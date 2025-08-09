@@ -10,6 +10,8 @@
 
 **Template Architecture Lint** is a comprehensive, enterprise-grade linting template for Go projects that enforces **SUPERB architectural boundaries** and **ZERO-TOLERANCE code quality standards**. Built for mission-critical systems where technical debt is not an option.
 
+**🚀 One-Line Usage**: `git clone https://github.com/LarsArtmann/template-arch-lint.git && cd template-arch-lint && just install && just lint`
+
 ---
 
 ## 🎯 **VALUE PROPOSITION**
@@ -507,29 +509,6 @@ lint:
 
 ---
 
-## 🏆 **REAL-WORLD RESULTS**
-
-### 📊 **Case Studies**
-
-| Company | Project Size | Issues Found | Time Saved | Result |
-|---------|-------------|--------------|------------|---------|
-| **FinTech Startup** | 50k LoC | 234 violations | 40h/week | Zero prod bugs in 6 months |
-| **E-commerce Platform** | 200k LoC | 1,247 violations | 25h/week | 80% faster code reviews |  
-| **Healthcare System** | 500k LoC | 3,891 violations | 60h/week | FDA compliance achieved |
-
-### 🎯 **Developer Feedback**
-
-> *"This template eliminated entire classes of bugs from our codebase. The architecture enforcement alone saved us weeks of refactoring."*  
-> — **Senior Go Developer, Fortune 500**
-
-> *"Finally, a linting setup that actually enforces good architecture. No more 'database imports in domain logic' code reviews."*  
-> — **Tech Lead, Y Combinator Startup**
-
-> *"The type safety enforcement caught 90% of our runtime panics during development. Game changer."*  
-> — **Principal Engineer, Unicorn Startup**
-
----
-
 ## 🔧 **TROUBLESHOOTING**
 
 ### 🚨 **Common Issues**
@@ -589,7 +568,7 @@ golangci-lint run ./internal/domain/...     # Specific paths
 
 - 📋 **Issues**: [GitHub Issues](https://github.com/LarsArtmann/template-arch-lint/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/LarsArtmann/template-arch-lint/discussions)  
-- 📧 **Email**: lars@artmann.dev
+- 📧 **Email**: template-arch-lint@lars.software
 - 🐦 **Twitter**: [@LarsArtmann](https://twitter.com/LarsArtmann)
 
 ---
@@ -643,17 +622,6 @@ All contributors are recognized in our [CONTRIBUTORS.md](CONTRIBUTORS.md) and re
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-### 🙏 **Credits & Acknowledgments**
-
-Built with and inspired by excellent open-source projects:
-- **[fe3dback/go-arch-lint](https://github.com/fe3dback/go-arch-lint)** - Architecture validation engine
-- **[golangci/golangci-lint](https://github.com/golangci/golangci-lint)** - Comprehensive Go linting
-- **[samber/lo](https://github.com/samber/lo)** - Functional programming utilities
-- **[samber/mo](https://github.com/samber/mo)** - Monads and functional abstractions
-
-Special thanks to the Go community for maintaining these incredible tools.
-
----
 
 ## 🚀 **GET STARTED TODAY**
 
