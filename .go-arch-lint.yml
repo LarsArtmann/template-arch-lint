@@ -1,0 +1,155 @@
+# 🔥 ENTERPRISE-GRADE GO ARCHITECTURE ENFORCEMENT TEMPLATE
+# MAXIMUM STRICTNESS - Domain-Driven Design & Clean Architecture
+#
+# This configuration demonstrates strict architectural boundaries
+# Customize components and dependencies for your specific project structure
+#
+# Features:
+# - ✅ Domain isolation (zero infrastructure dependencies)
+# - ✅ Application layer mediates between domain and infrastructure  
+# - ✅ Infrastructure abstractions via interfaces
+# - ✅ Clear dependency flow: Infrastructure → Application → Domain
+
+version: 3
+workdir: .
+
+# 🚨 VENDOR DEPENDENCY CONFIGURATION
+allow:
+  depOnAnyVendor: true  # Allow vendor dependencies (set to false for stricter control)
+
+# 📦 ARCHITECTURAL COMPONENTS
+# Define your project's architectural layers and boundaries
+components:
+  # ========================================
+  # DOMAIN LAYER - Pure Business Logic
+  # ========================================
+  domain-entities:
+    in: internal/domain/entities/**
+  domain-shared:
+    in: internal/domain/shared/**
+  
+  # ========================================  
+  # APPLICATION LAYER - Use Cases & Coordination
+  # ========================================
+  app-handlers:
+    in: internal/application/handlers/**
+    
+  # ========================================
+  # INFRASTRUCTURE LAYER - External Concerns
+  # ========================================
+  infrastructure:
+    in: internal/infrastructure/**
+    
+  # ========================================
+  # EXAMPLES & UTILITIES
+  # ========================================
+  examples:
+    in: example/**
+  tools:
+    in: cmd/**
+
+# 🔒 DEPENDENCY RULES - Enforce Clean Architecture
+deps:
+  # DOMAIN LAYER - Zero infrastructure dependencies
+  domain-entities:
+    mayDependOn:
+      - domain-shared
+      # ✅ Domain can only depend on other domain components
+      # ❌ NO infrastructure, no application, no external dependencies
+  
+  domain-shared:
+    anyVendorDeps: true  # Allow standard library
+    mayDependOn: []      # Shared kernel has no project dependencies
+  
+  # APPLICATION LAYER - Orchestrates domain and infrastructure
+  app-handlers:
+    mayDependOn:
+      - domain-entities
+      - domain-shared
+      # ✅ Application coordinates between domain and infrastructure
+      # ✅ Can depend on domain for business logic
+      # ✅ Should use dependency injection for infrastructure
+  
+  # INFRASTRUCTURE LAYER - External integrations
+  infrastructure:
+    mayDependOn:
+      - domain-entities
+      - domain-shared
+      # ✅ Infrastructure implements domain interfaces
+      # ✅ Can depend on domain types for implementations
+  
+  # EXAMPLES - Can use any layer for demonstrations
+  examples:
+    anyProjectDeps: true
+  
+  # TOOLS - Utilities and commands  
+  tools:
+    anyProjectDeps: true
+
+# 🌍 COMMON COMPONENTS - Available everywhere
+commonComponents:
+  - domain-shared
+
+# 🚫 EXCLUSION PATTERNS
+exclude:
+  # Generated and temporary files
+  - "**/*.pb.go"
+  - "**/*_generated.go" 
+  - "**/*_gen.go"
+  - "**/*_templ.go"
+  - "**/mock_*.go"
+  
+  # Test files and directories
+  - "**/*_test.go"
+  - "**/testdata/**"
+  - "**/test/**"
+  - "**/tests/**"
+  
+  # Build and vendor
+  - "**/vendor/**"
+  - "**/bin/**" 
+  - "**/build/**"
+  - "**/dist/**"
+  - "**/node_modules/**"
+  
+  # Documentation and configuration
+  - "**/docs/**"
+  - "**/examples/**" 
+  - "**/*.md"
+  - "**/.git/**"
+  - "**/.github/**"
+  
+  # IDE and editor files
+  - "**/.vscode/**"
+  - "**/.idea/**"
+  - "**/*.swp"
+  - "**/.DS_Store"
+
+# 📋 ARCHITECTURE VALIDATION RULES
+#
+# This configuration enforces:
+#
+# 1. DOMAIN ISOLATION
+#    - Domain entities cannot import infrastructure
+#    - Domain shared cannot import anything from project
+#    - Business logic stays pure and testable
+#
+# 2. DEPENDENCY INVERSION
+#    - Application layer defines interfaces
+#    - Infrastructure implements those interfaces
+#    - Domain depends on abstractions, not concretions
+#
+# 3. CLEAN ARCHITECTURE FLOW
+#    - Infrastructure → Application → Domain
+#    - Each layer can only depend on inner layers
+#    - No circular dependencies allowed
+#
+# 4. SHARED KERNEL
+#    - Common types and utilities available everywhere
+#    - Keeps shared concepts consistent across layers
+#
+# To customize for your project:
+# 1. Update component paths to match your directory structure
+# 2. Add/remove components as needed
+# 3. Adjust dependency rules for your architecture
+# 4. Set depOnAnyVendor to false for stricter vendor control
