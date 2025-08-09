@@ -1,0 +1,261 @@
+# 🔥 ENTERPRISE-GRADE GO LINTING JUSTFILE
+# Complete architecture and code quality enforcement
+#
+# Just is a handy way to save and run project-specific commands.
+# https://github.com/casey/just
+
+# Tool versions
+GOLANGCI_VERSION := "v1.61.0"
+GO_ARCH_LINT_VERSION := "v1.8.0"
+
+# Directories
+ROOT_DIR := justfile_directory()
+REPORT_DIR := ROOT_DIR / "reports"
+
+# Default recipe (runs when just is called without arguments)
+default: help
+
+# Show this help message
+help:
+    @echo "\033[1m🔥 ENTERPRISE GO LINTING JUSTFILE\033[0m"
+    @echo ""
+    @echo "\033[1mUSAGE:\033[0m"
+    @just --list --unsorted
+    @echo ""
+    @echo "\033[1mQUICK START:\033[0m"
+    @echo "  1. \033[0;36mjust install\033[0m  - Install required tools"
+    @echo "  2. \033[0;36mjust lint\033[0m     - Run all linters"
+    @echo "  3. \033[0;36mjust fix\033[0m      - Auto-fix issues"
+
+# Install all required linting tools
+install:
+    @echo "\033[1m📦 Installing linting tools...\033[0m"
+    @echo "\033[0;33mInstalling golangci-lint {{GOLANGCI_VERSION}}...\033[0m"
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@{{GOLANGCI_VERSION}}
+    @echo "\033[0;33mInstalling go-arch-lint {{GO_ARCH_LINT_VERSION}}...\033[0m"
+    go install github.com/fe3dback/go-arch-lint@{{GO_ARCH_LINT_VERSION}}
+    @echo "\033[0;33mBuilding filename-verifier...\033[0m"
+    go build -o bin/filename-verifier cmd/filename-verifier/main.go
+    @echo "\033[0;32m✅ All tools installed successfully!\033[0m"
+
+# Run all linters (architecture + code quality + filenames)
+lint: lint-files lint-arch lint-code
+    @echo ""
+    @echo "\033[0;32m\033[1m✅ All linting checks completed!\033[0m"
+
+# Run architecture linting only
+lint-arch:
+    @echo "\033[1m🏗️  ARCHITECTURE LINTING\033[0m"
+    @echo "\033[0;36mRunning go-arch-lint...\033[0m"
+    @if command -v go-arch-lint >/dev/null 2>&1; then \
+        if go-arch-lint check; then \
+            echo "\033[0;32m✅ Architecture validation passed!\033[0m"; \
+        else \
+            echo "\033[0;31m❌ Architecture violations found!\033[0m" >&2; \
+            exit 1; \
+        fi; \
+    else \
+        echo "\033[0;31m❌ go-arch-lint not installed. Run 'just install' first.\033[0m" >&2; \
+        exit 1; \
+    fi
+
+# Run code quality linting only
+lint-code:
+    @echo "\033[1m📝 CODE QUALITY LINTING\033[0m"
+    @echo "\033[0;36mRunning golangci-lint...\033[0m"
+    @if command -v golangci-lint >/dev/null 2>&1; then \
+        if golangci-lint run --config .golangci.yml; then \
+            echo "\033[0;32m✅ Code quality validation passed!\033[0m"; \
+        else \
+            echo "\033[0;31m❌ Code quality issues found!\033[0m" >&2; \
+            exit 1; \
+        fi; \
+    else \
+        echo "\033[0;31m❌ golangci-lint not installed. Run 'just install' first.\033[0m" >&2; \
+        exit 1; \
+    fi
+
+# Run filename verification only
+lint-files:
+    @echo "\033[1m📁 FILENAME VERIFICATION\033[0m"
+    @echo "\033[0;36mRunning filename-verifier...\033[0m"
+    @if [ -f bin/filename-verifier ]; then \
+        if ./bin/filename-verifier .; then \
+            echo "\033[0;32m✅ Filename validation passed!\033[0m"; \
+        else \
+            echo "\033[0;31m❌ Filename violations found!\033[0m" >&2; \
+            exit 1; \
+        fi; \
+    else \
+        if go run cmd/filename-verifier/main.go .; then \
+            echo "\033[0;32m✅ Filename validation passed!\033[0m"; \
+        else \
+            echo "\033[0;31m❌ Filename violations found!\033[0m" >&2; \
+            exit 1; \
+        fi; \
+    fi
+
+# Auto-fix issues where possible
+fix:
+    @echo "\033[1m🔧 AUTO-FIXING ISSUES\033[0m"
+    @echo "\033[0;33mRunning gofmt...\033[0m"
+    gofmt -w -s .
+    @echo "\033[0;33mRunning goimports...\033[0m"
+    @if command -v goimports >/dev/null 2>&1; then \
+        goimports -w .; \
+    else \
+        go install golang.org/x/tools/cmd/goimports@latest; \
+        goimports -w .; \
+    fi
+    @echo "\033[0;33mRunning golangci-lint with --fix...\033[0m"
+    @if command -v golangci-lint >/dev/null 2>&1; then \
+        golangci-lint run --fix --config .golangci.yml || true; \
+    fi
+    @echo "\033[0;32m✅ Auto-fix completed!\033[0m"
+
+# Run all checks (for CI/CD pipelines)
+ci: lint test
+    @echo "\033[0;36mChecking module dependencies...\033[0m"
+    go mod verify
+    go mod tidy -diff
+    @echo "\033[0;32m\033[1m✅ CI/CD checks passed!\033[0m"
+
+# Run tests with coverage
+test:
+    @echo "\033[1m🧪 RUNNING TESTS\033[0m"
+    @echo "\033[0;36mRunning tests with coverage...\033[0m"
+    go test ./... -v -race -coverprofile=coverage.out
+    @echo "\033[0;32m✅ Tests completed!\033[0m"
+
+# Generate detailed linting reports
+report:
+    @echo "\033[1m📊 GENERATING REPORTS\033[0m"
+    mkdir -p {{REPORT_DIR}}
+    @echo "\033[0;33mGenerating architecture report...\033[0m"
+    @if command -v go-arch-lint >/dev/null 2>&1; then \
+        go-arch-lint check --json > {{REPORT_DIR}}/architecture.json 2>/dev/null || true; \
+        go-arch-lint graph > {{REPORT_DIR}}/dependencies.dot 2>/dev/null || true; \
+        echo "  → {{REPORT_DIR}}/architecture.json"; \
+        echo "  → {{REPORT_DIR}}/dependencies.dot"; \
+    fi
+    @echo "\033[0;33mGenerating code quality report...\033[0m"
+    @if command -v golangci-lint >/dev/null 2>&1; then \
+        golangci-lint run --out-format json > {{REPORT_DIR}}/quality.json 2>/dev/null || true; \
+        golangci-lint run --out-format checkstyle > {{REPORT_DIR}}/checkstyle.xml 2>/dev/null || true; \
+        golangci-lint run --out-format junit-xml > {{REPORT_DIR}}/junit.xml 2>/dev/null || true; \
+        echo "  → {{REPORT_DIR}}/quality.json"; \
+        echo "  → {{REPORT_DIR}}/checkstyle.xml"; \
+        echo "  → {{REPORT_DIR}}/junit.xml"; \
+    fi
+    @echo "\033[0;33mGenerating test coverage report...\033[0m"
+    @go test ./... -coverprofile={{REPORT_DIR}}/coverage.out 2>/dev/null || true
+    @go tool cover -html={{REPORT_DIR}}/coverage.out -o {{REPORT_DIR}}/coverage.html 2>/dev/null || true
+    @echo "  → {{REPORT_DIR}}/coverage.out"
+    @echo "  → {{REPORT_DIR}}/coverage.html"
+    @echo "\033[0;32m✅ Reports generated in {{REPORT_DIR}}/\033[0m"
+
+# Clean generated files and reports
+clean:
+    @echo "\033[1m🧹 CLEANING\033[0m"
+    rm -rf {{REPORT_DIR}}
+    rm -rf bin/
+    rm -f coverage.out
+    @echo "\033[0;32m✅ Cleaned successfully!\033[0m"
+
+# Run minimal essential linters only
+lint-minimal:
+    @echo "\033[1m⚡ MINIMAL LINTING\033[0m"
+    golangci-lint run --fast --config .golangci.yml
+
+# Run with maximum strictness (slower but thorough)
+lint-strict:
+    @echo "\033[1m🔥 MAXIMUM STRICTNESS LINTING\033[0m"
+    golangci-lint run --config .golangci.yml --max-issues-per-linter 0 --max-same-issues 0
+
+# Run security-focused linters only
+lint-security:
+    @echo "\033[1m🔒 SECURITY LINTING\033[0m"
+    golangci-lint run --config .golangci.yml --enable-only gosec,copyloopvar
+
+# Format code
+fmt:
+    @echo "\033[1m📝 FORMATTING CODE\033[0m"
+    gofmt -w -s .
+    @if command -v goimports >/dev/null 2>&1; then \
+        goimports -w .; \
+    fi
+    @echo "\033[0;32m✅ Code formatted!\033[0m"
+
+# Build the filename verifier
+build:
+    @echo "\033[1m🔨 BUILDING\033[0m"
+    mkdir -p bin
+    go build -o bin/filename-verifier cmd/filename-verifier/main.go
+    @echo "\033[0;32m✅ Build completed!\033[0m"
+
+# Run the filename verifier
+verify-filenames:
+    @echo "\033[1m📁 VERIFYING FILENAMES\033[0m"
+    @if [ -f bin/filename-verifier ]; then \
+        ./bin/filename-verifier .; \
+    else \
+        go run cmd/filename-verifier/main.go .; \
+    fi
+
+# Check dependencies
+check-deps:
+    @echo "\033[1m📦 CHECKING DEPENDENCIES\033[0m"
+    go mod verify
+    go mod tidy
+    @echo "\033[0;32m✅ Dependencies checked!\033[0m"
+
+# Update dependencies
+update-deps:
+    @echo "\033[1m🔄 UPDATING DEPENDENCIES\033[0m"
+    go get -u ./...
+    go mod tidy
+    @echo "\033[0;32m✅ Dependencies updated!\033[0m"
+
+# Run benchmarks
+bench:
+    @echo "\033[1m⚡ RUNNING BENCHMARKS\033[0m"
+    go test -bench=. -benchmem ./...
+
+# Run with verbose output
+verbose:
+    @echo "\033[1m🔍 VERBOSE LINTING\033[0m"
+    go-arch-lint check -v
+    golangci-lint run -v --config .golangci.yml
+
+# Git hooks setup
+setup-hooks:
+    @echo "\033[1m🪝 SETTING UP GIT HOOKS\033[0m"
+    @echo '#!/bin/sh\necho "Running pre-commit linting..."\njust lint' > .git/hooks/pre-commit
+    @chmod +x .git/hooks/pre-commit
+    @echo "\033[0;32m✅ Git hooks setup completed!\033[0m"
+
+# Show project statistics
+stats:
+    @echo "\033[1m📊 PROJECT STATISTICS\033[0m"
+    @echo "Lines of Go code:"
+    @find . -name "*.go" -not -path "./vendor/*" | xargs wc -l | tail -1
+    @echo "Number of Go files:"
+    @find . -name "*.go" -not -path "./vendor/*" | wc -l
+    @echo "Number of packages:"
+    @go list ./... | wc -l
+
+# Show version information
+version:
+    @echo "\033[1m📋 VERSION INFORMATION\033[0m"
+    @echo "Go version:"
+    @go version
+    @if command -v golangci-lint >/dev/null 2>&1; then \
+        echo "golangci-lint version:"; \
+        golangci-lint version; \
+    fi
+    @if command -v go-arch-lint >/dev/null 2>&1; then \
+        echo "go-arch-lint version:"; \
+        go-arch-lint version; \
+    fi
+    @echo "Just version:"
+    @just --version

@@ -51,10 +51,10 @@ git clone https://github.com/LarsArtmann/template-arch-lint.git
 cd template-arch-lint
 
 # Install all linting tools  
-make install
+just install
 
 # Verify installation
-make lint
+just lint
 ```
 
 ### 2. **Integrate with Your Project**
@@ -62,11 +62,11 @@ make lint
 # Copy configurations to your project
 cp .go-arch-lint.yml /path/to/your/project/
 cp .golangci.yml /path/to/your/project/
-cp Makefile /path/to/your/project/
+cp justfile /path/to/your/project/
 
 # Run on your codebase
 cd /path/to/your/project
-make lint
+just lint
 ```
 
 ### 3. **Immediate Results**
@@ -162,17 +162,17 @@ Violations found: 0
 - 📏 **Length Limits**: Maximum 255 characters per filename
 - 🌐 **ASCII Only**: Prevents encoding issues across systems
 
-### 🔧 **Complete Automation** (`Makefile`)
+### 🔧 **Complete Automation** (`justfile`)
 ```bash
-make help           # Show all available commands
-make install        # Install all required tools  
-make lint           # Run complete linting suite
-make lint-arch      # Architecture validation only
-make lint-code      # Code quality only
-make lint-files     # Filename validation only
-make fix            # Auto-fix issues where possible
-make ci             # Complete CI/CD validation
-make report         # Generate detailed reports
+just help           # Show all available commands
+just install        # Install all required tools  
+just lint           # Run complete linting suite
+just lint-arch      # Architecture validation only
+just lint-code      # Code quality only
+just lint-files     # Filename validation only
+just fix            # Auto-fix issues where possible
+just ci             # Complete CI/CD validation
+just report         # Generate detailed reports
 ```
 
 ---
@@ -343,28 +343,28 @@ cp .golangci.yml .golangci.yml.backup 2>/dev/null || true
 # 1. Copy template configurations
 wget https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/main/.go-arch-lint.yml
 wget https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/main/.golangci.yml
-wget https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/main/Makefile
+wget https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/main/justfile
 
 # 2. Customize for your project structure
 # Edit .go-arch-lint.yml component paths
 # Edit .golangci.yml exclude patterns
 
 # 3. Install tools
-make install
+just install
 ```
 
 #### **Step 3: Gradual Adoption** (Iterative)
 ```bash
 # Start with architecture validation only
-make lint-arch
+just lint-arch
 
 # Add basic code quality  
-make lint-code --enable=errcheck,staticcheck,govet
+just lint-code --enable=errcheck,staticcheck,govet
 
 # Gradually enable more linters
-make lint-code --enable=forbidigo  # Add type safety
-make lint-code --enable=gosec     # Add security
-make lint        # Full enforcement
+just lint-code --enable=forbidigo  # Add type safety
+just lint-code --enable=gosec     # Add security
+just lint        # Full enforcement
 ```
 
 ### 🔄 **Common Migration Patterns**
@@ -487,8 +487,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with: { go-version: '1.23' }
-      - run: make install
-      - run: make lint
+      - run: just install
+      - run: just lint
 ```
 
 ### GitLab CI
@@ -498,8 +498,8 @@ lint:
   image: golang:1.23
   stage: test
   script:
-    - make install  
-    - make lint
+    - just install  
+    - just lint
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
@@ -566,10 +566,10 @@ Found 2,847 violations across 47 files
 **Solutions**:
 ```bash
 # Gradual adoption approach
-make lint-arch              # Start with architecture only
-make lint --enable=errcheck  # Add error handling
-make lint --enable=gosec     # Add security  
-make lint                   # Full enforcement when ready
+just lint-arch              # Start with architecture only
+just lint --enable=errcheck  # Add error handling
+just lint --enable=gosec     # Add security  
+just lint                   # Full enforcement when ready
 ```
 </details>
 
@@ -613,10 +613,22 @@ git clone https://github.com/yourusername/template-arch-lint.git
 git checkout -b feature/your-contribution
 
 # 3. Make changes and test
-make lint
-make test
+just lint
+just test
 
 # 4. Submit PR with clear description
+```
+
+### 🛠️ **Development Commands**
+All development tasks use the `justfile`:
+```bash
+just install    # Install all tools
+just lint       # Run all linters  
+just fix        # Auto-fix issues
+just test       # Run tests with coverage
+just ci         # Full CI/CD validation
+just report     # Generate detailed reports
+just clean      # Clean generated files
 ```
 
 ### 🏆 **Recognition**
@@ -649,8 +661,8 @@ Special thanks to the Go community for maintaining these incredible tools.
 # Clone and start enforcing enterprise-grade quality
 git clone https://github.com/LarsArtmann/template-arch-lint.git
 cd template-arch-lint
-make install
-make lint
+just install
+just lint
 
 # Your journey to zero-defect architecture starts now! 🚀
 ```
