@@ -166,7 +166,9 @@ issues:
   exclude-dirs:
     - vendor
     - testdata
+    - example
     - examples
+    - internal
     - docs
     - generated
     - mocks
