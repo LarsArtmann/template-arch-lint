@@ -9,7 +9,7 @@ func main() {
 	// Example of good code
 	message := "Hello, World!"
 	fmt.Println(message)
-	
+
 	// Check error handling
 	result := doSomething()
 	if result != nil {
