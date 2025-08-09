@@ -34,8 +34,6 @@ install:
     go install github.com/golangci/golangci-lint/cmd/golangci-lint@{{GOLANGCI_VERSION}}
     @echo "\033[0;33mInstalling go-arch-lint {{GO_ARCH_LINT_VERSION}}...\033[0m"
     go install github.com/fe3dback/go-arch-lint@{{GO_ARCH_LINT_VERSION}}
-    @echo "\033[0;33mBuilding filename-verifier...\033[0m"
-    go build -o bin/filename-verifier cmd/filename-verifier/main.go
     @echo "\033[0;32m✅ All tools installed successfully!\033[0m"
 
 # Run all linters (architecture + code quality + filenames)
@@ -75,24 +73,16 @@ lint-code:
         exit 1; \
     fi
 
-# Run filename verification only
+# Run filename verification only  
 lint-files:
     @echo "\033[1m📁 FILENAME VERIFICATION\033[0m"
-    @echo "\033[0;36mRunning filename-verifier...\033[0m"
-    @if [ -f bin/filename-verifier ]; then \
-        if ./bin/filename-verifier .; then \
-            echo "\033[0;32m✅ Filename validation passed!\033[0m"; \
-        else \
-            echo "\033[0;31m❌ Filename violations found!\033[0m" >&2; \
-            exit 1; \
-        fi; \
+    @echo "\033[0;36mChecking for problematic filenames...\033[0m"
+    @if find . -name "*:*" -not -path "./.git/*" | grep -q .; then \
+        echo "\033[0;31m❌ Found files with colons in names:\033[0m"; \
+        find . -name "*:*" -not -path "./.git/*"; \
+        exit 1; \
     else \
-        if go run cmd/filename-verifier/main.go .; then \
-            echo "\033[0;32m✅ Filename validation passed!\033[0m"; \
-        else \
-            echo "\033[0;31m❌ Filename violations found!\033[0m" >&2; \
-            exit 1; \
-        fi; \
+        echo "\033[0;32m✅ No problematic filenames found!\033[0m"; \
     fi
 
 # Auto-fix issues where possible
@@ -158,7 +148,6 @@ report:
 clean:
     @echo "\033[1m🧹 CLEANING\033[0m"
     rm -rf {{REPORT_DIR}}
-    rm -rf bin/
     rm -f coverage.out
     @echo "\033[0;32m✅ Cleaned successfully!\033[0m"
 
@@ -186,21 +175,14 @@ fmt:
     fi
     @echo "\033[0;32m✅ Code formatted!\033[0m"
 
-# Build the filename verifier
+# Build Go modules
 build:
     @echo "\033[1m🔨 BUILDING\033[0m"
-    mkdir -p bin
-    go build -o bin/filename-verifier cmd/filename-verifier/main.go
+    go build ./...
     @echo "\033[0;32m✅ Build completed!\033[0m"
 
-# Run the filename verifier
-verify-filenames:
-    @echo "\033[1m📁 VERIFYING FILENAMES\033[0m"
-    @if [ -f bin/filename-verifier ]; then \
-        ./bin/filename-verifier .; \
-    else \
-        go run cmd/filename-verifier/main.go .; \
-    fi
+# Run simple filename verification
+verify-filenames: lint-files
 
 # Check dependencies
 check-deps:

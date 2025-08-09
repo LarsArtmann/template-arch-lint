@@ -45,8 +45,6 @@ components:
   # ========================================
   examples:
     in: example/**
-  tools:
-    in: cmd/**
 
 # 🔒 DEPENDENCY RULES - Enforce Clean Architecture
 deps:
@@ -80,10 +78,6 @@ deps:
   
   # EXAMPLES - Can use any layer for demonstrations
   examples:
-    anyProjectDeps: true
-  
-  # TOOLS - Utilities and commands  
-  tools:
     anyProjectDeps: true
 
 # 🌍 COMMON COMPONENTS - Available everywhere
