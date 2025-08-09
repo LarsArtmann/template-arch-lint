@@ -5,8 +5,8 @@
 # https://github.com/casey/just
 
 # Tool versions
-GOLANGCI_VERSION := "v1.61.0"
-GO_ARCH_LINT_VERSION := "v1.8.0"
+GOLANGCI_VERSION := "v2.3.1"
+GO_ARCH_LINT_VERSION := "v1.12.0"
 
 # Directories
 ROOT_DIR := justfile_directory()
@@ -31,7 +31,7 @@ help:
 install:
     @echo "\033[1m📦 Installing linting tools...\033[0m"
     @echo "\033[0;33mInstalling golangci-lint {{GOLANGCI_VERSION}}...\033[0m"
-    go install github.com/golangci/golangci-lint/cmd/golangci-lint@{{GOLANGCI_VERSION}}
+    go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@{{GOLANGCI_VERSION}}
     @echo "\033[0;33mInstalling go-arch-lint {{GO_ARCH_LINT_VERSION}}...\033[0m"
     go install github.com/fe3dback/go-arch-lint@{{GO_ARCH_LINT_VERSION}}
     @echo "\033[0;32m✅ All tools installed successfully!\033[0m"

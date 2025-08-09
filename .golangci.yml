@@ -4,6 +4,8 @@
 # This configuration enforces the highest standards of Go code quality
 # Designed for mission-critical production systems with zero defect tolerance
 
+version: "2"
+
 run:
   timeout: 5m
   issues-exit-code: 1
@@ -14,13 +16,12 @@ run:
 
 # 🔥 LINTERS - Maximum enforcement (essential set)
 linters:
-  disable-all: true
+  default: none
   enable:
     # 🚨 TYPE SAFETY ENFORCEMENT
     - forbidigo      # Custom forbidden patterns
     - govet          # Suspicious constructs
     - staticcheck    # Advanced static analysis
-    - typecheck      # Type checking
     
     # 🛡️ ERROR HANDLING
     - errcheck       # Unchecked errors
@@ -39,18 +40,20 @@ linters:
     - gocyclo        # Cyclomatic complexity
     - goconst        # Repeated constants
     - gocritic       # Opinionated checks
-    - gofmt          # Formatting
-    - goimports      # Import formatting
-    - gosimple       # Simplification
     - ineffassign    # Ineffective assignments
     - misspell       # Spelling errors
     - nakedret       # Naked returns
     - revive         # Comprehensive checks
-    - stylecheck     # Style guide checks
     - unconvert      # Unnecessary conversions
     - unparam        # Unused parameters
     - unused         # Unused code
     - whitespace     # Trailing whitespace
+
+# 🎨 FORMATTERS - Code formatting
+formatters:
+  enable:
+    - gofmt          # Standard Go formatting
+    - goimports      # Import formatting
 
 # 🔧 LINTER SETTINGS - Maximum strictness
 linters-settings:
@@ -130,8 +133,7 @@ linters-settings:
     disabled-checks: []
   
   # Unused code
-  unused:
-    check-exported: true
+  unused: {}
   
   unparam:
     check-exported: true
@@ -166,7 +168,6 @@ issues:
   exclude-dirs:
     - vendor
     - testdata
-    - example
     - examples
     - internal
     - docs
@@ -183,8 +184,7 @@ issues:
 
 # 📊 OUTPUT CONFIGURATION
 output:
-  formats:
-    - format: colored-line-number
+  format: colored-line-number
   
   print-issued-lines: true
   print-linter-name: true
