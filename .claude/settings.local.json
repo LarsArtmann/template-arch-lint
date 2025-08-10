@@ -3,7 +3,8 @@
     "allow": [
       "WebFetch(domain:golangci-lint.run)",
       "Bash(ginkgo bootstrap:*)",
-      "Bash(ginkgo run:*)"
+      "Bash(ginkgo run:*)",
+      "Bash(ginkgo:*)"
     ],
     "deny": []
   }
