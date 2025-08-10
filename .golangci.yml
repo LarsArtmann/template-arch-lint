@@ -4,7 +4,7 @@
 # This configuration enforces the highest standards of Go code quality
 # Designed for mission-critical production systems with zero defect tolerance
 
-version: "2"
+# Compatible with golangci-lint v1
 
 run:
   timeout: 5m
@@ -48,12 +48,13 @@ linters:
     - unparam        # Unused parameters
     - unused         # Unused code
     - whitespace     # Trailing whitespace
-
-# 🎨 FORMATTERS - Code formatting
-formatters:
-  enable:
+    
+    # 🎨 FORMATTING
     - gofmt          # Standard Go formatting
     - goimports      # Import formatting
+
+# 🎨 FORMATTERS - Code formatting (v1 compatibility)
+# Note: formatters section is for v2, in v1 use linters
 
 # 🔧 LINTER SETTINGS - Maximum strictness
 linters-settings:
@@ -184,7 +185,7 @@ issues:
 
 # 📊 OUTPUT CONFIGURATION
 output:
-  format: colored-line-number
+  formats: colored-line-number
   
   print-issued-lines: true
   print-linter-name: true

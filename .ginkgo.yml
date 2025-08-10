@@ -1,0 +1,43 @@
+# Ginkgo Configuration File
+# See: https://onsi.github.io/ginkgo/#configuration
+
+# Default configuration for running tests
+randomize-suites: true
+randomize-specs: true
+fail-on-pending: false
+keep-going: false
+trace: false
+
+# Coverage configuration
+cover: true
+cover-profile: coverage.out
+cover-mode: atomic
+
+# Output configuration
+no-color: false
+succinct: false
+verbose: false
+
+# Parallel execution
+procs: 1
+
+# Timeout configuration
+timeout: 24h
+slow-spec-threshold: 5s
+
+# Skip configuration
+skip-package: ""
+focus-files: ""
+skip-files: ""
+
+# Label configuration
+label-filter: ""
+
+# Output directory
+output-dir: ""
+
+# JUnit reporting
+junit-report: "junit.xml"
+
+# Progress reporting
+progress: true

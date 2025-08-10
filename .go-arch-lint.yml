@@ -41,6 +41,8 @@ components:
   # ========================================
   app-handlers:
     in: internal/application/handlers/**
+  app-middleware:
+    in: internal/application/middleware/**
     
   # ========================================
   # INFRASTRUCTURE LAYER - External Concerns
@@ -114,6 +116,11 @@ deps:
       - domain-repositories
       - domain-shared
       - domain-values
+      - domain-errors
+      
+  app-middleware:
+    mayDependOn:
+      - domain-shared
       - domain-errors
   
   # INFRASTRUCTURE LAYER - External integrations
