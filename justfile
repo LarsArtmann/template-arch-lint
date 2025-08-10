@@ -203,6 +203,17 @@ bench:
     @echo "\033[1m⚡ RUNNING BENCHMARKS\033[0m"
     go test -bench=. -benchmem ./...
 
+# Test configuration system
+config-test:
+    @echo "\033[1m⚙️  TESTING CONFIGURATION\033[0m"
+    @echo "\033[0;36mTesting default configuration...\033[0m"
+    go run example/main.go
+    @echo ""
+    @echo "\033[0;36mTesting environment variable overrides...\033[0m"
+    APP_SERVER_PORT=9090 APP_LOGGING_LEVEL=debug go run example/main.go
+    @echo ""
+    @echo "\033[0;32m✅ Configuration tests completed!\033[0m"
+
 # Run with verbose output
 verbose:
     @echo "\033[1m🔍 VERBOSE LINTING\033[0m"

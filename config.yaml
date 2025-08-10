@@ -1,0 +1,29 @@
+# Example configuration file for template-arch-lint
+# This file demonstrates the configuration structure and default values
+
+server:
+  host: "localhost"
+  port: 8080
+  read_timeout: "5s"
+  write_timeout: "10s"
+  idle_timeout: "60s"
+  graceful_shutdown_timeout: "30s"
+
+database:
+  driver: "sqlite"
+  dsn: "./app.db"
+  max_open_conns: 25
+  max_idle_conns: 5
+  conn_max_lifetime: "5m"
+  conn_max_idle_time: "5m"
+
+logging:
+  level: "info"
+  format: "json"
+  output: "stdout"
+
+app:
+  name: "template-arch-lint"
+  version: "1.0.0"
+  environment: "development"
+  debug: false
