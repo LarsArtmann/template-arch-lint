@@ -18,34 +18,34 @@ var usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 
 // reservedUsernames contains usernames that are not allowed
 var reservedUsernames = map[string]bool{
-	"admin":       true,
-	"root":        true,
-	"system":      true,
-	"user":        true,
-	"guest":       true,
-	"anonymous":   true,
-	"null":        true,
-	"undefined":   true,
-	"api":         true,
-	"www":         true,
-	"mail":        true,
-	"email":       true,
-	"support":     true,
-	"help":        true,
-	"info":        true,
-	"contact":     true,
-	"noreply":     true,
-	"no-reply":    true,
-	"postmaster":  true,
-	"webmaster":   true,
-	"hostmaster":  true,
-	"abuse":       true,
-	"security":    true,
-	"privacy":     true,
-	"legal":       true,
-	"billing":     true,
-	"sales":       true,
-	"marketing":   true,
+	"admin":      true,
+	"root":       true,
+	"system":     true,
+	"user":       true,
+	"guest":      true,
+	"anonymous":  true,
+	"null":       true,
+	"undefined":  true,
+	"api":        true,
+	"www":        true,
+	"mail":       true,
+	"email":      true,
+	"support":    true,
+	"help":       true,
+	"info":       true,
+	"contact":    true,
+	"noreply":    true,
+	"no-reply":   true,
+	"postmaster": true,
+	"webmaster":  true,
+	"hostmaster": true,
+	"abuse":      true,
+	"security":   true,
+	"privacy":    true,
+	"legal":      true,
+	"billing":    true,
+	"sales":      true,
+	"marketing":  true,
 }
 
 // NewUserName creates a new UserName value object with validation
@@ -125,7 +125,7 @@ func validateUserNameFormat(username string) error {
 	// Business rule: Cannot start or end with special characters
 	firstChar := normalized[0]
 	lastChar := normalized[len(normalized)-1]
-	
+
 	if firstChar == '.' || firstChar == '-' || firstChar == '_' {
 		return fmt.Errorf("username cannot start with dot, hyphen, or underscore")
 	}
@@ -135,10 +135,10 @@ func validateUserNameFormat(username string) error {
 	}
 
 	// Business rule: No consecutive special characters
-	if strings.Contains(normalized, "..") || strings.Contains(normalized, "--") || 
-	   strings.Contains(normalized, "__") || strings.Contains(normalized, ".-") ||
-	   strings.Contains(normalized, "_.") || strings.Contains(normalized, "_-") ||
-	   strings.Contains(normalized, "-.") || strings.Contains(normalized, "-_") {
+	if strings.Contains(normalized, "..") || strings.Contains(normalized, "--") ||
+		strings.Contains(normalized, "__") || strings.Contains(normalized, ".-") ||
+		strings.Contains(normalized, "_.") || strings.Contains(normalized, "_-") ||
+		strings.Contains(normalized, "-.") || strings.Contains(normalized, "-_") {
 		return fmt.Errorf("username cannot contain consecutive special characters")
 	}
 

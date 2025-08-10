@@ -87,7 +87,7 @@ func main() {
 		// Attempt graceful shutdown
 		if err := server.Shutdown(shutdownCtx); err != nil {
 			logger.Error("Failed to shutdown server gracefully", "error", err)
-			
+
 			// Force close after timeout
 			if err := server.Close(); err != nil {
 				logger.Error("Failed to close server", "error", err)

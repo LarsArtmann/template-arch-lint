@@ -1,4 +1,4 @@
-package template_arch_lint_test
+package test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestTemplateArchLint(t *testing.T) {
+func TestAll(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "TemplateArchLint Suite")
+	RunSpecs(t, "Integration Tests Suite")
 }

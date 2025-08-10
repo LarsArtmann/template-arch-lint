@@ -9,14 +9,14 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/samber/do"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/samber/do"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/application/handlers"
 	"github.com/LarsArtmann/template-arch-lint/internal/config"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
-	inmemrepos "github.com/LarsArtmann/template-arch-lint/internal/infrastructure/repositories"
+	"github.com/LarsArtmann/template-arch-lint/internal/infrastructure/persistence"
 )
 
 // Container represents the DI container
@@ -99,7 +99,7 @@ func (c *Container) registerConfig() error {
 func (c *Container) registerLogger() error {
 	do.Provide(c.injector, func(i *do.Injector) (*slog.Logger, error) {
 		cfg := do.MustInvoke[*config.Config](i)
-		
+
 		var level slog.Level
 		switch cfg.Logging.Level {
 		case "debug":
@@ -125,7 +125,7 @@ func (c *Container) registerLogger() error {
 
 		logger := slog.New(handler)
 		slog.SetDefault(logger)
-		
+
 		return logger, nil
 	})
 	return nil
@@ -170,7 +170,7 @@ func (c *Container) registerRepositories() error {
 	do.Provide(c.injector, func(i *do.Injector) (repositories.UserRepository, error) {
 		db := do.MustInvoke[*sql.DB](i)
 		logger := do.MustInvoke[*slog.Logger](i)
-		
+
 		repo := persistence.NewSQLUserRepository(db, logger)
 		return repo, nil
 	})
@@ -192,7 +192,7 @@ func (c *Container) registerHandlers() error {
 	do.Provide(c.injector, func(i *do.Injector) (*handlers.UserHandler, error) {
 		userService := do.MustInvoke[*services.UserService](i)
 		logger := do.MustInvoke[*slog.Logger](i)
-		
+
 		handler := handlers.NewUserHandler(userService, logger)
 		return handler, nil
 	})
@@ -217,11 +217,11 @@ func (c *Container) registerHTTPServer() error {
 
 		// Create router
 		router := gin.New()
-		
+
 		// Add middleware
 		router.Use(gin.Logger())
 		router.Use(gin.Recovery())
-		
+
 		// Add custom middleware for logging
 		router.Use(func(c *gin.Context) {
 			logger.Info("Request received",

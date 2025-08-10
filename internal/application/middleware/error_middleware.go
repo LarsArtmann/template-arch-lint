@@ -73,9 +73,9 @@ func ValidationErrorMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Create a custom response writer to capture the response
 		recorder := &responseRecorder{ResponseWriter: w}
-		
+
 		next.ServeHTTP(recorder, r)
-		
+
 		// If there was an error, it should have been handled by ErrorHandler
 		// This middleware provides additional validation-specific logic if needed
 	})
@@ -104,13 +104,13 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			if err := recover(); err != nil {
 				log.Printf("Panic recovered: %v", err)
-				
+
 				// Convert panic to internal error
 				internalErr := errors.NewInternalError("panic recovered", nil)
 				HandleError(w, r, internalErr)
 			}
 		}()
-		
+
 		next.ServeHTTP(w, r)
 	})
 }
@@ -119,10 +119,10 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Request: %s %s", r.Method, r.URL.Path)
-		
+
 		recorder := &responseRecorder{ResponseWriter: w}
 		next.ServeHTTP(recorder, r)
-		
+
 		if recorder.statusCode >= 400 {
 			log.Printf("Error response: %d for %s %s", recorder.statusCode, r.Method, r.URL.Path)
 		}

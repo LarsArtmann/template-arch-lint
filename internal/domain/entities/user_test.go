@@ -21,7 +21,7 @@ var _ = Describe("User Entity", func() {
 				name := "TestUser"
 
 				// When
-				user, err := entities.NewUser(id, email, name)
+				user, err := NewUser(id, email, name)
 
 				// Then
 				Expect(err).To(BeNil())
@@ -37,10 +37,10 @@ var _ = Describe("User Entity", func() {
 			It("should set timestamps correctly", func() {
 				// Given
 				beforeCreation := time.Now()
-				
+
 				// When
-				user, err := entities.NewUserFromStrings("user-123", "test@example.com", "TestUser")
-				
+				user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
+
 				// Then
 				afterCreation := time.Now()
 				Expect(err).To(BeNil())
@@ -53,7 +53,7 @@ var _ = Describe("User Entity", func() {
 		Context("with invalid parameters", func() {
 			It("should return error when ID is empty", func() {
 				// When
-				user, err := entities.NewUserFromStrings("", "test@example.com", "TestUser")
+				user, err := NewUserFromStrings("", "test@example.com", "TestUser")
 
 				// Then
 				Expect(err).To(HaveOccurred())
@@ -63,7 +63,7 @@ var _ = Describe("User Entity", func() {
 
 			It("should return error when email is empty", func() {
 				// When
-				user, err := entities.NewUserFromStrings("user-123", "", "TestUser")
+				user, err := NewUserFromStrings("user-123", "", "TestUser")
 
 				// Then
 				Expect(err).To(HaveOccurred())
@@ -73,7 +73,7 @@ var _ = Describe("User Entity", func() {
 
 			It("should return error when name is empty", func() {
 				// When
-				user, err := entities.NewUserFromStrings("user-123", "test@example.com", "")
+				user, err := NewUserFromStrings("user-123", "test@example.com", "")
 
 				// Then
 				Expect(err).To(HaveOccurred())
@@ -83,7 +83,7 @@ var _ = Describe("User Entity", func() {
 
 			It("should return error when email is invalid", func() {
 				// When
-				user, err := entities.NewUserFromStrings("user-123", "invalid-email", "TestUser")
+				user, err := NewUserFromStrings("user-123", "invalid-email", "TestUser")
 
 				// Then
 				Expect(err).To(HaveOccurred())
@@ -95,7 +95,7 @@ var _ = Describe("User Entity", func() {
 		Context("edge cases", func() {
 			It("should reject whitespace-only inputs for ID", func() {
 				// When
-				user, err := entities.NewUserFromStrings("   ", "test@example.com", "TestUser")
+				user, err := NewUserFromStrings("   ", "test@example.com", "TestUser")
 
 				// Then - Current implementation validates and rejects whitespace
 				Expect(err).To(HaveOccurred())
@@ -111,7 +111,7 @@ var _ = Describe("User Entity", func() {
 				longStringValue := string(longString)
 
 				// When - This should fail due to validation
-				user, err := entities.NewUserFromStrings("user-123", longStringValue+"@example.com", longStringValue)
+				user, err := NewUserFromStrings("user-123", longStringValue+"@example.com", longStringValue)
 
 				// Then - Should fail validation for overly long email/name
 				Expect(err).To(HaveOccurred())
@@ -123,7 +123,7 @@ var _ = Describe("User Entity", func() {
 	Describe("NewUserFromStrings", func() {
 		It("should create user from string ID", func() {
 			// When
-			user, err := entities.NewUserFromStrings("user-123", "test@example.com", "TestUser")
+			user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
 
 			// Then
 			Expect(err).To(BeNil())
@@ -136,7 +136,7 @@ var _ = Describe("User Entity", func() {
 		Context("with a valid user", func() {
 			It("should pass validation", func() {
 				// Given
-				user, err := entities.NewUserFromStrings("user-123", "test@example.com", "TestUser")
+				user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
 				Expect(err).To(BeNil())
 
 				// When
@@ -150,7 +150,7 @@ var _ = Describe("User Entity", func() {
 		Context("with invalid user state", func() {
 			It("should fail validation when ID is empty", func() {
 				// Given - Create user with empty ID using struct literal (bypassing validation)
-				user := &entities.User{
+				user := &User{
 					ID:       values.UserID{}, // Empty UserID
 					Email:    "test@example.com",
 					Name:     "TestUser",
@@ -169,7 +169,7 @@ var _ = Describe("User Entity", func() {
 			It("should fail validation when email is empty", func() {
 				// Given
 				userID, _ := values.NewUserID("user-123")
-				user := &entities.User{
+				user := &User{
 					ID:       userID,
 					Email:    "", // Empty email
 					Name:     "TestUser",
@@ -188,7 +188,7 @@ var _ = Describe("User Entity", func() {
 			It("should fail validation when name is empty", func() {
 				// Given
 				userID, _ := values.NewUserID("user-123")
-				user := &entities.User{
+				user := &User{
 					ID:       userID,
 					Email:    "test@example.com",
 					Name:     "", // Empty name
@@ -209,7 +209,7 @@ var _ = Describe("User Entity", func() {
 			It("should still validate successfully (timestamps not validated)", func() {
 				// Given
 				userID, _ := values.NewUserID("user-123")
-				user := &entities.User{
+				user := &User{
 					ID:       userID,
 					Email:    "test@example.com",
 					Name:     "TestUser",
@@ -227,11 +227,11 @@ var _ = Describe("User Entity", func() {
 	})
 
 	Describe("User methods", func() {
-		var user *entities.User
+		var user *User
 
 		BeforeEach(func() {
 			var err error
-			user, err = entities.NewUserFromStrings("user-123", "test@example.com", "TestUser")
+			user, err = NewUserFromStrings("user-123", "test@example.com", "TestUser")
 			Expect(err).To(BeNil())
 		})
 

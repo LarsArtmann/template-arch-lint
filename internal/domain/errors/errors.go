@@ -18,7 +18,7 @@ const (
 	// Business logic error codes
 	NotFoundErrorCode ErrorCode = "NOT_FOUND"
 	ConflictErrorCode ErrorCode = "CONFLICT"
-	
+
 	// System error codes
 	InternalErrorCode ErrorCode = "INTERNAL_ERROR"
 )
@@ -142,7 +142,7 @@ func NewConflictError(message string, details map[string]interface{}) *ConflictE
 	if details == nil {
 		details = make(map[string]interface{})
 	}
-	
+
 	return &ConflictError{
 		code:    ConflictErrorCode,
 		message: message,

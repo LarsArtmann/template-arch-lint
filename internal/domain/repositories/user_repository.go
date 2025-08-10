@@ -20,16 +20,16 @@ var ErrUserAlreadyExists = errors.NewConflictError("user already exists", map[st
 type UserRepository interface {
 	// Save persists a user entity
 	Save(ctx context.Context, user *entities.User) error
-	
+
 	// FindByID retrieves a user by their unique identifier
 	FindByID(ctx context.Context, id entities.UserID) (*entities.User, error)
-	
+
 	// FindByEmail retrieves a user by their email address
 	FindByEmail(ctx context.Context, email string) (*entities.User, error)
-	
+
 	// Delete removes a user from the repository
 	Delete(ctx context.Context, id entities.UserID) error
-	
+
 	// List retrieves all users (useful for testing and admin operations)
 	List(ctx context.Context) ([]*entities.User, error)
 }

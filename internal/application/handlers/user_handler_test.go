@@ -9,11 +9,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 
+	"github.com/gin-gonic/gin"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/gin-gonic/gin"
 
-	"github.com/LarsArtmann/template-arch-lint/internal/application/handlers"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
@@ -22,13 +21,13 @@ import (
 
 // MockUserRepository implements repositories.UserRepository for testing
 type MockUserRepository struct {
-	users    map[string]*entities.User
+	users       map[string]*entities.User
 	shouldError bool
 }
 
 func NewMockUserRepository() *MockUserRepository {
 	return &MockUserRepository{
-		users:    make(map[string]*entities.User),
+		users:       make(map[string]*entities.User),
 		shouldError: false,
 	}
 }
@@ -45,7 +44,7 @@ func (m *MockUserRepository) FindByID(ctx context.Context, id values.UserID) (*e
 	if m.shouldError {
 		return nil, repositories.ErrUserNotFound
 	}
-	
+
 	user, exists := m.users[id.String()]
 	if !exists {
 		return nil, repositories.ErrUserNotFound
@@ -57,7 +56,7 @@ func (m *MockUserRepository) FindByEmail(ctx context.Context, email string) (*en
 	if m.shouldError {
 		return nil, repositories.ErrUserNotFound
 	}
-	
+
 	for _, user := range m.users {
 		if user.Email == email {
 			return user, nil
@@ -70,7 +69,7 @@ func (m *MockUserRepository) List(ctx context.Context) ([]*entities.User, error)
 	if m.shouldError {
 		return nil, fmt.Errorf("repository error")
 	}
-	
+
 	users := make([]*entities.User, 0, len(m.users))
 	for _, user := range m.users {
 		users = append(users, user)
@@ -82,12 +81,12 @@ func (m *MockUserRepository) Delete(ctx context.Context, id values.UserID) error
 	if m.shouldError {
 		return repositories.ErrUserNotFound
 	}
-	
+
 	_, exists := m.users[id.String()]
 	if !exists {
 		return repositories.ErrUserNotFound
 	}
-	
+
 	delete(m.users, id.String())
 	return nil
 }
@@ -98,7 +97,7 @@ func (m *MockUserRepository) SetShouldError(shouldError bool) {
 
 var _ = Describe("UserHandler", func() {
 	var (
-		handler     *handlers.UserHandler
+		handler     *UserHandler
 		mockRepo    *MockUserRepository
 		userService *services.UserService
 		router      *gin.Engine
@@ -108,17 +107,17 @@ var _ = Describe("UserHandler", func() {
 	BeforeEach(func() {
 		// Set Gin to test mode
 		gin.SetMode(gin.TestMode)
-		
+
 		// Create mock repository and logger
 		mockRepo = NewMockUserRepository()
 		logger = slog.New(slog.NewTextHandler(GinkgoWriter, nil))
-		
+
 		// Create service with mock repository
 		userService = services.NewUserService(mockRepo)
-		
+
 		// Create handler
-		handler = handlers.NewUserHandler(userService, logger)
-		
+		handler = NewUserHandler(userService, logger)
+
 		// Setup router
 		router = gin.New()
 		router.POST("/users", handler.CreateUser)
@@ -135,7 +134,7 @@ var _ = Describe("UserHandler", func() {
 		Context("with valid request", func() {
 			It("should create user successfully", func() {
 				// Given
-				requestBody := handlers.CreateUserRequest{
+				requestBody := CreateUserRequest{
 					ID:    "user-123",
 					Email: "test@example.com",
 					Name:  "TestUser",
@@ -152,7 +151,7 @@ var _ = Describe("UserHandler", func() {
 
 				// Then
 				Expect(recorder.Code).To(Equal(http.StatusCreated))
-				
+
 				var response entities.User
 				err = json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())
@@ -175,7 +174,7 @@ var _ = Describe("UserHandler", func() {
 
 				// Then
 				Expect(recorder.Code).To(Equal(http.StatusBadRequest))
-				
+
 				var response map[string]interface{}
 				err := json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())
@@ -184,7 +183,7 @@ var _ = Describe("UserHandler", func() {
 
 			It("should return error for missing required fields", func() {
 				// Given
-				requestBody := handlers.CreateUserRequest{
+				requestBody := CreateUserRequest{
 					// Missing ID
 					Email: "test@example.com",
 					Name:  "TestUser",
@@ -205,7 +204,7 @@ var _ = Describe("UserHandler", func() {
 
 			It("should return error for invalid email format", func() {
 				// Given
-				requestBody := handlers.CreateUserRequest{
+				requestBody := CreateUserRequest{
 					ID:    "user-123",
 					Email: "invalid-email", // Invalid email
 					Name:  "TestUser",
@@ -226,7 +225,7 @@ var _ = Describe("UserHandler", func() {
 
 			It("should return error for invalid user ID format", func() {
 				// Given
-				requestBody := handlers.CreateUserRequest{
+				requestBody := CreateUserRequest{
 					ID:    "invalid id with spaces", // Invalid user ID
 					Email: "test@example.com",
 					Name:  "TestUser",
@@ -243,7 +242,7 @@ var _ = Describe("UserHandler", func() {
 
 				// Then
 				Expect(recorder.Code).To(Equal(http.StatusBadRequest))
-				
+
 				var response map[string]interface{}
 				err = json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())
@@ -271,7 +270,7 @@ var _ = Describe("UserHandler", func() {
 
 				// Then
 				Expect(recorder.Code).To(Equal(http.StatusOK))
-				
+
 				var response entities.User
 				err := json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())
@@ -319,7 +318,7 @@ var _ = Describe("UserHandler", func() {
 		Context("with valid request", func() {
 			It("should update user successfully", func() {
 				// Given
-				requestBody := handlers.UpdateUserRequest{
+				requestBody := UpdateUserRequest{
 					Email: "updated@example.com",
 					Name:  "UpdatedUser",
 				}
@@ -335,7 +334,7 @@ var _ = Describe("UserHandler", func() {
 
 				// Then
 				Expect(recorder.Code).To(Equal(http.StatusOK))
-				
+
 				var response entities.User
 				err = json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())
@@ -364,7 +363,7 @@ var _ = Describe("UserHandler", func() {
 
 				// Then
 				Expect(recorder.Code).To(Equal(http.StatusOK))
-				
+
 				var response map[string]interface{}
 				err := json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())
@@ -394,7 +393,7 @@ var _ = Describe("UserHandler", func() {
 
 				// Then
 				Expect(recorder.Code).To(Equal(http.StatusOK))
-				
+
 				var response map[string]interface{}
 				err := json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())

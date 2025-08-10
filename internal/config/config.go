@@ -18,17 +18,17 @@ type Config struct {
 
 // ServerConfig contains HTTP server configuration
 type ServerConfig struct {
-	Host         string        `mapstructure:"host" validate:"required"`
-	Port         int           `mapstructure:"port" validate:"required,min=1,max=65535"`
-	ReadTimeout  time.Duration `mapstructure:"read_timeout"`
-	WriteTimeout time.Duration `mapstructure:"write_timeout"`
-	IdleTimeout  time.Duration `mapstructure:"idle_timeout"`
+	Host                    string        `mapstructure:"host" validate:"required"`
+	Port                    int           `mapstructure:"port" validate:"required,min=1,max=65535"`
+	ReadTimeout             time.Duration `mapstructure:"read_timeout"`
+	WriteTimeout            time.Duration `mapstructure:"write_timeout"`
+	IdleTimeout             time.Duration `mapstructure:"idle_timeout"`
 	GracefulShutdownTimeout time.Duration `mapstructure:"graceful_shutdown_timeout"`
 }
 
 // DatabaseConfig contains database configuration
 type DatabaseConfig struct {
-	Driver          string        `mapstructure:"driver" validate:"required,oneof=sqlite postgres mysql"`
+	Driver          string        `mapstructure:"driver" validate:"required,oneof=sqlite3 postgres mysql"`
 	DSN             string        `mapstructure:"dsn" validate:"required"`
 	MaxOpenConns    int           `mapstructure:"max_open_conns"`
 	MaxIdleConns    int           `mapstructure:"max_idle_conns"`
@@ -71,7 +71,7 @@ func LoadConfig(configPath string) (*Config, error) {
 	// Enable reading from environment variables
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("APP") // Environment variables will be prefixed with APP_
-	
+
 	// Set environment variable key mappings for nested structures
 	viper.BindEnv("server.host", "APP_SERVER_HOST")
 	viper.BindEnv("server.port", "APP_SERVER_PORT")
@@ -79,18 +79,18 @@ func LoadConfig(configPath string) (*Config, error) {
 	viper.BindEnv("server.write_timeout", "APP_SERVER_WRITE_TIMEOUT")
 	viper.BindEnv("server.idle_timeout", "APP_SERVER_IDLE_TIMEOUT")
 	viper.BindEnv("server.graceful_shutdown_timeout", "APP_SERVER_GRACEFUL_SHUTDOWN_TIMEOUT")
-	
+
 	viper.BindEnv("database.driver", "APP_DATABASE_DRIVER")
 	viper.BindEnv("database.dsn", "APP_DATABASE_DSN")
 	viper.BindEnv("database.max_open_conns", "APP_DATABASE_MAX_OPEN_CONNS")
 	viper.BindEnv("database.max_idle_conns", "APP_DATABASE_MAX_IDLE_CONNS")
 	viper.BindEnv("database.conn_max_lifetime", "APP_DATABASE_CONN_MAX_LIFETIME")
 	viper.BindEnv("database.conn_max_idle_time", "APP_DATABASE_CONN_MAX_IDLE_TIME")
-	
+
 	viper.BindEnv("logging.level", "APP_LOGGING_LEVEL")
 	viper.BindEnv("logging.format", "APP_LOGGING_FORMAT")
 	viper.BindEnv("logging.output", "APP_LOGGING_OUTPUT")
-	
+
 	viper.BindEnv("app.name", "APP_APP_NAME")
 	viper.BindEnv("app.version", "APP_APP_VERSION")
 	viper.BindEnv("app.environment", "APP_APP_ENVIRONMENT")

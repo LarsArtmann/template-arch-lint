@@ -122,7 +122,7 @@ func (s *UserService) UpdateUser(ctx context.Context, id entities.UserID, email,
 	if err := user.SetEmail(email); err != nil {
 		return nil, fmt.Errorf("failed to set email: %w", err)
 	}
-	
+
 	if err := user.SetName(name); err != nil {
 		return nil, fmt.Errorf("failed to set name: %w", err)
 	}

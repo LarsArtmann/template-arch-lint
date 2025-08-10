@@ -24,12 +24,12 @@ func NewSQLUserRepository(db *sql.DB, logger *slog.Logger) *SQLUserRepository {
 		db:     db,
 		logger: logger,
 	}
-	
+
 	// Initialize database schema
 	if err := repo.initSchema(); err != nil {
 		logger.Error("Failed to initialize database schema", "error", err)
 	}
-	
+
 	return repo
 }
 
@@ -47,12 +47,12 @@ func (r *SQLUserRepository) initSchema() error {
 		CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 		CREATE INDEX IF NOT EXISTS idx_users_created ON users(created);
 	`
-	
+
 	_, err := r.db.Exec(query)
 	if err != nil {
 		return fmt.Errorf("failed to create users table: %w", err)
 	}
-	
+
 	r.logger.Info("Database schema initialized successfully")
 	return nil
 }
