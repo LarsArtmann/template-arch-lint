@@ -27,6 +27,14 @@ components:
     in: internal/domain/entities/**
   domain-shared:
     in: internal/domain/shared/**
+  domain-values:
+    in: internal/domain/values/**
+  domain-errors:
+    in: internal/domain/errors/**
+  domain-repositories:
+    in: internal/domain/repositories/**
+  domain-services:
+    in: internal/domain/services/**
   
   # ========================================  
   # APPLICATION LAYER - Use Cases & Coordination
@@ -41,6 +49,16 @@ components:
     in: internal/infrastructure/**
     
   # ========================================
+  # CONFIGURATION & STARTUP
+  # ========================================
+  config:
+    in: internal/config/**
+  container:
+    in: internal/container/**
+  main:
+    in: cmd/**
+    
+  # ========================================
   # EXAMPLES & UTILITIES
   # ========================================
   examples:
@@ -50,32 +68,74 @@ components:
 deps:
   # DOMAIN LAYER - Zero infrastructure dependencies
   domain-entities:
+    anyVendorDeps: true
     mayDependOn:
       - domain-shared
-      # ✅ Domain can only depend on other domain components
-      # ❌ NO infrastructure, no application, no external dependencies
+      - domain-values
+      - domain-errors
   
   domain-shared:
-    anyVendorDeps: true  # Allow standard library
-    mayDependOn: []      # Shared kernel has no project dependencies
+    anyVendorDeps: true
+    mayDependOn: []
+    
+  domain-values:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-shared
+      - domain-errors
+      
+  domain-errors:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-shared
+      
+  domain-repositories:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-shared
+      - domain-values
+      - domain-errors
+      
+  domain-services:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-repositories
+      - domain-shared
+      - domain-values
+      - domain-errors
   
   # APPLICATION LAYER - Orchestrates domain and infrastructure
   app-handlers:
     mayDependOn:
       - domain-entities
+      - domain-services
+      - domain-repositories
       - domain-shared
-      # ✅ Application coordinates between domain and infrastructure
-      # ✅ Can depend on domain for business logic
-      # ✅ Should use dependency injection for infrastructure
+      - domain-values
+      - domain-errors
   
   # INFRASTRUCTURE LAYER - External integrations
   infrastructure:
     mayDependOn:
       - domain-entities
+      - domain-repositories
       - domain-shared
-      # ✅ Infrastructure implements domain interfaces
-      # ✅ Can depend on domain types for implementations
+      - domain-values
+      - domain-errors
   
+  # CONFIGURATION & STARTUP
+  config:
+    anyVendorDeps: true
+    mayDependOn: []
+    
+  container:
+    anyProjectDeps: true
+    
+  main:
+    anyProjectDeps: true
+
   # EXAMPLES - Can use any layer for demonstrations
   examples:
     anyProjectDeps: true
@@ -83,6 +143,7 @@ deps:
 # 🌍 COMMON COMPONENTS - Available everywhere
 commonComponents:
   - domain-shared
+  - domain-errors
 
 # 🚫 EXCLUSION PATTERNS
 exclude:

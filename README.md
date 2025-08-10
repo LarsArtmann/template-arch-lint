@@ -66,6 +66,9 @@ cp .go-arch-lint.yml /path/to/your/project/
 cp .golangci.yml /path/to/your/project/
 cp justfile /path/to/your/project/
 
+# Install dependencies (if using the full template)
+go mod tidy
+
 # Run on your codebase
 cd /path/to/your/project
 just lint
@@ -73,14 +76,14 @@ just lint
 
 ### 3. **Immediate Results**
 ```bash
-🔍 FILENAME VERIFIER
-✅ SUCCESS: All filenames are valid!
+📁 FILENAME VERIFICATION
+✅ No problematic filenames found!
 
 🏗️ ARCHITECTURE LINTING  
-✅ Architecture validation passed!
+⚠️ Architecture validation in progress...
 
 📝 CODE QUALITY LINTING
-❌ Found 47 violations requiring fixes
+✅ Code quality validation passed!
 ```
 
 ---
@@ -146,15 +149,13 @@ linters-settings:
 - ⚡ **Performance**: Detects inefficient patterns automatically
 - 🧪 **Test Quality**: Comprehensive test linting and best practices
 
-### 📁 **Filename Compliance** (`cmd/filename-verifier/`)
-```go
-// Custom tool preventing filesystem conflicts
-./bin/filename-verifier .
+### 📁 **Filename Compliance** (Built-in validation)
+```bash
+# Integrated filename verification  
+just lint-files
 
-🔍 FILENAME VERIFIER
-Files scanned: 156
-Violations found: 0
-✅ SUCCESS: All filenames are valid!
+📁 FILENAME VERIFICATION
+✅ No problematic filenames found!
 ```
 
 **Validation Rules:**
@@ -175,6 +176,82 @@ just lint-files     # Filename validation only
 just fix            # Auto-fix issues where possible
 just ci             # Complete CI/CD validation
 just report         # Generate detailed reports
+```
+
+### 🚀 **Working with the Template**
+
+#### **Running the Example**
+```bash
+# Clone and setup
+git clone https://github.com/LarsArtmann/template-arch-lint.git
+cd template-arch-lint
+
+# Install tools and run linting
+just install
+just lint
+
+# Examine example domain entity
+cat internal/domain/entities/user.go
+
+# Check architecture compliance
+just lint-arch
+
+# Review configuration management
+cat internal/config/config.go
+```
+
+#### **Development Workflow**
+```bash
+# 1. Install development tools
+just install
+
+# 2. Format and fix issues
+just fix
+
+# 3. Run comprehensive checks
+just ci
+
+# 4. Generate detailed reports
+just report
+ls -la reports/  # View generated reports
+```
+
+### 📦 **Dependencies & Requirements**
+
+#### **Required Tools** (Auto-installed via `just install`)
+```bash
+# Linting tools
+go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.3.1
+go install github.com/fe3dback/go-arch-lint@v1.12.0
+
+# Build requirements  
+go 1.23+
+just command runner (https://github.com/casey/just)
+```
+
+#### **Go Module Dependencies**
+```go
+// Core dependencies
+github.com/go-playground/validator/v10 v10.27.0  # Struct validation
+github.com/samber/do v1.6.0                      # Dependency injection  
+github.com/samber/lo v1.51.0                     # Functional utilities
+github.com/spf13/viper v1.20.1                   # Configuration management
+
+// See go.mod for complete dependency tree
+```
+
+#### **Project Structure Requirements**
+```bash
+# Recommended Clean Architecture structure
+internal/
+├── domain/
+│   ├── entities/      # Business entities
+│   ├── repositories/  # Repository interfaces  
+│   └── shared/        # Shared domain components
+├── application/
+│   └── handlers/      # Use case handlers
+└── infrastructure/
+    └── repositories/  # Repository implementations
 ```
 
 ---
@@ -592,8 +669,10 @@ git clone https://github.com/yourusername/template-arch-lint.git
 git checkout -b feature/your-contribution
 
 # 3. Make changes and test
-just lint
-just test
+just lint        # Run all quality checks
+just fix         # Auto-fix formatting issues  
+just ci          # Run CI/CD validation
+just test        # Run test suite (when tests are added)
 
 # 4. Submit PR with clear description
 ```
@@ -601,13 +680,29 @@ just test
 ### 🛠️ **Development Commands**
 All development tasks use the `justfile`:
 ```bash
-just install    # Install all tools
-just lint       # Run all linters  
-just fix        # Auto-fix issues
-just test       # Run tests with coverage
-just ci         # Full CI/CD validation
-just report     # Generate detailed reports
-just clean      # Clean generated files
+# Essential commands
+just install        # Install all required tools
+just lint           # Run complete linting suite
+just fix            # Auto-fix formatting and simple issues
+just ci             # Full CI/CD validation pipeline
+
+# Specialized linting
+just lint-arch      # Architecture boundaries only  
+just lint-code      # Code quality only
+just lint-files     # Filename compliance only
+just lint-minimal   # Fast essential checks only
+just lint-strict    # Maximum strictness mode
+just lint-security  # Security-focused linting
+
+# Development utilities
+just build          # Build Go modules
+just fmt            # Format code (gofmt + goimports)
+just test           # Run tests with coverage
+just report         # Generate comprehensive reports
+just clean          # Clean generated files and reports
+just stats          # Show project statistics
+just version        # Show tool versions
+just help           # Show all available commands
 ```
 
 ### 🏆 **Recognition**
