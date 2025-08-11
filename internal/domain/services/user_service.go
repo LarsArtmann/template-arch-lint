@@ -280,24 +280,37 @@ func (s *UserService) validateEmail(email string) error {
 	return nil
 }
 
-// validateUserName enforces business rules for username validation
+// validateUserName enforces business rules for display name validation
 func (s *UserService) validateUserName(name string) error {
 	if name == "" {
 		return errors.NewRequiredFieldError("name")
 	}
 
-	// Business rule: Username length constraints
+	// Business rule: Name length constraints
 	if len(name) < 2 {
 		return errors.NewValidationError("name", "too short (min 2 characters)")
 	}
 
-	if len(name) > 50 {
-		return errors.NewValidationError("name", "too long (max 50 characters)")
+	if len(name) > 100 {
+		return errors.NewValidationError("name", "too long (max 100 characters)")
 	}
 
 	// Business rule: No leading/trailing whitespace
 	if strings.TrimSpace(name) != name {
 		return errors.NewValidationError("name", "cannot have leading or trailing spaces")
+	}
+
+	// Business rule: Must contain at least one letter
+	hasLetter := false
+	for _, char := range name {
+		if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') {
+			hasLetter = true
+			break
+		}
+	}
+
+	if !hasLetter {
+		return errors.NewValidationError("name", "must contain at least one letter")
 	}
 
 	return nil

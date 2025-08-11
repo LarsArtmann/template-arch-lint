@@ -117,29 +117,38 @@ func validateUserNameFormat(username string) error {
 		return fmt.Errorf("username cannot have leading or trailing spaces")
 	}
 
-	// Business rule: Character validation
-	if !usernameRegex.MatchString(normalized) {
-		return fmt.Errorf("username can only contain letters, numbers, dots, hyphens, and underscores")
+	// Business rule: Character validation - allow spaces for display names
+	validChars := true
+	for _, char := range normalized {
+		if !((char >= 'a' && char <= 'z') ||
+			(char >= 'A' && char <= 'Z') ||
+			(char >= '0' && char <= '9') ||
+			char == '-' || char == '_' || char == '.' || char == ' ') {
+			validChars = false
+			break
+		}
+	}
+	
+	if !validChars {
+		return fmt.Errorf("name can only contain letters, numbers, dots, hyphens, underscores, and spaces")
 	}
 
-	// Business rule: Cannot start or end with special characters
+	// Business rule: Cannot start or end with special characters (but allow spaces in middle)
 	firstChar := normalized[0]
 	lastChar := normalized[len(normalized)-1]
 
 	if firstChar == '.' || firstChar == '-' || firstChar == '_' {
-		return fmt.Errorf("username cannot start with dot, hyphen, or underscore")
+		return fmt.Errorf("name cannot start with dot, hyphen, or underscore")
 	}
 
 	if lastChar == '.' || lastChar == '-' || lastChar == '_' {
-		return fmt.Errorf("username cannot end with dot, hyphen, or underscore")
+		return fmt.Errorf("name cannot end with dot, hyphen, or underscore")
 	}
 
-	// Business rule: No consecutive special characters
+	// Business rule: No excessive consecutive special characters (relaxed for display names)
 	if strings.Contains(normalized, "..") || strings.Contains(normalized, "--") ||
-		strings.Contains(normalized, "__") || strings.Contains(normalized, ".-") ||
-		strings.Contains(normalized, "_.") || strings.Contains(normalized, "_-") ||
-		strings.Contains(normalized, "-.") || strings.Contains(normalized, "-_") {
-		return fmt.Errorf("username cannot contain consecutive special characters")
+		strings.Contains(normalized, "__") {
+		return fmt.Errorf("name cannot contain consecutive dots, hyphens, or underscores")
 	}
 
 	// Business rule: Must contain at least one letter
@@ -155,9 +164,10 @@ func validateUserNameFormat(username string) error {
 		return fmt.Errorf("username must contain at least one letter")
 	}
 
-	// Business rule: Check against reserved usernames
-	if reservedUsernames[strings.ToLower(normalized)] {
-		return fmt.Errorf("username '%s' is reserved and cannot be used", normalized)
+	// Business rule: Check against reserved usernames (less restrictive for display names)
+	lowercased := strings.ToLower(strings.ReplaceAll(normalized, " ", ""))
+	if reservedUsernames[lowercased] {
+		return fmt.Errorf("name '%s' is reserved and cannot be used", normalized)
 	}
 
 	// Business rule: Cannot be all numbers

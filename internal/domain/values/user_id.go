@@ -3,6 +3,7 @@ package values
 
 import (
 	"crypto/rand"
+	"database/sql/driver"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -45,8 +46,8 @@ func (u UserID) String() string {
 	return u.value
 }
 
-// Value returns the user ID value for database storage
-func (u UserID) Value() string {
+// String returns the user ID value for database storage
+func (u UserID) StringValue() string {
 	return u.value
 }
 
@@ -126,4 +127,36 @@ func (u *UserID) UnmarshalJSON(data []byte) error {
 
 	*u = userID
 	return nil
+}
+
+// Value implements the driver.Valuer interface for database storage
+func (u UserID) Value() (driver.Value, error) {
+	return u.value, nil
+}
+
+// Scan implements the sql.Scanner interface for database retrieval
+func (u *UserID) Scan(value interface{}) error {
+	if value == nil {
+		*u = UserID{}
+		return nil
+	}
+
+	switch v := value.(type) {
+	case string:
+		userID, err := NewUserID(v)
+		if err != nil {
+			return err
+		}
+		*u = userID
+		return nil
+	case []byte:
+		userID, err := NewUserID(string(v))
+		if err != nil {
+			return err
+		}
+		*u = userID
+		return nil
+	default:
+		return fmt.Errorf("cannot scan %T into UserID", value)
+	}
 }
