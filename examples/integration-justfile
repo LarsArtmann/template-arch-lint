@@ -1,0 +1,108 @@
+# 🚀 EXAMPLE INTEGRATION JUSTFILE
+# Shows how template-justfile would import and use arch-lint modules
+# Copy this to your project and customize paths
+
+# Set the path to your arch-lint installation  
+# This could be via git subtree: ./linting/arch-lint
+# Or direct clone: ./vendor/template-arch-lint
+ARCH_LINT_ROOT := "./linting/arch-lint"
+
+# Import arch-lint modules
+import ARCH_LINT_ROOT + "/justfile-modules/arch-lint.just"
+import ARCH_LINT_ROOT + "/justfile-modules/quality.just" 
+import ARCH_LINT_ROOT + "/justfile-modules/setup.just"
+
+# Your project-specific variables
+PROJECT_NAME := "my-awesome-project"
+
+# Default recipe
+default: help
+
+# Show help
+help:
+    @echo "🚀 {{PROJECT_NAME}} - Development Commands"
+    @echo ""
+    @echo "📦 Setup Commands:"
+    @echo "  setup-clean     - Setup with Clean Architecture"
+    @echo "  setup-hex       - Setup with Hexagonal Architecture"
+    @echo "  install-tools   - Install all linting tools"
+    @echo ""
+    @echo "🔍 Linting Commands:"
+    @echo "  lint           - Run all linting (architecture + quality)"
+    @echo "  lint-arch      - Run architecture linting only"
+    @echo "  lint-quality   - Run code quality linting only"
+    @echo "  fix            - Auto-fix issues where possible"
+    @echo ""
+    @echo "📊 Reporting Commands:"
+    @echo "  reports        - Generate all reports"
+    @echo "  verify         - Verify setup"
+    @echo ""
+    @just --list --unsorted
+
+# Setup project with Clean Architecture
+setup-clean:
+    @echo "🏗️ Setting up {{PROJECT_NAME}} with Clean Architecture..."
+    @just setup-project clean standard
+    @echo "🎉 {{PROJECT_NAME}} is ready for development!"
+
+# Setup project with Hexagonal Architecture  
+setup-hex:
+    @echo "🏛️ Setting up {{PROJECT_NAME}} with Hexagonal Architecture..."
+    @just setup-project hexagonal standard
+    @echo "🎉 {{PROJECT_NAME}} is ready for development!"
+
+# Install all tools (alias for imported command)
+install-tools: install-all-tools
+
+# Run complete linting suite
+lint:
+    @echo "🔍 Running complete linting suite for {{PROJECT_NAME}}..."
+    @just lint-architecture
+    @just lint-quality
+    @echo "✅ All linting completed!"
+
+# Run architecture linting (uses imported command)
+lint-arch: lint-architecture
+
+# Run quality linting (uses imported command) 
+lint-quality: lint-quality
+
+# Auto-fix issues (uses imported command)
+fix: fix-quality
+
+# Generate all reports
+reports:
+    @echo "📊 Generating reports for {{PROJECT_NAME}}..."
+    @just report-architecture  
+    @just report-quality
+    @echo "✅ All reports generated in ./reports/"
+
+# Verify setup (uses imported command)
+verify: verify-setup
+
+# Project-specific commands
+build:
+    @echo "🔨 Building {{PROJECT_NAME}}..."
+    go build ./...
+    @echo "✅ Build completed!"
+
+test:
+    @echo "🧪 Testing {{PROJECT_NAME}}..."
+    go test ./... -v -race -coverprofile=coverage.out
+    @echo "✅ Tests completed!"
+
+# CI/CD pipeline
+ci: install-tools lint test build
+    @echo "✅ CI pipeline completed successfully!"
+
+# Development workflow
+dev: fix lint test
+    @echo "✅ Development checks completed!"
+
+# Show project status
+status:
+    @echo "📊 {{PROJECT_NAME}} Status:"
+    @echo "  Repository: $(git remote get-url origin 2>/dev/null || echo 'No remote')"
+    @echo "  Branch: $(git branch --show-current 2>/dev/null || echo 'No git')"
+    @echo "  Go Version: $(go version | cut -d' ' -f3)"
+    @just verify-setup
