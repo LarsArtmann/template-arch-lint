@@ -7,6 +7,7 @@ GOLANGCI_VERSION := "v2.3.1"
 
 # Configuration paths (can be overridden by importing justfile)
 QUALITY_CONFIG := env_var_or_default("QUALITY_CONFIG", ".golangci.yml")
+REPORTS_DIR := env_var_or_default("REPORTS_DIR", "reports")
 
 # Install code quality tools
 install-quality-tools:
