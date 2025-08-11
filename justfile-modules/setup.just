@@ -2,8 +2,9 @@
 # Importable justfile module for project setup and initialization
 # Usage: import "path/to/setup.just"
 
-# Default paths (can be overridden)
-TEMPLATE_ROOT := env_var_or_default("ARCH_LINT_ROOT", justfile_directory())
+# Default paths (can be overridden by importing justfile)
+# The importing justfile should set ARCH_LINT_ROOT to the correct path
+TEMPLATE_ROOT := env_var_or_default("ARCH_LINT_ROOT", "arch-lint-tools")
 CONFIG_TEMPLATES := TEMPLATE_ROOT + "/configs/templates"
 
 # Install all tools
