@@ -8,7 +8,10 @@
       "Bash(CGO_ENABLED=0 go build -v ./cmd/server)",
       "Bash(kill:*)",
       "Bash(./server:*)",
-      "Bash(APP_SERVER_PORT=8082 timeout 10s go run cmd/server/main.go)"
+      "Bash(APP_SERVER_PORT=8082 timeout 10s go run cmd/server/main.go)",
+      "Bash(staticcheck:*)",
+      "Bash(errorlint:*)",
+      "Bash(~/go/bin/errorlint:*)"
     ],
     "deny": []
   }
