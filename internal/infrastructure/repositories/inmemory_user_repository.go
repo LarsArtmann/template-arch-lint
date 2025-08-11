@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
@@ -38,7 +39,7 @@ func (r *InMemoryUserRepository) Save(ctx context.Context, user *entities.User) 
 	// Check if user already exists for create operations
 	if _, exists := r.users[user.ID]; exists {
 		// Update existing user's modified time
-		user.Modified = user.Modified
+		user.Modified = time.Now()
 	}
 
 	// Create a copy to avoid external modifications

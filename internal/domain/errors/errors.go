@@ -2,6 +2,7 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -214,30 +215,34 @@ func (e *InternalError) Unwrap() error {
 
 // IsDomainError checks if an error is a domain error
 func IsDomainError(err error) bool {
-	_, ok := err.(DomainError)
-	return ok
+	var domainErr DomainError
+	return errors.As(err, &domainErr)
 }
 
 // AsValidationError attempts to cast error to ValidationError
 func AsValidationError(err error) (*ValidationError, bool) {
-	ve, ok := err.(*ValidationError)
+	var ve *ValidationError
+	ok := errors.As(err, &ve)
 	return ve, ok
 }
 
 // AsNotFoundError attempts to cast error to NotFoundError
 func AsNotFoundError(err error) (*NotFoundError, bool) {
-	nfe, ok := err.(*NotFoundError)
+	var nfe *NotFoundError
+	ok := errors.As(err, &nfe)
 	return nfe, ok
 }
 
 // AsConflictError attempts to cast error to ConflictError
 func AsConflictError(err error) (*ConflictError, bool) {
-	ce, ok := err.(*ConflictError)
+	var ce *ConflictError
+	ok := errors.As(err, &ce)
 	return ce, ok
 }
 
 // AsInternalError attempts to cast error to InternalError
 func AsInternalError(err error) (*InternalError, bool) {
-	ie, ok := err.(*InternalError)
+	var ie *InternalError
+	ok := errors.As(err, &ie)
 	return ie, ok
 }

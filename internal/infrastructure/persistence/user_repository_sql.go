@@ -4,6 +4,7 @@ package persistence
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
@@ -103,7 +104,7 @@ func (r *SQLUserRepository) FindByID(ctx context.Context, id entities.UserID) (*
 		&modified,
 	)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			r.logger.Debug("User not found", "user_id", id)
 			return nil, repositories.ErrUserNotFound
 		}
@@ -139,7 +140,7 @@ func (r *SQLUserRepository) FindByEmail(ctx context.Context, email string) (*ent
 		&modified,
 	)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			r.logger.Debug("User not found", "email", email)
 			return nil, repositories.ErrUserNotFound
 		}
@@ -196,7 +197,11 @@ func (r *SQLUserRepository) List(ctx context.Context) ([]*entities.User, error) 
 		r.logger.Error("Failed to list users", "error", err)
 		return nil, fmt.Errorf("failed to list users: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			r.logger.Error("Failed to close rows", "error", err)
+		}
+	}()
 
 	var users []*entities.User
 	for rows.Next() {

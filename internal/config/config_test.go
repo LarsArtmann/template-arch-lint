@@ -7,7 +7,26 @@ import (
 )
 
 func TestLoadConfig(t *testing.T) {
-	tests := []struct {
+	tests := getLoadConfigTestCases()
+	
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			setupTestEnvironment(t, tt.envVars)
+			runLoadConfigTest(t, tt)
+		})
+	}
+}
+
+// getLoadConfigTestCases returns test cases for LoadConfig function
+func getLoadConfigTestCases() []struct {
+	name        string
+	configPath  string
+	envVars     map[string]string
+	wantErr     bool
+	expectPort  int
+	expectLevel string
+} {
+	return []struct {
 		name        string
 		configPath  string
 		envVars     map[string]string
@@ -51,30 +70,54 @@ func TestLoadConfig(t *testing.T) {
 			wantErr: true,
 		},
 	}
+}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Set environment variables
-			for key, value := range tt.envVars {
-				os.Setenv(key, value)
-				defer os.Unsetenv(key)
-			}
-
-			config, err := LoadConfig(tt.configPath)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("LoadConfig() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			if !tt.wantErr {
-				if config.Server.Port != tt.expectPort {
-					t.Errorf("LoadConfig() port = %v, want %v", config.Server.Port, tt.expectPort)
-				}
-				if config.Logging.Level != tt.expectLevel {
-					t.Errorf("LoadConfig() level = %v, want %v", config.Logging.Level, tt.expectLevel)
-				}
+// setupTestEnvironment sets up and cleans up environment variables for testing
+func setupTestEnvironment(t *testing.T, envVars map[string]string) {
+	t.Helper()
+	for key, value := range envVars {
+		if err := os.Setenv(key, value); err != nil {
+			t.Fatalf("Failed to set environment variable %s: %v", key, err)
+		}
+		t.Cleanup(func() {
+			if err := os.Unsetenv(key); err != nil {
+				t.Errorf("Failed to unset environment variable %s: %v", key, err)
 			}
 		})
+	}
+}
+
+// runLoadConfigTest executes the LoadConfig test logic
+func runLoadConfigTest(t *testing.T, tt struct {
+	name        string
+	configPath  string
+	envVars     map[string]string
+	wantErr     bool
+	expectPort  int
+	expectLevel string
+}) {
+	t.Helper()
+	
+	config, err := LoadConfig(tt.configPath)
+	if (err != nil) != tt.wantErr {
+		t.Errorf("LoadConfig() error = %v, wantErr %v", err, tt.wantErr)
+		return
+	}
+
+	if !tt.wantErr {
+		validateLoadConfigResult(t, config, tt.expectPort, tt.expectLevel)
+	}
+}
+
+// validateLoadConfigResult validates the loaded config matches expectations
+func validateLoadConfigResult(t *testing.T, config *Config, expectPort int, expectLevel string) {
+	t.Helper()
+	
+	if config.Server.Port != expectPort {
+		t.Errorf("LoadConfig() port = %v, want %v", config.Server.Port, expectPort)
+	}
+	if config.Logging.Level != expectLevel {
+		t.Errorf("LoadConfig() level = %v, want %v", config.Logging.Level, expectLevel)
 	}
 }
 
@@ -121,91 +164,88 @@ func TestConfigDefaults(t *testing.T) {
 }
 
 func TestConfigValidation(t *testing.T) {
-	tests := []struct {
+	tests := getConfigValidationTestCases()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			runConfigValidationTest(t, tt.config, tt.wantErr)
+		})
+	}
+}
+
+// getConfigValidationTestCases returns test cases for config validation
+func getConfigValidationTestCases() []struct {
+	name    string
+	config  Config
+	wantErr bool
+} {
+	return []struct {
 		name    string
 		config  Config
 		wantErr bool
 	}{
 		{
-			name: "valid config",
-			config: Config{
-				Server: ServerConfig{
-					Host: "localhost",
-					Port: 8080,
-				},
-				Database: DatabaseConfig{
-					Driver: "sqlite3",
-					DSN:    "./test.db",
-				},
-				Logging: LoggingConfig{
-					Level:  "info",
-					Format: "json",
-					Output: "stdout",
-				},
-				App: AppConfig{
-					Name:        "test-app",
-					Version:     "1.0.0",
-					Environment: "development",
-				},
-			},
+			name:    "valid config",
+			config:  createValidTestConfig(),
 			wantErr: false,
 		},
 		{
-			name: "invalid port",
-			config: Config{
-				Server: ServerConfig{
-					Host: "localhost",
-					Port: 0, // Invalid port
-				},
-				Database: DatabaseConfig{
-					Driver: "sqlite3",
-					DSN:    "./test.db",
-				},
-				Logging: LoggingConfig{
-					Level:  "info",
-					Format: "json",
-					Output: "stdout",
-				},
-				App: AppConfig{
-					Name:        "test-app",
-					Version:     "1.0.0",
-					Environment: "development",
-				},
-			},
+			name:    "invalid port",
+			config:  createConfigWithInvalidPort(),
 			wantErr: true,
 		},
 		{
-			name: "invalid database driver",
-			config: Config{
-				Server: ServerConfig{
-					Host: "localhost",
-					Port: 8080,
-				},
-				Database: DatabaseConfig{
-					Driver: "invalid", // Invalid driver
-					DSN:    "./test.db",
-				},
-				Logging: LoggingConfig{
-					Level:  "info",
-					Format: "json",
-					Output: "stdout",
-				},
-				App: AppConfig{
-					Name:        "test-app",
-					Version:     "1.0.0",
-					Environment: "development",
-				},
-			},
+			name:    "invalid database driver",
+			config:  createConfigWithInvalidDriver(),
 			wantErr: true,
 		},
 	}
+}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := validateConfig(&tt.config)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("validateConfig() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
+// createValidTestConfig creates a valid configuration for testing
+func createValidTestConfig() Config {
+	return Config{
+		Server: ServerConfig{
+			Host: "localhost",
+			Port: 8080,
+		},
+		Database: DatabaseConfig{
+			Driver: "sqlite3",
+			DSN:    "./test.db",
+		},
+		Logging: LoggingConfig{
+			Level:  "info",
+			Format: "json",
+			Output: "stdout",
+		},
+		App: AppConfig{
+			Name:        "test-app",
+			Version:     "1.0.0",
+			Environment: "development",
+		},
+	}
+}
+
+// createConfigWithInvalidPort creates a config with invalid port for testing
+func createConfigWithInvalidPort() Config {
+	config := createValidTestConfig()
+	config.Server.Port = 0 // Invalid port
+	return config
+}
+
+// createConfigWithInvalidDriver creates a config with invalid database driver for testing
+func createConfigWithInvalidDriver() Config {
+	config := createValidTestConfig()
+	config.Database.Driver = "invalid" // Invalid driver
+	return config
+}
+
+// runConfigValidationTest executes a single config validation test
+func runConfigValidationTest(t *testing.T, config Config, wantErr bool) {
+	t.Helper()
+	
+	err := validateConfig(&config)
+	if (err != nil) != wantErr {
+		t.Errorf("validateConfig() error = %v, wantErr %v", err, wantErr)
 	}
 }

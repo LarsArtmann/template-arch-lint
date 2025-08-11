@@ -100,40 +100,70 @@ func validateUserNameFormat(username string) error {
 		return fmt.Errorf("username cannot be empty")
 	}
 
-	// Trim whitespace for validation
 	normalized := strings.TrimSpace(username)
+	
+	if err := validateUsernameLength(normalized); err != nil {
+		return err
+	}
+	
+	if err := validateUsernameWhitespace(username, normalized); err != nil {
+		return err
+	}
+	
+	if err := validateUsernameCharacters(normalized); err != nil {
+		return err
+	}
+	
+	if err := validateUsernameEdges(normalized); err != nil {
+		return err
+	}
+	
+	if err := validateUsernameContent(normalized); err != nil {
+		return err
+	}
 
-	// Business rule: Length constraints
+	return nil
+}
+
+// validateUsernameLength checks length constraints
+func validateUsernameLength(normalized string) error {
 	if len(normalized) < 2 {
 		return fmt.Errorf("username too short (minimum 2 characters)")
 	}
-
 	if len(normalized) > 50 {
 		return fmt.Errorf("username too long (maximum 50 characters)")
 	}
+	return nil
+}
 
-	// Business rule: No leading/trailing whitespace in original
+// validateUsernameWhitespace checks for leading/trailing whitespace
+func validateUsernameWhitespace(username, normalized string) error {
 	if username != normalized {
 		return fmt.Errorf("username cannot have leading or trailing spaces")
 	}
+	return nil
+}
 
-	// Business rule: Character validation - allow spaces for display names
-	validChars := true
+// validateUsernameCharacters validates allowed characters
+func validateUsernameCharacters(normalized string) error {
 	for _, char := range normalized {
-		if !((char >= 'a' && char <= 'z') ||
-			(char >= 'A' && char <= 'Z') ||
-			(char >= '0' && char <= '9') ||
-			char == '-' || char == '_' || char == '.' || char == ' ') {
-			validChars = false
-			break
+		if !isValidUsernameChar(char) {
+			return fmt.Errorf("name can only contain letters, numbers, dots, hyphens, underscores, and spaces")
 		}
 	}
-	
-	if !validChars {
-		return fmt.Errorf("name can only contain letters, numbers, dots, hyphens, underscores, and spaces")
-	}
+	return nil
+}
 
-	// Business rule: Cannot start or end with special characters (but allow spaces in middle)
+// isValidUsernameChar checks if a character is allowed in usernames
+func isValidUsernameChar(char rune) bool {
+	return (char >= 'a' && char <= 'z') ||
+		   (char >= 'A' && char <= 'Z') ||
+		   (char >= '0' && char <= '9') ||
+		   char == '-' || char == '_' || char == '.' || char == ' '
+}
+
+// validateUsernameEdges checks start/end character restrictions and consecutive characters
+func validateUsernameEdges(normalized string) error {
 	firstChar := normalized[0]
 	lastChar := normalized[len(normalized)-1]
 
@@ -145,43 +175,56 @@ func validateUserNameFormat(username string) error {
 		return fmt.Errorf("name cannot end with dot, hyphen, or underscore")
 	}
 
-	// Business rule: No excessive consecutive special characters (relaxed for display names)
 	if strings.Contains(normalized, "..") || strings.Contains(normalized, "--") ||
 		strings.Contains(normalized, "__") {
 		return fmt.Errorf("name cannot contain consecutive dots, hyphens, or underscores")
 	}
 
-	// Business rule: Must contain at least one letter
-	hasLetter := false
+	return nil
+}
+
+// validateUsernameContent validates username content rules (letters, reserved names, numbers)
+func validateUsernameContent(normalized string) error {
+	if err := validateHasLetter(normalized); err != nil {
+		return err
+	}
+	
+	if err := validateNotReserved(normalized); err != nil {
+		return err
+	}
+	
+	if err := validateNotAllNumbers(normalized); err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+// validateHasLetter ensures username contains at least one letter
+func validateHasLetter(normalized string) error {
 	for _, char := range normalized {
 		if unicode.IsLetter(char) {
-			hasLetter = true
-			break
+			return nil
 		}
 	}
+	return fmt.Errorf("username must contain at least one letter")
+}
 
-	if !hasLetter {
-		return fmt.Errorf("username must contain at least one letter")
-	}
-
-	// Business rule: Check against reserved usernames (less restrictive for display names)
+// validateNotReserved checks against reserved usernames
+func validateNotReserved(normalized string) error {
 	lowercased := strings.ToLower(strings.ReplaceAll(normalized, " ", ""))
 	if reservedUsernames[lowercased] {
 		return fmt.Errorf("name '%s' is reserved and cannot be used", normalized)
 	}
+	return nil
+}
 
-	// Business rule: Cannot be all numbers
-	allNumbers := true
+// validateNotAllNumbers ensures username is not all numbers
+func validateNotAllNumbers(normalized string) error {
 	for _, char := range normalized {
 		if !unicode.IsDigit(char) {
-			allNumbers = false
-			break
+			return nil
 		}
 	}
-
-	if allNumbers {
-		return fmt.Errorf("username cannot be all numbers")
-	}
-
-	return nil
+	return fmt.Errorf("username cannot be all numbers")
 }

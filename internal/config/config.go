@@ -56,7 +56,27 @@ func LoadConfig(configPath string) (*Config, error) {
 	// Set default values
 	setDefaults()
 
-	// Set config file path if provided
+	// Setup configuration paths and sources
+	if err := setupConfigPaths(configPath); err != nil {
+		return nil, err
+	}
+
+	// Setup environment variable bindings
+	if err := setupEnvironmentBindings(); err != nil {
+		return nil, err
+	}
+
+	// Read and parse configuration
+	config, err := readAndParseConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	return config, nil
+}
+
+// setupConfigPaths configures viper to read from the specified config file or default locations
+func setupConfigPaths(configPath string) error {
 	if configPath != "" {
 		viper.SetConfigFile(configPath)
 	} else {
@@ -71,31 +91,82 @@ func LoadConfig(configPath string) (*Config, error) {
 	// Enable reading from environment variables
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("APP") // Environment variables will be prefixed with APP_
+	return nil
+}
 
-	// Set environment variable key mappings for nested structures
-	viper.BindEnv("server.host", "APP_SERVER_HOST")
-	viper.BindEnv("server.port", "APP_SERVER_PORT")
-	viper.BindEnv("server.read_timeout", "APP_SERVER_READ_TIMEOUT")
-	viper.BindEnv("server.write_timeout", "APP_SERVER_WRITE_TIMEOUT")
-	viper.BindEnv("server.idle_timeout", "APP_SERVER_IDLE_TIMEOUT")
-	viper.BindEnv("server.graceful_shutdown_timeout", "APP_SERVER_GRACEFUL_SHUTDOWN_TIMEOUT")
+// setupEnvironmentBindings configures all environment variable bindings
+func setupEnvironmentBindings() error {
+	if err := bindServerEnvVars(); err != nil {
+		return err
+	}
+	if err := bindDatabaseEnvVars(); err != nil {
+		return err
+	}
+	if err := bindLoggingEnvVars(); err != nil {
+		return err
+	}
+	return bindAppEnvVars()
+}
 
-	viper.BindEnv("database.driver", "APP_DATABASE_DRIVER")
-	viper.BindEnv("database.dsn", "APP_DATABASE_DSN")
-	viper.BindEnv("database.max_open_conns", "APP_DATABASE_MAX_OPEN_CONNS")
-	viper.BindEnv("database.max_idle_conns", "APP_DATABASE_MAX_IDLE_CONNS")
-	viper.BindEnv("database.conn_max_lifetime", "APP_DATABASE_CONN_MAX_LIFETIME")
-	viper.BindEnv("database.conn_max_idle_time", "APP_DATABASE_CONN_MAX_IDLE_TIME")
+// bindServerEnvVars binds server-related environment variables
+func bindServerEnvVars() error {
+	serverBindings := map[string]string{
+		"server.host":                        "APP_SERVER_HOST",
+		"server.port":                        "APP_SERVER_PORT",
+		"server.read_timeout":                "APP_SERVER_READ_TIMEOUT",
+		"server.write_timeout":               "APP_SERVER_WRITE_TIMEOUT",
+		"server.idle_timeout":                "APP_SERVER_IDLE_TIMEOUT",
+		"server.graceful_shutdown_timeout":   "APP_SERVER_GRACEFUL_SHUTDOWN_TIMEOUT",
+	}
+	return bindEnvVars(serverBindings, "server")
+}
 
-	viper.BindEnv("logging.level", "APP_LOGGING_LEVEL")
-	viper.BindEnv("logging.format", "APP_LOGGING_FORMAT")
-	viper.BindEnv("logging.output", "APP_LOGGING_OUTPUT")
+// bindDatabaseEnvVars binds database-related environment variables
+func bindDatabaseEnvVars() error {
+	databaseBindings := map[string]string{
+		"database.driver":              "APP_DATABASE_DRIVER",
+		"database.dsn":                 "APP_DATABASE_DSN",
+		"database.max_open_conns":      "APP_DATABASE_MAX_OPEN_CONNS",
+		"database.max_idle_conns":      "APP_DATABASE_MAX_IDLE_CONNS",
+		"database.conn_max_lifetime":   "APP_DATABASE_CONN_MAX_LIFETIME",
+		"database.conn_max_idle_time":  "APP_DATABASE_CONN_MAX_IDLE_TIME",
+	}
+	return bindEnvVars(databaseBindings, "database")
+}
 
-	viper.BindEnv("app.name", "APP_APP_NAME")
-	viper.BindEnv("app.version", "APP_APP_VERSION")
-	viper.BindEnv("app.environment", "APP_APP_ENVIRONMENT")
-	viper.BindEnv("app.debug", "APP_APP_DEBUG")
+// bindLoggingEnvVars binds logging-related environment variables
+func bindLoggingEnvVars() error {
+	loggingBindings := map[string]string{
+		"logging.level":  "APP_LOGGING_LEVEL",
+		"logging.format": "APP_LOGGING_FORMAT",
+		"logging.output": "APP_LOGGING_OUTPUT",
+	}
+	return bindEnvVars(loggingBindings, "logging")
+}
 
+// bindAppEnvVars binds app-related environment variables
+func bindAppEnvVars() error {
+	appBindings := map[string]string{
+		"app.name":        "APP_APP_NAME",
+		"app.version":     "APP_APP_VERSION",
+		"app.environment": "APP_APP_ENVIRONMENT",
+		"app.debug":       "APP_APP_DEBUG",
+	}
+	return bindEnvVars(appBindings, "app")
+}
+
+// bindEnvVars is a helper function that binds a map of configuration keys to environment variables
+func bindEnvVars(bindings map[string]string, section string) error {
+	for configKey, envVar := range bindings {
+		if err := viper.BindEnv(configKey, envVar); err != nil {
+			return fmt.Errorf("failed to bind %s env var: %w", configKey, err)
+		}
+	}
+	return nil
+}
+
+// readAndParseConfig reads the config file and parses it into a Config struct
+func readAndParseConfig() (*Config, error) {
 	// Read config file if it exists
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {

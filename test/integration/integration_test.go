@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -38,7 +37,10 @@ func TestHTTPIntegration(t *testing.T) {
 
 	// Test health endpoint
 	t.Run("Health Check", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/health", nil)
+		req, err := http.NewRequest("GET", "/health", nil)
+		if err != nil {
+			t.Fatalf("Failed to create request: %v", err)
+		}
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -67,10 +69,16 @@ func TestHTTPIntegration(t *testing.T) {
 			"name":  "Test User",
 		}
 		
-		jsonPayload, _ := json.Marshal(userPayload)
+		jsonPayload, err := json.Marshal(userPayload)
+		if err != nil {
+			t.Fatalf("Failed to marshal JSON: %v", err)
+		}
 		
 		// Create user
-		req, _ := http.NewRequest("POST", "/api/v1/users", bytes.NewBuffer(jsonPayload))
+		req, err := http.NewRequest("POST", "/api/v1/users", bytes.NewBuffer(jsonPayload))
+		if err != nil {
+			t.Fatalf("Failed to create request: %v", err)
+		}
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
@@ -83,7 +91,10 @@ func TestHTTPIntegration(t *testing.T) {
 		}
 
 		// Get user by ID
-		req, _ = http.NewRequest("GET", "/api/v1/users/testuser123", nil)
+		req, err = http.NewRequest("GET", "/api/v1/users/testuser123", nil)
+		if err != nil {
+			t.Fatalf("Failed to create request: %v", err)
+		}
 		w = httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -95,7 +106,10 @@ func TestHTTPIntegration(t *testing.T) {
 		}
 
 		// List users
-		req, _ = http.NewRequest("GET", "/api/v1/users", nil)
+		req, err = http.NewRequest("GET", "/api/v1/users", nil)
+		if err != nil {
+			t.Fatalf("Failed to create request: %v", err)
+		}
 		w = httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -111,9 +125,15 @@ func TestHTTPIntegration(t *testing.T) {
 			"name":  "Updated User",
 		}
 		
-		jsonPayload, _ = json.Marshal(updatePayload)
+		jsonPayload, err = json.Marshal(updatePayload)
+		if err != nil {
+			t.Fatalf("Failed to marshal JSON: %v", err)
+		}
 		
-		req, _ = http.NewRequest("PUT", "/api/v1/users/testuser123", bytes.NewBuffer(jsonPayload))
+		req, err = http.NewRequest("PUT", "/api/v1/users/testuser123", bytes.NewBuffer(jsonPayload))
+		if err != nil {
+			t.Fatalf("Failed to create request: %v", err)
+		}
 		req.Header.Set("Content-Type", "application/json")
 		w = httptest.NewRecorder()
 		router.ServeHTTP(w, req)
@@ -126,7 +146,10 @@ func TestHTTPIntegration(t *testing.T) {
 		}
 
 		// Delete user
-		req, _ = http.NewRequest("DELETE", "/api/v1/users/testuser123", nil)
+		req, err = http.NewRequest("DELETE", "/api/v1/users/testuser123", nil)
+		if err != nil {
+			t.Fatalf("Failed to create request: %v", err)
+		}
 		w = httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -140,7 +163,10 @@ func TestHTTPIntegration(t *testing.T) {
 	// Test error handling
 	t.Run("Error Handling", func(t *testing.T) {
 		// Test invalid user ID
-		req, _ := http.NewRequest("GET", "/api/v1/users/invalid@user", nil)
+		req, err := http.NewRequest("GET", "/api/v1/users/invalid@user", nil)
+		if err != nil {
+			t.Fatalf("Failed to create request: %v", err)
+		}
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -151,7 +177,10 @@ func TestHTTPIntegration(t *testing.T) {
 		}
 
 		// Test user not found
-		req, _ = http.NewRequest("GET", "/api/v1/users/nonexistent-user", nil)
+		req, err = http.NewRequest("GET", "/api/v1/users/nonexistent-user", nil)
+		if err != nil {
+			t.Fatalf("Failed to create request: %v", err)
+		}
 		w = httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -162,7 +191,10 @@ func TestHTTPIntegration(t *testing.T) {
 		}
 
 		// Test invalid JSON
-		req, _ = http.NewRequest("POST", "/api/v1/users", bytes.NewBuffer([]byte("invalid json")))
+		req, err = http.NewRequest("POST", "/api/v1/users", bytes.NewBuffer([]byte("invalid json")))
+		if err != nil {
+			t.Fatalf("Failed to create request: %v", err)
+		}
 		req.Header.Set("Content-Type", "application/json")
 		w = httptest.NewRecorder()
 		router.ServeHTTP(w, req)
@@ -173,19 +205,4 @@ func TestHTTPIntegration(t *testing.T) {
 			fmt.Printf("✅ Invalid JSON error handling passed: %s\n", w.Body.String())
 		}
 	})
-}
-
-func main() {
-	// Set test environment
-	os.Setenv("APP_APP_ENVIRONMENT", "test")
-	
-	// Run the integration test
-	testing.Main(func(pat, str string) (bool, error) {
-		return true, nil
-	}, []testing.InternalTest{
-		{
-			Name: "TestHTTPIntegration",
-			F:    TestHTTPIntegration,
-		},
-	}, nil, nil)
 }
