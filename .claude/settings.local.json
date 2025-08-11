@@ -4,7 +4,8 @@
       "WebFetch(domain:golangci-lint.run)",
       "Bash(ginkgo bootstrap:*)",
       "Bash(ginkgo run:*)",
-      "Bash(ginkgo:*)"
+      "Bash(ginkgo:*)",
+      "Bash(CGO_ENABLED=0 go build -v ./cmd/server)"
     ],
     "deny": []
   }
