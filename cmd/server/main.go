@@ -35,23 +35,13 @@ func main() {
 
 	diContainer, err := setupContainer()
 	if err != nil {
-		_, _ = fmt.Fprintf(
-			os.Stderr,
-			"Failed to register dependencies: %v%s",
-			err,
-			NewlineConstant,
-		)
+		slog.Error("Failed to register dependencies", "error", err)
 		cancel() // Call cancel before exit to avoid exitAfterDefer
 		os.Exit(ExitCodeFailure)
 	}
 	defer func() {
 		if shutdownErr := shutdownContainer(diContainer); shutdownErr != nil {
-			_, _ = fmt.Fprintf(
-				os.Stderr,
-				"Error shutting down container: %v%s",
-				shutdownErr,
-				NewlineConstant,
-			)
+			slog.Error("Error shutting down container", "error", shutdownErr)
 		}
 	}()
 

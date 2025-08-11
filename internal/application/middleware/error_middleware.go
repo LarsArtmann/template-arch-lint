@@ -3,7 +3,7 @@ package middleware
 
 import (
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
@@ -44,7 +44,7 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 		}
 
 		if jsonErr := json.NewEncoder(w).Encode(response); jsonErr != nil {
-			log.Printf("Error encoding error response: %v", jsonErr)
+			slog.Error("Error encoding error response", "error", jsonErr)
 		}
 		return
 	}
@@ -61,11 +61,11 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 	}
 
 	if jsonErr := json.NewEncoder(w).Encode(response); jsonErr != nil {
-		log.Printf("Error encoding error response: %v", jsonErr)
+		slog.Error("Error encoding error response", "error", jsonErr)
 	}
 
 	// Log internal errors for debugging
-	log.Printf("Internal error: %v", err)
+	slog.Error("Internal server error", "error", err)
 }
 
 // ValidationErrorMiddleware specifically handles validation errors
@@ -103,7 +103,7 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Printf("Panic recovered: %v", err)
+				slog.Error("Panic recovered", "error", err)
 
 				// Convert panic to internal error
 				internalErr := errors.NewInternalError("panic recovered", nil)
@@ -115,16 +115,23 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// LoggingMiddleware logs requests and errors
+// LoggingMiddleware logs requests and errors with structured logging
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("Request: %s %s", r.Method, r.URL.Path)
+		slog.Info("HTTP request started",
+			"method", r.Method,
+			"path", r.URL.Path,
+		)
 
 		recorder := &responseRecorder{ResponseWriter: w}
 		next.ServeHTTP(recorder, r)
 
 		if recorder.statusCode >= 400 {
-			log.Printf("Error response: %d for %s %s", recorder.statusCode, r.Method, r.URL.Path)
+			slog.Warn("HTTP error response",
+				"status_code", recorder.statusCode,
+				"method", r.Method,
+				"path", r.URL.Path,
+			)
 		}
 	})
 }

@@ -3,7 +3,6 @@ package integration_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -105,7 +104,7 @@ func testHealthEndpoint(t *testing.T, router *gin.Engine) {
 		t.Errorf("Expected status 'ok', got %v", response.Status)
 	}
 
-	_, _ = fmt.Printf("✅ Health check passed: %+v\n", response)
+	t.Logf("✅ Health check passed: %+v", response)
 }
 
 // testUserCRUDOperations tests all user CRUD operations
@@ -150,7 +149,7 @@ func testUserCreation(t *testing.T, router *gin.Engine) {
 		t.Errorf("Expected status 201 for user creation, got %d", w.Code)
 		t.Errorf(ResponseBodyMsg, w.Body.String())
 	} else {
-		_, _ = fmt.Printf("✅ User creation passed: %s\n", w.Body.String())
+		t.Logf("✅ User creation passed: %s", w.Body.String())
 	}
 }
 
@@ -173,7 +172,7 @@ func testUserRetrieval(t *testing.T, router *gin.Engine) {
 		t.Errorf("Expected status 200 for user retrieval, got %d", w.Code)
 		t.Errorf(ResponseBodyMsg, w.Body.String())
 	} else {
-		_, _ = fmt.Printf("✅ User retrieval passed: %s\n", w.Body.String())
+		t.Logf("✅ User retrieval passed: %s", w.Body.String())
 	}
 }
 
@@ -191,7 +190,7 @@ func testUserListing(t *testing.T, router *gin.Engine) {
 	if w.Code != StatusOK {
 		t.Errorf("Expected status 200 for user list, got %d", w.Code)
 	} else {
-		_, _ = fmt.Printf("✅ User list passed: %s\n", w.Body.String())
+		t.Logf("✅ User list passed: %s", w.Body.String())
 	}
 }
 
@@ -225,7 +224,7 @@ func testUserUpdate(t *testing.T, router *gin.Engine) {
 		t.Errorf("Expected status 200 for user update, got %d", w.Code)
 		t.Errorf(ResponseBodyMsg, w.Body.String())
 	} else {
-		_, _ = fmt.Printf("✅ User update passed: %s\n", w.Body.String())
+		t.Logf("✅ User update passed: %s", w.Body.String())
 	}
 }
 
@@ -247,7 +246,7 @@ func testUserDeletion(t *testing.T, router *gin.Engine) {
 	if w.Code != StatusOK {
 		t.Errorf("Expected status 200 for user deletion, got %d", w.Code)
 	} else {
-		_, _ = fmt.Printf("✅ User deletion passed: %s\n", w.Body.String())
+		t.Logf("✅ User deletion passed: %s", w.Body.String())
 	}
 }
 
@@ -278,10 +277,7 @@ func testInvalidUserIDError(t *testing.T, router *gin.Engine) {
 	if w.Code != StatusBadRequest {
 		t.Errorf("Expected status 400 for invalid user ID, got %d", w.Code)
 	} else {
-		_, _ = fmt.Printf(
-			"✅ Invalid user ID error handling passed: %s\n",
-			w.Body.String(),
-		)
+		t.Logf("✅ Invalid user ID error handling passed: %s", w.Body.String())
 	}
 }
 
@@ -303,10 +299,7 @@ func testUserNotFoundError(t *testing.T, router *gin.Engine) {
 	if w.Code != StatusNotFound {
 		t.Errorf("Expected status 404 for nonexistent user, got %d", w.Code)
 	} else {
-		_, _ = fmt.Printf(
-			"✅ User not found error handling passed: %s\n",
-			w.Body.String(),
-		)
+		t.Logf("✅ User not found error handling passed: %s", w.Body.String())
 	}
 }
 
@@ -329,9 +322,6 @@ func testInvalidJSONError(t *testing.T, router *gin.Engine) {
 	if w.Code != StatusBadRequest {
 		t.Errorf("Expected status 400 for invalid JSON, got %d", w.Code)
 	} else {
-		_, _ = fmt.Printf(
-			"✅ Invalid JSON error handling passed: %s\n",
-			w.Body.String(),
-		)
+		t.Logf("✅ Invalid JSON error handling passed: %s", w.Body.String())
 	}
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/samber/do"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/application/handlers"
+	"github.com/LarsArtmann/template-arch-lint/internal/application/middleware"
 	"github.com/LarsArtmann/template-arch-lint/internal/config"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
@@ -219,19 +220,8 @@ func (c *Container) registerHTTPServer() error {
 		router := gin.New()
 
 		// Add middleware
-		router.Use(gin.Logger())
 		router.Use(gin.Recovery())
-
-		// Add custom middleware for logging
-		router.Use(func(c *gin.Context) {
-			logger.Info("Request received",
-				"method", c.Request.Method,
-				"path", c.Request.URL.Path,
-				"user_agent", c.GetHeader("User-Agent"),
-				"remote_addr", c.ClientIP(),
-			)
-			c.Next()
-		})
+		router.Use(middleware.RequestLoggingMiddleware(logger))
 
 		// Health check endpoint
 		router.GET("/health", func(c *gin.Context) {

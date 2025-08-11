@@ -179,11 +179,11 @@ func (s *UserService) FilterActiveUsers(ctx context.Context) ([]*entities.User, 
 	return activeUsers, nil
 }
 
-// GetUserEmailsWithResult demonstrates Result pattern
+// GetUserEmailsWithResult demonstrates Result pattern with Railway Oriented Programming
 func (s *UserService) GetUserEmailsWithResult(ctx context.Context) shared.Result[[]string] {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
-		return shared.NewError[[]string](errors.NewInternalError("failed to list users", err))
+		return shared.Err[[]string](errors.NewInternalError("failed to list users", err))
 	}
 
 	// Functional operation: extract emails
@@ -191,7 +191,60 @@ func (s *UserService) GetUserEmailsWithResult(ctx context.Context) shared.Result
 		return user.Email
 	})
 
-	return shared.NewResult(emails)
+	return shared.Ok(emails)
+}
+
+// CreateUserWithResult demonstrates Railway Oriented Programming
+func (s *UserService) CreateUserWithResult(ctx context.Context, id entities.UserID, email, name string) shared.Result[*entities.User] {
+	// Step 1: Validate inputs
+	if validationResult := s.validateUserInputsResult(email, name); validationResult.IsError() {
+		return shared.Err[*entities.User](validationResult.Error())
+	}
+	
+	// Step 2: Check user doesn't exist
+	if existsResult := s.checkUserNotExistsResult(ctx, email); existsResult.IsError() {
+		return shared.Err[*entities.User](existsResult.Error())
+	}
+	
+	// Step 3: Create and save user
+	return s.createAndSaveUserResult(ctx, id, email, name)
+}
+
+// validateUserInputsResult validates user inputs using Result pattern
+func (s *UserService) validateUserInputsResult(email, name string) shared.Result[struct{}] {
+	if err := s.validateEmail(email); err != nil {
+		return shared.Err[struct{}](errors.NewValidationError("email", err.Error()))
+	}
+	if err := s.validateUserName(name); err != nil {
+		return shared.Err[struct{}](errors.NewValidationError("name", err.Error()))
+	}
+	return shared.Ok(struct{}{})
+}
+
+// checkUserNotExistsResult checks if user exists using Result pattern
+func (s *UserService) checkUserNotExistsResult(ctx context.Context, email string) shared.Result[*entities.User] {
+	existingUser, err := s.userRepo.FindByEmail(ctx, email)
+	if err != nil && err != repositories.ErrUserNotFound {
+		return shared.Err[*entities.User](errors.NewInternalError("failed to check existing user", err))
+	}
+	if existingUser != nil {
+		return shared.Err[*entities.User](repositories.ErrUserAlreadyExists)
+	}
+	return shared.Ok[*entities.User](nil)
+}
+
+// createAndSaveUserResult creates and saves user using Result pattern
+func (s *UserService) createAndSaveUserResult(ctx context.Context, id entities.UserID, email, name string) shared.Result[*entities.User] {
+	user, err := entities.NewUser(id, email, name)
+	if err != nil {
+		return shared.Err[*entities.User](err)
+	}
+
+	if err := s.userRepo.Save(ctx, user); err != nil {
+		return shared.Err[*entities.User](errors.NewInternalError("failed to save user", err))
+	}
+
+	return shared.Ok(user)
 }
 
 // FindUserByEmailOption demonstrates Option pattern
@@ -223,7 +276,7 @@ func (s *UserService) BatchValidateUsers(users []*entities.User) map[entities.Us
 	return failedValidations
 }
 
-// GetUserStats demonstrates functional aggregation
+// GetUserStats demonstrates functional aggregation with lo.Reduce and lo.Ternary
 func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
@@ -235,26 +288,116 @@ func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) 
 	// Count total users
 	stats["total"] = len(users)
 
-	// Count active users (created in last 30 days)
+	// Count active users (created in last 30 days) using functional operations
 	thirtyDaysAgo := time.Now().AddDate(0, 0, -30)
 	activeCount := lo.CountBy(users, func(user *entities.User) bool {
 		return user.Created.After(thirtyDaysAgo)
 	})
 	stats["active"] = activeCount
 
-	// Count users by email domain using functional operations
+	// Extract email domains using functional operations with lo.Ternary
 	domains := lo.Map(users, func(user *entities.User, _ int) string {
 		parts := strings.Split(user.Email, "@")
-		if len(parts) > 1 {
-			return parts[1]
-		}
-		return "unknown"
+		return lo.Ternary(len(parts) > 1, parts[1], "unknown")
 	})
 
+	// Count unique domains
 	domainCounts := lo.CountValues(domains)
 	stats["domains"] = len(domainCounts)
 
+	// Calculate average days since registration using lo.Reduce
+	now := time.Now()
+	totalDays := lo.Reduce(users, func(acc int, user *entities.User, _ int) int {
+		days := int(now.Sub(user.Created).Hours() / 24)
+		// Ensure non-negative days
+		if days < 0 {
+			days = 0
+		}
+		return acc + days
+	}, 0)
+	
+	// Safe division using lo.Max to prevent divide by zero
+	userCount := lo.Max([]int{len(users), 1}) // Ensure at least 1 to prevent division by zero
+	avgDays := lo.Ternary(len(users) > 0, totalDays/userCount, 0)
+	stats["avg_days_since_registration"] = avgDays
+
 	return stats, nil
+}
+
+// GetUsersWithFilters demonstrates advanced functional programming with lo.Must
+func (s *UserService) GetUsersWithFilters(ctx context.Context, filters map[string]interface{}) ([]*entities.User, error) {
+	users, err := s.userRepo.List(ctx)
+	if err != nil {
+		return nil, errors.NewInternalError("failed to list users", err)
+	}
+
+	// Use lo.Must for safe operations that should never fail in this context
+	filteredUsers := users
+	
+	// Filter by domain if specified
+	if domain, exists := filters["domain"]; exists {
+		domainStr := lo.Must(domain.(string), "domain filter must be string")
+		filteredUsers = lo.Filter(filteredUsers, func(user *entities.User, _ int) bool {
+			parts := strings.Split(user.Email, "@")
+			return len(parts) > 1 && parts[1] == domainStr
+		})
+	}
+	
+	// Filter by active status if specified
+	if activeOnly, exists := filters["active"]; exists && lo.Must(activeOnly.(bool), "active filter must be bool") {
+		thirtyDaysAgo := time.Now().AddDate(0, 0, -30)
+		filteredUsers = lo.Filter(filteredUsers, func(user *entities.User, _ int) bool {
+			return user.Created.After(thirtyDaysAgo)
+		})
+	}
+
+	return filteredUsers, nil
+}
+
+// ValidateUserBatchWithEither demonstrates Either pattern for batch operations
+func (s *UserService) ValidateUserBatchWithEither(users []*entities.User) shared.Either[[]error, []entities.UserID] {
+	validUsers := make([]entities.UserID, 0)
+	validationErrors := make([]error, 0)
+
+	lo.ForEach(users, func(user *entities.User, _ int) {
+		if err := user.Validate(); err != nil {
+			validationErrors = append(validationErrors, err)
+		} else {
+			validUsers = append(validUsers, user.ID)
+		}
+	})
+
+	// Return either errors (if any) or valid user IDs
+	if len(validationErrors) > 0 {
+		return shared.Left[[]error, []entities.UserID](validationErrors)
+	}
+	return shared.Right[[]error, []entities.UserID](validUsers)
+}
+
+// GetUsersByEmailDomains demonstrates more complex lo operations
+func (s *UserService) GetUsersByEmailDomains(ctx context.Context, domains []string) (map[string][]*entities.User, error) {
+	users, err := s.userRepo.List(ctx)
+	if err != nil {
+		return nil, errors.NewInternalError("failed to list users", err)
+	}
+
+	// Group users by email domain using lo.GroupBy
+	usersByDomain := lo.GroupBy(users, func(user *entities.User) string {
+		parts := strings.Split(user.Email, "@")
+		return lo.Ternary(len(parts) > 1, parts[1], "unknown")
+	})
+
+	// Filter only requested domains using lo.PickByKeys
+	requestedDomainsSet := lo.SliceToMap(domains, func(domain string) (string, bool) {
+		return domain, true
+	})
+	
+	filteredUsers := lo.PickBy(usersByDomain, func(domain string, users []*entities.User) bool {
+		_, exists := requestedDomainsSet[domain]
+		return exists
+	})
+
+	return filteredUsers, nil
 }
 
 // validateEmail enforces business rules for email validation

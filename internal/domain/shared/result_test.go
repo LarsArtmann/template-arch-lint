@@ -7,9 +7,9 @@ import (
 
 func TestResult(t *testing.T) {
 	// Test successful result
-	result := NewResult("test value")
+	result := Ok("test value")
 
-	if !result.IsSuccess() {
+	if !result.IsOk() {
 		t.Error("Expected result to be successful")
 	}
 
@@ -17,30 +17,22 @@ func TestResult(t *testing.T) {
 		t.Error("Expected result not to be error")
 	}
 
-	value, err := result.Value()
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
-
+	value := result.MustGet()
 	if value != "test value" {
 		t.Errorf("Expected 'test value', got %s", value)
 	}
 
-	if result.Unwrap() != "test value" {
-		t.Errorf("Expected 'test value', got %s", result.Unwrap())
-	}
-
-	if result.UnwrapOr("default") != "test value" {
-		t.Errorf("Expected 'test value', got %s", result.UnwrapOr("default"))
+	if result.OrElse("default") != "test value" {
+		t.Errorf("Expected 'test value', got %s", result.OrElse("default"))
 	}
 }
 
 func TestResultError(t *testing.T) {
 	// Test error result
 	testErr := errors.New("test error")
-	result := NewError[string](testErr)
+	result := Err[string](testErr)
 
-	if result.IsSuccess() {
+	if result.IsOk() {
 		t.Error("Expected result not to be successful")
 	}
 
@@ -48,35 +40,13 @@ func TestResultError(t *testing.T) {
 		t.Error("Expected result to be error")
 	}
 
-	_, err := result.Value()
+	err := result.Error()
 	if err != testErr {
 		t.Errorf("Expected error %v, got %v", testErr, err)
 	}
 
-	if result.UnwrapOr("default") != "default" {
-		t.Errorf("Expected 'default', got %s", result.UnwrapOr("default"))
-	}
-}
-
-func TestResultMap(t *testing.T) {
-	// Test mapping successful result
-	result := NewResult(10)
-	mapped := result.Map(func(x int) int { return x * 2 })
-
-	if !mapped.IsSuccess() {
-		t.Error("Expected mapped result to be successful")
-	}
-
-	if mapped.Unwrap() != 20 {
-		t.Errorf("Expected 20, got %d", mapped.Unwrap())
-	}
-
-	// Test mapping error result
-	errorResult := NewError[int](errors.New("test"))
-	mappedError := errorResult.Map(func(x int) int { return x * 2 })
-
-	if !mappedError.IsError() {
-		t.Error("Expected mapped error result to be error")
+	if result.OrElse("default") != "default" {
+		t.Errorf("Expected 'default', got %s", result.OrElse("default"))
 	}
 }
 
@@ -84,20 +54,20 @@ func TestOption(t *testing.T) {
 	// Test Some option
 	option := Some("test value")
 
-	if !option.IsSome() {
+	if !option.IsPresent() {
 		t.Error("Expected option to have some value")
 	}
 
-	if option.IsNone() {
+	if option.IsAbsent() {
 		t.Error("Expected option not to be none")
 	}
 
-	if option.Unwrap() != "test value" {
-		t.Errorf("Expected 'test value', got %s", option.Unwrap())
+	if option.MustGet() != "test value" {
+		t.Errorf("Expected 'test value', got %s", option.MustGet())
 	}
 
-	if option.UnwrapOr("default") != "test value" {
-		t.Errorf("Expected 'test value', got %s", option.UnwrapOr("default"))
+	if option.OrElse("default") != "test value" {
+		t.Errorf("Expected 'test value', got %s", option.OrElse("default"))
 	}
 }
 
@@ -105,66 +75,47 @@ func TestOptionNone(t *testing.T) {
 	// Test None option
 	option := None[string]()
 
-	if option.IsSome() {
+	if option.IsPresent() {
 		t.Error("Expected option not to have value")
 	}
 
-	if !option.IsNone() {
+	if !option.IsAbsent() {
 		t.Error("Expected option to be none")
 	}
 
-	if option.UnwrapOr("default") != "default" {
-		t.Errorf("Expected 'default', got %s", option.UnwrapOr("default"))
+	if option.OrElse("default") != "default" {
+		t.Errorf("Expected 'default', got %s", option.OrElse("default"))
 	}
 }
 
-func TestOptionMap(t *testing.T) {
-	// Test mapping some option
-	option := Some(10)
-	mapped := option.Map(func(x int) int { return x * 2 })
-
-	if !mapped.IsSome() {
-		t.Error("Expected mapped option to have value")
+func TestEither(t *testing.T) {
+	// Test Right either
+	rightEither := Right[string, int](42)
+	
+	if !rightEither.IsRight() {
+		t.Error("Expected either to be right")
+	}
+	
+	if rightEither.IsLeft() {
+		t.Error("Expected either not to be left")
+	}
+	
+	if rightEither.MustRight() != 42 {
+		t.Errorf("Expected 42, got %d", rightEither.MustRight())
 	}
 
-	if mapped.Unwrap() != 20 {
-		t.Errorf("Expected 20, got %d", mapped.Unwrap())
+	// Test Left either 
+	leftEither := Left[string, int]("error")
+	
+	if !leftEither.IsLeft() {
+		t.Error("Expected either to be left")
 	}
-
-	// Test mapping none option
-	noneOption := None[int]()
-	mappedNone := noneOption.Map(func(x int) int { return x * 2 })
-
-	if !mappedNone.IsNone() {
-		t.Error("Expected mapped none option to be none")
+	
+	if leftEither.IsRight() {
+		t.Error("Expected either not to be right")
 	}
-}
-
-func TestOptionFilter(t *testing.T) {
-	// Test filtering some option with passing predicate
-	option := Some(10)
-	filtered := option.Filter(func(x int) bool { return x > 5 })
-
-	if !filtered.IsSome() {
-		t.Error("Expected filtered option to have value")
-	}
-
-	if filtered.Unwrap() != 10 {
-		t.Errorf("Expected 10, got %d", filtered.Unwrap())
-	}
-
-	// Test filtering some option with failing predicate
-	failFiltered := option.Filter(func(x int) bool { return x < 5 })
-
-	if !failFiltered.IsNone() {
-		t.Error("Expected filtered option to be none")
-	}
-
-	// Test filtering none option
-	noneOption := None[int]()
-	noneFiltered := noneOption.Filter(func(x int) bool { return x > 5 })
-
-	if !noneFiltered.IsNone() {
-		t.Error("Expected filtered none option to be none")
+	
+	if leftEither.MustLeft() != "error" {
+		t.Errorf("Expected 'error', got %s", leftEither.MustLeft())
 	}
 }
