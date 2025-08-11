@@ -19,7 +19,7 @@ lint-architecture:
     @echo "🏗️ ARCHITECTURE VALIDATION"
     @echo "Using config: {{ARCH_CONFIG}}"
     @if [ -f "{{ARCH_CONFIG}}" ]; then \
-        go-arch-lint check --config={{ARCH_CONFIG}}; \
+        go-arch-lint check --arch-file={{ARCH_CONFIG}}; \
     else \
         echo "⚠️ Config file {{ARCH_CONFIG}} not found"; \
         go-arch-lint check; \
