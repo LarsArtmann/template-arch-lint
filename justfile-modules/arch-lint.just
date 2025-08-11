@@ -7,7 +7,6 @@ GO_ARCH_LINT_VERSION := "v1.12.0"
 
 # Configuration paths (can be overridden by importing justfile)
 ARCH_CONFIG := env_var_or_default("ARCH_CONFIG", ".go-arch-lint.yml")
-REPORTS_DIR := env_var_or_default("REPORTS_DIR", "reports")
 
 # Install architecture linting tools
 install-arch-tools:
@@ -29,10 +28,10 @@ lint-architecture:
 # Generate architecture reports
 report-architecture:
     @echo "📊 Generating architecture reports..."
-    @mkdir -p {{REPORTS_DIR}}
-    @go-arch-lint check --json > {{REPORTS_DIR}}/architecture.json 2>/dev/null || true
-    @go-arch-lint graph > {{REPORTS_DIR}}/dependencies.dot 2>/dev/null || true
-    @echo "✅ Reports generated in {{REPORTS_DIR}}/"
+    @mkdir -p {{env_var_or_default("REPORTS_DIR", "reports")}}
+    @go-arch-lint check --json > {{env_var_or_default("REPORTS_DIR", "reports")}}/architecture.json 2>/dev/null || true
+    @go-arch-lint graph > {{env_var_or_default("REPORTS_DIR", "reports")}}/dependencies.dot 2>/dev/null || true
+    @echo "✅ Reports generated in {{env_var_or_default('REPORTS_DIR', 'reports')}}/"
 
 # Verify architecture setup
 verify-arch-setup:

@@ -7,7 +7,6 @@ GOLANGCI_VERSION := "v2.3.1"
 
 # Configuration paths (can be overridden by importing justfile)
 QUALITY_CONFIG := env_var_or_default("QUALITY_CONFIG", ".golangci.yml")
-REPORTS_DIR := env_var_or_default("REPORTS_DIR", "reports")
 
 # Install code quality tools
 install-quality-tools:
@@ -42,11 +41,11 @@ fix-quality:
 # Generate quality reports
 report-quality:
     @echo "📊 Generating quality reports..."
-    @mkdir -p {{REPORTS_DIR}}
-    @golangci-lint run --out-format json > {{REPORTS_DIR}}/quality.json 2>/dev/null || true
-    @golangci-lint run --out-format checkstyle > {{REPORTS_DIR}}/checkstyle.xml 2>/dev/null || true
-    @golangci-lint run --out-format junit-xml > {{REPORTS_DIR}}/junit.xml 2>/dev/null || true
-    @echo "✅ Quality reports generated in {{REPORTS_DIR}}/"
+    @mkdir -p {{env_var_or_default("REPORTS_DIR", "reports")}}
+    @golangci-lint run --out-format json > {{env_var_or_default("REPORTS_DIR", "reports")}}/quality.json 2>/dev/null || true
+    @golangci-lint run --out-format checkstyle > {{env_var_or_default("REPORTS_DIR", "reports")}}/checkstyle.xml 2>/dev/null || true
+    @golangci-lint run --out-format junit-xml > {{env_var_or_default("REPORTS_DIR", "reports")}}/junit.xml 2>/dev/null || true
+    @echo "✅ Quality reports generated in {{env_var_or_default('REPORTS_DIR', 'reports')}}/"
 
 # Verify quality setup  
 verify-quality-setup:
