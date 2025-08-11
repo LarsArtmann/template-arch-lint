@@ -10,6 +10,16 @@ import (
 // ErrorCode represents a typed error code
 type ErrorCode string
 
+// ErrorDetails represents strongly typed error details
+type ErrorDetails struct {
+	Field    string `json:"field,omitempty"`
+	Resource string `json:"resource,omitempty"`
+	ID       string `json:"id,omitempty"`
+	Value    string `json:"value,omitempty"`
+	Reason   string `json:"reason,omitempty"`
+	Extra    map[string]string `json:"extra,omitempty"`
+}
+
 const (
 	// Validation error codes
 	ValidationErrorCode ErrorCode = "VALIDATION_ERROR"
@@ -29,7 +39,7 @@ type DomainError interface {
 	error
 	Code() ErrorCode
 	HTTPStatus() int
-	Details() map[string]interface{}
+	Details() ErrorDetails
 }
 
 // ValidationError represents validation failures in domain entities
@@ -37,7 +47,7 @@ type ValidationError struct {
 	code    ErrorCode
 	message string
 	field   string
-	details map[string]interface{}
+	details ErrorDetails
 }
 
 // NewValidationError creates a new validation error
@@ -46,8 +56,8 @@ func NewValidationError(field, message string) *ValidationError {
 		code:    ValidationErrorCode,
 		message: message,
 		field:   field,
-		details: map[string]interface{}{
-			"field": field,
+		details: ErrorDetails{
+			Field: field,
 		},
 	}
 }
@@ -58,8 +68,8 @@ func NewRequiredFieldError(field string) *ValidationError {
 		code:    RequiredFieldCode,
 		message: fmt.Sprintf("%s cannot be empty", field),
 		field:   field,
-		details: map[string]interface{}{
-			"field": field,
+		details: ErrorDetails{
+			Field: field,
 		},
 	}
 }
@@ -76,7 +86,7 @@ func (e *ValidationError) HTTPStatus() int {
 	return http.StatusBadRequest
 }
 
-func (e *ValidationError) Details() map[string]interface{} {
+func (e *ValidationError) Details() ErrorDetails {
 	return e.details
 }
 
@@ -90,7 +100,7 @@ type NotFoundError struct {
 	message  string
 	resource string
 	id       string
-	details  map[string]interface{}
+	details  ErrorDetails
 }
 
 // NewNotFoundError creates a new not found error
@@ -100,9 +110,9 @@ func NewNotFoundError(resource, id string) *NotFoundError {
 		message:  fmt.Sprintf("%s with id '%s' not found", resource, id),
 		resource: resource,
 		id:       id,
-		details: map[string]interface{}{
-			"resource": resource,
-			"id":       id,
+		details: ErrorDetails{
+			Resource: resource,
+			ID:       id,
 		},
 	}
 }
@@ -119,7 +129,7 @@ func (e *NotFoundError) HTTPStatus() int {
 	return http.StatusNotFound
 }
 
-func (e *NotFoundError) Details() map[string]interface{} {
+func (e *NotFoundError) Details() ErrorDetails {
 	return e.details
 }
 
@@ -135,15 +145,11 @@ func (e *NotFoundError) ID() string {
 type ConflictError struct {
 	code    ErrorCode
 	message string
-	details map[string]interface{}
+	details ErrorDetails
 }
 
 // NewConflictError creates a new conflict error
-func NewConflictError(message string, details map[string]interface{}) *ConflictError {
-	if details == nil {
-		details = make(map[string]interface{})
-	}
-
+func NewConflictError(message string, details ErrorDetails) *ConflictError {
 	return &ConflictError{
 		code:    ConflictErrorCode,
 		message: message,
@@ -163,7 +169,7 @@ func (e *ConflictError) HTTPStatus() int {
 	return http.StatusConflict
 }
 
-func (e *ConflictError) Details() map[string]interface{} {
+func (e *ConflictError) Details() ErrorDetails {
 	return e.details
 }
 
@@ -172,7 +178,7 @@ type InternalError struct {
 	code    ErrorCode
 	message string
 	cause   error
-	details map[string]interface{}
+	details ErrorDetails
 }
 
 // NewInternalError creates a new internal error
@@ -181,7 +187,7 @@ func NewInternalError(message string, cause error) *InternalError {
 		code:    InternalErrorCode,
 		message: message,
 		cause:   cause,
-		details: make(map[string]interface{}),
+		details: ErrorDetails{},
 	}
 }
 
@@ -200,7 +206,7 @@ func (e *InternalError) HTTPStatus() int {
 	return http.StatusInternalServerError
 }
 
-func (e *InternalError) Details() map[string]interface{} {
+func (e *InternalError) Details() ErrorDetails {
 	return e.details
 }
 

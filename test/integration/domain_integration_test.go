@@ -190,7 +190,16 @@ func runUserListAndDeletionTests(t *testing.T, ctx context.Context, userService 
 
 // TestValueObjectsIntegration tests value objects in isolation
 func TestValueObjectsIntegration(t *testing.T) {
-	// Test Email value object
+	testEmailValueObject(t)
+	testUserNameValueObject(t)
+	testUserIDValueObject(t)
+}
+
+// testEmailValueObject tests the Email value object behavior
+func testEmailValueObject(t *testing.T) {
+	t.Helper()
+	
+	// Test valid email creation
 	email, err := values.NewEmail("test@example.com")
 	if err != nil {
 		t.Fatalf("Failed to create email: %v", err)
@@ -204,13 +213,18 @@ func TestValueObjectsIntegration(t *testing.T) {
 		t.Errorf("Expected local part test, got %s", email.LocalPart())
 	}
 
-	// Test invalid email
+	// Test invalid email validation
 	_, err = values.NewEmail("invalid-email")
 	if err == nil {
 		t.Error("Expected validation error for invalid email")
 	}
+}
 
-	// Test UserName value object
+// testUserNameValueObject tests the UserName value object behavior
+func testUserNameValueObject(t *testing.T) {
+	t.Helper()
+	
+	// Test valid username creation
 	username, err := values.NewUserName("validuser123")
 	if err != nil {
 		t.Fatalf("Failed to create username: %v", err)
@@ -220,13 +234,25 @@ func TestValueObjectsIntegration(t *testing.T) {
 		t.Errorf("Expected validuser123, got %s", username.Value())
 	}
 
-	// Test reserved username
+	// Test reserved username validation
 	_, err = values.NewUserName("admin")
 	if err == nil {
 		t.Error("Expected validation error for reserved username")
 	}
+}
 
-	// Test UserID value object
+// testUserIDValueObject tests the UserID value object behavior
+func testUserIDValueObject(t *testing.T) {
+	t.Helper()
+	
+	testGeneratedUserID(t)
+	testCustomUserID(t)
+}
+
+// testGeneratedUserID tests generated user ID behavior
+func testGeneratedUserID(t *testing.T) {
+	t.Helper()
+	
 	userID, err := values.GenerateUserID()
 	if err != nil {
 		t.Fatalf("Failed to generate user ID: %v", err)
@@ -239,8 +265,12 @@ func TestValueObjectsIntegration(t *testing.T) {
 	if !userID.IsGenerated() {
 		t.Error("Generated user ID should be marked as generated")
 	}
+}
 
-	// Test custom user ID
+// testCustomUserID tests custom user ID behavior
+func testCustomUserID(t *testing.T) {
+	t.Helper()
+	
 	customID, err := values.NewUserID("custom_user_123")
 	if err != nil {
 		t.Fatalf("Failed to create custom user ID: %v", err)
@@ -255,8 +285,18 @@ func TestValueObjectsIntegration(t *testing.T) {
 func TestRepositoryIntegration(t *testing.T) {
 	ctx := context.Background()
 	repo := memrepos.NewInMemoryUserRepository()
+	userID, user := setupTestUserEntity(t)
 
-	// Create user with value objects
+	testRepositorySaveOperation(t, ctx, repo, user)
+	testRepositoryFindOperations(t, ctx, repo, userID)
+	testRepositoryListOperation(t, ctx, repo)
+	testRepositoryDeleteOperation(t, ctx, repo, userID)
+}
+
+// setupTestUserEntity creates a test user entity for repository testing
+func setupTestUserEntity(t *testing.T) (values.UserID, *entities.User) {
+	t.Helper()
+	
 	userID, err := values.GenerateUserID()
 	if err != nil {
 		t.Fatalf("Failed to generate user ID: %v", err)
@@ -265,13 +305,23 @@ func TestRepositoryIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create user entity: %v", err)
 	}
+	return userID, user
+}
 
-	// Test Save
-	err = repo.Save(ctx, user)
+// testRepositorySaveOperation tests the Save repository operation
+func testRepositorySaveOperation(t *testing.T, ctx context.Context, repo repositories.UserRepository, user *entities.User) {
+	t.Helper()
+	
+	err := repo.Save(ctx, user)
 	if err != nil {
 		t.Fatalf("Failed to save user: %v", err)
 	}
+}
 
+// testRepositoryFindOperations tests FindByID and FindByEmail operations
+func testRepositoryFindOperations(t *testing.T, ctx context.Context, repo repositories.UserRepository, userID values.UserID) {
+	t.Helper()
+	
 	// Test FindByID
 	foundUser, err := repo.FindByID(ctx, userID)
 	if err != nil {
@@ -291,8 +341,12 @@ func TestRepositoryIntegration(t *testing.T) {
 	if !foundByEmail.ID.Equals(userID) {
 		t.Error("Found user ID doesn't match when searched by email")
 	}
+}
 
-	// Test List
+// testRepositoryListOperation tests the List repository operation
+func testRepositoryListOperation(t *testing.T, ctx context.Context, repo repositories.UserRepository) {
+	t.Helper()
+	
 	users, err := repo.List(ctx)
 	if err != nil {
 		t.Fatalf("Failed to list users: %v", err)
@@ -301,9 +355,13 @@ func TestRepositoryIntegration(t *testing.T) {
 	if len(users) != 1 {
 		t.Errorf("Expected 1 user, got %d", len(users))
 	}
+}
 
-	// Test Delete
-	err = repo.Delete(ctx, userID)
+// testRepositoryDeleteOperation tests the Delete repository operation
+func testRepositoryDeleteOperation(t *testing.T, ctx context.Context, repo repositories.UserRepository, userID values.UserID) {
+	t.Helper()
+	
+	err := repo.Delete(ctx, userID)
 	if err != nil {
 		t.Fatalf("Failed to delete user: %v", err)
 	}

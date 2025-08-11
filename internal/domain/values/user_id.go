@@ -135,7 +135,7 @@ func (u UserID) Value() (driver.Value, error) {
 }
 
 // Scan implements the sql.Scanner interface for database retrieval
-func (u *UserID) Scan(value interface{}) error {
+func (u *UserID) Scan(value any) error {
 	if value == nil {
 		*u = UserID{}
 		return nil

@@ -19,6 +19,27 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
+// Test response types to replace interface{} usage
+type ErrorResponse struct {
+	Error string `json:"error"`
+	Code  string `json:"code,omitempty"`
+}
+
+type UserResponse struct {
+	ID    string `json:"id"`
+	Email string `json:"email"`
+	Name  string `json:"name"`
+}
+
+type SuccessResponse struct {
+	Message string `json:"message"`
+}
+
+type ListUsersResponse struct {
+	Users []UserResponse `json:"users"`
+	Total int            `json:"total"`
+}
+
 // MockUserRepository implements repositories.UserRepository for testing
 type MockUserRepository struct {
 	users       map[string]*entities.User
@@ -175,10 +196,10 @@ var _ = Describe("UserHandler", func() {
 				// Then
 				Expect(recorder.Code).To(Equal(http.StatusBadRequest))
 
-				var response map[string]interface{}
+				var response ErrorResponse
 				err := json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())
-				Expect(response["error"]).To(Equal("Invalid request payload"))
+				Expect(response.Error).To(Equal("Invalid request payload"))
 			})
 
 			It("should return error for missing required fields", func() {
@@ -243,10 +264,10 @@ var _ = Describe("UserHandler", func() {
 				// Then
 				Expect(recorder.Code).To(Equal(http.StatusBadRequest))
 
-				var response map[string]interface{}
+				var response ErrorResponse
 				err = json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())
-				Expect(response["error"]).To(Equal("Invalid user ID format"))
+				Expect(response.Error).To(Equal("Invalid user ID format"))
 			})
 		})
 	})
@@ -364,10 +385,10 @@ var _ = Describe("UserHandler", func() {
 				// Then
 				Expect(recorder.Code).To(Equal(http.StatusOK))
 
-				var response map[string]interface{}
+				var response SuccessResponse
 				err := json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())
-				Expect(response["message"]).To(Equal("User deleted successfully"))
+				Expect(response.Message).To(Equal("User deleted successfully"))
 			})
 		})
 	})
@@ -394,10 +415,10 @@ var _ = Describe("UserHandler", func() {
 				// Then
 				Expect(recorder.Code).To(Equal(http.StatusOK))
 
-				var response map[string]interface{}
+				var response ListUsersResponse
 				err := json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())
-				Expect(response["total"]).To(Equal(float64(3)))
+				Expect(response.Total).To(Equal(3))
 			})
 		})
 	})

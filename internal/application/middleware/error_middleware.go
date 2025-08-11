@@ -11,10 +11,10 @@ import (
 
 // ErrorResponse represents a structured error response
 type ErrorResponse struct {
-	Error   string                 `json:"error"`
-	Code    errors.ErrorCode       `json:"code"`
-	Message string                 `json:"message"`
-	Details map[string]interface{} `json:"details,omitempty"`
+	Error   string               `json:"error"`
+	Code    errors.ErrorCode     `json:"code"`
+	Message string               `json:"message"`
+	Details errors.ErrorDetails `json:"details,omitempty"`
 }
 
 // ErrorHandler wraps a handler and provides structured error handling
@@ -55,8 +55,8 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 		Error:   "internal_error",
 		Code:    errors.InternalErrorCode,
 		Message: "An internal server error occurred",
-		Details: map[string]interface{}{
-			"original_error": err.Error(),
+		Details: errors.ErrorDetails{
+			Reason: err.Error(),
 		},
 	}
 

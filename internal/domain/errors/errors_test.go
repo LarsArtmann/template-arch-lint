@@ -68,9 +68,9 @@ func TestNotFoundError(t *testing.T) {
 }
 
 func TestConflictError(t *testing.T) {
-	details := map[string]interface{}{
-		"field": "email",
-		"value": "test@example.com",
+	details := ErrorDetails{
+		Field: "email",
+		Value: "test@example.com",
 	}
 	err := NewConflictError("email already exists", details)
 
@@ -87,8 +87,8 @@ func TestConflictError(t *testing.T) {
 		t.Errorf("Expected message '%s', got %s", expectedMessage, err.Error())
 	}
 
-	if err.Details()["field"] != "email" {
-		t.Errorf("Expected details field 'email', got %v", err.Details()["field"])
+	if err.Details().Field != "email" {
+		t.Errorf("Expected details field 'email', got %v", err.Details().Field)
 	}
 }
 
@@ -117,7 +117,7 @@ func TestInternalError(t *testing.T) {
 func TestErrorTypeAssertions(t *testing.T) {
 	validationErr := NewValidationError("email", "invalid")
 	notFoundErr := NewNotFoundError("user", "123")
-	conflictErr := NewConflictError("conflict", nil)
+	conflictErr := NewConflictError("conflict", ErrorDetails{})
 	internalErr := NewInternalError("internal", nil)
 
 	// Test IsDomainError

@@ -18,12 +18,42 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/container"
 )
 
+const (
+	// ChannelBufferSize represents the buffer size for error channels
+	ChannelBufferSize = 1
+	// ExitCodeFailure represents the exit code for application failure
+	ExitCodeFailure = 1
+	// ErrorConstant represents the repeated string literal for error logging
+	ErrorConstant = "error"
+	// NewlineConstant represents the newline character constant
+	NewlineConstant = "\n"
+)
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	diContainer := setupContainer()
-	defer shutdownContainer(diContainer)
+	diContainer, err := setupContainer()
+	if err != nil {
+		_, _ = fmt.Fprintf(
+			os.Stderr,
+			"Failed to register dependencies: %v%s",
+			err,
+			NewlineConstant,
+		)
+		cancel() // Call cancel before exit to avoid exitAfterDefer
+		os.Exit(ExitCodeFailure)
+	}
+	defer func() {
+		if shutdownErr := shutdownContainer(diContainer); shutdownErr != nil {
+			_, _ = fmt.Fprintf(
+				os.Stderr,
+				"Error shutting down container: %v%s",
+				shutdownErr,
+				NewlineConstant,
+			)
+		}
+	}()
 
 	cfg, logger, router := getDependencies(diContainer)
 	logServerStart(logger, cfg)
@@ -31,28 +61,37 @@ func main() {
 	server := createHTTPServer(cfg, router)
 	serverErrors := startServer(server, logger)
 	
-	runServerWithGracefulShutdown(ctx, server, serverErrors, logger, cfg)
+	err = runServerWithGracefulShutdown(
+		ctx,
+		server,
+		serverErrors,
+		logger,
+		cfg,
+	)
+	if err != nil {
+		cancel() // Call cancel before exit to avoid exitAfterDefer
+		os.Exit(ExitCodeFailure)
+	}
 }
 
 // setupContainer creates and registers all dependencies
-func setupContainer() *container.Container {
+func setupContainer() (*container.Container, error) {
 	diContainer := container.New()
 	if err := diContainer.RegisterAll(); err != nil {
-		fmt.Printf("Failed to register dependencies: %v\n", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("failed to register dependencies: %w", err)
 	}
-	return diContainer
+	return diContainer, nil
 }
 
 // shutdownContainer safely shuts down the DI container
-func shutdownContainer(diContainer *container.Container) {
-	if err := diContainer.Shutdown(); err != nil {
-		fmt.Printf("Error shutting down container: %v\n", err)
-	}
+func shutdownContainer(diContainer *container.Container) error {
+	return diContainer.Shutdown()
 }
 
 // getDependencies extracts required dependencies from the container
-func getDependencies(diContainer *container.Container) (*config.Config, *slog.Logger, *gin.Engine) {
+func getDependencies(
+	diContainer *container.Container,
+) (*config.Config, *slog.Logger, *gin.Engine) {
 	injector := diContainer.GetInjector()
 	cfg := do.MustInvoke[*config.Config](injector)
 	logger := do.MustInvoke[*slog.Logger](injector)
@@ -84,7 +123,7 @@ func createHTTPServer(cfg *config.Config, router *gin.Engine) *http.Server {
 
 // startServer starts the HTTP server in a goroutine
 func startServer(server *http.Server, logger *slog.Logger) chan error {
-	serverErrors := make(chan error, 1)
+	serverErrors := make(chan error, ChannelBufferSize)
 	go func() {
 		logger.Info("Server listening", "address", server.Addr)
 		serverErrors <- server.ListenAndServe()
@@ -93,37 +132,53 @@ func startServer(server *http.Server, logger *slog.Logger) chan error {
 }
 
 // runServerWithGracefulShutdown handles server lifecycle and graceful shutdown
-func runServerWithGracefulShutdown(ctx context.Context, server *http.Server, serverErrors chan error, logger *slog.Logger, cfg *config.Config) {
-	shutdown := make(chan os.Signal, 1)
+func runServerWithGracefulShutdown(
+	ctx context.Context,
+	server *http.Server,
+	serverErrors chan error,
+	logger *slog.Logger,
+	cfg *config.Config,
+) error {
+	shutdown := make(chan os.Signal, ChannelBufferSize)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
 	select {
 	case err := <-serverErrors:
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Error("Server failed to start", "error", err)
-			os.Exit(1)
+			logger.Error("Server failed to start", ErrorConstant, err)
+			return err
 		}
 	case sig := <-shutdown:
 		logger.Info("Graceful shutdown initiated", "signal", sig.String())
-		performGracefulShutdown(ctx, server, logger, cfg)
+		return performGracefulShutdown(ctx, server, logger, cfg)
 	}
+	return nil
 }
 
 // performGracefulShutdown handles the graceful shutdown process
-func performGracefulShutdown(ctx context.Context, server *http.Server, logger *slog.Logger, cfg *config.Config) {
-	shutdownCtx, shutdownCancel := context.WithTimeout(ctx, cfg.Server.GracefulShutdownTimeout)
+func performGracefulShutdown(
+	ctx context.Context,
+	server *http.Server,
+	logger *slog.Logger,
+	cfg *config.Config,
+) error {
+	shutdownCtx, shutdownCancel := context.WithTimeout(
+		ctx,
+		cfg.Server.GracefulShutdownTimeout,
+	)
 	defer shutdownCancel()
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
-		logger.Error("Failed to shutdown server gracefully", "error", err)
+		logger.Error("Failed to shutdown server gracefully", ErrorConstant, err)
 		
-		if err := server.Close(); err != nil {
-			logger.Error("Failed to close server", "error", err)
+		if closeErr := server.Close(); closeErr != nil {
+			logger.Error("Failed to close server", ErrorConstant, closeErr)
 		}
-		os.Exit(1)
+		return err
 	}
 
 	logger.Info("Server shutdown completed successfully")
+	return nil
 }
 
 // init sets up initial configuration before main runs

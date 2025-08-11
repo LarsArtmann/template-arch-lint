@@ -12,8 +12,8 @@ import (
 var ErrUserNotFound = errors.NewNotFoundError("user", "")
 
 // ErrUserAlreadyExists is returned when a user already exists
-var ErrUserAlreadyExists = errors.NewConflictError("user already exists", map[string]interface{}{
-	"resource": "user",
+var ErrUserAlreadyExists = errors.NewConflictError("user already exists", errors.ErrorDetails{
+	Resource: "user",
 })
 
 // UserRepository defines the contract for user data persistence
