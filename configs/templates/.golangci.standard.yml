@@ -1,5 +1,6 @@
 # 📝 STANDARD QUALITY CONFIGURATION
 # Balanced approach - Essential linters for most projects
+version: "2"
 
 run:
   timeout: 5m
@@ -7,7 +8,6 @@ run:
   go: "1.23"
 
 linters:
-  default: none
   enable:
     # Essential Error Handling
     - errcheck       # Unchecked errors
@@ -22,13 +22,14 @@ linters:
     # Security Basics
     - gosec          # Security audit
     
-    # Formatting
-    - gofmt          # Standard formatting
-    - goimports      # Import formatting
-    
     # Code Quality
     - goconst        # Repeated constants
     - misspell       # Spelling errors
+
+formatters:
+  enable:
+    - gofmt          # Standard formatting
+    - goimports      # Import formatting
 
 linters-settings:
   gosec:

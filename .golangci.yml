@@ -3,6 +3,7 @@
 #
 # This configuration enforces the highest standards of Go code quality
 # Designed for mission-critical production systems with zero defect tolerance
+version: "2"
 
 run:
   timeout: 5m
@@ -14,7 +15,6 @@ run:
 
 # 🔥 LINTERS - Maximum enforcement (essential set)
 linters:
-  default: none
   enable:
     # 🚨 TYPE SAFETY ENFORCEMENT
     - forbidigo      # Custom forbidden patterns

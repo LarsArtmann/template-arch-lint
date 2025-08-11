@@ -1,5 +1,6 @@
 # 🔥 STRICT QUALITY CONFIGURATION
 # Maximum enforcement - Zero tolerance for violations
+version: "2"
 
 run:
   timeout: 10m
@@ -8,7 +9,6 @@ run:
   issues-exit-code: 1
 
 linters:
-  default: none  
   enable:
     # Type Safety Enforcement
     - forbidigo      # Custom forbidden patterns
@@ -41,7 +41,8 @@ linters:
     - unused         # Unused code
     - whitespace     # Trailing whitespace
     
-    # Formatting
+formatters:
+  enable:
     - gofmt          # Standard formatting
     - goimports      # Import formatting
 
