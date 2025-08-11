@@ -1,5 +1,5 @@
 // Integration test to demonstrate DDD patterns working together
-package domain_test
+package integration_test
 
 import (
 	"context"

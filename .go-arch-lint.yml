@@ -163,6 +163,8 @@ exclude:
   
   # Test files and directories
   - "**/*_test.go"
+  - "*_test.go"
+  - "integration_test.go"
   - "**/testdata/**"
   - "**/test/**"
   - "**/tests/**"

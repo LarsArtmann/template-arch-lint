@@ -5,9 +5,8 @@
 # Tool version
 GO_ARCH_LINT_VERSION := "v1.12.0"
 
-# Configuration paths (can be overridden)
+# Configuration paths (can be overridden by importing justfile)
 ARCH_CONFIG := env_var_or_default("ARCH_CONFIG", ".go-arch-lint.yml")
-REPORTS_DIR := env_var_or_default("REPORTS_DIR", "./reports")
 
 # Install architecture linting tools
 install-arch-tools:

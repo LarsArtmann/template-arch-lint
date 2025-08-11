@@ -96,8 +96,8 @@ func TestConfigDefaults(t *testing.T) {
 	}
 
 	// Test database defaults
-	if config.Database.Driver != "sqlite" {
-		t.Errorf("Expected default database driver 'sqlite', got '%s'", config.Database.Driver)
+	if config.Database.Driver != "sqlite3" {
+		t.Errorf("Expected default database driver 'sqlite3', got '%s'", config.Database.Driver)
 	}
 	if config.Database.DSN != "./app.db" {
 		t.Errorf("Expected default DSN './app.db', got '%s'", config.Database.DSN)
@@ -134,7 +134,7 @@ func TestConfigValidation(t *testing.T) {
 					Port: 8080,
 				},
 				Database: DatabaseConfig{
-					Driver: "sqlite",
+					Driver: "sqlite3",
 					DSN:    "./test.db",
 				},
 				Logging: LoggingConfig{
@@ -158,7 +158,7 @@ func TestConfigValidation(t *testing.T) {
 					Port: 0, // Invalid port
 				},
 				Database: DatabaseConfig{
-					Driver: "sqlite",
+					Driver: "sqlite3",
 					DSN:    "./test.db",
 				},
 				Logging: LoggingConfig{
