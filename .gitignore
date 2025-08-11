@@ -57,3 +57,7 @@ vendor/
 .env
 .env.local
 .env.*.local
+
+# Database files
+*.db
+app.db

@@ -129,7 +129,7 @@ func setDefaults() {
 	viper.SetDefault("server.graceful_shutdown_timeout", "30s")
 
 	// Database defaults
-	viper.SetDefault("database.driver", "sqlite")
+	viper.SetDefault("database.driver", "sqlite3")
 	viper.SetDefault("database.dsn", "./app.db")
 	viper.SetDefault("database.max_open_conns", 25)
 	viper.SetDefault("database.max_idle_conns", 5)

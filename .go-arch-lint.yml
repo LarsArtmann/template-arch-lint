@@ -166,6 +166,7 @@ exclude:
   - "**/testdata/**"
   - "**/test/**"
   - "**/tests/**"
+  - "test/**"
   
   # Build and vendor
   - "**/vendor/**"
