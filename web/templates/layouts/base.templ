@@ -1,0 +1,169 @@
+package layouts
+
+// BaseLayout provides the main HTML structure for all pages
+templ BaseLayout(title string, content templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title } - User Management System</title>
+			
+			<!-- TailwindCSS CDN -->
+			<script src="https://cdn.tailwindcss.com"></script>
+			
+			<!-- HTMX CDN -->
+			<script src="https://unpkg.com/htmx.org@2.0.3" integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" crossorigin="anonymous"></script>
+			
+			<!-- Heroicons for beautiful icons -->
+			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/heroicons/2.0.18/index.min.css"/>
+			
+			<!-- Custom Styles -->
+			<style>
+				.loading {
+					@apply opacity-50 pointer-events-none;
+				}
+				
+				.htmx-indicator {
+					display: none;
+				}
+				
+				.htmx-request .htmx-indicator {
+					display: inline;
+				}
+				
+				.htmx-request.loading {
+					@apply opacity-50;
+				}
+			</style>
+		</head>
+		<body class="bg-gray-50 min-h-screen">
+			<!-- Navigation -->
+			@Navigation()
+			
+			<!-- Main Content -->
+			<main class="container mx-auto px-4 py-8">
+				@content
+			</main>
+			
+			<!-- Toast Container for notifications -->
+			<div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+			
+			<!-- Loading Indicator -->
+			<div id="loading-indicator" class="htmx-indicator fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg">
+				<div class="flex items-center space-x-2">
+					<svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+					</svg>
+					<span>Loading...</span>
+				</div>
+			</div>
+			
+			<!-- HTMX Config -->
+			<script>
+				// Global HTMX configuration
+				htmx.config.defaultSwapStyle = 'outerHTML';
+				htmx.config.defaultSwapDelay = 0;
+				htmx.config.defaultSettleDelay = 20;
+				
+				// Custom HTMX event listeners
+				document.body.addEventListener('htmx:beforeRequest', function(evt) {
+					document.getElementById('loading-indicator').style.display = 'block';
+				});
+				
+				document.body.addEventListener('htmx:afterRequest', function(evt) {
+					document.getElementById('loading-indicator').style.display = 'none';
+				});
+				
+				// Toast notification system
+				window.showToast = function(message, type = 'success') {
+					const toast = document.createElement('div');
+					toast.className = `toast px-4 py-2 rounded-lg shadow-lg text-white ${
+						type === 'success' ? 'bg-green-500' : 
+						type === 'error' ? 'bg-red-500' : 
+						type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+					}`;
+					toast.textContent = message;
+					
+					document.getElementById('toast-container').appendChild(toast);
+					
+					// Auto remove after 3 seconds
+					setTimeout(() => {
+						toast.remove();
+					}, 3000);
+				};
+				
+				// Handle successful HTMX responses
+				document.body.addEventListener('htmx:afterSwap', function(evt) {
+					if (evt.detail.xhr.status === 200 || evt.detail.xhr.status === 201) {
+						const action = evt.detail.elt.getAttribute('hx-post') ? 'created' : 
+									   evt.detail.elt.getAttribute('hx-put') ? 'updated' : 
+									   evt.detail.elt.getAttribute('hx-delete') ? 'deleted' : 'completed';
+						if (action !== 'completed') {
+							showToast(`User ${action} successfully!`);
+						}
+					}
+				});
+				
+				// Handle HTMX errors
+				document.body.addEventListener('htmx:responseError', function(evt) {
+					showToast('An error occurred. Please try again.', 'error');
+				});
+			</script>
+		</body>
+	</html>
+}
+
+// Navigation component for consistent navigation across pages
+templ Navigation() {
+	<nav class="bg-white shadow-sm border-b border-gray-200">
+		<div class="container mx-auto px-4">
+			<div class="flex justify-between items-center h-16">
+				<!-- Logo/Brand -->
+				<div class="flex items-center space-x-4">
+					<h1 class="text-xl font-bold text-gray-900">User Management</h1>
+				</div>
+				
+				<!-- Navigation Links -->
+				<div class="hidden md:flex items-center space-x-8">
+					<a href="/users" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+						Users
+					</a>
+					<a href="/users/new" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+						Add User
+					</a>
+				</div>
+				
+				<!-- Mobile menu button -->
+				<div class="md:hidden">
+					<button type="button" class="text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600" 
+							onclick="toggleMobileMenu()">
+						<svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+						</svg>
+					</button>
+				</div>
+			</div>
+			
+			<!-- Mobile menu -->
+			<div id="mobile-menu" class="hidden md:hidden pb-4">
+				<div class="space-y-1">
+					<a href="/users" class="block text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-base font-medium">
+						Users
+					</a>
+					<a href="/users/new" class="block bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-base font-medium">
+						Add User
+					</a>
+				</div>
+			</div>
+		</div>
+	</nav>
+	
+	<script>
+		function toggleMobileMenu() {
+			const menu = document.getElementById('mobile-menu');
+			menu.classList.toggle('hidden');
+		}
+	</script>
+}

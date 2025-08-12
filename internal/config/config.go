@@ -10,10 +10,11 @@ import (
 
 // Config represents the application configuration
 type Config struct {
-	Server   ServerConfig   `mapstructure:"server" validate:"required"`
-	Database DatabaseConfig `mapstructure:"database" validate:"required"`
-	Logging  LoggingConfig  `mapstructure:"logging" validate:"required"`
-	App      AppConfig      `mapstructure:"app" validate:"required"`
+	Server       ServerConfig       `mapstructure:"server" validate:"required"`
+	Database     DatabaseConfig     `mapstructure:"database" validate:"required"`
+	Logging      LoggingConfig      `mapstructure:"logging" validate:"required"`
+	App          AppConfig          `mapstructure:"app" validate:"required"`
+	Observability ObservabilityConfig `mapstructure:"observability" validate:"required"`
 }
 
 // ServerConfig contains HTTP server configuration
@@ -49,6 +50,64 @@ type AppConfig struct {
 	Version     string `mapstructure:"version" validate:"required"`
 	Environment string `mapstructure:"environment" validate:"required,oneof=development staging production"`
 	Debug       bool   `mapstructure:"debug"`
+}
+
+// ObservabilityConfig contains OpenTelemetry configuration
+type ObservabilityConfig struct {
+	Enabled           bool                     `mapstructure:"enabled"`
+	ServiceName       string                   `mapstructure:"service_name" validate:"required"`
+	ServiceVersion    string                   `mapstructure:"service_version" validate:"required"`
+	Environment       string                   `mapstructure:"environment" validate:"required"`
+	Tracing           TracingConfig            `mapstructure:"tracing"`
+	Metrics           MetricsConfig            `mapstructure:"metrics"`
+	Exporters         ExportersConfig          `mapstructure:"exporters"`
+	SamplingRate      float64                  `mapstructure:"sampling_rate" validate:"min=0,max=1"`
+}
+
+// TracingConfig contains tracing-specific configuration
+type TracingConfig struct {
+	Enabled     bool   `mapstructure:"enabled"`
+	Endpoint    string `mapstructure:"endpoint"`
+	Headers     map[string]string `mapstructure:"headers"`
+	HTTPDetails bool   `mapstructure:"http_details"`
+	DBQueries   bool   `mapstructure:"db_queries"`
+}
+
+// MetricsConfig contains metrics-specific configuration
+type MetricsConfig struct {
+	Enabled         bool              `mapstructure:"enabled"`
+	Endpoint        string            `mapstructure:"endpoint"`
+	Headers         map[string]string `mapstructure:"headers"`
+	PushInterval    time.Duration     `mapstructure:"push_interval"`
+	BusinessMetrics bool              `mapstructure:"business_metrics"`
+}
+
+// ExportersConfig contains configuration for different exporters
+type ExportersConfig struct {
+	Prometheus PrometheusConfig `mapstructure:"prometheus"`
+	OTLP       OTLPConfig       `mapstructure:"otlp"`
+	Jaeger     JaegerConfig     `mapstructure:"jaeger"`
+}
+
+// PrometheusConfig contains Prometheus exporter configuration
+type PrometheusConfig struct {
+	Enabled bool   `mapstructure:"enabled"`
+	Port    int    `mapstructure:"port" validate:"min=1,max=65535"`
+	Path    string `mapstructure:"path"`
+}
+
+// OTLPConfig contains OTLP exporter configuration
+type OTLPConfig struct {
+	Enabled   bool              `mapstructure:"enabled"`
+	Endpoint  string            `mapstructure:"endpoint"`
+	Headers   map[string]string `mapstructure:"headers"`
+	Insecure  bool              `mapstructure:"insecure"`
+}
+
+// JaegerConfig contains Jaeger exporter configuration
+type JaegerConfig struct {
+	Enabled  bool   `mapstructure:"enabled"`
+	Endpoint string `mapstructure:"endpoint"`
 }
 
 // LoadConfig loads configuration from file and environment variables
@@ -105,7 +164,10 @@ func setupEnvironmentBindings() error {
 	if err := bindLoggingEnvVars(); err != nil {
 		return err
 	}
-	return bindAppEnvVars()
+	if err := bindAppEnvVars(); err != nil {
+		return err
+	}
+	return bindObservabilityEnvVars()
 }
 
 // bindServerEnvVars binds server-related environment variables
@@ -153,6 +215,34 @@ func bindAppEnvVars() error {
 		"app.debug":       "APP_APP_DEBUG",
 	}
 	return bindEnvVars(appBindings, "app")
+}
+
+// bindObservabilityEnvVars binds observability-related environment variables
+func bindObservabilityEnvVars() error {
+	observabilityBindings := map[string]string{
+		"observability.enabled":                      "APP_OBSERVABILITY_ENABLED",
+		"observability.service_name":                 "APP_OBSERVABILITY_SERVICE_NAME",
+		"observability.service_version":              "APP_OBSERVABILITY_SERVICE_VERSION",
+		"observability.environment":                  "APP_OBSERVABILITY_ENVIRONMENT",
+		"observability.sampling_rate":                "APP_OBSERVABILITY_SAMPLING_RATE",
+		"observability.tracing.enabled":              "APP_OBSERVABILITY_TRACING_ENABLED",
+		"observability.tracing.endpoint":             "APP_OBSERVABILITY_TRACING_ENDPOINT",
+		"observability.tracing.http_details":         "APP_OBSERVABILITY_TRACING_HTTP_DETAILS",
+		"observability.tracing.db_queries":           "APP_OBSERVABILITY_TRACING_DB_QUERIES",
+		"observability.metrics.enabled":              "APP_OBSERVABILITY_METRICS_ENABLED",
+		"observability.metrics.endpoint":             "APP_OBSERVABILITY_METRICS_ENDPOINT",
+		"observability.metrics.push_interval":        "APP_OBSERVABILITY_METRICS_PUSH_INTERVAL",
+		"observability.metrics.business_metrics":     "APP_OBSERVABILITY_METRICS_BUSINESS_METRICS",
+		"observability.exporters.prometheus.enabled": "APP_OBSERVABILITY_EXPORTERS_PROMETHEUS_ENABLED",
+		"observability.exporters.prometheus.port":    "APP_OBSERVABILITY_EXPORTERS_PROMETHEUS_PORT",
+		"observability.exporters.prometheus.path":    "APP_OBSERVABILITY_EXPORTERS_PROMETHEUS_PATH",
+		"observability.exporters.otlp.enabled":       "APP_OBSERVABILITY_EXPORTERS_OTLP_ENABLED",
+		"observability.exporters.otlp.endpoint":      "APP_OBSERVABILITY_EXPORTERS_OTLP_ENDPOINT",
+		"observability.exporters.otlp.insecure":      "APP_OBSERVABILITY_EXPORTERS_OTLP_INSECURE",
+		"observability.exporters.jaeger.enabled":     "APP_OBSERVABILITY_EXPORTERS_JAEGER_ENABLED",
+		"observability.exporters.jaeger.endpoint":    "APP_OBSERVABILITY_EXPORTERS_JAEGER_ENDPOINT",
+	}
+	return bindEnvVars(observabilityBindings, "observability")
 }
 
 // bindEnvVars is a helper function that binds a map of configuration keys to environment variables
@@ -217,6 +307,39 @@ func setDefaults() {
 	viper.SetDefault("app.version", "1.0.0")
 	viper.SetDefault("app.environment", "development")
 	viper.SetDefault("app.debug", false)
+
+	// Observability defaults
+	viper.SetDefault("observability.enabled", true)
+	viper.SetDefault("observability.service_name", "template-arch-lint")
+	viper.SetDefault("observability.service_version", "1.0.0")
+	viper.SetDefault("observability.environment", "development")
+	viper.SetDefault("observability.sampling_rate", 1.0)
+	
+	// Tracing defaults
+	viper.SetDefault("observability.tracing.enabled", true)
+	viper.SetDefault("observability.tracing.endpoint", "http://localhost:4318/v1/traces")
+	viper.SetDefault("observability.tracing.http_details", true)
+	viper.SetDefault("observability.tracing.db_queries", true)
+	
+	// Metrics defaults
+	viper.SetDefault("observability.metrics.enabled", true)
+	viper.SetDefault("observability.metrics.endpoint", "http://localhost:4318/v1/metrics")
+	viper.SetDefault("observability.metrics.push_interval", "15s")
+	viper.SetDefault("observability.metrics.business_metrics", true)
+	
+	// Prometheus exporter defaults
+	viper.SetDefault("observability.exporters.prometheus.enabled", true)
+	viper.SetDefault("observability.exporters.prometheus.port", 2112)
+	viper.SetDefault("observability.exporters.prometheus.path", "/metrics")
+	
+	// OTLP exporter defaults
+	viper.SetDefault("observability.exporters.otlp.enabled", true)
+	viper.SetDefault("observability.exporters.otlp.endpoint", "http://localhost:4318")
+	viper.SetDefault("observability.exporters.otlp.insecure", true)
+	
+	// Jaeger exporter defaults
+	viper.SetDefault("observability.exporters.jaeger.enabled", false)
+	viper.SetDefault("observability.exporters.jaeger.endpoint", "http://localhost:14268/api/traces")
 }
 
 // validateConfig validates the configuration using struct tags

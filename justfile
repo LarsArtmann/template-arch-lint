@@ -175,11 +175,48 @@ fmt:
     fi
     @echo "\033[0;32m✅ Code formatted!\033[0m"
 
-# Build Go modules
+# Generate templates and build Go modules
 build:
     @echo "\033[1m🔨 BUILDING\033[0m"
+    @echo "\033[0;33mGenerating templates...\033[0m"
+    @if command -v templ >/dev/null 2>&1; then \
+        templ generate; \
+    else \
+        echo "\033[0;31m❌ templ not installed. Installing...\033[0m"; \
+        go install github.com/a-h/templ/cmd/templ@latest; \
+        templ generate; \
+    fi
+    @echo "\033[0;33mBuilding Go modules...\033[0m"
     go build ./...
     @echo "\033[0;32m✅ Build completed!\033[0m"
+
+# Generate templates only
+templ:
+    @echo "\033[1m📄 GENERATING TEMPLATES\033[0m"
+    @if command -v templ >/dev/null 2>&1; then \
+        templ generate; \
+    else \
+        echo "\033[0;31m❌ templ not installed. Installing...\033[0m"; \
+        go install github.com/a-h/templ/cmd/templ@latest; \
+        templ generate; \
+    fi
+    @echo "\033[0;32m✅ Templates generated!\033[0m"
+
+# Run the server
+run: build
+    @echo "\033[1m🚀 STARTING SERVER\033[0m"
+    go run cmd/server/main.go
+
+# Development mode with auto-reload
+dev:
+    @echo "\033[1m🔄 DEVELOPMENT MODE\033[0m"
+    @if command -v air >/dev/null 2>&1; then \
+        air; \
+    else \
+        echo "\033[0;31m❌ air not installed. Installing...\033[0m"; \
+        go install github.com/cosmtrek/air@latest; \
+        air; \
+    fi
 
 # Run simple filename verification
 verify-filenames: lint-files

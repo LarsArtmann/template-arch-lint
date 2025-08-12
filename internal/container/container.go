@@ -1,4 +1,4 @@
-// Dependency injection container using samber/do
+// Simple dependency injection container for HTMX template implementation
 package container
 
 import (
@@ -172,6 +172,7 @@ func (c *Container) registerRepositories() error {
 		db := do.MustInvoke[*sql.DB](i)
 		logger := do.MustInvoke[*slog.Logger](i)
 
+		// Use SQL-based repository implementation
 		repo := persistence.NewSQLUserRepository(db, logger)
 		return repo, nil
 	})
@@ -190,6 +191,7 @@ func (c *Container) registerServices() error {
 
 // registerHandlers registers all HTTP handlers
 func (c *Container) registerHandlers() error {
+	// Register API handler
 	do.Provide(c.injector, func(i *do.Injector) (*handlers.UserHandler, error) {
 		userService := do.MustInvoke[*services.UserService](i)
 		logger := do.MustInvoke[*slog.Logger](i)
@@ -197,6 +199,16 @@ func (c *Container) registerHandlers() error {
 		handler := handlers.NewUserHandler(userService, logger)
 		return handler, nil
 	})
+
+	// Register template handler
+	do.Provide(c.injector, func(i *do.Injector) (*handlers.TemplateHandler, error) {
+		userService := do.MustInvoke[*services.UserService](i)
+		logger := do.MustInvoke[*slog.Logger](i)
+
+		handler := handlers.NewTemplateHandler(userService, logger)
+		return handler, nil
+	})
+
 	return nil
 }
 
@@ -206,6 +218,7 @@ func (c *Container) registerHTTPServer() error {
 		cfg := do.MustInvoke[*config.Config](i)
 		logger := do.MustInvoke[*slog.Logger](i)
 		userHandler := do.MustInvoke[*handlers.UserHandler](i)
+		templHandler := do.MustInvoke[*handlers.TemplateHandler](i)
 
 		// Set Gin mode based on environment
 		if cfg.App.Environment == "production" {
@@ -232,7 +245,31 @@ func (c *Container) registerHTTPServer() error {
 			})
 		})
 
-		// API routes
+		// Root redirect to users page
+		router.GET("/", func(c *gin.Context) {
+			c.Redirect(302, "/users")
+		})
+
+		// Template-based web routes (HTMX)
+		{
+			// Main pages
+			router.GET("/users", templHandler.UsersPage)
+			router.GET("/users/new", templHandler.CreateUserPage)
+			router.GET("/users/:id/edit", templHandler.EditUserPage)
+
+			// HTMX endpoints
+			router.GET("/users/search", templHandler.SearchUsers)
+			router.GET("/users/:id/edit-inline", templHandler.EditUserInline)
+			router.GET("/users/:id/cancel-edit", templHandler.CancelUserEdit)
+			router.GET("/users/stats", templHandler.UserStatsPartial)
+
+			// HTMX form submissions
+			router.POST("/users", templHandler.CreateUser)
+			router.PUT("/users/:id", templHandler.UpdateUser)
+			router.DELETE("/users/:id", templHandler.DeleteUser)
+		}
+
+		// API routes (JSON)
 		api := router.Group("/api/v1")
 		{
 			users := api.Group("/users")
@@ -242,10 +279,19 @@ func (c *Container) registerHTTPServer() error {
 				users.PUT("/:id", userHandler.UpdateUser)
 				users.DELETE("/:id", userHandler.DeleteUser)
 				users.GET("", userHandler.ListUsers)
+
+				// Functional programming endpoints
+				users.GET("/stats", userHandler.GetUserStats)
+				users.GET("/active", userHandler.GetActiveUsers)
+				users.GET("/emails", userHandler.GetUserEmails)
+				users.GET("/filtered", userHandler.GetUsersFiltered)
+				users.GET("/by-domains", userHandler.GetUsersByDomains)
+				users.POST("/functional", userHandler.CreateUserFunctional)
+				users.POST("/validate-batch", userHandler.ValidateUsersBatch)
 			}
 		}
 
-		logger.Info("HTTP router configured successfully")
+		logger.Info("HTTP router configured successfully with template and API routes")
 		return router, nil
 	})
 	return nil

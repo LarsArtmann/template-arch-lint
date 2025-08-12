@@ -31,6 +31,7 @@ func NewUserHandler(userService *services.UserService, logger *slog.Logger) *Use
 	}
 }
 
+
 // CreateUserRequest represents the request payload for creating a user
 type CreateUserRequest struct {
 	ID    string `json:"id" binding:"required"`
@@ -86,6 +87,8 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		})
 		return
 	}
+
+	// User creation metrics disabled
 
 	h.logger.Info("User created successfully", "user_id", user.ID, "email", user.Email)
 	c.JSON(http.StatusCreated, user)
