@@ -1,190 +1,68 @@
 graph TB
-    subgraph "📝 Command Side (Write Model)"
-        subgraph "Commands"
-            CREATE_USER[CreateUser<br/>command]
-            UPDATE_USER[UpdateUser<br/>command] 
-            DELETE_USER[DeleteUser<br/>command]
-            CHANGE_EMAIL[ChangeEmail<br/>command]
+    subgraph "🎯 Current Implementation: Service-Based Architecture"
+        subgraph "📝 Service Layer (Business Logic)"
+            USER_SERVICE[UserService<br/>• CreateUser<br/>• GetUser<br/>• UpdateUser<br/>• DeleteUser<br/>• ListUsers]
+            VALIDATION[Business Validation<br/>• validateEmail<br/>• validateUserName<br/>• business rules]
         end
         
-        subgraph "Command Handlers"
-            USER_CMD_HANDLER[UserCommandHandler<br/>business logic]
-            EMAIL_CMD_HANDLER[EmailCommandHandler<br/>validation logic]
+        subgraph "🏛️ Domain Model"
+            USER_ENTITY[User Entity<br/>• Domain logic<br/>• Value objects<br/>• Business rules]
+            EMAIL_VO[Email Value Object<br/>• Format validation<br/>• Domain extraction]
+            USERNAME_VO[UserName Value Object<br/>• Length validation<br/>• Reserved names]
+            USER_ID_VO[UserID Value Object<br/>• Identity management<br/>• Empty checks]
         end
         
-        subgraph "Domain Model"
-            USER_AGGREGATE[User Aggregate<br/>business rules]
-            EMAIL_VALUE[Email Value Object<br/>validation]
-            USER_ID_VALUE[UserID Value Object<br/>identity]
+        subgraph "📊 Repository Pattern"
+            USER_REPO_INTERFACE[UserRepository Interface<br/>• FindByID<br/>• FindByEmail<br/>• Save<br/>• Delete<br/>• List]
+            USER_REPO_IMPL[SQLC Implementation<br/>• Type-safe SQL<br/>• Database operations]
         end
         
-        subgraph "Events Generated"
-            USER_CREATED[UserCreated<br/>event]
-            USER_UPDATED[UserUpdated<br/>event]
-            USER_DELETED[UserDeleted<br/>event] 
-            EMAIL_CHANGED[EmailChanged<br/>event]
+        subgraph "🗄️ Data Layer"
+            SQLITE_DB[(SQLite Database<br/>users table)]
+            SQLC_GENERATED[SQLC Generated<br/>• Type-safe queries<br/>• Go structs<br/>• Query validation]
         end
     end
     
-    subgraph "📊 Query Side (Read Model)"
-        subgraph "Queries"
-            GET_USER[GetUser<br/>query]
-            LIST_USERS[ListUsers<br/>query]
-            SEARCH_USERS[SearchUsers<br/>query]
-            USER_STATS[GetUserStats<br/>query]
-        end
-        
-        subgraph "Query Handlers"
-            USER_QUERY_HANDLER[UserQueryHandler<br/>data retrieval]
-            STATS_QUERY_HANDLER[StatsQueryHandler<br/>aggregations]
-        end
-        
-        subgraph "Read Models"
-            USER_VIEW[UserView<br/>optimized for display]
-            USER_LIST_VIEW[UserListView<br/>optimized for lists]
-            USER_SEARCH_VIEW[UserSearchView<br/>optimized for search]
-            USER_STATS_VIEW[UserStatsView<br/>aggregated data]
-        end
-        
-        subgraph "Query Storage"
-            READ_DB[(Read Database<br/>denormalized)]
-            SEARCH_INDEX[(Search Index<br/>Elasticsearch)]
-            CACHE[(Cache Layer<br/>Redis)]
-        end
+    subgraph "🔄 Functional Programming Patterns"
+        RAILWAY_ORP[Railway Oriented Programming<br/>• Result pattern<br/>• Option pattern<br/>• Either pattern]
+        SAMBER_LO[samber/lo Integration<br/>• Filter operations<br/>• Map operations<br/>• Reduce operations]
     end
     
-    subgraph "🔄 Event Processing"
-        subgraph "Event Store"
-            EVENT_STREAM[(Event Stream<br/>append-only log)]
-            EVENT_SNAPSHOTS[(Snapshots<br/>aggregate state)]
-        end
-        
-        subgraph "Event Projections"
-            USER_PROJECTION[User Projection<br/>builds UserView]
-            STATS_PROJECTION[Stats Projection<br/>builds UserStatsView]
-            SEARCH_PROJECTION[Search Projection<br/>builds UserSearchView]
-            NOTIFICATION_PROJECTION[Notification Projection<br/>sends notifications]
-        end
-        
-        subgraph "Integration Events"
-            USER_REGISTERED[UserRegistered<br/>integration event]
-            PROFILE_COMPLETED[ProfileCompleted<br/>integration event]
-            ACCOUNT_SUSPENDED[AccountSuspended<br/>integration event]
-        end
+    subgraph "🌐 Application Layer"
+        HTTP_HANDLERS[HTTP Handlers<br/>• Template rendering<br/>• JSON API<br/>• HTMX endpoints]
+        MIDDLEWARE[Middleware Stack<br/>• Error handling<br/>• Validation<br/>• Logging]
     end
     
-    subgraph "🌐 API Layer"
-        subgraph "Command API"
-            CMD_CONTROLLER[Command Controller<br/>HTTP endpoints]
-            CMD_VALIDATION[Command Validation<br/>input validation]
-        end
-        
-        subgraph "Query API"  
-            QUERY_CONTROLLER[Query Controller<br/>HTTP endpoints]
-            QUERY_CACHE[Query Caching<br/>performance optimization]
-        end
-    end
+    %% Flow Connections
+    HTTP_HANDLERS --> USER_SERVICE
+    USER_SERVICE --> VALIDATION
+    USER_SERVICE --> USER_ENTITY
+    USER_ENTITY --> EMAIL_VO
+    USER_ENTITY --> USERNAME_VO
+    USER_ENTITY --> USER_ID_VO
+    USER_SERVICE --> USER_REPO_INTERFACE
+    USER_REPO_INTERFACE --> USER_REPO_IMPL
+    USER_REPO_IMPL --> SQLC_GENERATED
+    SQLC_GENERATED --> SQLITE_DB
     
-    subgraph "📡 Event Bus"
-        COMMAND_BUS[Command Bus<br/>command routing]
-        EVENT_BUS[Event Bus<br/>event publishing]
-        QUERY_BUS[Query Bus<br/>query routing]
-    end
-    
-    %% Command flow
-    CMD_CONTROLLER --> CMD_VALIDATION
-    CMD_VALIDATION --> CREATE_USER
-    CMD_VALIDATION --> UPDATE_USER  
-    CMD_VALIDATION --> DELETE_USER
-    CMD_VALIDATION --> CHANGE_EMAIL
-    
-    CREATE_USER --> COMMAND_BUS
-    UPDATE_USER --> COMMAND_BUS
-    DELETE_USER --> COMMAND_BUS
-    CHANGE_EMAIL --> COMMAND_BUS
-    
-    COMMAND_BUS --> USER_CMD_HANDLER
-    COMMAND_BUS --> EMAIL_CMD_HANDLER
-    
-    USER_CMD_HANDLER --> USER_AGGREGATE
-    EMAIL_CMD_HANDLER --> EMAIL_VALUE
-    USER_AGGREGATE --> USER_ID_VALUE
-    
-    USER_AGGREGATE --> USER_CREATED
-    USER_AGGREGATE --> USER_UPDATED
-    USER_AGGREGATE --> USER_DELETED
-    EMAIL_VALUE --> EMAIL_CHANGED
-    
-    %% Event persistence and publishing
-    USER_CREATED --> EVENT_STREAM
-    USER_UPDATED --> EVENT_STREAM
-    USER_DELETED --> EVENT_STREAM
-    EMAIL_CHANGED --> EVENT_STREAM
-    
-    EVENT_STREAM --> EVENT_BUS
-    USER_AGGREGATE --> EVENT_SNAPSHOTS
-    
-    %% Event projections
-    EVENT_BUS --> USER_PROJECTION
-    EVENT_BUS --> STATS_PROJECTION
-    EVENT_BUS --> SEARCH_PROJECTION
-    EVENT_BUS --> NOTIFICATION_PROJECTION
-    
-    USER_PROJECTION --> USER_VIEW
-    USER_PROJECTION --> USER_LIST_VIEW
-    STATS_PROJECTION --> USER_STATS_VIEW
-    SEARCH_PROJECTION --> USER_SEARCH_VIEW
-    
-    %% Query flow
-    QUERY_CONTROLLER --> QUERY_CACHE
-    QUERY_CACHE --> GET_USER
-    QUERY_CACHE --> LIST_USERS
-    QUERY_CACHE --> SEARCH_USERS
-    QUERY_CACHE --> USER_STATS
-    
-    GET_USER --> QUERY_BUS
-    LIST_USERS --> QUERY_BUS
-    SEARCH_USERS --> QUERY_BUS
-    USER_STATS --> QUERY_BUS
-    
-    QUERY_BUS --> USER_QUERY_HANDLER
-    QUERY_BUS --> STATS_QUERY_HANDLER
-    
-    USER_QUERY_HANDLER --> USER_VIEW
-    USER_QUERY_HANDLER --> USER_LIST_VIEW
-    STATS_QUERY_HANDLER --> USER_STATS_VIEW
-    USER_QUERY_HANDLER --> USER_SEARCH_VIEW
-    
-    %% Storage connections
-    USER_VIEW --> READ_DB
-    USER_LIST_VIEW --> READ_DB
-    USER_STATS_VIEW --> READ_DB
-    USER_SEARCH_VIEW --> SEARCH_INDEX
-    USER_QUERY_HANDLER --> CACHE
-    
-    %% Integration events
-    EVENT_BUS --> USER_REGISTERED
-    EVENT_BUS --> PROFILE_COMPLETED
-    EVENT_BUS --> ACCOUNT_SUSPENDED
-    
-    %% External service connections
-    USER_REGISTERED -.-> EXTERNAL_SERVICES[External Services<br/>email, analytics]
-    PROFILE_COMPLETED -.-> EXTERNAL_SERVICES
-    ACCOUNT_SUSPENDED -.-> EXTERNAL_SERVICES
+    %% Functional Programming Integration
+    USER_SERVICE -.-> RAILWAY_ORP
+    USER_SERVICE -.-> SAMBER_LO
     
     %% Styling
-    classDef command fill:#1565c0,color:#fff
-    classDef query fill:#2e7d32,color:#fff  
-    classDef event fill:#f57c00,color:#fff
-    classDef storage fill:#5d4037,color:#fff
-    classDef api fill:#7b1fa2,color:#fff
-    classDef bus fill:#c62828,color:#fff
-    classDef external fill:#455a64,color:#fff
+    classDef serviceClass fill:#e1f5fe
+    classDef domainClass fill:#f3e5f5
+    classDef repoClass fill:#e8f5e8
+    classDef dataClass fill:#fff3e0
+    classDef functionalClass fill:#fce4ec
     
-    class CREATE_USER,UPDATE_USER,DELETE_USER,CHANGE_EMAIL,USER_CMD_HANDLER,EMAIL_CMD_HANDLER,CMD_CONTROLLER,CMD_VALIDATION command
-    class GET_USER,LIST_USERS,SEARCH_USERS,USER_STATS,USER_QUERY_HANDLER,STATS_QUERY_HANDLER,QUERY_CONTROLLER,QUERY_CACHE query
-    class USER_CREATED,USER_UPDATED,USER_DELETED,EMAIL_CHANGED,USER_PROJECTION,STATS_PROJECTION,SEARCH_PROJECTION,NOTIFICATION_PROJECTION,USER_REGISTERED,PROFILE_COMPLETED,ACCOUNT_SUSPENDED event
-    class EVENT_STREAM,EVENT_SNAPSHOTS,READ_DB,SEARCH_INDEX,CACHE storage
-    class USER_AGGREGATE,EMAIL_VALUE,USER_ID_VALUE,USER_VIEW,USER_LIST_VIEW,USER_SEARCH_VIEW,USER_STATS_VIEW api
-    class COMMAND_BUS,EVENT_BUS,QUERY_BUS bus
-    class EXTERNAL_SERVICES external
+    class USER_SERVICE,VALIDATION serviceClass
+    class USER_ENTITY,EMAIL_VO,USERNAME_VO,USER_ID_VO domainClass
+    class USER_REPO_INTERFACE,USER_REPO_IMPL repoClass
+    class SQLITE_DB,SQLC_GENERATED dataClass
+    class RAILWAY_ORP,SAMBER_LO functionalClass
+    
+    %% Notes
+    USER_SERVICE -.- NOTE1[🔍 No event sourcing<br/>Traditional CRUD operations]
+    USER_ENTITY -.- NOTE2[🎯 Rich domain model<br/>Value objects for validation]
+    SQLC_GENERATED -.- NOTE3[⚡ Type-safe SQL<br/>Compile-time validation]
