@@ -1,13 +1,9 @@
 package config
 
 import (
-	"context"
 	"os"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -227,39 +223,6 @@ func createValidTestConfig() Config {
 			Version:     "1.0.0",
 			Environment: "development",
 		},
-		Observability: ObservabilityConfig{
-			ServiceName:    "test-app",
-			ServiceVersion: "1.0.0",
-			Environment:    "development",
-			Exporters: ExportersConfig{
-				Prometheus: PrometheusConfig{
-					Port: 2112,
-				},
-			},
-		},
-		Security: SecurityConfig{
-			CORS: CORSConfig{
-				AllowedOrigins: []string{"http://localhost:3000"},
-				AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
-				AllowedHeaders: []string{"Content-Type", "Authorization"},
-			},
-			RateLimit: RateLimitConfig{
-				RequestsPerMinute: 100,
-				Burst:            20,
-			},
-		},
-		External: ExternalConfig{
-			CircuitBreaker: CircuitBreakerConfig{
-				Threshold: 5,
-			},
-		},
-		Backup: BackupConfig{
-			RetentionDays: 30,
-		},
-		Resources: ResourcesConfig{
-			MaxCPUCores:    4,
-			MaxConnections: 100,
-		},
 	}
 }
 
@@ -301,11 +264,19 @@ func TestConfigWithEnvironmentOverrides(t *testing.T) {
 		}()
 
 		config, err := LoadConfig("")
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("LoadConfig() failed: %v", err)
+		}
 		
-		assert.Equal(t, "staging", config.App.Environment)
-		assert.Equal(t, 9090, config.Server.Port)
-		assert.Equal(t, "warn", config.Logging.Level)
+		if config.App.Environment != "staging" {
+			t.Errorf("Expected environment 'staging', got '%s'", config.App.Environment)
+		}
+		if config.Server.Port != 9090 {
+			t.Errorf("Expected port 9090, got %d", config.Server.Port)
+		}
+		if config.Logging.Level != "warn" {
+			t.Errorf("Expected log level 'warn', got '%s'", config.Logging.Level)
+		}
 	})
 	
 	t.Run("invalid environment validation", func(t *testing.T) {
@@ -313,142 +284,8 @@ func TestConfigWithEnvironmentOverrides(t *testing.T) {
 		defer os.Unsetenv("APP_APP_ENVIRONMENT")
 		
 		_, err := LoadConfig("")
-		assert.Error(t, err, "Should reject invalid environment")
-	})
-}
-
-// Test feature flags functionality
-func TestFeatureFlags(t *testing.T) {
-	featureConfig := &FeaturesConfig{
-		EnableDebugEndpoints: true,
-		EnableProfiling:      false,
-		EnableBetaFeatures:   true,
-	}
-	
-	manager := NewFeatureManager(featureConfig)
-	defer manager.Close()
-	
-	t.Run("basic feature flag check", func(t *testing.T) {
-		assert.True(t, manager.IsEnabled("debug_endpoints"))
-		assert.False(t, manager.IsEnabled("profiling"))
-		assert.True(t, manager.IsEnabled("beta_features"))
-		assert.False(t, manager.IsEnabled("non_existent"))
-	})
-	
-	t.Run("feature flag with context", func(t *testing.T) {
-		ctx := FeatureContext{
-			UserID:      "test_user",
-			Environment: "development",
-			Timestamp:   time.Now(),
+		if err == nil {
+			t.Error("Should reject invalid environment")
 		}
-		
-		assert.True(t, manager.IsEnabledForContext("debug_endpoints", ctx))
 	})
-	
-	t.Run("dynamic feature flag creation", func(t *testing.T) {
-		flag := &FeatureFlag{
-			Name:        "dynamic_test",
-			Enabled:     true,
-			Description: "Test dynamic flag",
-		}
-		
-		err := manager.UpdateFlag(flag)
-		assert.NoError(t, err)
-		
-		assert.True(t, manager.IsEnabled("dynamic_test"))
-		
-		// Get flag details
-		retrievedFlag, exists := manager.GetFlag("dynamic_test")
-		assert.True(t, exists)
-		assert.Equal(t, "Test dynamic flag", retrievedFlag.Description)
-	})
-}
-
-// Test secrets management functionality
-func TestSecretsManager(t *testing.T) {
-	t.Run("environment provider", func(t *testing.T) {
-		provider := NewEnvProvider()
-		ctx := context.Background()
-		
-		// Test getting existing environment variable
-		os.Setenv("TEST_SECRET", "test_value")
-		defer os.Unsetenv("TEST_SECRET")
-		
-		value, err := provider.GetSecret(ctx, "TEST_SECRET")
-		assert.NoError(t, err)
-		assert.Equal(t, "test_value", value)
-		
-		// Test getting non-existent secret
-		_, err = provider.GetSecret(ctx, "NON_EXISTENT")
-		assert.Error(t, err)
-	})
-	
-	t.Run("file provider", func(t *testing.T) {
-		config := FileConfig{
-			Path:   "/tmp/test_secrets.json",
-			Format: "json",
-		}
-		
-		provider, err := NewFileProvider(config)
-		require.NoError(t, err)
-		defer provider.Close()
-		
-		ctx := context.Background()
-		
-		// Test setting and getting secret
-		err = provider.SetSecret(ctx, "test_key", "test_value")
-		assert.NoError(t, err)
-		
-		value, err := provider.GetSecret(ctx, "test_key")
-		assert.NoError(t, err)
-		assert.Equal(t, "test_value", value)
-		
-		// Test deleting secret
-		err = provider.DeleteSecret(ctx, "test_key")
-		assert.NoError(t, err)
-		
-		_, err = provider.GetSecret(ctx, "test_key")
-		assert.Error(t, err)
-	})
-}
-
-// Benchmark tests
-func BenchmarkConfigLoading(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		_, err := LoadConfig("")
-		if err != nil {
-			b.Fatal(err)
-		}
-	}
-}
-
-func BenchmarkConfigValidation(b *testing.B) {
-	config, err := LoadConfig("")
-	if err != nil {
-		b.Fatal(err)
-	}
-	
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		err := validateConfig(config)
-		if err != nil {
-			b.Fatal(err)
-		}
-	}
-}
-
-func BenchmarkFeatureFlagCheck(b *testing.B) {
-	featureConfig := &FeaturesConfig{
-		EnableDebugEndpoints: true,
-		EnableProfiling:      false,
-		EnableBetaFeatures:   true,
-	}
-	
-	manager := NewFeatureManager(featureConfig)
-	defer manager.Close()
-	
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = manager.IsEnabled("debug_endpoints")
-	}
 }

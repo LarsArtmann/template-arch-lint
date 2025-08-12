@@ -1,4 +1,4 @@
-// Simple dependency injection container for HTMX template implementation
+// Simple dependency injection container for clean architecture demonstration
 package container
 
 import (
@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
@@ -19,7 +18,6 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/infrastructure/persistence"
-	"github.com/LarsArtmann/template-arch-lint/internal/observability"
 )
 
 // Container represents the DI container
@@ -57,11 +55,6 @@ func (c *Container) RegisterAll() error {
 		return fmt.Errorf("failed to register repositories: %w", err)
 	}
 
-	// Register database performance monitor
-	if err := c.registerDBPerformanceMonitor(); err != nil {
-		return fmt.Errorf("failed to register DB performance monitor: %w", err)
-	}
-
 	// Register services
 	if err := c.registerServices(); err != nil {
 		return fmt.Errorf("failed to register services: %w", err)
@@ -70,31 +63,6 @@ func (c *Container) RegisterAll() error {
 	// Register handlers
 	if err := c.registerHandlers(); err != nil {
 		return fmt.Errorf("failed to register handlers: %w", err)
-	}
-
-	// Register performance metrics
-	if err := c.registerPerformanceMetrics(); err != nil {
-		return fmt.Errorf("failed to register performance metrics: %w", err)
-	}
-
-	// Register resource manager
-	if err := c.registerResourceManager(); err != nil {
-		return fmt.Errorf("failed to register resource manager: %w", err)
-	}
-
-	// Register cache manager
-	if err := c.registerCacheManager(); err != nil {
-		return fmt.Errorf("failed to register cache manager: %w", err)
-	}
-
-	// Register Prometheus metrics
-	if err := c.registerPrometheusMetrics(); err != nil {
-		return fmt.Errorf("failed to register Prometheus metrics: %w", err)
-	}
-
-	// Register SLA tracker
-	if err := c.registerSLATracker(); err != nil {
-		return fmt.Errorf("failed to register SLA tracker: %w", err)
 	}
 
 	// Register HTTP server
@@ -211,130 +179,6 @@ func (c *Container) registerRepositories() error {
 	return nil
 }
 
-// registerResourceManager registers the resource manager
-func (c *Container) registerResourceManager() error {
-	do.Provide(c.injector, func(i *do.Injector) (*observability.ResourceManager, error) {
-		logger := do.MustInvoke[*slog.Logger](i)
-		performanceMetrics := do.MustInvoke[*observability.PerformanceMetrics](i)
-		cfg := do.MustInvoke[*config.Config](i)
-		
-		// Create resource config based on application configuration
-		resourceConfig := &observability.ResourceConfig{
-			MaxMemoryBytes:       parseMemoryString(cfg.Resources.MaxMemory),
-			GCTarget:            100.0,
-			GCInterval:          5 * time.Minute,
-			MaxGoroutines:        cfg.Resources.MaxConnections,
-			GoroutineThreshold:   cfg.Resources.MaxConnections / 2,
-			MonitoringInterval:   30 * time.Second,
-			OptimizationEnabled:  true,
-			OptimizationCooldown: 5 * time.Minute,
-		}
-		
-		resourceManager := observability.NewResourceManager(logger, performanceMetrics, resourceConfig)
-		
-		// Start monitoring in background
-		go resourceManager.StartMonitoring(context.Background())
-		
-		// Optimize for environment
-		if err := resourceManager.OptimizeForEnvironment(cfg.App.Environment); err != nil {
-			logger.Warn("Failed to optimize for environment", "environment", cfg.App.Environment, "error", err)
-		}
-		
-		return resourceManager, nil
-	})
-	return nil
-}
-
-// parseMemoryString parses memory strings like "512MB" into bytes
-func parseMemoryString(memStr string) int64 {
-	// Simple parsing for common formats
-	if memStr == "" {
-		return 512 * 1024 * 1024 // Default 512MB
-	}
-	
-	// This is a simplified parser - in production you'd want more robust parsing
-	switch {
-	case len(memStr) >= 2 && memStr[len(memStr)-2:] == "MB":
-		if val := parseNumber(memStr[:len(memStr)-2]); val > 0 {
-			return val * 1024 * 1024
-		}
-	case len(memStr) >= 2 && memStr[len(memStr)-2:] == "GB":
-		if val := parseNumber(memStr[:len(memStr)-2]); val > 0 {
-			return val * 1024 * 1024 * 1024
-		}
-	}
-	
-	return 512 * 1024 * 1024 // Default fallback
-}
-
-// parseNumber parses a number string
-func parseNumber(str string) int64 {
-	// Simple number parsing
-	var result int64
-	for _, char := range str {
-		if char >= '0' && char <= '9' {
-			result = result*10 + int64(char-'0')
-		}
-	}
-	return result
-}
-
-// registerCacheManager registers the cache manager
-func (c *Container) registerCacheManager() error {
-	do.Provide(c.injector, func(i *do.Injector) (*observability.CacheManager, error) {
-		logger := do.MustInvoke[*slog.Logger](i)
-		performanceMetrics := do.MustInvoke[*observability.PerformanceMetrics](i)
-		cfg := do.MustInvoke[*config.Config](i)
-		
-		// Create cache config based on application configuration
-		cacheConfig := &observability.CacheConfig{
-			L1Enabled:           true,
-			L1MaxSize:           parseMemoryString(cfg.Cache.MaxMemory) / 2, // Half for L1 cache
-			L1TTL:               cfg.Cache.DefaultTTL,
-			L1EvictionPolicy:    "LRU",
-			L2Enabled:           cfg.Cache.Enabled,
-			L2RedisURL:          cfg.Cache.RedisURL,
-			L2TTL:               cfg.Cache.DefaultTTL * 2,
-			L2ClusterMode:       cfg.Cache.ClusterMode,
-			MonitoringInterval:  30 * time.Second,
-			HitRatioThreshold:   0.8,
-			EvictionThreshold:   0.9,
-			WarmupEnabled:       true,
-			HotPathDetection:    true,
-			HotPathThreshold:    100,
-			HotPathCacheTTL:     1 * time.Hour,
-		}
-		
-		cacheManager := observability.NewCacheManager(logger, performanceMetrics, cacheConfig)
-		
-		// Start monitoring in background
-		go cacheManager.StartMonitoring(context.Background())
-		
-		return cacheManager, nil
-	})
-	return nil
-}
-
-// registerDBPerformanceMonitor registers the database performance monitor
-func (c *Container) registerDBPerformanceMonitor() error {
-	do.Provide(c.injector, func(i *do.Injector) (*persistence.DBPerformanceMonitor, error) {
-		db := do.MustInvoke[*sql.DB](i)
-		logger := do.MustInvoke[*slog.Logger](i)
-		performanceMetrics := do.MustInvoke[*observability.PerformanceMetrics](i)
-
-		monitor := persistence.NewDBPerformanceMonitor(db, logger, performanceMetrics)
-		
-		// Set optimal database pragmas on startup
-		ctx := context.Background()
-		if err := monitor.SetOptimalPragmas(ctx); err != nil {
-			logger.Error("Failed to set optimal database pragmas", "error", err)
-		}
-
-		return monitor, nil
-	})
-	return nil
-}
-
 // registerServices registers all domain services
 func (c *Container) registerServices() error {
 	do.Provide(c.injector, func(i *do.Injector) (*services.UserService, error) {
@@ -365,74 +209,6 @@ func (c *Container) registerHandlers() error {
 		return handler, nil
 	})
 
-	// Register monitoring handler
-	do.Provide(c.injector, func(i *do.Injector) (*handlers.MonitoringHandler, error) {
-		cfg := do.MustInvoke[*config.Config](i)
-		logger := do.MustInvoke[*slog.Logger](i)
-		prometheusMetrics := do.MustInvoke[*observability.PrometheusMetrics](i)
-		slaTracker := do.MustInvoke[*observability.SLATracker](i)
-
-		handler := handlers.NewMonitoringHandler(cfg, logger, prometheusMetrics, slaTracker)
-		return handler, nil
-	})
-
-	return nil
-}
-
-// registerPerformanceMetrics registers the performance metrics collector
-func (c *Container) registerPerformanceMetrics() error {
-	do.Provide(c.injector, func(i *do.Injector) (*observability.PerformanceMetrics, error) {
-		logger := do.MustInvoke[*slog.Logger](i)
-		
-		performanceMetrics, err := observability.NewPerformanceMetrics(logger)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create performance metrics: %w", err)
-		}
-
-		// Start runtime metrics collection
-		go performanceMetrics.StartRuntimeMetricsCollection(context.Background())
-		
-		return performanceMetrics, nil
-	})
-	return nil
-}
-
-// registerPrometheusMetrics registers the Prometheus metrics collector
-func (c *Container) registerPrometheusMetrics() error {
-	do.Provide(c.injector, func(i *do.Injector) (*observability.PrometheusMetrics, error) {
-		cfg := do.MustInvoke[*config.Config](i)
-		logger := do.MustInvoke[*slog.Logger](i)
-		
-		prometheusMetrics := observability.NewPrometheusMetrics(cfg, logger)
-		
-		// Start the Prometheus metrics server
-		ctx := context.Background()
-		if err := prometheusMetrics.Start(ctx); err != nil {
-			return nil, fmt.Errorf("failed to start Prometheus metrics server: %w", err)
-		}
-		
-		return prometheusMetrics, nil
-	})
-	return nil
-}
-
-// registerSLATracker registers the SLA tracking service
-func (c *Container) registerSLATracker() error {
-	do.Provide(c.injector, func(i *do.Injector) (*observability.SLATracker, error) {
-		cfg := do.MustInvoke[*config.Config](i)
-		logger := do.MustInvoke[*slog.Logger](i)
-		prometheusMetrics := do.MustInvoke[*observability.PrometheusMetrics](i)
-		
-		slaTracker := observability.NewSLATracker(cfg, logger, prometheusMetrics)
-		
-		// Start the SLA tracker
-		ctx := context.Background()
-		if err := slaTracker.Start(ctx); err != nil {
-			return nil, fmt.Errorf("failed to start SLA tracker: %w", err)
-		}
-		
-		return slaTracker, nil
-	})
 	return nil
 }
 
@@ -443,9 +219,6 @@ func (c *Container) registerHTTPServer() error {
 		logger := do.MustInvoke[*slog.Logger](i)
 		userHandler := do.MustInvoke[*handlers.UserHandler](i)
 		templHandler := do.MustInvoke[*handlers.TemplateHandler](i)
-		monitoringHandler := do.MustInvoke[*handlers.MonitoringHandler](i)
-		prometheusMetrics := do.MustInvoke[*observability.PrometheusMetrics](i)
-		slaTracker := do.MustInvoke[*observability.SLATracker](i)
 
 		// Set Gin mode based on environment
 		if cfg.App.Environment == "production" {
@@ -462,17 +235,6 @@ func (c *Container) registerHTTPServer() error {
 		// Add middleware
 		router.Use(gin.Recovery())
 		router.Use(middleware.RequestLoggingMiddleware(logger))
-		router.Use(prometheusMetrics.HTTPMiddleware())
-		router.Use(observability.SLAMiddleware(slaTracker, logger))
-
-		// Setup profiling endpoints if enabled
-		middleware.SetupProfilingRoutes(
-			router,
-			cfg.Features.EnableProfiling,
-			os.Getenv("PPROF_USERNAME"),
-			os.Getenv("PPROF_PASSWORD"),
-			[]string{"127.0.0.1", "::1"}, // Only allow localhost by default
-		)
 
 		// Health check endpoint
 		router.GET("/health", func(c *gin.Context) {
@@ -499,7 +261,6 @@ func (c *Container) registerHTTPServer() error {
 			router.GET("/users/search", templHandler.SearchUsers)
 			router.GET("/users/:id/edit-inline", templHandler.EditUserInline)
 			router.GET("/users/:id/cancel-edit", templHandler.CancelUserEdit)
-			router.GET("/users/stats", templHandler.UserStatsPartial)
 
 			// HTMX form submissions
 			router.POST("/users", templHandler.CreateUser)
@@ -519,29 +280,8 @@ func (c *Container) registerHTTPServer() error {
 				users.GET("", userHandler.ListUsers)
 
 				// Functional programming endpoints
-				users.GET("/stats", userHandler.GetUserStats)
 				users.GET("/active", userHandler.GetActiveUsers)
-				users.GET("/emails", userHandler.GetUserEmails)
-				users.GET("/filtered", userHandler.GetUsersFiltered)
-				users.GET("/by-domains", userHandler.GetUsersByDomains)
 				users.POST("/functional", userHandler.CreateUserFunctional)
-				users.POST("/validate-batch", userHandler.ValidateUsersBatch)
-			}
-
-			// Monitoring and SLA endpoints
-			monitoring := api.Group("/monitoring")
-			{
-				monitoring.GET("/sla", monitoringHandler.GetSLAStatus)
-				monitoring.GET("/sla/:tier", monitoringHandler.GetSLAStatusForTier)
-				monitoring.GET("/health", monitoringHandler.GetHealthDetails)
-				
-				// Test endpoints for alert generation
-				testing := monitoring.Group("/test")
-				{
-					testing.POST("/slow", monitoringHandler.SimulateSlowResponse)
-					testing.POST("/error", monitoringHandler.SimulateError)
-					testing.POST("/alert/:type", monitoringHandler.TriggerAlert)
-				}
 			}
 		}
 

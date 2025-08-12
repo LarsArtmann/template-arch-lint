@@ -21,7 +21,8 @@
       "Bash(CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags='-w -s' -o server-test ./cmd/server)",
       "Bash(APP_SERVER_PORT=9090 APP_LOGGING_LEVEL=debug timeout 5s go run example/main.go)",
       "Bash(APP_SERVER_PORT=9090 APP_LOGGING_LEVEL=debug go run example/main.go)",
-      "Bash($HOME/go/bin/govulncheck ./...)"
+      "Bash($HOME/go/bin/govulncheck ./...)",
+      "Bash(APP_SERVER_PORT=8082 gtimeout 10s go run cmd/server/main.go)"
     ],
     "deny": []
   }
