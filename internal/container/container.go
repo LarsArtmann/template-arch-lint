@@ -351,9 +351,8 @@ func (c *Container) registerHandlers() error {
 	do.Provide(c.injector, func(i *do.Injector) (*handlers.UserHandler, error) {
 		userService := do.MustInvoke[*services.UserService](i)
 		logger := do.MustInvoke[*slog.Logger](i)
-		prometheusMetrics := do.MustInvoke[*observability.PrometheusMetrics](i)
 
-		handler := handlers.NewUserHandler(userService, logger, prometheusMetrics)
+		handler := handlers.NewUserHandler(userService, logger)
 		return handler, nil
 	})
 

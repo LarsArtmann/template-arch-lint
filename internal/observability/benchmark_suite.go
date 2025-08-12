@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/LarsArtmann/template-arch-lint/internal/config"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
 // BenchmarkSuite provides comprehensive performance benchmarking
@@ -369,7 +369,7 @@ func (bs *BenchmarkSuite) runStressBenchmarks(ctx context.Context) error {
 // benchmarkUserList benchmarks user listing endpoint
 func (bs *BenchmarkSuite) benchmarkUserList(ctx context.Context, concurrency int) BenchmarkResult {
 	return bs.runConcurrentBenchmark(ctx, "user_list", concurrency, func(ctx context.Context) error {
-		_, err := bs.userService.ListUsers(ctx, 10, 0)
+		_, err := bs.userService.ListUsers(ctx)
 		return err
 	})
 }
@@ -379,7 +379,11 @@ func (bs *BenchmarkSuite) benchmarkUserCreate(ctx context.Context, concurrency i
 	return bs.runConcurrentBenchmark(ctx, "user_create", concurrency, func(ctx context.Context) error {
 		// Generate unique test data
 		testID := fmt.Sprintf("test-%d-%d", time.Now().UnixNano(), runtime.NumGoroutine())
-		_, err := bs.userService.CreateUser(ctx, testID, fmt.Sprintf("%s@example.com", testID), "Test User")
+		userID, err := values.NewUserID(testID)
+		if err != nil {
+			return err
+		}
+		_, err = bs.userService.CreateUser(ctx, userID, fmt.Sprintf("%s@example.com", testID), "Test User")
 		return err
 	})
 }
@@ -387,7 +391,11 @@ func (bs *BenchmarkSuite) benchmarkUserCreate(ctx context.Context, concurrency i
 // benchmarkUserGet benchmarks user retrieval
 func (bs *BenchmarkSuite) benchmarkUserGet(ctx context.Context, concurrency int) BenchmarkResult {
 	return bs.runConcurrentBenchmark(ctx, "user_get", concurrency, func(ctx context.Context) error {
-		_, err := bs.userService.GetUser(ctx, "test-user-1")
+		userID, err := values.NewUserID("test-user-1")
+		if err != nil {
+			return err
+		}
+		_, err = bs.userService.GetUser(ctx, userID)
 		return err
 	})
 }

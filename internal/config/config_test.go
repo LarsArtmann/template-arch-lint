@@ -237,6 +237,29 @@ func createValidTestConfig() Config {
 				},
 			},
 		},
+		Security: SecurityConfig{
+			CORS: CORSConfig{
+				AllowedOrigins: []string{"http://localhost:3000"},
+				AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+				AllowedHeaders: []string{"Content-Type", "Authorization"},
+			},
+			RateLimit: RateLimitConfig{
+				RequestsPerMinute: 100,
+				Burst:            20,
+			},
+		},
+		External: ExternalConfig{
+			CircuitBreaker: CircuitBreakerConfig{
+				Threshold: 5,
+			},
+		},
+		Backup: BackupConfig{
+			RetentionDays: 30,
+		},
+		Resources: ResourcesConfig{
+			MaxCPUCores:    4,
+			MaxConnections: 100,
+		},
 	}
 }
 

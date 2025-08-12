@@ -51,10 +51,7 @@ type PrometheusMetrics struct {
 	dbQueryDuration          *prometheus.HistogramVec
 	dbTransactionsTotal      *prometheus.CounterVec
 
-	// System metrics
-	goGoroutines             prometheus.Gauge
-	goMemoryUsage            *prometheus.GaugeVec
-	goGCDuration             prometheus.Gauge
+	// System metrics (using Prometheus built-in Go collectors)
 	goGCRuns                 prometheus.Counter
 
 	// SLA/SLI metrics
@@ -235,28 +232,7 @@ func (pm *PrometheusMetrics) initMetrics() {
 		[]string{"status"},
 	)
 
-	// System metrics
-	pm.goGoroutines = prometheus.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "go_goroutines",
-			Help: "Number of goroutines that currently exist",
-		},
-	)
-
-	pm.goMemoryUsage = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "go_memory_usage_bytes",
-			Help: "Go memory usage in bytes",
-		},
-		[]string{"type"},
-	)
-
-	pm.goGCDuration = prometheus.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "go_gc_duration_seconds",
-			Help: "Time spent in garbage collection",
-		},
-	)
+	// System metrics (using Prometheus built-in Go collectors)
 
 	pm.goGCRuns = prometheus.NewCounter(
 		prometheus.CounterOpts{
@@ -330,10 +306,7 @@ func (pm *PrometheusMetrics) registerMetrics() {
 		pm.dbQueryDuration,
 		pm.dbTransactionsTotal,
 
-		// System metrics
-		pm.goGoroutines,
-		pm.goMemoryUsage,
-		pm.goGCDuration,
+		// System metrics (using Prometheus built-in Go collectors)
 		pm.goGCRuns,
 
 		// SLA/SLI metrics
@@ -438,11 +411,8 @@ func (pm *PrometheusMetrics) startMetricsCollection(ctx context.Context) {
 
 // updateGoMetrics updates Go runtime metrics
 func (pm *PrometheusMetrics) updateGoMetrics() {
-	// This would typically use runtime.ReadMemStats()
-	// For now, we'll use placeholder values
-	pm.goGoroutines.Set(100) // placeholder
-	pm.goMemoryUsage.WithLabelValues("heap").Set(1024 * 1024) // placeholder
-	pm.goMemoryUsage.WithLabelValues("stack").Set(512 * 1024) // placeholder
+	// Go runtime metrics are now handled by Prometheus built-in collectors
+	// Only custom metrics (like goGCRuns) need to be updated here
 }
 
 // HTTPMiddleware creates a Gin middleware for HTTP metrics collection

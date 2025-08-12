@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/your-org/template-arch-lint/internal/config"
+	"github.com/LarsArtmann/template-arch-lint/internal/config"
 )
 
 // Example application demonstrating comprehensive configuration management
@@ -249,22 +249,14 @@ func setupHTTPServer(reloadableConfig *config.ReloadableConfig, secretsManager *
 	
 	// Setup middleware
 	configMiddleware := config.NewConfigMiddleware(reloadableConfig)
-	secretsMiddleware := config.NewSecretsMiddleware(secretsManager)
+	_ = config.NewSecretsMiddleware(secretsManager) // Available for use
 	driftMiddleware := config.NewDriftMiddleware(driftDetector)
 	
 	// Add a health check endpoint
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		cfg := reloadableConfig.GetConfig()
-		stats := reloadableConfig.GetStats()
-		driftStats := driftDetector.GetStats()
-		
-		health := map[string]interface{}{
-			"status":      "healthy",
-			"timestamp":   time.Now(),
-			"app":         cfg.App,
-			"config":      stats,
-			"drift":       driftStats,
-		}
+		_ = reloadableConfig.GetStats()  // Available for extended health check
+		_ = driftDetector.GetStats()     // Available for drift monitoring
 		
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
