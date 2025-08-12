@@ -12,7 +12,8 @@
       "Bash(staticcheck:*)",
       "Bash(errorlint:*)",
       "Bash(~/go/bin/errorlint:*)",
-      "WebFetch(domain:pkg.go.dev)"
+      "WebFetch(domain:pkg.go.dev)",
+      "Bash(pkill:*)"
     ],
     "deny": []
   }
