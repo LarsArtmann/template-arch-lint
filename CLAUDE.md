@@ -2,11 +2,23 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## 🎯 What This Project IS and IS NOT
 
-This is **template-arch-lint** - a comprehensive Go architecture and code quality enforcement template demonstrating enterprise-grade patterns. The project serves as both a working application and a reference template for Go projects requiring strict architectural boundaries and code quality standards.
+### ✅ **What This Project IS:**
+- **Go Linting Template**: Demonstrates enterprise-grade architecture and code quality enforcement
+- **Reference Implementation**: Shows Clean Architecture + DDD patterns in Go
+- **Configuration Library**: Provides `.go-arch-lint.yml`, `.golangci.yml`, and `justfile` for copy/paste use
+- **Simple HTMX Demo**: Basic web app with templ templates and SQLite database
+- **Educational Resource**: Learn proper Go architecture boundaries and functional programming patterns
 
-**Core Purpose**: Demonstrate and enforce Clean Architecture, Domain-Driven Design (DDD), and maximum code quality through automated linting and architectural validation.
+### ❌ **What This Project IS NOT:**
+- **Production Application**: Not meant for real business use - it's a template/demo
+- **Framework or Library**: Not installable via `go get` - copy configurations instead  
+- **Enterprise Platform**: Despite having monitoring/Docker/K8s - these are demos of over-engineering
+- **Complex Business Domain**: User CRUD is intentionally simple to focus on architecture
+
+### 🎯 **Core Purpose:**
+Copy the linting configurations (`.go-arch-lint.yml`, `.golangci.yml`, `justfile`) to your real projects to enforce architectural boundaries and code quality. The Go code demonstrates how to structure projects following these rules.
 
 ## Essential Commands
 
@@ -93,123 +105,48 @@ sqlc verify
 # Test: in-memory
 ```
 
-## Architecture Overview
+## Architecture (What the Linting Enforces)
 
-This project implements **Clean Architecture with Domain-Driven Design** using the following structure:
-
-### Layer Dependencies (Strictly Enforced)
+### Layer Dependencies (Strictly Enforced by `.go-arch-lint.yml`)
 ```
 Infrastructure → Application → Domain
 ```
 
-### Key Architectural Components
+### Key Layers
+- **Domain** (`internal/domain/`): Pure business logic, no external dependencies
+- **Application** (`internal/application/`): HTTP handlers, orchestrates domain + infrastructure  
+- **Infrastructure** (`internal/infrastructure/`): Database, external services
+- **Database** (`internal/db/`): SQLC-generated type-safe SQL code
 
-**Domain Layer** (`internal/domain/`):
-- **Entities**: Core business objects with behavior (`entities/user.go`)
-- **Value Objects**: Type-safe primitives (`values/user_id.go`, `values/email.go`)
-- **Repositories**: Abstract data access interfaces (`repositories/user_repository.go`)
-- **Services**: Complex business logic coordination (`services/user_service.go`)
-- **Errors**: Typed domain errors (`errors/domain_errors.go`)
+### Key Libraries Used
+- **gin + templ + HTMX**: HTTP server with type-safe templates
+- **sqlc**: Type-safe SQL code generation  
+- **samber/lo**: Functional programming (Filter, Map, Reduce)
+- **viper**: Configuration management
+- **Ginkgo/Gomega**: BDD testing
 
-**Application Layer** (`internal/application/`):
-- **Handlers**: HTTP request/response handling with gin + templ
-- **Middleware**: Cross-cutting concerns (logging, metrics, SLA tracking)
+## Important Files to Copy to Your Projects
 
-**Infrastructure Layer** (`internal/infrastructure/`):
-- **Persistence**: SQLC-generated database implementations
-- **Repositories**: Concrete repository implementations
+- **`.go-arch-lint.yml`**: Architecture boundary enforcement  
+- **`.golangci.yml`**: Maximum strictness code quality rules
+- **`justfile`**: Complete linting and development automation
+- **`sqlc.yaml`**: Type-safe SQL generation configuration
 
-**Database Layer** (`internal/db/`):
-- **SQLC Generated**: Type-safe database operations
-- **Schema**: SQL DDL in `sql/schema/`
-- **Queries**: SQL DML in `sql/queries/`
+## What the Linting Enforces
 
-### Technology Stack Integration
-
-**HTTP & Templates**:
-- **gin-gonic/gin**: HTTP routing and middleware
-- **a-h/templ**: Type-safe HTML templates (generate with `templ generate`)
-- **HTMX**: Progressive enhancement for dynamic UI
-
-**Data & Configuration**:
-- **sqlc**: Type-safe SQL code generation
-- **SQLite**: Database (via `github.com/mattn/go-sqlite3`)
-- **spf13/viper**: Configuration management with hot-reloading
-
-**Functional Programming**:
-- **samber/lo**: Functional utilities (Filter, Map, Reduce patterns extensively used)
-- **samber/mo**: Monads and functional abstractions (Result, Option, Either patterns)
-- **samber/do**: Dependency injection container
-
-**Testing**:
-- **Ginkgo/Gomega**: BDD-style testing framework
-- **testify**: Assertions and mocking
-
-**Observability**:
-- **OpenTelemetry**: Distributed tracing and metrics
-- **Prometheus**: Metrics collection (port 2112)
-
-## Critical Configuration Files
-
-### Architecture Enforcement
-- **`.go-arch-lint.yml`**: Defines component boundaries and dependency rules
-- **`.golangci.yml`**: Comprehensive code quality rules with maximum strictness
-- **`justfile`**: Complete build and linting automation
-
-### Database & Code Generation
-- **`sqlc.yaml`**: Type-safe SQL generation with custom UserID value object mapping
-- **`go.mod`**: Go 1.24+ with key dependencies
-
-### Template System
-- **`web/templates/`**: templ template components
-  - `layouts/`: Base page layouts
-  - `pages/`: Full page templates  
-  - `components/`: Reusable UI components
-
-## Development Patterns
-
-### Domain Modeling
-- Value objects enforce invariants at compile time
-- Entities contain business logic, not just data
-- Repository interfaces defined in domain, implemented in infrastructure
-- Use samber/lo for functional operations on collections
-
-### Error Handling
-- Typed domain errors using custom error types
-- Railway Oriented Programming with Result/Option patterns
-- No panic() usage - return errors explicitly
-
-### Testing Strategy
-- BDD tests using Ginkgo/Gomega for business logic
-- Unit tests for value objects and entities
-- Integration tests for repository implementations
-- Table-driven tests for complex scenarios
-
-### SQLC Integration
-- Custom type mapping for UserID value objects
-- Strict query validation rules (no SELECT *, require WHERE for DELETE)
-- JSON tags for API serialization
-- Prepared statements for performance
-
-## Architecture Violations to Avoid
-
-The `.go-arch-lint.yml` strictly enforces:
 - Domain layer cannot import infrastructure packages
-- Application handlers cannot directly import database packages
-- Infrastructure implements domain interfaces, never the reverse
-- Value objects and entities remain pure (minimal external dependencies)
+- No `interface{}`, `any`, or `panic()` usage (`.golangci.yml`)
+- Functional programming patterns with samber/lo
+- Type-safe database operations via SQLC
+- Value objects for domain primitives
 
-## Observability & Monitoring
+## Architecture Violations You'll Get
 
-- **Metrics**: Prometheus metrics on port 2112 (`/metrics`)
-- **Health Checks**: `/health/live` and `/health/ready` endpoints
-- **Profiling**: pprof endpoints available in development
-- **Tracing**: OpenTelemetry integration for distributed tracing
+Common violations the linters catch:
+- `domain-entities cannot depend on infrastructure` 
+- `🚨 BANNED: interface{} erases type safety`
+- `DELETE statements should include WHERE clauses`
+- Function too long (max 50 lines)
+- Cyclomatic complexity too high (max 10)
 
-## Container & Deployment
-
-- **Docker**: Multi-stage build with distroless runtime (~20MB image)
-- **Kubernetes**: Complete manifests in `k8s/` directory
-- **CI/CD**: GitHub Actions with security scanning and quality gates
-
-This codebase prioritizes architectural correctness, type safety, and functional programming patterns while maintaining practical simplicity for real-world usage.
+**Note**: The project includes extensive Docker/K8s/monitoring setup as examples of over-engineering to avoid in templates. Focus on the core linting configurations.
