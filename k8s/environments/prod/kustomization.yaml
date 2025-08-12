@@ -1,0 +1,166 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: template-arch-lint-prod
+  annotations:
+    description: "Production environment configuration for template-arch-lint"
+
+# Base configuration
+resources:
+- ../../base
+
+# Namespace for all resources
+namespace: template-arch-lint-prod
+
+# Name prefix for all resources (none for production)
+namePrefix: ""
+
+# Common labels for all resources
+labels:
+- pairs:
+    environment: production
+    tier: production
+    version: stable
+
+# Common annotations
+commonAnnotations:
+  environment: production
+  managed-by: kustomize
+
+# Image transformations - use specific version tags in production
+images:
+- name: template-arch-lint
+  newTag: v1.0.0
+  
+# Patches for production environment
+patches:
+# Production resource requirements
+- patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/limits/cpu
+      value: 1000m
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/limits/memory
+      value: 512Mi
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/cpu
+      value: 200m
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: 256Mi
+  target:
+    kind: Deployment
+    name: template-arch-lint
+
+# Production replica count
+- patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 5
+  target:
+    kind: Deployment
+    name: template-arch-lint
+
+# Production HPA configuration
+- patch: |-
+    - op: replace
+      path: /spec/minReplicas
+      value: 3
+    - op: replace
+      path: /spec/maxReplicas
+      value: 20
+    - op: replace
+      path: /spec/metrics/0/resource/target/averageUtilization
+      value: 60
+    - op: replace
+      path: /spec/metrics/1/resource/target/averageUtilization
+      value: 70
+  target:
+    kind: HorizontalPodAutoscaler
+    name: template-arch-lint
+
+# Production-specific ConfigMap patches
+- patch: |-
+    - op: replace
+      path: /data/APP_APP_ENVIRONMENT
+      value: production
+    - op: replace
+      path: /data/APP_LOGGING_LEVEL
+      value: warn
+    - op: replace
+      path: /data/APP_APP_DEBUG
+      value: "false"
+    - op: replace
+      path: /data/APP_OBSERVABILITY_SAMPLING_RATE
+      value: "0.01"
+    - op: replace
+      path: /data/APP_OBSERVABILITY_ENVIRONMENT
+      value: production
+    - op: replace
+      path: /data/APP_SERVER_READ_TIMEOUT
+      value: "10s"
+    - op: replace
+      path: /data/APP_SERVER_WRITE_TIMEOUT
+      value: "15s"
+    - op: replace
+      path: /data/APP_SERVER_GRACEFUL_SHUTDOWN_TIMEOUT
+      value: "60s"
+  target:
+    kind: ConfigMap
+    name: template-arch-lint-config
+
+# Production ingress configuration
+- patch: |-
+    - op: replace
+      path: /spec/rules/0/host
+      value: template-arch-lint.example.com
+    - op: replace
+      path: /spec/rules/1/host
+      value: api.template-arch-lint.example.com
+    - op: replace
+      path: /spec/tls/0/hosts/0
+      value: template-arch-lint.example.com
+    - op: replace
+      path: /spec/tls/0/hosts/1
+      value: api.template-arch-lint.example.com
+  target:
+    kind: Ingress
+    name: template-arch-lint
+
+# Production storage configuration
+- patch: |-
+    - op: replace
+      path: /spec/storageClassName
+      value: template-arch-lint-ssd
+    - op: replace
+      path: /spec/resources/requests/storage
+      value: 50Gi
+  target:
+    kind: PersistentVolumeClaim
+    name: template-arch-lint-data
+
+# Add production-specific security enhancements
+- patch: |-
+    - op: add
+      path: /spec/template/spec/containers/0/env/-
+      value:
+        name: GOMAXPROCS
+        value: "2"
+    - op: add
+      path: /spec/template/spec/containers/0/env/-
+      value:
+        name: GOGC
+        value: "100"
+  target:
+    kind: Deployment
+    name: template-arch-lint
+
+# Stricter Pod Disruption Budget for production
+- patch: |-
+    - op: replace
+      path: /spec/minAvailable
+      value: 2
+  target:
+    kind: PodDisruptionBudget
+    name: template-arch-lint

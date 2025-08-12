@@ -1,0 +1,207 @@
+groups:
+  - name: infrastructure.alerts
+    rules:
+      # Node/Container Resource Alerts
+      - alert: HighCPUUsage
+        expr: |
+          (100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: infrastructure
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+          runbook_url: "https://runbook.example.com/high-cpu-usage"
+
+      - alert: HighMemoryUsage
+        expr: |
+          ((node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: infrastructure
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+          runbook_url: "https://runbook.example.com/high-memory-usage"
+
+      - alert: HighDiskUsage
+        expr: |
+          ((node_filesystem_size_bytes - node_filesystem_avail_bytes) / node_filesystem_size_bytes) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: infrastructure
+        annotations:
+          summary: "High disk usage detected"
+          description: "Disk usage is {{ $value }}% on {{ $labels.instance }} filesystem {{ $labels.mountpoint }}"
+          runbook_url: "https://runbook.example.com/high-disk-usage"
+
+      # Network Alerts
+      - alert: HighNetworkTraffic
+        expr: |
+          rate(node_network_receive_bytes_total[5m]) / 1024 / 1024 > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: infrastructure
+        annotations:
+          summary: "High network traffic detected"
+          description: "Network receive rate is {{ $value }}MB/s on {{ $labels.instance }} interface {{ $labels.device }}"
+          runbook_url: "https://runbook.example.com/high-network-traffic"
+
+      # Container Specific Alerts
+      - alert: ContainerHighCPUUsage
+        expr: |
+          rate(container_cpu_usage_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: infrastructure
+        annotations:
+          summary: "Container high CPU usage detected"
+          description: "Container {{ $labels.name }} CPU usage is {{ $value }}%"
+          runbook_url: "https://runbook.example.com/container-high-cpu"
+
+      - alert: ContainerHighMemoryUsage
+        expr: |
+          (container_memory_usage_bytes / container_spec_memory_limit_bytes) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: infrastructure
+        annotations:
+          summary: "Container high memory usage detected"
+          description: "Container {{ $labels.name }} memory usage is {{ $value }}%"
+          runbook_url: "https://runbook.example.com/container-high-memory"
+
+      - alert: ContainerRestarting
+        expr: |
+          rate(container_last_seen[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: infrastructure
+        annotations:
+          summary: "Container is restarting frequently"
+          description: "Container {{ $labels.name }} has restarted {{ $value }} times in the last 5 minutes"
+          runbook_url: "https://runbook.example.com/container-restarting"
+
+      # Service Discovery Alerts
+      - alert: TargetDown
+        expr: |
+          up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: template-arch-lint
+          alert_type: infrastructure
+        annotations:
+          summary: "Monitoring target is down"
+          description: "{{ $labels.job }} {{ $labels.instance }} is down"
+          runbook_url: "https://runbook.example.com/target-down"
+
+      - alert: TooManyTargetsDown
+        expr: |
+          (count by(job) (up == 0) / count by(job) (up)) > 0.5
+        for: 5m
+        labels:
+          severity: critical
+          service: template-arch-lint
+          alert_type: infrastructure
+        annotations:
+          summary: "Too many targets are down"
+          description: "More than 50% of {{ $labels.job }} targets are down"
+          runbook_url: "https://runbook.example.com/too-many-targets-down"
+
+  - name: prometheus.alerts
+    rules:
+      # Prometheus Self-Monitoring
+      - alert: PrometheusConfigurationReloadFailure
+        expr: |
+          prometheus_config_last_reload_successful != 1
+        for: 1m
+        labels:
+          severity: critical
+          service: prometheus
+          alert_type: monitoring
+        annotations:
+          summary: "Prometheus configuration reload failed"
+          description: "Prometheus configuration reload has failed for {{ $labels.instance }}"
+          runbook_url: "https://runbook.example.com/prometheus-config-reload-failure"
+
+      - alert: PrometheusTSDBReloadFailure
+        expr: |
+          prometheus_tsdb_reloads_failures_total > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: prometheus
+          alert_type: monitoring
+        annotations:
+          summary: "Prometheus TSDB reload failed"
+          description: "Prometheus TSDB reload has failed for {{ $labels.instance }}"
+          runbook_url: "https://runbook.example.com/prometheus-tsdb-reload-failure"
+
+      - alert: PrometheusNotConnectedToAlertmanager
+        expr: |
+          prometheus_notifications_alertmanagers_discovered < 1
+        for: 1m
+        labels:
+          severity: critical
+          service: prometheus
+          alert_type: monitoring
+        annotations:
+          summary: "Prometheus not connected to Alertmanager"
+          description: "Prometheus {{ $labels.instance }} is not connected to any Alertmanager"
+          runbook_url: "https://runbook.example.com/prometheus-alertmanager-disconnected"
+
+      - alert: PrometheusRuleEvaluationFailure
+        expr: |
+          increase(prometheus_rule_evaluation_failures_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          service: prometheus
+          alert_type: monitoring
+        annotations:
+          summary: "Prometheus rule evaluation failed"
+          description: "Prometheus {{ $labels.instance }} has failed to evaluate {{ $value }} rules"
+          runbook_url: "https://runbook.example.com/prometheus-rule-evaluation-failure"
+
+      - alert: PrometheusTSDBCompactionsFailed
+        expr: |
+          increase(prometheus_tsdb_compactions_failed_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          service: prometheus
+          alert_type: monitoring
+        annotations:
+          summary: "Prometheus TSDB compactions failed"
+          description: "Prometheus {{ $labels.instance }} has failed {{ $value }} TSDB compactions"
+          runbook_url: "https://runbook.example.com/prometheus-tsdb-compactions-failed"
+
+      # Storage Alerts
+      - alert: PrometheusStorageSpaceLow
+        expr: |
+          (
+            prometheus_tsdb_lowest_timestamp_seconds - prometheus_tsdb_retention_limit_seconds
+          ) < 24 * 60 * 60
+        for: 5m
+        labels:
+          severity: warning
+          service: prometheus
+          alert_type: monitoring
+        annotations:
+          summary: "Prometheus storage space is low"
+          description: "Prometheus {{ $labels.instance }} storage will be full in less than 24 hours"
+          runbook_url: "https://runbook.example.com/prometheus-storage-low"

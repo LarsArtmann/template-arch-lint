@@ -33,7 +33,7 @@ sql:
       - "sql/schema"               # Directory containing schema files
     
     # === QUERY VALIDATION SETTINGS ===
-    strict_function_checks: true   # Validate SQL function existence
+    strict_function_checks: false   # Disable for SQLite datetime functions
     strict_order_by: true         # Prevent ambiguous ORDER BY columns
     
     # === DATABASE CONNECTION SETTINGS ===

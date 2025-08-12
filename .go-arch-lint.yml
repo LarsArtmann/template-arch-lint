@@ -51,6 +51,30 @@ components:
     in: internal/infrastructure/**
     
   # ========================================
+  # DATA ACCESS & PERSISTENCE
+  # ========================================
+  database:
+    in: internal/db/**
+    
+  # ========================================
+  # OBSERVABILITY & MONITORING
+  # ========================================
+  observability:
+    in: internal/observability/**
+    
+  # ========================================
+  # WEB LAYER - Templates & Static Assets
+  # ========================================
+  web-templates-components:
+    in: web/templates/components/**
+  web-templates-layouts:
+    in: web/templates/layouts/**
+  web-templates-pages:
+    in: web/templates/pages/**
+  web-static:
+    in: web/static/**
+    
+  # ========================================
   # CONFIGURATION & STARTUP
   # ========================================
   config:
@@ -117,11 +141,15 @@ deps:
       - domain-shared
       - domain-values
       - domain-errors
+      - web-templates-components
+      - web-templates-layouts
+      - web-templates-pages
       
   app-middleware:
     mayDependOn:
       - domain-shared
       - domain-errors
+      - observability
   
   # INFRASTRUCTURE LAYER - External integrations
   infrastructure:
@@ -131,6 +159,53 @@ deps:
       - domain-shared
       - domain-values
       - domain-errors
+      - database
+      
+  # DATA ACCESS & PERSISTENCE
+  database:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-shared
+      - domain-values
+      - domain-errors
+      
+  # OBSERVABILITY & MONITORING
+  observability:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-shared
+      - domain-errors
+      - domain-entities
+      - config
+      
+  # WEB LAYER - Templates & Static Assets
+  web-templates-components:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-shared
+      - domain-values
+      
+  web-templates-layouts:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-shared
+      - domain-values
+      
+  web-templates-pages:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-shared
+      - domain-values
+      - web-templates-components
+      - web-templates-layouts
+      
+  web-static:
+    anyVendorDeps: true
+    mayDependOn: []
   
   # CONFIGURATION & STARTUP
   config:
@@ -169,6 +244,8 @@ exclude:
   - "**/test/**"
   - "**/tests/**"
   - "test/**"
+  - "integration-test/**"
+  - "**/integration-test/**"
   
   # Build and vendor
   - "**/vendor/**"

@@ -1,0 +1,114 @@
+# Container Registry Cleanup and Retention Policy
+# Automated cleanup of old container images to manage registry storage
+name: Registry Cleanup
+
+on:
+  schedule:
+    # Run daily at 2:00 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run mode (preview only)'
+        required: false
+        default: 'true'
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  cleanup-registry:
+    name: 🧹 Cleanup Container Registry
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔑 Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🧹 Delete old container images
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ env.IMAGE_NAME }}
+          package-type: container
+          min-versions-to-keep: 10
+          delete-only-untagged-versions: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+          dry-run: ${{ inputs.dry_run || true }}
+
+      - name: 🧹 Delete untagged container images
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ env.IMAGE_NAME }}
+          package-type: container
+          min-versions-to-keep: 0
+          delete-only-untagged-versions: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          dry-run: ${{ inputs.dry_run || false }}
+
+      - name: 📊 Cleanup summary
+        run: |
+          echo "## 🧹 Registry Cleanup Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### Cleanup Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- **Registry:** ${{ env.REGISTRY }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Repository:** ${{ env.IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Minimum versions to keep:** 10" >> $GITHUB_STEP_SUMMARY
+          echo "- **Delete untagged:** Yes" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dry run mode:** ${{ inputs.dry_run || 'true (scheduled run)' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Retention Policy" >> $GITHUB_STEP_SUMMARY
+          echo "- Keep latest 10 tagged versions" >> $GITHUB_STEP_SUMMARY
+          echo "- Keep all images from main/master branch" >> $GITHUB_STEP_SUMMARY
+          echo "- Remove untagged images immediately" >> $GITHUB_STEP_SUMMARY
+          echo "- Remove PR images after 7 days" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Schedule" >> $GITHUB_STEP_SUMMARY
+          echo "- **Automated cleanup:** Daily at 2:00 AM UTC" >> $GITHUB_STEP_SUMMARY
+          echo "- **Manual cleanup:** Available via workflow dispatch" >> $GITHUB_STEP_SUMMARY
+
+  cleanup-pr-images:
+    name: 🧹 Cleanup PR Images
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔑 Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🧹 Delete old PR images (7+ days)
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ env.IMAGE_NAME }}
+          package-type: container
+          min-versions-to-keep: 0
+          ignore-versions: '^(main|master|latest|v\d+\.\d+\.\d+).*'
+          delete-only-pre-release-versions: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          dry-run: ${{ inputs.dry_run || true }}
+
+      - name: 📊 PR cleanup summary
+        run: |
+          echo "## 🧹 PR Images Cleanup Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### PR Image Retention Policy" >> $GITHUB_STEP_SUMMARY
+          echo "- **Keep main/master images:** Forever" >> $GITHUB_STEP_SUMMARY
+          echo "- **Keep release images:** Forever (v*.*.*)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Keep PR images:** 7 days" >> $GITHUB_STEP_SUMMARY
+          echo "- **Keep development images:** 3 days" >> $GITHUB_STEP_SUMMARY

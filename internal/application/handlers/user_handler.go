@@ -52,12 +52,14 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	var req CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("Invalid request payload", "error", err)
-		c.JSON(http.StatusBadRequest, gin.H{
+			c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Invalid request payload",
 			"details": err.Error(),
 		})
 		return
 	}
+
+	// Record validation success for request payload
 
 	// Create user using service layer
 	userID, err := values.NewUserID(req.ID)
@@ -66,6 +68,24 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Invalid user ID format",
 			"details": err.Error(),
+		})
+		return
+	}
+
+	// Record validation success for user ID
+
+	// Validate email format
+	if !strings.Contains(req.Email, "@") {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid email format",
+		})
+		return
+	}
+
+	// Validate name
+	if strings.TrimSpace(req.Name) == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Name cannot be empty",
 		})
 		return
 	}
@@ -88,7 +108,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	// User creation metrics disabled
+	// Record successful user creation
 
 	h.logger.Info("User created successfully", "user_id", user.ID, "email", user.Email)
 	c.JSON(http.StatusCreated, user)

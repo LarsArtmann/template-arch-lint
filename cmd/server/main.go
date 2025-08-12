@@ -4,6 +4,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -30,6 +31,16 @@ const (
 )
 
 func main() {
+	// Parse command line flags
+	healthCheck := flag.Bool("health-check", false, "Perform health check and exit")
+	flag.Parse()
+
+	// Handle health check flag
+	if *healthCheck {
+		performHealthCheck()
+		return
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -169,6 +180,33 @@ func performGracefulShutdown(
 
 	logger.Info("Server shutdown completed successfully")
 	return nil
+}
+
+// performHealthCheck performs a simple health check for Docker health checks
+func performHealthCheck() {
+	// For Docker health checks, we verify basic application health
+	// This includes config loading and basic dependency validation
+	
+	// Try to load config
+	cfg, err := config.LoadConfig("")
+	if err != nil {
+		slog.Error("Health check failed: unable to load config", "error", err)
+		os.Exit(ExitCodeFailure)
+	}
+	
+	// Validate that we can create a basic container (dependency injection)
+	diContainer := container.New()
+	if err := diContainer.RegisterAll(); err != nil {
+		slog.Error("Health check failed: unable to register dependencies", "error", err)
+		os.Exit(ExitCodeFailure)
+	}
+	
+	// Clean up
+	if err := diContainer.Shutdown(); err != nil {
+		slog.Error("Health check warning: unable to shutdown container cleanly", "error", err)
+	}
+	
+	slog.Info("Health check passed", "service", cfg.App.Name, "version", cfg.App.Version)
 }
 
 // init sets up initial configuration before main runs

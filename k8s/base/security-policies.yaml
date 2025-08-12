@@ -1,0 +1,174 @@
+# Pod Security Policy (PSP) - deprecated in k8s 1.25+, use Pod Security Standards instead
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: template-arch-lint
+  labels:
+    app.kubernetes.io/name: template-arch-lint
+    app.kubernetes.io/instance: template-arch-lint
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: security-policy
+    app.kubernetes.io/part-of: template-arch-lint
+  annotations:
+    description: "Pod Security Policy for template-arch-lint"
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'runtime/default'
+    seccomp.security.alpha.kubernetes.io/defaultProfileName: 'runtime/default'
+spec:
+  # Privilege and access controls
+  privileged: false
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+    - ALL
+  
+  # Host controls
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  hostPorts:
+  - min: 0
+    max: 0
+  
+  # Volume controls
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+  
+  # Run as controls
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  runAsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  
+  # SELinux controls
+  seLinux:
+    rule: 'RunAsAny'
+  
+  # Supplemental groups controls
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  
+  # File system controls
+  fsGroup:
+    rule: 'RunAsAny'
+  readOnlyRootFilesystem: true
+
+---
+# Network Policy for template-arch-lint
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: template-arch-lint
+  namespace: template-arch-lint
+  labels:
+    app.kubernetes.io/name: template-arch-lint
+    app.kubernetes.io/instance: template-arch-lint
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: network-policy
+    app.kubernetes.io/part-of: template-arch-lint
+  annotations:
+    description: "Network policy for template-arch-lint application"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: template-arch-lint
+      app.kubernetes.io/instance: template-arch-lint
+  
+  policyTypes:
+  - Ingress
+  - Egress
+  
+  # Ingress rules
+  ingress:
+  # Allow traffic from ingress controllers
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 8080
+  
+  # Allow traffic from monitoring/observability namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: observability
+    ports:
+    - protocol: TCP
+      port: 2112  # Prometheus metrics port
+  
+  # Allow health checks from within the same namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: template-arch-lint
+    ports:
+    - protocol: TCP
+      port: 8080
+  
+  # Egress rules
+  egress:
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  
+  # Allow HTTPS for external API calls
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  
+  # Allow HTTP for internal services (if needed)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 80
+  
+  # Allow observability stack communication
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: observability
+    ports:
+    - protocol: TCP
+      port: 4318  # OTLP
+    - protocol: TCP
+      port: 9090  # Prometheus
+    - protocol: TCP
+      port: 14268 # Jaeger
+
+---
+# Pod Disruption Budget
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: template-arch-lint
+  namespace: template-arch-lint
+  labels:
+    app.kubernetes.io/name: template-arch-lint
+    app.kubernetes.io/instance: template-arch-lint
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: disruption-budget
+    app.kubernetes.io/part-of: template-arch-lint
+  annotations:
+    description: "Pod Disruption Budget for template-arch-lint"
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: template-arch-lint
+      app.kubernetes.io/instance: template-arch-lint

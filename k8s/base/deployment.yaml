@@ -1,0 +1,182 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: template-arch-lint
+  namespace: template-arch-lint
+  labels:
+    app.kubernetes.io/name: template-arch-lint
+    app.kubernetes.io/instance: template-arch-lint
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: web-server
+    app.kubernetes.io/part-of: template-arch-lint
+    app.kubernetes.io/managed-by: kubernetes
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    description: "Go web application with HTMX frontend"
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: template-arch-lint
+      app.kubernetes.io/instance: template-arch-lint
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: template-arch-lint
+        app.kubernetes.io/instance: template-arch-lint
+        app.kubernetes.io/version: "1.0.0"
+        app.kubernetes.io/component: web-server
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "2112"
+        prometheus.io/path: "/metrics"
+    spec:
+      # Security Context for the Pod
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      
+      # Service Account
+      serviceAccountName: template-arch-lint
+      
+      # Container Configuration
+      containers:
+      - name: template-arch-lint
+        image: template-arch-lint:latest
+        imagePullPolicy: IfNotPresent
+        
+        # Security Context for the Container
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 65532
+          runAsGroup: 65532
+          capabilities:
+            drop:
+            - ALL
+        
+        # Ports
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        - name: metrics
+          containerPort: 2112
+          protocol: TCP
+        
+        # Environment Variables
+        env:
+        - name: APP_SERVER_HOST
+          value: "0.0.0.0"
+        - name: APP_SERVER_PORT
+          value: "8080"
+        - name: APP_APP_ENVIRONMENT
+          value: "production"
+        - name: APP_LOGGING_FORMAT
+          value: "json"
+        - name: APP_LOGGING_OUTPUT
+          value: "stdout"
+        
+        # ConfigMap and Secret References
+        envFrom:
+        - configMapRef:
+            name: template-arch-lint-config
+        - secretRef:
+            name: template-arch-lint-secrets
+            optional: true
+        
+        # Resource Limits and Requests
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        
+        # Health Probes
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+        
+        startupProbe:
+          httpGet:
+            path: /health/live
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 30
+        
+        # Volume Mounts
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: data
+          mountPath: /data
+        - name: config
+          mountPath: /etc/template-arch-lint
+          readOnly: true
+      
+      # Volumes
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 100Mi
+      - name: data
+        emptyDir:
+          sizeLimit: 1Gi
+      - name: config
+        configMap:
+          name: template-arch-lint-config
+          defaultMode: 0644
+      
+      # Pod Disruption Budget and Affinity
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: template-arch-lint
+              topologyKey: kubernetes.io/hostname
+      
+      # Termination Grace Period
+      terminationGracePeriodSeconds: 30
+      
+      # DNS Policy
+      dnsPolicy: ClusterFirst
+      
+      # Restart Policy
+      restartPolicy: Always

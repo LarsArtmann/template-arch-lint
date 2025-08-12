@@ -25,6 +25,7 @@
 | **🚫 Type Safety Mandate** | Zero interface{}/any usage | -90% runtime type errors |
 | **📁 Filesystem Compliance** | Cross-platform compatibility | -100% deployment failures |
 | **🔧 Complete Automation** | Integrated CI/CD pipeline | -75% manual review time |
+| **🐳 Container Ready** | Production-grade Docker setup | Zero deployment complexity |
 
 ### 🚨 **ENTERPRISE PROBLEM SOLVED**
 
@@ -74,7 +75,25 @@ cd /path/to/your/project
 just lint
 ```
 
-### 3. **Immediate Results**
+### 3. **🐳 Docker Quick Start** (Alternative)
+```bash
+# Start complete development environment with observability stack
+just docker-dev-detached
+
+# Access services:
+# - Application: http://localhost:8080
+# - Grafana: http://localhost:3000 (admin/admin)
+# - Prometheus: http://localhost:9090  
+# - Jaeger UI: http://localhost:16686
+
+# Test Docker image
+just docker-test
+
+# Stop environment
+just docker-stop
+```
+
+### 4. **Immediate Results**
 ```bash
 📁 FILENAME VERIFICATION
 ✅ No problematic filenames found!
@@ -703,6 +722,13 @@ just clean          # Clean generated files and reports
 just stats          # Show project statistics
 just version        # Show tool versions
 just help           # Show all available commands
+
+# 🐳 Docker commands
+just docker-test         # Build and test Docker image
+just docker-dev-detached # Start full development environment
+just docker-stop         # Stop development environment
+just docker-clean        # Clean up Docker resources
+just docker-security     # Security scan Docker image
 ```
 
 ### 🏆 **Recognition**

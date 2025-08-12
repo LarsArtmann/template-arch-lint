@@ -1,0 +1,213 @@
+groups:
+  - name: application.alerts
+    rules:
+      # High Error Rate Alert
+      - alert: HighErrorRate
+        expr: |
+          (
+            rate(http_requests_total{status_code=~"5.."}[5m]) /
+            rate(http_requests_total[5m])
+          ) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: template-arch-lint
+          alert_type: availability
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.job }} {{ $labels.instance }}"
+          runbook_url: "https://runbook.example.com/high-error-rate"
+
+      # High Response Time Alert
+      - alert: HighResponseTime
+        expr: |
+          histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1.0
+        for: 3m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: performance
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s for {{ $labels.job }} {{ $labels.instance }}"
+          runbook_url: "https://runbook.example.com/high-response-time"
+
+      # Low Request Rate (Possible Outage)
+      - alert: LowRequestRate
+        expr: |
+          rate(http_requests_total[5m]) < 1
+        for: 5m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: availability
+        annotations:
+          summary: "Low request rate detected"
+          description: "Request rate is {{ $value }} requests/second for {{ $labels.job }} {{ $labels.instance }}"
+          runbook_url: "https://runbook.example.com/low-request-rate"
+
+      # Application Instance Down
+      - alert: ApplicationDown
+        expr: |
+          up{job="template-arch-lint"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: template-arch-lint
+          alert_type: availability
+        annotations:
+          summary: "Application instance is down"
+          description: "{{ $labels.job }} {{ $labels.instance }} has been down for more than 1 minute"
+          runbook_url: "https://runbook.example.com/application-down"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: |
+          go_memory_usage_bytes{type="heap"} / (1024 * 1024) > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: resource
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}MB for {{ $labels.job }} {{ $labels.instance }}"
+          runbook_url: "https://runbook.example.com/high-memory-usage"
+
+      # High Goroutine Count
+      - alert: HighGoroutineCount
+        expr: |
+          go_goroutines > 1000
+        for: 5m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: resource
+        annotations:
+          summary: "High goroutine count detected"
+          description: "Goroutine count is {{ $value }} for {{ $labels.job }} {{ $labels.instance }}"
+          runbook_url: "https://runbook.example.com/high-goroutine-count"
+
+  - name: database.alerts
+    rules:
+      # Database Connection Pool Exhaustion
+      - alert: DatabaseConnectionPoolHigh
+        expr: |
+          db_connections_active / (db_connections_active + db_connections_idle) > 0.8
+        for: 3m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: database
+        annotations:
+          summary: "Database connection pool usage high"
+          description: "Database connection pool usage is {{ $value | humanizePercentage }} for {{ $labels.job }} {{ $labels.instance }}"
+          runbook_url: "https://runbook.example.com/db-connection-pool"
+
+      # Long Running Database Queries
+      - alert: SlowDatabaseQueries
+        expr: |
+          histogram_quantile(0.95, rate(db_query_duration_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: database
+        annotations:
+          summary: "Slow database queries detected"
+          description: "95th percentile query time is {{ $value }}s for {{ $labels.job }} {{ $labels.instance }}"
+          runbook_url: "https://runbook.example.com/slow-db-queries"
+
+      # Database Error Rate
+      - alert: HighDatabaseErrorRate
+        expr: |
+          (
+            rate(db_queries_total{status="error"}[5m]) /
+            rate(db_queries_total[5m])
+          ) > 0.02
+        for: 2m
+        labels:
+          severity: critical
+          service: template-arch-lint
+          alert_type: database
+        annotations:
+          summary: "High database error rate detected"
+          description: "Database error rate is {{ $value | humanizePercentage }} for {{ $labels.job }} {{ $labels.instance }}"
+          runbook_url: "https://runbook.example.com/high-db-error-rate"
+
+  - name: business.alerts
+    rules:
+      # User Creation Rate Drop
+      - alert: UserCreationRateDrop
+        expr: |
+          rate(user_created_total[1h]) < rate(user_created_total[1h] offset 24h) * 0.5
+        for: 30m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: business
+        annotations:
+          summary: "User creation rate has dropped significantly"
+          description: "Current user creation rate is {{ $value }} users/hour, which is 50% lower than yesterday"
+          runbook_url: "https://runbook.example.com/user-creation-drop"
+
+      # High User Validation Failure Rate
+      - alert: HighUserValidationFailureRate
+        expr: |
+          (
+            rate(user_validation_total{status="failed"}[5m]) /
+            rate(user_validation_total[5m])
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: business
+        annotations:
+          summary: "High user validation failure rate"
+          description: "User validation failure rate is {{ $value | humanizePercentage }} for {{ $labels.job }} {{ $labels.instance }}"
+          runbook_url: "https://runbook.example.com/user-validation-failures"
+
+  - name: sla.alerts
+    rules:
+      # SLA Availability Breach
+      - alert: SLAAvailabilityBreach
+        expr: |
+          sla_availability_ratio < 0.995
+        for: 1m
+        labels:
+          severity: critical
+          service: template-arch-lint
+          alert_type: sla
+        annotations:
+          summary: "SLA availability breach"
+          description: "SLA availability is {{ $value | humanizePercentage }} for {{ $labels.service }} {{ $labels.sla_tier }}"
+          runbook_url: "https://runbook.example.com/sla-availability-breach"
+
+      # SLA Error Budget Critical
+      - alert: SLAErrorBudgetCritical
+        expr: |
+          sla_error_budget_ratio < 0.1
+        for: 1m
+        labels:
+          severity: critical
+          service: template-arch-lint
+          alert_type: sla
+        annotations:
+          summary: "SLA error budget critically low"
+          description: "SLA error budget is {{ $value | humanizePercentage }} remaining for {{ $labels.service }} {{ $labels.sla_tier }}"
+          runbook_url: "https://runbook.example.com/sla-error-budget-critical"
+
+      # SLA Error Budget High Burn Rate
+      - alert: SLAErrorBudgetHighBurnRate
+        expr: |
+          sla_error_budget_burn_rate > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: template-arch-lint
+          alert_type: sla
+        annotations:
+          summary: "High SLA error budget burn rate"
+          description: "SLA error budget burn rate is {{ $value }}x for {{ $labels.service }} {{ $labels.sla_tier }}"
+          runbook_url: "https://runbook.example.com/sla-high-burn-rate"

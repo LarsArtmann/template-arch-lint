@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -15,6 +16,13 @@ type Config struct {
 	Logging      LoggingConfig      `mapstructure:"logging" validate:"required"`
 	App          AppConfig          `mapstructure:"app" validate:"required"`
 	Observability ObservabilityConfig `mapstructure:"observability" validate:"required"`
+	Features     FeaturesConfig     `mapstructure:"features"`
+	Security     SecurityConfig     `mapstructure:"security"`
+	Health       HealthConfig       `mapstructure:"health"`
+	Cache        CacheConfig        `mapstructure:"cache"`
+	External     ExternalConfig     `mapstructure:"external"`
+	Backup       BackupConfig       `mapstructure:"backup"`
+	Resources    ResourcesConfig    `mapstructure:"resources"`
 }
 
 // ServerConfig contains HTTP server configuration
@@ -39,7 +47,7 @@ type DatabaseConfig struct {
 
 // LoggingConfig contains logging configuration
 type LoggingConfig struct {
-	Level  string `mapstructure:"level" validate:"required,oneof=debug info warn error"`
+	Level  string `mapstructure:"level" validate:"required,valid_log_level"`
 	Format string `mapstructure:"format" validate:"required,oneof=json text"`
 	Output string `mapstructure:"output" validate:"required"`
 }
@@ -48,7 +56,7 @@ type LoggingConfig struct {
 type AppConfig struct {
 	Name        string `mapstructure:"name" validate:"required"`
 	Version     string `mapstructure:"version" validate:"required"`
-	Environment string `mapstructure:"environment" validate:"required,oneof=development staging production"`
+	Environment string `mapstructure:"environment" validate:"required,valid_environment"`
 	Debug       bool   `mapstructure:"debug"`
 }
 
@@ -110,6 +118,108 @@ type JaegerConfig struct {
 	Endpoint string `mapstructure:"endpoint"`
 }
 
+// FeaturesConfig contains feature flag configuration
+type FeaturesConfig struct {
+	EnableDebugEndpoints  bool `mapstructure:"enable_debug_endpoints"`
+	EnableProfiling       bool `mapstructure:"enable_profiling"`
+	EnableHotReload       bool `mapstructure:"enable_hot_reload"`
+	EnableCORS            bool `mapstructure:"enable_cors"`
+	EnableRequestLogging  bool `mapstructure:"enable_request_logging"`
+	EnableQueryLogging    bool `mapstructure:"enable_query_logging"`
+	EnableMetricsDebug    bool `mapstructure:"enable_metrics_debug"`
+	EnableBetaFeatures    bool `mapstructure:"enable_beta_features"`
+	EnableLoadTesting     bool `mapstructure:"enable_load_testing"`
+}
+
+// SecurityConfig contains security-related configuration
+type SecurityConfig struct {
+	EnableAuth        bool             `mapstructure:"enable_auth"`
+	EnableRateLimit   bool             `mapstructure:"enable_rate_limiting"`
+	CORS              CORSConfig       `mapstructure:"cors"`
+	RateLimit         RateLimitConfig  `mapstructure:"rate_limit"`
+	TLS               TLSConfig        `mapstructure:"tls"`
+	APIKeys           APIKeysConfig    `mapstructure:"api_keys"`
+	RequestSizeLimit  string           `mapstructure:"request_size_limit"`
+}
+
+// CORSConfig contains CORS configuration
+type CORSConfig struct {
+	AllowedOrigins   []string `mapstructure:"allowed_origins" validate:"required"`
+	AllowedMethods   []string `mapstructure:"allowed_methods" validate:"required"`
+	AllowedHeaders   []string `mapstructure:"allowed_headers" validate:"required"`
+	AllowCredentials bool     `mapstructure:"allow_credentials"`
+}
+
+// RateLimitConfig contains rate limiting configuration
+type RateLimitConfig struct {
+	RequestsPerMinute int `mapstructure:"requests_per_minute" validate:"min=1"`
+	Burst             int `mapstructure:"burst" validate:"min=1"`
+}
+
+// TLSConfig contains TLS configuration
+type TLSConfig struct {
+	Enabled    bool   `mapstructure:"enabled"`
+	CertFile   string `mapstructure:"cert_file"`
+	KeyFile    string `mapstructure:"key_file"`
+	MinVersion string `mapstructure:"min_version" validate:"omitempty,oneof=1.0 1.1 1.2 1.3"`
+}
+
+// APIKeysConfig contains API key configuration
+type APIKeysConfig struct {
+	Enabled        bool          `mapstructure:"enabled"`
+	HeaderName     string        `mapstructure:"header_name" validate:"required_if=Enabled true"`
+	RotateInterval time.Duration `mapstructure:"rotate_interval"`
+}
+
+// HealthConfig contains health check configuration
+type HealthConfig struct {
+	Enabled                bool          `mapstructure:"enabled"`
+	Endpoint               string        `mapstructure:"endpoint" validate:"required_if=Enabled true"`
+	Timeout                time.Duration `mapstructure:"timeout"`
+	CheckDatabase          bool          `mapstructure:"check_database"`
+	CheckExternalServices  bool          `mapstructure:"check_external_services"`
+}
+
+// CacheConfig contains cache configuration
+type CacheConfig struct {
+	Enabled     bool          `mapstructure:"enabled"`
+	RedisURL    string        `mapstructure:"redis_url" validate:"required_if=Enabled true"`
+	DefaultTTL  time.Duration `mapstructure:"default_ttl"`
+	MaxMemory   string        `mapstructure:"max_memory"`
+	ClusterMode bool          `mapstructure:"cluster_mode"`
+}
+
+// ExternalConfig contains external service configuration
+type ExternalConfig struct {
+	APITimeout      time.Duration        `mapstructure:"api_timeout"`
+	RetryAttempts   int                  `mapstructure:"retry_attempts" validate:"min=0,max=10"`
+	CircuitBreaker  CircuitBreakerConfig `mapstructure:"circuit_breaker"`
+}
+
+// CircuitBreakerConfig contains circuit breaker configuration
+type CircuitBreakerConfig struct {
+	Enabled   bool          `mapstructure:"enabled"`
+	Threshold int           `mapstructure:"threshold" validate:"min=1"`
+	Timeout   time.Duration `mapstructure:"timeout"`
+}
+
+// BackupConfig contains backup configuration
+type BackupConfig struct {
+	Enabled       bool   `mapstructure:"enabled"`
+	Schedule      string `mapstructure:"schedule" validate:"required_if=Enabled true"`
+	RetentionDays int    `mapstructure:"retention_days" validate:"min=1"`
+	S3Bucket      string `mapstructure:"s3_bucket" validate:"required_if=Enabled true"`
+}
+
+// ResourcesConfig contains resource limits configuration
+type ResourcesConfig struct {
+	MaxMemory       string        `mapstructure:"max_memory"`
+	MaxCPUCores     int           `mapstructure:"max_cpu_cores" validate:"min=1"`
+	MaxConnections  int           `mapstructure:"max_connections" validate:"min=1"`
+	RequestTimeout  time.Duration `mapstructure:"request_timeout"`
+	MaxRequestSize  string        `mapstructure:"max_request_size"`
+}
+
 // LoadConfig loads configuration from file and environment variables
 func LoadConfig(configPath string) (*Config, error) {
 	// Set default values
@@ -167,7 +277,28 @@ func setupEnvironmentBindings() error {
 	if err := bindAppEnvVars(); err != nil {
 		return err
 	}
-	return bindObservabilityEnvVars()
+	if err := bindObservabilityEnvVars(); err != nil {
+		return err
+	}
+	if err := bindFeaturesEnvVars(); err != nil {
+		return err
+	}
+	if err := bindSecurityEnvVars(); err != nil {
+		return err
+	}
+	if err := bindHealthEnvVars(); err != nil {
+		return err
+	}
+	if err := bindCacheEnvVars(); err != nil {
+		return err
+	}
+	if err := bindExternalEnvVars(); err != nil {
+		return err
+	}
+	if err := bindBackupEnvVars(); err != nil {
+		return err
+	}
+	return bindResourcesEnvVars()
 }
 
 // bindServerEnvVars binds server-related environment variables
@@ -340,13 +471,322 @@ func setDefaults() {
 	// Jaeger exporter defaults
 	viper.SetDefault("observability.exporters.jaeger.enabled", false)
 	viper.SetDefault("observability.exporters.jaeger.endpoint", "http://localhost:14268/api/traces")
+
+	// Features defaults
+	viper.SetDefault("features.enable_debug_endpoints", false)
+	viper.SetDefault("features.enable_profiling", false)
+	viper.SetDefault("features.enable_hot_reload", false)
+	viper.SetDefault("features.enable_cors", true)
+	viper.SetDefault("features.enable_request_logging", false)
+	viper.SetDefault("features.enable_query_logging", false)
+	viper.SetDefault("features.enable_metrics_debug", false)
+	viper.SetDefault("features.enable_beta_features", false)
+	viper.SetDefault("features.enable_load_testing", false)
+
+	// Security defaults
+	viper.SetDefault("security.enable_auth", false)
+	viper.SetDefault("security.enable_rate_limiting", false)
+	viper.SetDefault("security.cors.allowed_origins", []string{"*"})
+	viper.SetDefault("security.cors.allowed_methods", []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
+	viper.SetDefault("security.cors.allowed_headers", []string{"*"})
+	viper.SetDefault("security.cors.allow_credentials", false)
+	viper.SetDefault("security.rate_limit.requests_per_minute", 60)
+	viper.SetDefault("security.rate_limit.burst", 10)
+	viper.SetDefault("security.tls.enabled", false)
+	viper.SetDefault("security.tls.min_version", "1.2")
+	viper.SetDefault("security.api_keys.enabled", false)
+	viper.SetDefault("security.api_keys.header_name", "X-API-Key")
+	viper.SetDefault("security.api_keys.rotate_interval", "24h")
+	viper.SetDefault("security.request_size_limit", "10MB")
+
+	// Health defaults
+	viper.SetDefault("health.enabled", true)
+	viper.SetDefault("health.endpoint", "/health")
+	viper.SetDefault("health.timeout", "5s")
+	viper.SetDefault("health.check_database", true)
+	viper.SetDefault("health.check_external_services", false)
+
+	// Cache defaults
+	viper.SetDefault("cache.enabled", false)
+	viper.SetDefault("cache.default_ttl", "1h")
+	viper.SetDefault("cache.max_memory", "256mb")
+	viper.SetDefault("cache.cluster_mode", false)
+
+	// External defaults
+	viper.SetDefault("external.api_timeout", "30s")
+	viper.SetDefault("external.retry_attempts", 3)
+	viper.SetDefault("external.circuit_breaker.enabled", true)
+	viper.SetDefault("external.circuit_breaker.threshold", 5)
+	viper.SetDefault("external.circuit_breaker.timeout", "60s")
+
+	// Backup defaults
+	viper.SetDefault("backup.enabled", false)
+	viper.SetDefault("backup.retention_days", 30)
+
+	// Resources defaults
+	viper.SetDefault("resources.max_memory", "512MB")
+	viper.SetDefault("resources.max_cpu_cores", 1)
+	viper.SetDefault("resources.max_connections", 1000)
+	viper.SetDefault("resources.request_timeout", "30s")
+	viper.SetDefault("resources.max_request_size", "10MB")
+}
+
+// bindFeaturesEnvVars binds features-related environment variables
+func bindFeaturesEnvVars() error {
+	featuresBindings := map[string]string{
+		"features.enable_debug_endpoints":  "APP_FEATURES_ENABLE_DEBUG_ENDPOINTS",
+		"features.enable_profiling":        "APP_FEATURES_ENABLE_PROFILING",
+		"features.enable_hot_reload":       "APP_FEATURES_ENABLE_HOT_RELOAD",
+		"features.enable_cors":             "APP_FEATURES_ENABLE_CORS",
+		"features.enable_request_logging":  "APP_FEATURES_ENABLE_REQUEST_LOGGING",
+		"features.enable_query_logging":    "APP_FEATURES_ENABLE_QUERY_LOGGING",
+		"features.enable_metrics_debug":    "APP_FEATURES_ENABLE_METRICS_DEBUG",
+		"features.enable_beta_features":    "APP_FEATURES_ENABLE_BETA_FEATURES",
+		"features.enable_load_testing":     "APP_FEATURES_ENABLE_LOAD_TESTING",
+	}
+	return bindEnvVars(featuresBindings, "features")
+}
+
+// bindSecurityEnvVars binds security-related environment variables
+func bindSecurityEnvVars() error {
+	securityBindings := map[string]string{
+		"security.enable_auth":                      "APP_SECURITY_ENABLE_AUTH",
+		"security.enable_rate_limiting":             "APP_SECURITY_ENABLE_RATE_LIMITING",
+		"security.cors.allowed_origins":             "APP_SECURITY_CORS_ALLOWED_ORIGINS",
+		"security.cors.allowed_methods":             "APP_SECURITY_CORS_ALLOWED_METHODS",
+		"security.cors.allowed_headers":             "APP_SECURITY_CORS_ALLOWED_HEADERS",
+		"security.cors.allow_credentials":           "APP_SECURITY_CORS_ALLOW_CREDENTIALS",
+		"security.rate_limit.requests_per_minute":   "APP_SECURITY_RATE_LIMIT_REQUESTS_PER_MINUTE",
+		"security.rate_limit.burst":                 "APP_SECURITY_RATE_LIMIT_BURST",
+		"security.tls.enabled":                      "APP_SECURITY_TLS_ENABLED",
+		"security.tls.cert_file":                    "APP_SECURITY_TLS_CERT_FILE",
+		"security.tls.key_file":                     "APP_SECURITY_TLS_KEY_FILE",
+		"security.tls.min_version":                  "APP_SECURITY_TLS_MIN_VERSION",
+		"security.api_keys.enabled":                 "APP_SECURITY_API_KEYS_ENABLED",
+		"security.api_keys.header_name":             "APP_SECURITY_API_KEYS_HEADER_NAME",
+		"security.api_keys.rotate_interval":         "APP_SECURITY_API_KEYS_ROTATE_INTERVAL",
+		"security.request_size_limit":               "APP_SECURITY_REQUEST_SIZE_LIMIT",
+	}
+	return bindEnvVars(securityBindings, "security")
+}
+
+// bindHealthEnvVars binds health-related environment variables
+func bindHealthEnvVars() error {
+	healthBindings := map[string]string{
+		"health.enabled":                    "APP_HEALTH_ENABLED",
+		"health.endpoint":                   "APP_HEALTH_ENDPOINT",
+		"health.timeout":                    "APP_HEALTH_TIMEOUT",
+		"health.check_database":             "APP_HEALTH_CHECK_DATABASE",
+		"health.check_external_services":    "APP_HEALTH_CHECK_EXTERNAL_SERVICES",
+	}
+	return bindEnvVars(healthBindings, "health")
+}
+
+// bindCacheEnvVars binds cache-related environment variables
+func bindCacheEnvVars() error {
+	cacheBindings := map[string]string{
+		"cache.enabled":       "APP_CACHE_ENABLED",
+		"cache.redis_url":     "APP_CACHE_REDIS_URL",
+		"cache.default_ttl":   "APP_CACHE_DEFAULT_TTL",
+		"cache.max_memory":    "APP_CACHE_MAX_MEMORY",
+		"cache.cluster_mode":  "APP_CACHE_CLUSTER_MODE",
+	}
+	return bindEnvVars(cacheBindings, "cache")
+}
+
+// bindExternalEnvVars binds external services-related environment variables
+func bindExternalEnvVars() error {
+	externalBindings := map[string]string{
+		"external.api_timeout":                  "APP_EXTERNAL_API_TIMEOUT",
+		"external.retry_attempts":              "APP_EXTERNAL_RETRY_ATTEMPTS",
+		"external.circuit_breaker.enabled":     "APP_EXTERNAL_CIRCUIT_BREAKER_ENABLED",
+		"external.circuit_breaker.threshold":   "APP_EXTERNAL_CIRCUIT_BREAKER_THRESHOLD",
+		"external.circuit_breaker.timeout":     "APP_EXTERNAL_CIRCUIT_BREAKER_TIMEOUT",
+	}
+	return bindEnvVars(externalBindings, "external")
+}
+
+// bindBackupEnvVars binds backup-related environment variables
+func bindBackupEnvVars() error {
+	backupBindings := map[string]string{
+		"backup.enabled":        "APP_BACKUP_ENABLED",
+		"backup.schedule":       "APP_BACKUP_SCHEDULE",
+		"backup.retention_days": "APP_BACKUP_RETENTION_DAYS",
+		"backup.s3_bucket":      "APP_BACKUP_S3_BUCKET",
+	}
+	return bindEnvVars(backupBindings, "backup")
+}
+
+// bindResourcesEnvVars binds resources-related environment variables
+func bindResourcesEnvVars() error {
+	resourcesBindings := map[string]string{
+		"resources.max_memory":       "APP_RESOURCES_MAX_MEMORY",
+		"resources.max_cpu_cores":    "APP_RESOURCES_MAX_CPU_CORES",
+		"resources.max_connections":  "APP_RESOURCES_MAX_CONNECTIONS",
+		"resources.request_timeout":  "APP_RESOURCES_REQUEST_TIMEOUT",
+		"resources.max_request_size": "APP_RESOURCES_MAX_REQUEST_SIZE",
+	}
+	return bindEnvVars(resourcesBindings, "resources")
 }
 
 // validateConfig validates the configuration using struct tags
 func validateConfig(config *Config) error {
 	validate := validator.New()
+	
+	// Add custom validation for environment-specific rules
+	validate.RegisterValidation("valid_environment", validateEnvironment)
+	validate.RegisterValidation("valid_log_level", validateLogLevel)
+	
 	if err := validate.Struct(config); err != nil {
 		return fmt.Errorf("validation errors: %w", err)
 	}
+	
+	// Additional business logic validation
+	if err := validateBusinessLogic(config); err != nil {
+		return fmt.Errorf("business logic validation failed: %w", err)
+	}
+	
 	return nil
+}
+
+// validateEnvironment validates environment values
+func validateEnvironment(fl validator.FieldLevel) bool {
+	env := fl.Field().String()
+	validEnvs := []string{"development", "staging", "production", "testing", "local"}
+	for _, validEnv := range validEnvs {
+		if env == validEnv {
+			return true
+		}
+	}
+	return false
+}
+
+// validateLogLevel validates log level values
+func validateLogLevel(fl validator.FieldLevel) bool {
+	level := fl.Field().String()
+	validLevels := []string{"debug", "info", "warn", "error"}
+	for _, validLevel := range validLevels {
+		if level == validLevel {
+			return true
+		}
+	}
+	return false
+}
+
+// validateCronExpression validates cron expressions (basic validation)
+func validateCronExpression(fl validator.FieldLevel) bool {
+	cron := fl.Field().String()
+	if cron == "" {
+		return true // Allow empty for optional fields
+	}
+	// Basic cron validation - should have 5 parts
+	parts := strings.Fields(cron)
+	return len(parts) == 5
+}
+
+// validateBusinessLogic performs additional business logic validation
+func validateBusinessLogic(config *Config) error {
+	// Validate that TLS is required in production
+	if config.App.Environment == "production" && !config.Security.TLS.Enabled {
+		return fmt.Errorf("TLS must be enabled in production environment")
+	}
+	
+	// Validate that authentication is enabled in production
+	if config.App.Environment == "production" && !config.Security.EnableAuth {
+		return fmt.Errorf("authentication must be enabled in production environment")
+	}
+	
+	// Validate that debug features are disabled in production
+	if config.App.Environment == "production" {
+		if config.Features.EnableDebugEndpoints {
+			return fmt.Errorf("debug endpoints must be disabled in production")
+		}
+		if config.App.Debug {
+			return fmt.Errorf("debug mode must be disabled in production")
+		}
+	}
+	
+	// Validate database configuration
+	if config.Database.Driver == "postgres" && !strings.Contains(config.Database.DSN, "sslmode") {
+		return fmt.Errorf("PostgreSQL connections should specify SSL mode")
+	}
+	
+	// Validate observability in production
+	if config.App.Environment == "production" && config.Observability.SamplingRate > 0.2 {
+		return fmt.Errorf("sampling rate should be <= 0.2 in production for performance")
+	}
+	
+	return nil
+}
+
+// validateSizeFormat validates size format strings like "10MB", "1GB"
+func validateSizeFormat(fl validator.FieldLevel) bool {
+	size := fl.Field().String()
+	if size == "" {
+		return true // Allow empty for optional fields
+	}
+	// Simple validation for size format
+	validSuffixes := []string{"B", "KB", "MB", "GB", "TB"}
+	for _, suffix := range validSuffixes {
+		if strings.HasSuffix(strings.ToUpper(size), suffix) {
+			return true
+		}
+	}
+	return false
+}
+
+// ConfigDiff represents differences between two configurations
+type ConfigDiff struct {
+	Field    string      `json:"field"`
+	OldValue interface{} `json:"old_value"`
+	NewValue interface{} `json:"new_value"`
+	Action   string      `json:"action"` // "added", "removed", "changed"
+}
+
+// CompareConfigs compares two configurations and returns differences
+func CompareConfigs(oldConfig, newConfig *Config) []ConfigDiff {
+	// This is a simplified comparison - in a real implementation
+	// you would use reflection or a dedicated library for deep comparison
+	var diffs []ConfigDiff
+
+	// Compare server configuration
+	if oldConfig.Server.Host != newConfig.Server.Host {
+		diffs = append(diffs, ConfigDiff{
+			Field:    "server.host",
+			OldValue: oldConfig.Server.Host,
+			NewValue: newConfig.Server.Host,
+			Action:   "changed",
+		})
+	}
+
+	if oldConfig.Server.Port != newConfig.Server.Port {
+		diffs = append(diffs, ConfigDiff{
+			Field:    "server.port",
+			OldValue: oldConfig.Server.Port,
+			NewValue: newConfig.Server.Port,
+			Action:   "changed",
+		})
+	}
+
+	// Compare database configuration
+	if oldConfig.Database.Driver != newConfig.Database.Driver {
+		diffs = append(diffs, ConfigDiff{
+			Field:    "database.driver",
+			OldValue: oldConfig.Database.Driver,
+			NewValue: newConfig.Database.Driver,
+			Action:   "changed",
+		})
+	}
+
+	// Compare app environment
+	if oldConfig.App.Environment != newConfig.App.Environment {
+		diffs = append(diffs, ConfigDiff{
+			Field:    "app.environment",
+			OldValue: oldConfig.App.Environment,
+			NewValue: newConfig.App.Environment,
+			Action:   "changed",
+		})
+	}
+
+	return diffs
 }

@@ -13,7 +13,11 @@
       "Bash(errorlint:*)",
       "Bash(~/go/bin/errorlint:*)",
       "WebFetch(domain:pkg.go.dev)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(docker build:*)",
+      "Bash(docker:*)",
+      "Bash(/dev/null)",
+      "Bash(./k8s/scripts/validate.sh:*)"
     ],
     "deny": []
   }

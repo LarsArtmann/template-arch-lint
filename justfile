@@ -26,6 +26,12 @@ help:
     @echo "  1. \033[0;36mjust install\033[0m  - Install required tools"
     @echo "  2. \033[0;36mjust lint\033[0m     - Run all linters"
     @echo "  3. \033[0;36mjust fix\033[0m      - Auto-fix issues"
+    @echo "  4. \033[0;36mjust run\033[0m      - Run the application"
+    @echo ""
+    @echo "\033[1mDOCKER COMMANDS:\033[0m"
+    @echo "  • \033[0;36mjust docker-test\033[0m         - Build and test Docker image"
+    @echo "  • \033[0;36mjust docker-dev-detached\033[0m - Start full dev environment"
+    @echo "  • \033[0;36mjust docker-stop\033[0m         - Stop development environment"
 
 # Install all required linting tools
 install:
@@ -289,3 +295,79 @@ version:
     fi
     @echo "Just version:"
     @just --version
+    @if command -v docker >/dev/null 2>&1; then \
+        echo "Docker version:"; \
+        docker --version; \
+    fi
+
+# 🐳 Docker Commands
+
+# Build Docker image
+docker-build:
+    @echo "\033[1m🐳 BUILDING DOCKER IMAGE\033[0m"
+    docker build -t template-arch-lint:latest .
+    @echo "\033[0;32m✅ Docker image built successfully!\033[0m"
+
+# Build and test Docker image
+docker-test: docker-build
+    @echo "\033[1m🧪 TESTING DOCKER IMAGE\033[0m"
+    @echo "\033[0;36mTesting health check...\033[0m"
+    docker run --rm template-arch-lint:latest -health-check
+    @echo "\033[0;36mTesting container startup...\033[0m"
+    @CONTAINER_ID=$$(docker run -d -p 8080:8080 template-arch-lint:latest); \
+    sleep 5; \
+    echo "Testing health endpoints..."; \
+    curl -f http://localhost:8080/health/live || exit 1; \
+    curl -f http://localhost:8080/version || exit 1; \
+    docker stop $$CONTAINER_ID; \
+    echo "\033[0;32m✅ Docker image tests passed!\033[0m"
+
+# Run application in Docker container
+docker-run: docker-build
+    @echo "\033[1m🚀 RUNNING DOCKER CONTAINER\033[0m"
+    docker run --rm -p 8080:8080 -p 2112:2112 template-arch-lint:latest
+
+# Start development environment with Docker Compose
+docker-dev:
+    @echo "\033[1m🔄 STARTING DEVELOPMENT ENVIRONMENT\033[0m"
+    docker-compose up --build
+
+# Start development environment in background
+docker-dev-detached:
+    @echo "\033[1m🔄 STARTING DEVELOPMENT ENVIRONMENT (DETACHED)\033[0m"
+    docker-compose up --build -d
+    @echo "\033[0;32m✅ Development environment started!\033[0m"
+    @echo "\033[0;36mServices available at:\033[0m"
+    @echo "  - Application: http://localhost:8080"
+    @echo "  - Grafana: http://localhost:3000 (admin/admin)"
+    @echo "  - Prometheus: http://localhost:9090"
+    @echo "  - Jaeger UI: http://localhost:16686"
+
+# Stop development environment
+docker-stop:
+    @echo "\033[1m🛑 STOPPING DEVELOPMENT ENVIRONMENT\033[0m"
+    docker-compose down
+    @echo "\033[0;32m✅ Development environment stopped!\033[0m"
+
+# Clean up Docker resources
+docker-clean:
+    @echo "\033[1m🧹 CLEANING DOCKER RESOURCES\033[0m"
+    docker-compose down -v --remove-orphans
+    docker image prune -f
+    docker system prune -f
+    @echo "\033[0;32m✅ Docker resources cleaned!\033[0m"
+
+# Show Docker logs
+docker-logs:
+    @echo "\033[1m📋 DOCKER LOGS\033[0m"
+    docker-compose logs -f
+
+# Security scan Docker image with Trivy
+docker-security: docker-build
+    @echo "\033[1m🛡️  DOCKER SECURITY SCAN\033[0m"
+    @if command -v trivy >/dev/null 2>&1; then \
+        trivy image template-arch-lint:latest; \
+    else \
+        echo "\033[0;31m❌ Trivy not installed. Install with: brew install trivy\033[0m"; \
+        exit 1; \
+    fi

@@ -26,11 +26,23 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
+	if q.bulkDeleteUsersStmt, err = db.PrepareContext(ctx, BulkDeleteUsers); err != nil {
+		return nil, fmt.Errorf("error preparing query BulkDeleteUsers: %w", err)
+	}
+	if q.bulkInsertUsersStmt, err = db.PrepareContext(ctx, BulkInsertUsers); err != nil {
+		return nil, fmt.Errorf("error preparing query BulkInsertUsers: %w", err)
+	}
 	if q.countUsersStmt, err = db.PrepareContext(ctx, CountUsers); err != nil {
 		return nil, fmt.Errorf("error preparing query CountUsers: %w", err)
 	}
+	if q.countUsersByDateRangeStmt, err = db.PrepareContext(ctx, CountUsersByDateRange); err != nil {
+		return nil, fmt.Errorf("error preparing query CountUsersByDateRange: %w", err)
+	}
 	if q.deleteUserStmt, err = db.PrepareContext(ctx, DeleteUser); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteUser: %w", err)
+	}
+	if q.findRecentUsersStmt, err = db.PrepareContext(ctx, FindRecentUsers); err != nil {
+		return nil, fmt.Errorf("error preparing query FindRecentUsers: %w", err)
 	}
 	if q.findUserByEmailStmt, err = db.PrepareContext(ctx, FindUserByEmail); err != nil {
 		return nil, fmt.Errorf("error preparing query FindUserByEmail: %w", err)
@@ -38,25 +50,72 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.findUserByIDStmt, err = db.PrepareContext(ctx, FindUserByID); err != nil {
 		return nil, fmt.Errorf("error preparing query FindUserByID: %w", err)
 	}
+	if q.getActiveUserEmailsStmt, err = db.PrepareContext(ctx, GetActiveUserEmails); err != nil {
+		return nil, fmt.Errorf("error preparing query GetActiveUserEmails: %w", err)
+	}
+	if q.getQueryPlanStmt, err = db.PrepareContext(ctx, GetQueryPlan); err != nil {
+		return nil, fmt.Errorf("error preparing query GetQueryPlan: %w", err)
+	}
+	if q.getUserStatsStmt, err = db.PrepareContext(ctx, GetUserStats); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserStats: %w", err)
+	}
+	if q.getUsersCreatedAfterStmt, err = db.PrepareContext(ctx, GetUsersCreatedAfter); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUsersCreatedAfter: %w", err)
+	}
+	if q.getUsersModifiedAfterStmt, err = db.PrepareContext(ctx, GetUsersModifiedAfter); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUsersModifiedAfter: %w", err)
+	}
 	if q.listUsersStmt, err = db.PrepareContext(ctx, ListUsers); err != nil {
 		return nil, fmt.Errorf("error preparing query ListUsers: %w", err)
 	}
+	if q.listUsersAllStmt, err = db.PrepareContext(ctx, ListUsersAll); err != nil {
+		return nil, fmt.Errorf("error preparing query ListUsersAll: %w", err)
+	}
 	if q.saveUserStmt, err = db.PrepareContext(ctx, SaveUser); err != nil {
 		return nil, fmt.Errorf("error preparing query SaveUser: %w", err)
+	}
+	if q.searchUsersByEmailStmt, err = db.PrepareContext(ctx, SearchUsersByEmail); err != nil {
+		return nil, fmt.Errorf("error preparing query SearchUsersByEmail: %w", err)
+	}
+	if q.searchUsersByNameStmt, err = db.PrepareContext(ctx, SearchUsersByName); err != nil {
+		return nil, fmt.Errorf("error preparing query SearchUsersByName: %w", err)
+	}
+	if q.updateUserModifiedStmt, err = db.PrepareContext(ctx, UpdateUserModified); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUserModified: %w", err)
 	}
 	return &q, nil
 }
 
 func (q *Queries) Close() error {
 	var err error
+	if q.bulkDeleteUsersStmt != nil {
+		if cerr := q.bulkDeleteUsersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing bulkDeleteUsersStmt: %w", cerr)
+		}
+	}
+	if q.bulkInsertUsersStmt != nil {
+		if cerr := q.bulkInsertUsersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing bulkInsertUsersStmt: %w", cerr)
+		}
+	}
 	if q.countUsersStmt != nil {
 		if cerr := q.countUsersStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing countUsersStmt: %w", cerr)
 		}
 	}
+	if q.countUsersByDateRangeStmt != nil {
+		if cerr := q.countUsersByDateRangeStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing countUsersByDateRangeStmt: %w", cerr)
+		}
+	}
 	if q.deleteUserStmt != nil {
 		if cerr := q.deleteUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteUserStmt: %w", cerr)
+		}
+	}
+	if q.findRecentUsersStmt != nil {
+		if cerr := q.findRecentUsersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing findRecentUsersStmt: %w", cerr)
 		}
 	}
 	if q.findUserByEmailStmt != nil {
@@ -69,14 +128,59 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing findUserByIDStmt: %w", cerr)
 		}
 	}
+	if q.getActiveUserEmailsStmt != nil {
+		if cerr := q.getActiveUserEmailsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getActiveUserEmailsStmt: %w", cerr)
+		}
+	}
+	if q.getQueryPlanStmt != nil {
+		if cerr := q.getQueryPlanStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getQueryPlanStmt: %w", cerr)
+		}
+	}
+	if q.getUserStatsStmt != nil {
+		if cerr := q.getUserStatsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserStatsStmt: %w", cerr)
+		}
+	}
+	if q.getUsersCreatedAfterStmt != nil {
+		if cerr := q.getUsersCreatedAfterStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUsersCreatedAfterStmt: %w", cerr)
+		}
+	}
+	if q.getUsersModifiedAfterStmt != nil {
+		if cerr := q.getUsersModifiedAfterStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUsersModifiedAfterStmt: %w", cerr)
+		}
+	}
 	if q.listUsersStmt != nil {
 		if cerr := q.listUsersStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing listUsersStmt: %w", cerr)
 		}
 	}
+	if q.listUsersAllStmt != nil {
+		if cerr := q.listUsersAllStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listUsersAllStmt: %w", cerr)
+		}
+	}
 	if q.saveUserStmt != nil {
 		if cerr := q.saveUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing saveUserStmt: %w", cerr)
+		}
+	}
+	if q.searchUsersByEmailStmt != nil {
+		if cerr := q.searchUsersByEmailStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing searchUsersByEmailStmt: %w", cerr)
+		}
+	}
+	if q.searchUsersByNameStmt != nil {
+		if cerr := q.searchUsersByNameStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing searchUsersByNameStmt: %w", cerr)
+		}
+	}
+	if q.updateUserModifiedStmt != nil {
+		if cerr := q.updateUserModifiedStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserModifiedStmt: %w", cerr)
 		}
 	}
 	return err
@@ -116,25 +220,51 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                  DBTX
-	tx                  *sql.Tx
-	countUsersStmt      *sql.Stmt
-	deleteUserStmt      *sql.Stmt
-	findUserByEmailStmt *sql.Stmt
-	findUserByIDStmt    *sql.Stmt
-	listUsersStmt       *sql.Stmt
-	saveUserStmt        *sql.Stmt
+	db                        DBTX
+	tx                        *sql.Tx
+	bulkDeleteUsersStmt       *sql.Stmt
+	bulkInsertUsersStmt       *sql.Stmt
+	countUsersStmt            *sql.Stmt
+	countUsersByDateRangeStmt *sql.Stmt
+	deleteUserStmt            *sql.Stmt
+	findRecentUsersStmt       *sql.Stmt
+	findUserByEmailStmt       *sql.Stmt
+	findUserByIDStmt          *sql.Stmt
+	getActiveUserEmailsStmt   *sql.Stmt
+	getQueryPlanStmt          *sql.Stmt
+	getUserStatsStmt          *sql.Stmt
+	getUsersCreatedAfterStmt  *sql.Stmt
+	getUsersModifiedAfterStmt *sql.Stmt
+	listUsersStmt             *sql.Stmt
+	listUsersAllStmt          *sql.Stmt
+	saveUserStmt              *sql.Stmt
+	searchUsersByEmailStmt    *sql.Stmt
+	searchUsersByNameStmt     *sql.Stmt
+	updateUserModifiedStmt    *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                  tx,
-		tx:                  tx,
-		countUsersStmt:      q.countUsersStmt,
-		deleteUserStmt:      q.deleteUserStmt,
-		findUserByEmailStmt: q.findUserByEmailStmt,
-		findUserByIDStmt:    q.findUserByIDStmt,
-		listUsersStmt:       q.listUsersStmt,
-		saveUserStmt:        q.saveUserStmt,
+		db:                        tx,
+		tx:                        tx,
+		bulkDeleteUsersStmt:       q.bulkDeleteUsersStmt,
+		bulkInsertUsersStmt:       q.bulkInsertUsersStmt,
+		countUsersStmt:            q.countUsersStmt,
+		countUsersByDateRangeStmt: q.countUsersByDateRangeStmt,
+		deleteUserStmt:            q.deleteUserStmt,
+		findRecentUsersStmt:       q.findRecentUsersStmt,
+		findUserByEmailStmt:       q.findUserByEmailStmt,
+		findUserByIDStmt:          q.findUserByIDStmt,
+		getActiveUserEmailsStmt:   q.getActiveUserEmailsStmt,
+		getQueryPlanStmt:          q.getQueryPlanStmt,
+		getUserStatsStmt:          q.getUserStatsStmt,
+		getUsersCreatedAfterStmt:  q.getUsersCreatedAfterStmt,
+		getUsersModifiedAfterStmt: q.getUsersModifiedAfterStmt,
+		listUsersStmt:             q.listUsersStmt,
+		listUsersAllStmt:          q.listUsersAllStmt,
+		saveUserStmt:              q.saveUserStmt,
+		searchUsersByEmailStmt:    q.searchUsersByEmailStmt,
+		searchUsersByNameStmt:     q.searchUsersByNameStmt,
+		updateUserModifiedStmt:    q.updateUserModifiedStmt,
 	}
 }

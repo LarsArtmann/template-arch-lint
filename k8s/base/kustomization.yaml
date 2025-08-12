@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: template-arch-lint-base
+  annotations:
+    description: "Base configuration for template-arch-lint"
+
+# Base resources
+resources:
+- namespace.yaml
+- configmap.yaml
+- secret.yaml
+- rbac.yaml
+- deployment.yaml
+- service.yaml
+- ingress.yaml
+- hpa.yaml
+- security-policies.yaml
+- storage.yaml
+
+# Common labels for all resources
+labels:
+- pairs:
+    app.kubernetes.io/name: template-arch-lint
+    app.kubernetes.io/component: web-server
+    app.kubernetes.io/part-of: template-arch-lint
+    app.kubernetes.io/managed-by: kustomize

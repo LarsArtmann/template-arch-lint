@@ -13,39 +13,132 @@ import (
 )
 
 type Querier interface {
+	//BulkDeleteUsers
+	//
+	//  DELETE FROM users WHERE id = ?
+	BulkDeleteUsers(ctx context.Context, id values.UserID) error
+	// Bulk operations for performance
+	//
+	//
+	//  INSERT OR IGNORE INTO users (id, email, name, created, modified)
+	//  VALUES (?, ?, ?, ?, ?)
+	BulkInsertUsers(ctx context.Context, arg *BulkInsertUsersParams) error
 	//CountUsers
 	//
 	//  SELECT COUNT(*) FROM users
 	CountUsers(ctx context.Context) (int64, error)
+	//CountUsersByDateRange
+	//
+	//  SELECT COUNT(*) FROM users
+	//  WHERE created BETWEEN ? AND ?
+	CountUsersByDateRange(ctx context.Context, arg *CountUsersByDateRangeParams) (int64, error)
 	//DeleteUser
 	//
 	//  DELETE FROM users WHERE id = ?
 	DeleteUser(ctx context.Context, id values.UserID) error
+	// Performance-optimized queries
+	//
+	//
+	//  SELECT id, email, name, created, modified
+	//  FROM users
+	//  WHERE created > datetime('now', '-30 days')
+	//  ORDER BY created DESC
+	//  LIMIT ? OFFSET ?
+	FindRecentUsers(ctx context.Context, arg *FindRecentUsersParams) ([]*Users, error)
 	//FindUserByEmail
 	//
 	//  SELECT id, email, name, created, modified
 	//  FROM users
 	//  WHERE email = ?
+	//  LIMIT 1
 	FindUserByEmail(ctx context.Context, email string) (*Users, error)
 	//FindUserByID
 	//
 	//  SELECT id, email, name, created, modified
 	//  FROM users
 	//  WHERE id = ?
+	//  LIMIT 1
 	FindUserByID(ctx context.Context, id values.UserID) (*Users, error)
+	//GetActiveUserEmails
+	//
+	//  SELECT DISTINCT email
+	//  FROM users
+	//  WHERE modified > datetime('now', '-7 days')
+	//  ORDER BY email
+	GetActiveUserEmails(ctx context.Context) ([]string, error)
+	//GetQueryPlan
+	//
+	//  EXPLAIN QUERY PLAN SELECT id, email, name, created, modified FROM users WHERE email = ?
+	GetQueryPlan(ctx context.Context, email string) ([]*Users, error)
+	//GetUserStats
+	//
+	//  SELECT
+	//      COUNT(*) as total_users,
+	//      COUNT(CASE WHEN created > datetime('now', '-1 day') THEN 1 END) as users_today,
+	//      COUNT(CASE WHEN created > datetime('now', '-7 days') THEN 1 END) as users_week,
+	//      COUNT(CASE WHEN created > datetime('now', '-30 days') THEN 1 END) as users_month,
+	//      MIN(created) as first_user_created,
+	//      MAX(created) as last_user_created
+	//  FROM users
+	GetUserStats(ctx context.Context) (*GetUserStatsRow, error)
+	//GetUsersCreatedAfter
+	//
+	//  SELECT id, email, name, created, modified
+	//  FROM users
+	//  WHERE created >= ?
+	//  ORDER BY created DESC
+	//  LIMIT ? OFFSET ?
+	GetUsersCreatedAfter(ctx context.Context, arg *GetUsersCreatedAfterParams) ([]*Users, error)
+	//GetUsersModifiedAfter
+	//
+	//  SELECT id, email, name, created, modified
+	//  FROM users
+	//  WHERE modified >= ?
+	//  ORDER BY modified DESC
+	//  LIMIT ? OFFSET ?
+	GetUsersModifiedAfter(ctx context.Context, arg *GetUsersModifiedAfterParams) ([]*Users, error)
 	//ListUsers
 	//
 	//  SELECT id, email, name, created, modified
 	//  FROM users
-	//  ORDER BY created ASC
-	ListUsers(ctx context.Context) ([]*Users, error)
+	//  ORDER BY created DESC
+	//  LIMIT ? OFFSET ?
+	ListUsers(ctx context.Context, arg *ListUsersParams) ([]*Users, error)
+	//ListUsersAll
+	//
+	//  SELECT id, email, name, created, modified
+	//  FROM users
+	//  ORDER BY created DESC
+	ListUsersAll(ctx context.Context) ([]*Users, error)
 	// Users CRUD queries
-	// Matches the existing UserRepository interface methods
+	// Optimized for performance with proper indexing and query patterns
 	//
 	//
 	//  INSERT OR REPLACE INTO users (id, email, name, created, modified)
 	//  VALUES (?, ?, ?, ?, ?)
 	SaveUser(ctx context.Context, arg *SaveUserParams) error
+	//SearchUsersByEmail
+	//
+	//  SELECT id, email, name, created, modified
+	//  FROM users
+	//  WHERE email LIKE '%' || ? || '%'
+	//  ORDER BY email
+	//  LIMIT ? OFFSET ?
+	SearchUsersByEmail(ctx context.Context, arg *SearchUsersByEmailParams) ([]*Users, error)
+	//SearchUsersByName
+	//
+	//  SELECT id, email, name, created, modified
+	//  FROM users
+	//  WHERE name LIKE '%' || ? || '%'
+	//  ORDER BY name
+	//  LIMIT ? OFFSET ?
+	SearchUsersByName(ctx context.Context, arg *SearchUsersByNameParams) ([]*Users, error)
+	//UpdateUserModified
+	//
+	//  UPDATE users
+	//  SET modified = CURRENT_TIMESTAMP
+	//  WHERE id = ?
+	UpdateUserModified(ctx context.Context, id values.UserID) error
 }
 
 var _ Querier = (*Queries)(nil)

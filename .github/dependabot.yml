@@ -1,0 +1,52 @@
+# 🔄 Dependabot Configuration
+# Automated dependency updates for Go modules and GitHub Actions
+
+version: 2
+updates:
+  # Go modules dependency updates
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "LarsArtmann"
+    assignees:
+      - "LarsArtmann"
+    commit-message:
+      prefix: "🔄 deps:"
+      prefix-development: "🔄 dev-deps:"
+    labels:
+      - "dependencies"
+      - "go"
+    # Group minor and patch updates
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # GitHub Actions dependency updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "LarsArtmann"
+    assignees:
+      - "LarsArtmann"
+    commit-message:
+      prefix: "🔄 ci:"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci"

@@ -1,0 +1,443 @@
+# 🔥 ENTERPRISE-GRADE CI/CD PIPELINE
+# Complete automation for Go application with security, quality, and testing
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:
+
+env:
+  GO_VERSION: '1.24.0'
+  GOLANGCI_LINT_VERSION: 'v2.3.1'
+  GO_ARCH_LINT_VERSION: 'v1.12.0'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+  checks: write
+  packages: write
+
+jobs:
+  # 🔍 Basic validation and setup
+  validate:
+    name: 🔍 Validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: 📋 Verify dependencies
+        run: |
+          go mod download
+          go mod verify
+          go mod tidy -diff
+
+      - name: 📁 Check filenames
+        run: |
+          if find . -name "*:*" -not -path "./.git/*" | grep -q .; then
+            echo "❌ Found files with colons in names:"
+            find . -name "*:*" -not -path "./.git/*"
+            exit 1
+          else
+            echo "✅ No problematic filenames found!"
+          fi
+
+  # 🔒 Security scanning
+  security:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: validate
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: 🔍 Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: go
+          config: |
+            name: "CodeQL Config"
+            queries:
+              - uses: security-and-quality
+
+      - name: 🏗️ Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: 🔍 Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:go"
+
+      - name: 🛡️ Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: 📤 Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # 🏗️ Build and architecture validation
+  build:
+    name: 🏗️ Build & Architecture
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: validate
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: 📦 Install dependencies
+        run: go mod download
+
+      - name: 🎨 Install and generate templates
+        run: |
+          go install github.com/a-h/templ/cmd/templ@latest
+          templ generate
+
+      - name: 🏗️ Build application
+        run: |
+          go build ./...
+          go build -o server cmd/server/main.go
+
+      - name: 📦 Install go-arch-lint
+        run: go install github.com/fe3dback/go-arch-lint@${{ env.GO_ARCH_LINT_VERSION }}
+
+      - name: 🏗️ Validate architecture
+        run: go-arch-lint check
+
+      - name: 📤 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            server
+          retention-days: 1
+
+  # 📊 Code quality and linting
+  quality:
+    name: 📊 Code Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: validate
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: 📦 Install dependencies
+        run: go mod download
+
+      - name: 🎨 Generate templates
+        run: |
+          go install github.com/a-h/templ/cmd/templ@latest
+          templ generate
+
+      - name: 📋 Install golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          args: --config .golangci.yml --out-format=colored-line-number,checkstyle:golangci-lint-report.xml
+
+      - name: 📤 Upload lint results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lint-results
+          path: golangci-lint-report.xml
+          retention-days: 30
+
+  # 🧪 Testing with coverage
+  test:
+    name: 🧪 Test & Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: validate
+    strategy:
+      matrix:
+        go-version: ['1.24.0', '1.23.0']
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache: true
+
+      - name: 📦 Install dependencies
+        run: go mod download
+
+      - name: 🎨 Generate templates
+        run: |
+          go install github.com/a-h/templ/cmd/templ@latest
+          templ generate
+
+      - name: 🧪 Run tests with coverage
+        run: |
+          go test ./... -v -race -coverprofile=coverage.out -covermode=atomic -timeout=10m
+          go tool cover -html=coverage.out -o coverage.html
+
+      - name: 📊 Generate coverage report
+        run: |
+          echo "## Test Coverage Report" >> $GITHUB_STEP_SUMMARY
+          echo "### Go Version: ${{ matrix.go-version }}" >> $GITHUB_STEP_SUMMARY
+          go tool cover -func=coverage.out | tail -1 | awk '{print "**Total Coverage: " $3 "**"}' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Detailed Coverage:" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          go tool cover -func=coverage.out >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: 📤 Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.out
+          flags: unittests
+          name: codecov-go-${{ matrix.go-version }}
+          fail_ci_if_error: false
+
+      - name: 📤 Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-go-${{ matrix.go-version }}
+          path: |
+            coverage.out
+            coverage.html
+          retention-days: 30
+
+  # 🔧 Integration testing
+  integration:
+    name: 🔧 Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build, test]
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: 📦 Install dependencies
+        run: go mod download
+
+      - name: 🎨 Generate templates
+        run: |
+          go install github.com/a-h/templ/cmd/templ@latest
+          templ generate
+
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+
+      - name: 🔧 Run integration tests
+        run: |
+          chmod +x server
+          go test ./test/integration/... -v -tags=integration -timeout=5m
+
+      - name: 🧪 Test configuration system
+        run: |
+          echo "Testing default configuration..."
+          go run example/main.go &
+          CONFIG_PID=$!
+          sleep 2
+          kill $CONFIG_PID || true
+          
+          echo "Testing environment variable overrides..."
+          APP_SERVER_PORT=9090 APP_LOGGING_LEVEL=debug go run example/main.go &
+          CONFIG_PID=$!
+          sleep 2
+          kill $CONFIG_PID || true
+
+  # 🐳 Docker build and security scanning
+  docker:
+    name: 🐳 Docker Build & Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [build, test]
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-tag: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔐 Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏷️ Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: 🏗️ Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+
+      - name: 🛡️ Run Trivy vulnerability scanner on image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+          format: 'sarif'
+          output: 'trivy-image-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: 📤 Upload Trivy image scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-image-results.sarif'
+
+      - name: 🧪 Test Docker image
+        run: |
+          # Pull the built image
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+          
+          # Test health check functionality
+          echo "Testing Docker image health check..."
+          docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }} -health-check
+          
+          # Test that the container starts successfully
+          echo "Testing container startup..."
+          CONTAINER_ID=$(docker run -d -p 8080:8080 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }})
+          
+          # Wait for container to be ready
+          sleep 10
+          
+          # Test health endpoints
+          docker exec $CONTAINER_ID wget -qO- http://localhost:8080/health/live || exit 1
+          docker exec $CONTAINER_ID wget -qO- http://localhost:8080/version || exit 1
+          
+          # Clean up
+          docker stop $CONTAINER_ID
+          
+          echo "✅ Docker image tests passed!"
+
+      - name: 📊 Generate Docker build summary
+        run: |
+          echo "## 🐳 Docker Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### Image Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Registry:** ${{ env.REGISTRY }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** ${{ env.IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** ${{ steps.meta.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Digest:** ${{ steps.build.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platforms:** linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
+
+  # 📊 Final validation and reporting
+  validate-complete:
+    name: 📊 Final Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [security, build, quality, test, integration, docker]
+    if: always()
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: 📊 Generate pipeline summary
+        run: |
+          echo "## 🎉 CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### Pipeline Status" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Validation: ${{ needs.validate.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔒 Security: ${{ needs.security.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏗️ Build: ${{ needs.build.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 Quality: ${{ needs.quality.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 🧪 Tests: ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔧 Integration: ${{ needs.integration.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 🐳 Docker: ${{ needs.docker.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Commit Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Author:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: ✅ Validate all jobs succeeded
+        if: ${{ needs.security.result != 'success' || needs.build.result != 'success' || needs.quality.result != 'success' || needs.test.result != 'success' || needs.integration.result != 'success' || needs.docker.result != 'success' }}
+        run: |
+          echo "❌ One or more CI jobs failed"
+          exit 1
+
+      - name: 🎉 Success notification
+        if: success()
+        run: |
+          echo "🎉 All CI/CD checks passed successfully!"
+          echo "✅ Ready for deployment"

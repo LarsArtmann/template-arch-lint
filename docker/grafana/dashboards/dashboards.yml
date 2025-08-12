@@ -1,0 +1,13 @@
+# Grafana dashboards configuration
+apiVersion: 1
+
+providers:
+  - name: 'app-dashboards'
+    orgId: 1
+    folder: 'Application'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

@@ -1,0 +1,86 @@
+# Prometheus configuration for comprehensive monitoring
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'template-arch-lint'
+    environment: 'development'
+
+# Storage configuration for production
+storage:
+  tsdb:
+    retention.time: 30d
+    retention.size: 5GB
+    path: /prometheus/data
+  
+# Rule evaluation configuration
+rule_files:
+  - "/etc/prometheus/rules/*.yml"
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+      scheme: http
+      timeout: 10s
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 15s
+    metrics_path: /metrics
+
+  # Application metrics
+  - job_name: 'template-arch-lint'
+    static_configs:
+      - targets: ['app:2112']
+    scrape_interval: 5s
+    scrape_timeout: 4s
+    metrics_path: /metrics
+    honor_labels: true
+    params:
+      format: ['prometheus']
+
+  # OpenTelemetry Collector
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['otel-collector:8888']
+    scrape_interval: 10s
+    metrics_path: /metrics
+
+  # Node Exporter for system metrics (will be added)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # cAdvisor for container metrics (will be added)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 30s
+
+  # Grafana metrics
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+# Recording rules for performance optimization
+recording_rules:
+  - name: application.rules
+    rules:
+      - record: instance:http_request_rate5m
+        expr: rate(http_requests_total[5m])
+      
+      - record: instance:http_error_rate5m
+        expr: rate(http_requests_total{status_code=~"5.."}[5m]) / rate(http_requests_total[5m])
+      
+      - record: instance:http_response_time_p95
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))

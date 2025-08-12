@@ -1,0 +1,38 @@
+# 👥 Code Owners
+# Define code ownership for automated review assignments
+
+# Global ownership
+* @LarsArtmann
+
+# CI/CD and configuration files
+/.github/ @LarsArtmann
+/justfile @LarsArtmann
+/.golangci.yml @LarsArtmann
+/go.mod @LarsArtmann
+/go.sum @LarsArtmann
+
+# Core application
+/cmd/ @LarsArtmann
+/internal/ @LarsArtmann
+
+# Infrastructure and observability
+/internal/infrastructure/ @LarsArtmann
+/internal/observability/ @LarsArtmann
+
+# Database and persistence
+/sql/ @LarsArtmann
+/sqlc.yaml @LarsArtmann
+/internal/db/ @LarsArtmann
+
+# Configuration
+/config.yaml @LarsArtmann
+/config.production.yaml @LarsArtmann
+/internal/config/ @LarsArtmann
+
+# Templates and web assets
+/web/ @LarsArtmann
+/internal/application/handlers/ @LarsArtmann
+
+# Tests
+/test/ @LarsArtmann
+/integration-test/ @LarsArtmann

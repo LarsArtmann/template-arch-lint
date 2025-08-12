@@ -1,0 +1,139 @@
+# Production environment configuration
+# This configuration is optimized for production with security, performance, and reliability
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  read_timeout: "15s"
+  write_timeout: "30s"
+  idle_timeout: "120s"
+  graceful_shutdown_timeout: "30s"
+
+database:
+  driver: "postgres"
+  dsn: "${DATABASE_URL}"  # Provided via environment variable or secret
+  max_open_conns: 50      # Optimized for production load
+  max_idle_conns: 25      # Higher idle connections for better performance
+  conn_max_lifetime: "30m" # Longer lifetime for stable connections
+  conn_max_idle_time: "15m" # Longer idle time to prevent frequent reconnections
+
+logging:
+  level: "warn"
+  format: "json"
+  output: "stdout"
+
+app:
+  name: "template-arch-lint"
+  version: "${APP_VERSION}"
+  environment: "production"
+  debug: false
+
+# Feature flags for production (minimal debug features)
+features:
+  enable_debug_endpoints: false
+  enable_profiling: true  # Enable profiling for performance monitoring
+  enable_hot_reload: false
+  enable_cors: true
+  enable_request_logging: false
+  enable_query_logging: false
+  enable_metrics_debug: false
+  enable_beta_features: false
+  enable_load_testing: false
+
+# Security settings (production-grade)
+security:
+  enable_auth: true
+  enable_rate_limiting: true
+  cors:
+    allowed_origins: ["${ALLOWED_ORIGINS}"]  # Comma-separated list
+    allowed_methods: ["GET", "POST", "PUT", "DELETE"]
+    allowed_headers: ["Content-Type", "Authorization"]
+    allow_credentials: false
+  rate_limit:
+    requests_per_minute: 120
+    burst: 20
+  tls:
+    enabled: true
+    cert_file: "${TLS_CERT_FILE}"
+    key_file: "${TLS_KEY_FILE}"
+    min_version: "1.3"
+  api_keys:
+    enabled: true
+    header_name: "X-API-Key"
+    rotate_interval: "24h"
+  request_size_limit: "10MB"
+  
+observability:
+  enabled: true
+  service_name: "template-arch-lint"
+  service_version: "${APP_VERSION}"
+  environment: "production"
+  sampling_rate: 0.1  # Lower sampling for production
+  
+  tracing:
+    enabled: true
+    endpoint: "${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}"
+    http_details: false
+    db_queries: false
+  
+  metrics:
+    enabled: true
+    endpoint: "${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT}"
+    push_interval: "60s"
+    business_metrics: true
+  
+  exporters:
+    prometheus:
+      enabled: true
+      port: 2112
+      path: "/metrics"
+    
+    otlp:
+      enabled: true
+      endpoint: "${OTEL_EXPORTER_OTLP_ENDPOINT}"
+      insecure: false
+      headers:
+        Authorization: "Bearer ${OTEL_AUTH_TOKEN}"
+    
+    jaeger:
+      enabled: false
+
+# Health check configuration
+health:
+  enabled: true
+  endpoint: "/health"
+  timeout: "5s"
+  check_database: true
+  check_external_services: true
+
+# Cache configuration
+cache:
+  enabled: true
+  redis_url: "${REDIS_URL}"
+  default_ttl: "24h"
+  max_memory: "1gb"
+  cluster_mode: true
+
+# External services
+external:
+  api_timeout: "10s"
+  retry_attempts: 2
+  circuit_breaker:
+    enabled: true
+    threshold: 3
+    timeout: "30s"
+
+# Backup and disaster recovery
+backup:
+  enabled: true
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  retention_days: 30
+  s3_bucket: "${BACKUP_S3_BUCKET}"
+
+# Resource limits
+resources:
+  max_memory: "512MB"
+  max_cpu_cores: 2
+  max_connections: 1000
+  request_timeout: "30s"
+  max_request_size: "10MB"

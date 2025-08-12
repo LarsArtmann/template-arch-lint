@@ -1,0 +1,55 @@
+# Testing environment configuration
+# Optimized for automated testing with minimal external dependencies
+
+server:
+  host: "localhost"
+  port: 0  # Random available port
+  read_timeout: "1s"
+  write_timeout: "2s"
+  idle_timeout: "10s"
+  graceful_shutdown_timeout: "5s"
+
+database:
+  driver: "sqlite3"
+  dsn: ":memory:"  # In-memory database for tests
+  max_open_conns: 1
+  max_idle_conns: 1
+  conn_max_lifetime: "1m"
+  conn_max_idle_time: "1m"
+
+logging:
+  level: "error"  # Minimal logging for tests
+  format: "json"
+  output: "stdout"
+
+app:
+  name: "template-arch-lint-test"
+  version: "test"
+  environment: "testing"
+  debug: false
+
+features:
+  enable_debug_endpoints: false
+  enable_profiling: false
+  enable_hot_reload: false
+  enable_cors: false
+  enable_request_logging: false
+  enable_query_logging: false
+  enable_metrics_debug: false
+
+security:
+  enable_auth: false
+  enable_rate_limiting: false
+
+observability:
+  enabled: false  # Disabled for testing
+
+health:
+  enabled: false  # Disabled for testing
+
+cache:
+  enabled: false  # Use in-memory cache for testing
+
+external:
+  api_timeout: "1s"
+  retry_attempts: 1
