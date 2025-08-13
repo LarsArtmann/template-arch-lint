@@ -32,6 +32,10 @@ help:
     @echo "  • \033[0;36mjust docker-test\033[0m         - Build and test Docker image"
     @echo "  • \033[0;36mjust docker-dev-detached\033[0m - Start full dev environment"
     @echo "  • \033[0;36mjust docker-stop\033[0m         - Stop development environment"
+    @echo ""
+    @echo "\033[1mCODE ANALYSIS:\033[0m"
+    @echo "  • \033[0;36mjust fd\033[0m                  - Find duplicate code (alias for find-duplicates)"
+    @echo "  • \033[0;36mjust find-duplicates\033[0m     - Find duplicate code with custom threshold"
 
 # Install all required linting tools
 install:
@@ -371,3 +375,44 @@ docker-security: docker-build
         echo "\033[0;31m❌ Trivy not installed. Install with: brew install trivy\033[0m"; \
         exit 1; \
     fi
+
+# 🔍 Code Duplication Detection
+
+# Find duplicate code blocks using dupl tool
+find-duplicates threshold="50":
+    @echo "\033[1m🔍 FINDING DUPLICATE CODE\033[0m"
+    @echo "\033[0;36mUsing threshold: {{threshold}} tokens...\033[0m"
+    @if command -v dupl >/dev/null 2>&1; then \
+        echo "\033[0;33mAnalyzing Go source files...\033[0m"; \
+        dupl -t {{threshold}} . > duplication-report.txt; \
+        if dupl -t {{threshold}} -html . > duplication-report.html; then \
+            echo "\033[0;32m✅ Duplication analysis completed!\033[0m"; \
+            echo "\033[0;36m→ Text report: ./duplication-report.txt\033[0m"; \
+            echo "\033[0;36m→ HTML report: ./duplication-report.html\033[0m"; \
+        else \
+            echo "\033[0;31m❌ Duplication analysis failed!\033[0m" >&2; \
+            exit 1; \
+        fi; \
+    else \
+        echo "\033[0;31m❌ dupl not installed. Installing...\033[0m"; \
+        go install github.com/mibk/dupl@latest; \
+        echo "\033[0;33mAnalyzing Go source files...\033[0m"; \
+        dupl -t {{threshold}} . > duplication-report.txt; \
+        if dupl -t {{threshold}} -html . > duplication-report.html; then \
+            echo "\033[0;32m✅ Duplication analysis completed!\033[0m"; \
+            echo "\033[0;36m→ Text report: ./duplication-report.txt\033[0m"; \
+            echo "\033[0;36m→ HTML report: ./duplication-report.html\033[0m"; \
+        else \
+            echo "\033[0;31m❌ Duplication analysis failed!\033[0m" >&2; \
+            exit 1; \
+        fi; \
+    fi
+
+# Alias for find-duplicates (fd)
+fd threshold="50": (find-duplicates threshold)
+
+# Find high-confidence duplicates (stricter threshold)
+find-duplicates-strict: (find-duplicates "100")
+
+# Find all potential duplicates (looser threshold) 
+find-duplicates-loose: (find-duplicates "25")

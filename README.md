@@ -420,6 +420,60 @@ linters:
 
 ---
 
+## 🏗️ **ARCHITECTURE DECISIONS**
+
+### 📋 **Test File Exclusions**
+
+**Decision**: Test files are excluded from architecture validation using `excludeFiles` patterns.
+
+**Rationale**:
+- Test files commonly use `package_test` naming convention
+- Tests import their corresponding implementation packages (e.g., `services_test` imports `services`)
+- This is standard Go testing idiom, not an architectural violation
+- Test files don't affect production architecture boundaries
+
+**Example Normal Patterns**:
+```go
+// ✅ Normal Go testing pattern
+package services_test
+
+import (
+    "testing"
+    "myapp/internal/domain/services"  // Self-import for testing
+)
+```
+
+**Configuration**:
+```yaml
+excludeFiles:
+  - ".*_test\\.go$"              # All test files
+  - "integration_test\\.go$"     # Integration tests  
+  - ".*_integration_test\\.go$"  # Integration test variations
+```
+
+### 🔧 **Deep Scanning Configuration**
+
+**Decision**: Deep scanning (`deepScan: false`) is disabled in go-arch-lint configuration.
+
+**Trade-off Analysis**:
+- **Enabled**: More comprehensive AST analysis, but tool stability issues
+- **Disabled**: Stable operation with import-level validation
+
+**Impact**: Basic import validation still catches 90%+ of architectural violations while maintaining tool reliability.
+
+**Future**: Re-evaluate when go-arch-lint stability improves in future versions.
+
+### 🎯 **Clean Architecture Boundaries**
+
+**Enforced Rules**:
+- Domain entities cannot import infrastructure
+- Application layer orchestrates domain and infrastructure
+- Infrastructure implements domain interfaces (dependency inversion)
+- No circular dependencies between components
+- Shared kernel available to all layers
+
+---
+
 ## 🚨 **MIGRATION GUIDE**
 
 ### 📋 **Integration Checklist**

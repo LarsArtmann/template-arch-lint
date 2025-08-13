@@ -1,0 +1,74 @@
+found 2 clones:
+  internal/domain/entities/user.go:88,96
+  internal/domain/entities/user.go:99,107
+found 6 clones:
+  internal/domain/services/user_service_test.go:54,66
+  internal/domain/services/user_service_test.go:68,80
+  internal/domain/services/user_service_test.go:82,94
+  internal/domain/services/user_service_test.go:98,110
+  internal/domain/services/user_service_test.go:112,124
+  internal/domain/services/user_service_test.go:126,138
+found 2 clones:
+  internal/domain/values/values_test.go:132,141
+  internal/domain/values/values_test.go:269,278
+found 2 clones:
+  internal/application/handlers/user_handler_test.go:376,393
+  internal/application/handlers/user_handler_test.go:406,423
+found 2 clones:
+  web/templates/components/user_components_templ.go:590,608
+  web/templates/components/user_components_templ.go:613,631
+found 2 clones:
+  internal/db/users.sql.go:48,57
+  internal/db/users.sql.go:530,539
+found 2 clones:
+  internal/application/handlers/template_handler.go:186,203
+  internal/application/handlers/template_handler.go:206,223
+found 2 clones:
+  internal/domain/services/user_service_test.go:203,211
+  internal/domain/services/user_service_test.go:257,265
+found 2 clones:
+  web/templates/pages/user_form_templ.go:48,83
+  web/templates/pages/user_form_templ.go:116,151
+found 2 clones:
+  internal/domain/entities/user_test.go:168,185
+  internal/domain/entities/user_test.go:187,204
+found 2 clones:
+  internal/infrastructure/persistence/user_repository_sqlc.go:88,112
+  internal/infrastructure/persistence/user_repository_sqlc.go:115,139
+found 2 clones:
+  internal/container/container.go:195,201
+  internal/container/container.go:204,210
+found 2 clones:
+  internal/application/handlers/user_handler_test.go:302,314
+  internal/application/handlers/user_handler_test.go:316,328
+found 2 clones:
+  internal/application/handlers/user_handler.go:133,147
+  internal/application/handlers/user_handler.go:223,238
+found 2 clones:
+  internal/domain/entities/user.go:110,120
+  internal/domain/entities/user.go:123,133
+found 2 clones:
+  internal/db/users.sql.go:127,154
+  internal/db/users.sql.go:442,469
+found 2 clones:
+  internal/infrastructure/persistence/user_repository_sql.go:87,120
+  internal/infrastructure/persistence/user_repository_sql.go:123,156
+found 4 clones:
+  internal/db/users.sql.go:345,372
+  internal/db/users.sql.go:395,422
+  internal/db/users.sql.go:562,589
+  internal/db/users.sql.go:612,639
+found 8 clones:
+  internal/db/users.sql.go:134,146
+  internal/db/users.sql.go:258,270
+  internal/db/users.sql.go:352,364
+  internal/db/users.sql.go:402,414
+  internal/db/users.sql.go:449,461
+  internal/db/users.sql.go:489,501
+  internal/db/users.sql.go:569,581
+  internal/db/users.sql.go:619,631
+found 2 clones:
+  internal/domain/services/user_service_test.go:53,95
+  internal/domain/services/user_service_test.go:97,139
+
+Found total 20 clone groups.

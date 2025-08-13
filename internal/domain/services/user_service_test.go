@@ -12,7 +12,6 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
-	inmemory "github.com/LarsArtmann/template-arch-lint/internal/infrastructure/repositories"
 )
 
 func TestUserService(t *testing.T) {
@@ -29,9 +28,36 @@ var _ = Describe("UserService", func() {
 
 	BeforeEach(func() {
 		ctx = context.Background()
-		userRepo = inmemory.NewInMemoryUserRepository()
+		userRepo = repositories.NewInMemoryUserRepository()
 		userService = services.NewUserService(userRepo)
 	})
+
+	// Test helper functions
+	createTestUserID := func(id string) values.UserID {
+		userID, err := values.NewUserID(id)
+		Expect(err).ToNot(HaveOccurred())
+		return userID
+	}
+
+	assertValidationError := func(user *entities.User, err error) {
+		Expect(user).To(BeNil())
+		Expect(err).To(HaveOccurred())
+		_, isValidationError := errors.AsValidationError(err)
+		Expect(isValidationError).To(BeTrue())
+	}
+
+	createUserAndExpectValidationError := func(email, name string) {
+		id := createTestUserID("test-user-1")
+		user, err := userService.CreateUser(ctx, id, email, name)
+		assertValidationError(user, err)
+	}
+
+	createValidTestUser := func(userIDSuffix, email, name string) *entities.User {
+		id := createTestUserID(userIDSuffix)
+		user, err := userService.CreateUser(ctx, id, email, name)
+		Expect(err).ToNot(HaveOccurred())
+		return user
+	}
 
 	Describe("CreateUser", func() {
 		Context("with valid input", func() {
@@ -53,89 +79,29 @@ var _ = Describe("UserService", func() {
 
 		Context("with invalid email", func() {
 			It("should return validation error for empty email", func() {
-				id, err := values.NewUserID("test-user-1")
-				Expect(err).ToNot(HaveOccurred())
-				email := ""
-				name := "Test User"
-
-				user, err := userService.CreateUser(ctx, id, email, name)
-
-				Expect(user).To(BeNil())
-				Expect(err).To(HaveOccurred())
-				_, isValidationError := errors.AsValidationError(err)
-				Expect(isValidationError).To(BeTrue())
+				createUserAndExpectValidationError("", "Test User")
 			})
 
 			It("should return validation error for invalid email format", func() {
-				id, err := values.NewUserID("test-user-1")
-				Expect(err).ToNot(HaveOccurred())
-				email := "invalid-email"
-				name := "Test User"
-
-				user, err := userService.CreateUser(ctx, id, email, name)
-
-				Expect(user).To(BeNil())
-				Expect(err).To(HaveOccurred())
-				_, isValidationError := errors.AsValidationError(err)
-				Expect(isValidationError).To(BeTrue())
+				createUserAndExpectValidationError("invalid-email", "Test User")
 			})
 
 			It("should return validation error for email with spaces", func() {
-				id, err := values.NewUserID("test-user-1")
-				Expect(err).ToNot(HaveOccurred())
-				email := "test @example.com"
-				name := "Test User"
-
-				user, err := userService.CreateUser(ctx, id, email, name)
-
-				Expect(user).To(BeNil())
-				Expect(err).To(HaveOccurred())
-				_, isValidationError := errors.AsValidationError(err)
-				Expect(isValidationError).To(BeTrue())
+				createUserAndExpectValidationError("test @example.com", "Test User")
 			})
 		})
 
 		Context("with invalid name", func() {
 			It("should return validation error for empty name", func() {
-				id, err := values.NewUserID("test-user-1")
-				Expect(err).ToNot(HaveOccurred())
-				email := "test@example.com"
-				name := ""
-
-				user, err := userService.CreateUser(ctx, id, email, name)
-
-				Expect(user).To(BeNil())
-				Expect(err).To(HaveOccurred())
-				_, isValidationError := errors.AsValidationError(err)
-				Expect(isValidationError).To(BeTrue())
+				createUserAndExpectValidationError("test@example.com", "")
 			})
 
 			It("should return validation error for too short name", func() {
-				id, err := values.NewUserID("test-user-1")
-				Expect(err).ToNot(HaveOccurred())
-				email := "test@example.com"
-				name := "A"
-
-				user, err := userService.CreateUser(ctx, id, email, name)
-
-				Expect(user).To(BeNil())
-				Expect(err).To(HaveOccurred())
-				_, isValidationError := errors.AsValidationError(err)
-				Expect(isValidationError).To(BeTrue())
+				createUserAndExpectValidationError("test@example.com", "A")
 			})
 
 			It("should return validation error for name without letters", func() {
-				id, err := values.NewUserID("test-user-1")
-				Expect(err).ToNot(HaveOccurred())
-				email := "test@example.com"
-				name := "123"
-
-				user, err := userService.CreateUser(ctx, id, email, name)
-
-				Expect(user).To(BeNil())
-				Expect(err).To(HaveOccurred())
-				_, isValidationError := errors.AsValidationError(err)
-				Expect(isValidationError).To(BeTrue())
+				createUserAndExpectValidationError("test@example.com", "123")
 			})
 		})
 
@@ -202,13 +168,7 @@ var _ = Describe("UserService", func() {
 		var existingUser *entities.User
 
 		BeforeEach(func() {
-			id, err := values.NewUserID("test-user-1")
-			Expect(err).ToNot(HaveOccurred())
-			email := "test@example.com"
-			name := "Test User"
-
-			existingUser, err = userService.CreateUser(ctx, id, email, name)
-			Expect(err).ToNot(HaveOccurred())
+			existingUser = createValidTestUser("test-user-1", "test@example.com", "Test User")
 		})
 
 		Context("with valid input", func() {
@@ -256,13 +216,7 @@ var _ = Describe("UserService", func() {
 		var existingUser *entities.User
 
 		BeforeEach(func() {
-			id, err := values.NewUserID("test-user-1")
-			Expect(err).ToNot(HaveOccurred())
-			email := "test@example.com"
-			name := "Test User"
-
-			existingUser, err = userService.CreateUser(ctx, id, email, name)
-			Expect(err).ToNot(HaveOccurred())
+			existingUser = createValidTestUser("test-user-1", "test@example.com", "Test User")
 		})
 
 		Context("when user exists", func() {

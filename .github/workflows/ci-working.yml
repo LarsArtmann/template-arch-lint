@@ -1,6 +1,6 @@
-# 🔥 WORKING CI/CD PIPELINE (Temporary - Architecture linting disabled)
-# Complete automation for Go application with security, quality, and testing
-name: CI/CD Pipeline (Working)
+# 🔥 CI/CD PIPELINE - Complete Architecture & Quality Enforcement
+# Complete automation for Go application with security, quality, architecture validation, and testing
+name: CI/CD Pipeline
 
 on:
   push:
@@ -12,6 +12,7 @@ on:
 env:
   GO_VERSION: '1.24.0'
   GOLANGCI_LINT_VERSION: 'v2.3.1'
+  GO_ARCH_LINT_VERSION: 'v1.12.0'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -145,9 +146,9 @@ jobs:
             server
           retention-days: 1
 
-  # 📊 Code quality and linting (Skip architecture for now)
+  # 📊 Code quality and linting (with architecture validation)
   quality:
-    name: 📊 Code Quality
+    name: 📊 Code Quality & Architecture
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: validate
@@ -170,6 +171,16 @@ jobs:
         run: |
           go install github.com/a-h/templ/cmd/templ@latest
           templ generate
+
+      - name: 🏗️ Install architecture linter
+        run: |
+          go install github.com/fe3dback/go-arch-lint@${{ env.GO_ARCH_LINT_VERSION }}
+
+      - name: 🏗️ Run architecture validation
+        run: |
+          echo "🏗️ Running architecture validation..."
+          go-arch-lint check
+          echo "✅ Architecture validation passed!"
 
       - name: 📋 Install golangci-lint
         uses: golangci/golangci-lint-action@v6
@@ -571,8 +582,8 @@ jobs:
           echo "- **Author:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Notes" >> $GITHUB_STEP_SUMMARY
-          echo "- 🔄 Architecture linting temporarily disabled due to go-arch-lint configuration issues" >> $GITHUB_STEP_SUMMARY
-          echo "- 📊 All other quality gates are active and enforced" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏗️ Architecture linting enabled and enforcing Clean Architecture boundaries" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 All quality gates are active and enforced" >> $GITHUB_STEP_SUMMARY
           echo "- 🐳 Container images published to GitHub Container Registry (GHCR)" >> $GITHUB_STEP_SUMMARY
           echo "- 🔒 Container security scanning with Trivy and Grype" >> $GITHUB_STEP_SUMMARY
           echo "- 🏗️ Multi-architecture builds (AMD64/ARM64) with SBOM and provenance" >> $GITHUB_STEP_SUMMARY

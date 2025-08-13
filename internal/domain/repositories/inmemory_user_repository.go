@@ -7,7 +7,6 @@ import (
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 )
 
 // InMemoryUserRepository implements UserRepository interface with in-memory storage
@@ -17,7 +16,7 @@ type InMemoryUserRepository struct {
 }
 
 // NewInMemoryUserRepository creates a new in-memory user repository
-func NewInMemoryUserRepository() repositories.UserRepository {
+func NewInMemoryUserRepository() UserRepository {
 	return &InMemoryUserRepository{
 		users: make(map[entities.UserID]*entities.User),
 	}
@@ -56,7 +55,7 @@ func (r *InMemoryUserRepository) FindByID(ctx context.Context, id entities.UserI
 
 	user, exists := r.users[id]
 	if !exists {
-		return nil, repositories.ErrUserNotFound
+		return nil, ErrUserNotFound
 	}
 
 	// Return a copy to prevent external modifications
@@ -77,7 +76,7 @@ func (r *InMemoryUserRepository) FindByEmail(ctx context.Context, email string) 
 		}
 	}
 
-	return nil, repositories.ErrUserNotFound
+	return nil, ErrUserNotFound
 }
 
 // Delete removes a user from the repository
@@ -86,7 +85,7 @@ func (r *InMemoryUserRepository) Delete(ctx context.Context, id entities.UserID)
 	defer r.mu.Unlock()
 
 	if _, exists := r.users[id]; !exists {
-		return repositories.ErrUserNotFound
+		return ErrUserNotFound
 	}
 
 	delete(r.users, id)

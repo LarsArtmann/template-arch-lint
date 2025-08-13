@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<meta charset="utf-8"/>
+<title>Duplicates</title>
+<style>
+	pre {
+		background-color: #FFD;
+		border: 1px solid #E2E2E2;
+		padding: 1ex;
+	}
+</style>
+<h1>#1 found 2 clones</h1>
+<h2>internal/domain/entities/user.go:88</h2>
+<pre>func (u *User) GetEmail() values.Email {
+	// Lazy initialization if value object is not set
+	if u.emailVO.IsEmpty() && u.Email != "" {
+		if emailVO, err := values.NewEmail(u.Email); err == nil {
+			u.emailVO = emailVO
+		}
+	}
+	return u.emailVO
+}</pre>
+<h2>internal/domain/entities/user.go:99</h2>
+<pre>func (u *User) GetUserName() values.UserName {
+	// Lazy initialization if value object is not set
+	if u.nameVO.IsEmpty() && u.Name != "" {
+		if nameVO, err := values.NewUserName(u.Name); err == nil {
+			u.nameVO = nameVO
+		}
+	}
+	return u.nameVO
+}</pre>
+<h1>#2 found 6 clones</h1>
+<h2>internal/domain/services/user_service_test.go:54</h2>
+<pre>It("should return validation error for empty email", func() {
+	id, err := values.NewUserID("test-user-1")
+	Expect(err).ToNot(HaveOccurred())
+	email := ""
+	name := "Test User"
+
+	user, err := userService.CreateUser(ctx, id, email, name)
+
+	Expect(user).To(BeNil())
+	Expect(err).To(HaveOccurred())
+	_, isValidationError := errors.AsValidationError(err)
+	Expect(isValidationError).To(BeTrue())
+})</pre>
+<h2>internal/domain/services/user_service_test.go:68</h2>
+<pre>It("should return validation error for invalid email format", func() {
+	id, err := values.NewUserID("test-user-1")
+	Expect(err).ToNot(HaveOccurred())
+	email := "invalid-email"
+	name := "Test User"
+
+	user, err := userService.CreateUser(ctx, id, email, name)
+
+	Expect(user).To(BeNil())
+	Expect(err).To(HaveOccurred())
+	_, isValidationError := errors.AsValidationError(err)
+	Expect(isValidationError).To(BeTrue())
+})</pre>
+<h2>internal/domain/services/user_service_test.go:82</h2>
+<pre>It("should return validation error for email with spaces", func() {
+	id, err := values.NewUserID("test-user-1")
+	Expect(err).ToNot(HaveOccurred())
+	email := "test @example.com"
+	name := "Test User"
+
+	user, err := userService.CreateUser(ctx, id, email, name)
+
+	Expect(user).To(BeNil())
+	Expect(err).To(HaveOccurred())
+	_, isValidationError := errors.AsValidationError(err)
+	Expect(isValidationError).To(BeTrue())
+})</pre>
+<h2>internal/domain/services/user_service_test.go:98</h2>
+<pre>It("should return validation error for empty name", func() {
+	id, err := values.NewUserID("test-user-1")
+	Expect(err).ToNot(HaveOccurred())
+	email := "test@example.com"
+	name := ""
+
+	user, err := userService.CreateUser(ctx, id, email, name)
+
+	Expect(user).To(BeNil())
+	Expect(err).To(HaveOccurred())
+	_, isValidationError := errors.AsValidationError(err)
+	Expect(isValidationError).To(BeTrue())
+})</pre>
+<h2>internal/domain/services/user_service_test.go:112</h2>
+<pre>It("should return validation error for too short name", func() {
+	id, err := values.NewUserID("test-user-1")
+	Expect(err).ToNot(HaveOccurred())
+	email := "test@example.com"
+	name := "A"
+
+	user, err := userService.CreateUser(ctx, id, email, name)
+
+	Expect(user).To(BeNil())
+	Expect(err).To(HaveOccurred())
+	_, isValidationError := errors.AsValidationError(err)
+	Expect(isValidationError).To(BeTrue())
+})</pre>
+<h2>internal/domain/services/user_service_test.go:126</h2>
+<pre>It("should return validation error for name without letters", func() {
+	id, err := values.NewUserID("test-user-1")
+	Expect(err).ToNot(HaveOccurred())
+	email := "test@example.com"
+	name := "123"
+
+	user, err := userService.CreateUser(ctx, id, email, name)
+
+	Expect(user).To(BeNil())
+	Expect(err).To(HaveOccurred())
+	_, isValidationError := errors.AsValidationError(err)
+	Expect(isValidationError).To(BeTrue())
+})</pre>
+<h1>#3 found 2 clones</h1>
+<h2>internal/domain/values/values_test.go:132</h2>
+<pre>Describe("IsEmpty", func() {
+	It("should return false for valid email", func() {
+		Expect(email.IsEmpty()).To(BeFalse())
+	})
+
+	It("should return true for empty email", func() {
+		emptyEmail := values.Email{}
+		Expect(emptyEmail.IsEmpty()).To(BeTrue())
+	})
+})</pre>
+<h2>internal/domain/values/values_test.go:269</h2>
+<pre>Describe("IsEmpty", func() {
+	It("should return false for valid user ID", func() {
+		Expect(userID.IsEmpty()).To(BeFalse())
+	})
+
+	It("should return true for empty user ID", func() {
+		emptyID := values.UserID{}
+		Expect(emptyID.IsEmpty()).To(BeTrue())
+	})
+})</pre>
+<h1>#4 found 2 clones</h1>
+<h2>internal/application/handlers/user_handler_test.go:376</h2>
+<pre>Context("with valid user ID", func() {
+	It("should delete user successfully", func() {
+		// Given
+		req := httptest.NewRequest("DELETE", "/users/user-123", nil)
+		recorder := httptest.NewRecorder()
+
+		// When
+		router.ServeHTTP(recorder, req)
+
+		// Then
+		Expect(recorder.Code).To(Equal(http.StatusOK))
+
+		var response SuccessResponse
+		err := json.Unmarshal(recorder.Body.Bytes(), &response)
+		Expect(err).To(BeNil())
+		Expect(response.Message).To(Equal("User deleted successfully"))
+	})
+})</pre>
+<h2>internal/application/handlers/user_handler_test.go:406</h2>
+<pre>Context("without query parameters", func() {
+	It("should return all users", func() {
+		// Given
+		req := httptest.NewRequest("GET", "/users", nil)
+		recorder := httptest.NewRecorder()
+
+		// When
+		router.ServeHTTP(recorder, req)
+
+		// Then
+		Expect(recorder.Code).To(Equal(http.StatusOK))
+
+		var response ListUsersResponse
+		err := json.Unmarshal(recorder.Body.Bytes(), &response)
+		Expect(err).To(BeNil())
+		Expect(response.Total).To(Equal(3))
+	})
+})</pre>
+<h1>#5 found 2 clones</h1>
+<h2>web/templates/components/user_components_templ.go:590</h2>
+<pre>if user != nil {
+	templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, " value=\"")
+	if templ_7745c5c3_Err != nil {
+		return templ_7745c5c3_Err
+	}
+	var templ_7745c5c3_Var35 string
+	templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
+	if templ_7745c5c3_Err != nil {
+		return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/components/user_components.templ`, Line: 260, Col: 27}
+	}
+	_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
+	if templ_7745c5c3_Err != nil {
+		return templ_7745c5c3_Err
+	}
+	templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\"")
+	if templ_7745c5c3_Err != nil {
+		return templ_7745c5c3_Err
+	}
+}</pre>
+<h2>web/templates/components/user_components_templ.go:613</h2>
+<pre>if user != nil {
+	templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, " value=\"")
+	if templ_7745c5c3_Err != nil {
+		return templ_7745c5c3_Err
+	}
+	var templ_7745c5c3_Var36 string
+	templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
+	if templ_7745c5c3_Err != nil {
+		return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/components/user_components.templ`, Line: 273, Col: 28}
+	}
+	_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
+	if templ_7745c5c3_Err != nil {
+		return templ_7745c5c3_Err
+	}
+	templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "\"")
+	if templ_7745c5c3_Err != nil {
+		return templ_7745c5c3_Err
+	}
+}</pre>
+<h1>#6 found 2 clones</h1>
+<h2>internal/db/users.sql.go:48</h2>
+<pre>func (q *Queries) BulkInsertUsers(ctx context.Context, arg *BulkInsertUsersParams) error {
+	_, err := q.exec(ctx, q.bulkInsertUsersStmt, BulkInsertUsers,
+		arg.ID,
+		arg.Email,
+		arg.Name,
+		arg.Created,
+		arg.Modified,
+	)
+	return err
+}</pre>
+<h2>internal/db/users.sql.go:530</h2>
+<pre>func (q *Queries) SaveUser(ctx context.Context, arg *SaveUserParams) error {
+	_, err := q.exec(ctx, q.saveUserStmt, SaveUser,
+		arg.ID,
+		arg.Email,
+		arg.Name,
+		arg.Created,
+		arg.Modified,
+	)
+	return err
+}</pre>
+<h1>#7 found 2 clones</h1>
+<h2>internal/application/handlers/template_handler.go:186</h2>
+<pre>func (h *TemplateHandler) EditUserInline(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := values.NewUserID(idStr)
+	if err != nil {
+		h.logger.Warn("Invalid user ID format", "error", err, "user_id", idStr)
+		h.showErrorTemplate(c, "Invalid user ID", err.Error())
+		return
+	}
+
+	user, err := h.userService.GetUser(c.Request.Context(), id)
+	if err != nil {
+		h.logger.Error("Failed to get user for inline edit", "error", err, "user_id", id)
+		h.showErrorTemplate(c, "User not found", err.Error())
+		return
+	}
+
+	h.renderTemplate(c, components.UserEditRow(user))
+}</pre>
+<h2>internal/application/handlers/template_handler.go:206</h2>
+<pre>func (h *TemplateHandler) CancelUserEdit(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := values.NewUserID(idStr)
+	if err != nil {
+		h.logger.Warn("Invalid user ID format", "error", err, "user_id", idStr)
+		h.showErrorTemplate(c, "Invalid user ID", err.Error())
+		return
+	}
+
+	user, err := h.userService.GetUser(c.Request.Context(), id)
+	if err != nil {
+		h.logger.Error("Failed to get user for cancel edit", "error", err, "user_id", id)
+		h.showErrorTemplate(c, "User not found", err.Error())
+		return
+	}
+
+	h.renderTemplate(c, components.UserRow(user))
+}</pre>
+<h1>#8 found 2 clones</h1>
+<h2>internal/domain/services/user_service_test.go:203</h2>
+<pre>BeforeEach(func() {
+	id, err := values.NewUserID("test-user-1")
+	Expect(err).ToNot(HaveOccurred())
+	email := "test@example.com"
+	name := "Test User"
+
+	existingUser, err = userService.CreateUser(ctx, id, email, name)
+	Expect(err).ToNot(HaveOccurred())
+})</pre>
+<h2>internal/domain/services/user_service_test.go:257</h2>
+<pre>BeforeEach(func() {
+	id, err := values.NewUserID("test-user-1")
+	Expect(err).ToNot(HaveOccurred())
+	email := "test@example.com"
+	name := "Test User"
+
+	existingUser, err = userService.CreateUser(ctx, id, email, name)
+	Expect(err).ToNot(HaveOccurred())
+})</pre>
+<h1>#9 found 2 clones</h1>
+<h2>web/templates/pages/user_form_templ.go:48</h2>
+<pre>                                         {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var2 == nil {
+			templ_7745c5c3_Var2 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"max-w-md mx-auto\"><div class=\"bg-white rounded-lg shadow-sm border border-gray-200 p-6\"><div class=\"mb-6\"><h1 class=\"text-2xl font-bold text-gray-900\">Create New User</h1><p class=\"text-gray-600 mt-1\">Add a new user to the system</p></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = components.UserForm(nil, "create").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}</pre>
+<h2>web/templates/pages/user_form_templ.go:116</h2>
+<pre>                                                          {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"max-w-md mx-auto\"><div class=\"bg-white rounded-lg shadow-sm border border-gray-200 p-6\"><div class=\"mb-6\"><h1 class=\"text-2xl font-bold text-gray-900\">Edit User</h1><p class=\"text-gray-600 mt-1\">Update user information</p></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = components.UserForm(user, "edit").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}</pre>
+<h1>#10 found 2 clones</h1>
+<h2>internal/domain/entities/user_test.go:168</h2>
+<pre>It("should fail validation when email is empty", func() {
+	// Given
+	userID, _ := values.NewUserID("user-123")
+	user := &User{
+		ID:       userID,
+		Email:    "", // Empty email
+		Name:     "TestUser",
+		Created:  time.Now(),
+		Modified: time.Now(),
+	}
+
+	// When
+	err := user.Validate()
+
+	// Then
+	Expect(err).To(HaveOccurred())
+	Expect(err.Error()).To(ContainSubstring("email"))
+})</pre>
+<h2>internal/domain/entities/user_test.go:187</h2>
+<pre>It("should fail validation when name is empty", func() {
+	// Given
+	userID, _ := values.NewUserID("user-123")
+	user := &User{
+		ID:       userID,
+		Email:    "test@example.com",
+		Name:     "", // Empty name
+		Created:  time.Now(),
+		Modified: time.Now(),
+	}
+
+	// When
+	err := user.Validate()
+
+	// Then
+	Expect(err).To(HaveOccurred())
+	Expect(err.Error()).To(ContainSubstring("name"))
+})</pre>
+<h1>#11 found 2 clones</h1>
+<h2>internal/infrastructure/persistence/user_repository_sqlc.go:88</h2>
+<pre>                                                                                                       {
+	r.logger.Debug("Finding user by ID", "user_id", id)
+
+	dbUser, err := r.queries.FindUserByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			r.logger.Debug("User not found", "user_id", id)
+			return nil, repositories.ErrUserNotFound
+		}
+		r.logger.Error("Failed to find user by ID", "user_id", id, "error", err)
+		return nil, err
+	}
+
+	// Convert from SQLC generated struct to domain entity
+	user := &entities.User{
+		ID:       dbUser.ID,
+		Email:    dbUser.Email,
+		Name:     dbUser.Name,
+		Created:  dbUser.Created,
+		Modified: dbUser.Modified,
+	}
+
+	r.logger.Debug("User found successfully", "user_id", id, "email", user.Email)
+	return user, nil
+}</pre>
+<h2>internal/infrastructure/persistence/user_repository_sqlc.go:115</h2>
+<pre>                                                                                                    {
+	r.logger.Debug("Finding user by email", "email", email)
+
+	dbUser, err := r.queries.FindUserByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			r.logger.Debug("User not found", "email", email)
+			return nil, repositories.ErrUserNotFound
+		}
+		r.logger.Error("Failed to find user by email", "email", email, "error", err)
+		return nil, err
+	}
+
+	// Convert from SQLC generated struct to domain entity
+	user := &entities.User{
+		ID:       dbUser.ID,
+		Email:    dbUser.Email,
+		Name:     dbUser.Name,
+		Created:  dbUser.Created,
+		Modified: dbUser.Modified,
+	}
+
+	r.logger.Debug("User found successfully", "email", email, "user_id", user.ID)
+	return user, nil
+}</pre>
+<h1>#12 found 2 clones</h1>
+<h2>internal/container/container.go:195</h2>
+<pre>do.Provide(c.injector, func(i *do.Injector) (*handlers.UserHandler, error) {
+	userService := do.MustInvoke[*services.UserService](i)
+	logger := do.MustInvoke[*slog.Logger](i)
+
+	handler := handlers.NewUserHandler(userService, logger)
+	return handler, nil
+})</pre>
+<h2>internal/container/container.go:204</h2>
+<pre>do.Provide(c.injector, func(i *do.Injector) (*handlers.TemplateHandler, error) {
+	userService := do.MustInvoke[*services.UserService](i)
+	logger := do.MustInvoke[*slog.Logger](i)
+
+	handler := handlers.NewTemplateHandler(userService, logger)
+	return handler, nil
+})</pre>
+<h1>#13 found 2 clones</h1>
+<h2>internal/application/handlers/user_handler_test.go:302</h2>
+<pre>Context("with invalid user ID", func() {
+	It("should return error for invalid ID format", func() {
+		// Given
+		req := httptest.NewRequest("GET", "/users/invalid%20id", nil)
+		recorder := httptest.NewRecorder()
+
+		// When
+		router.ServeHTTP(recorder, req)
+
+		// Then
+		Expect(recorder.Code).To(Equal(http.StatusBadRequest))
+	})
+})</pre>
+<h2>internal/application/handlers/user_handler_test.go:316</h2>
+<pre>Context("with non-existent user", func() {
+	It("should return not found error", func() {
+		// Given
+		req := httptest.NewRequest("GET", "/users/nonexistent", nil)
+		recorder := httptest.NewRecorder()
+
+		// When
+		router.ServeHTTP(recorder, req)
+
+		// Then
+		Expect(recorder.Code).To(Equal(http.StatusNotFound))
+	})
+})</pre>
+<h1>#14 found 2 clones</h1>
+<h2>internal/application/handlers/user_handler.go:133</h2>
+<pre>              {
+	h.logger.Error("Failed to get user", "error", err, "user_id", id)
+
+	if errors.Is(err, repositories.ErrUserNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "User not found",
+		})
+		return
+	}
+	c.JSON(http.StatusInternalServerError, gin.H{
+		"error":   "Failed to retrieve user",
+		"details": err.Error(),
+	})
+	return
+}</pre>
+<h2>internal/application/handlers/user_handler.go:223</h2>
+<pre>                                                                        {
+	h.logger.Error("Failed to delete user", "error", err, "user_id", id)
+
+	if errors.Is(err, repositories.ErrUserNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "User not found",
+		})
+		return
+	}
+
+	c.JSON(http.StatusInternalServerError, gin.H{
+		"error":   "Failed to delete user",
+		"details": err.Error(),
+	})
+	return
+}</pre>
+<h1>#15 found 2 clones</h1>
+<h2>internal/domain/entities/user.go:110</h2>
+<pre>func (u *User) SetEmail(email string) error {
+	emailVO, err := values.NewEmail(email)
+	if err != nil {
+		return errors.NewValidationError("email", err.Error())
+	}
+
+	u.emailVO = emailVO
+	u.Email = emailVO.Value()
+	u.Modified = time.Now()
+	return nil
+}</pre>
+<h2>internal/domain/entities/user.go:123</h2>
+<pre>func (u *User) SetName(name string) error {
+	nameVO, err := values.NewUserName(name)
+	if err != nil {
+		return errors.NewValidationError("name", err.Error())
+	}
+
+	u.nameVO = nameVO
+	u.Name = nameVO.Value()
+	u.Modified = time.Now()
+	return nil
+}</pre>
+<h1>#16 found 2 clones</h1>
+<h2>internal/db/users.sql.go:127</h2>
+<pre>func (q *Queries) FindRecentUsers(ctx context.Context, arg *FindRecentUsersParams) ([]*Users, error) {
+	rows, err := q.query(ctx, q.findRecentUsersStmt, FindRecentUsers, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*Users{}
+	for rows.Next() {
+		var i Users
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Name,
+			&i.Created,
+			&i.Modified,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}</pre>
+<h2>internal/db/users.sql.go:442</h2>
+<pre>func (q *Queries) ListUsers(ctx context.Context, arg *ListUsersParams) ([]*Users, error) {
+	rows, err := q.query(ctx, q.listUsersStmt, ListUsers, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*Users{}
+	for rows.Next() {
+		var i Users
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Name,
+			&i.Created,
+			&i.Modified,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}</pre>
+<h1>#17 found 2 clones</h1>
+<h2>internal/infrastructure/persistence/user_repository_sql.go:87</h2>
+<pre>                                                                                                      {
+	r.logger.Debug("Finding user by ID", "user_id", id)
+
+	query := `
+		SELECT id, email, name, created, modified
+		FROM users
+		WHERE id = ?
+	`
+
+	var user entities.User
+	var created, modified time.Time
+
+	err := r.db.QueryRowContext(ctx, query, id).Scan(
+		&user.ID,
+		&user.Email,
+		&user.Name,
+		&created,
+		&modified,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			r.logger.Debug("User not found", "user_id", id)
+			return nil, repositories.ErrUserNotFound
+		}
+		r.logger.Error("Failed to find user by ID", "user_id", id, "error", err)
+		return nil, fmt.Errorf("failed to find user by ID: %w", err)
+	}
+
+	user.Created = created
+	user.Modified = modified
+
+	r.logger.Debug("User found successfully", "user_id", id, "email", user.Email)
+	return &user, nil
+}</pre>
+<h2>internal/infrastructure/persistence/user_repository_sql.go:123</h2>
+<pre>                                                                                                   {
+	r.logger.Debug("Finding user by email", "email", email)
+
+	query := `
+		SELECT id, email, name, created, modified
+		FROM users
+		WHERE email = ?
+	`
+
+	var user entities.User
+	var created, modified time.Time
+
+	err := r.db.QueryRowContext(ctx, query, email).Scan(
+		&user.ID,
+		&user.Email,
+		&user.Name,
+		&created,
+		&modified,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			r.logger.Debug("User not found", "email", email)
+			return nil, repositories.ErrUserNotFound
+		}
+		r.logger.Error("Failed to find user by email", "email", email, "error", err)
+		return nil, fmt.Errorf("failed to find user by email: %w", err)
+	}
+
+	user.Created = created
+	user.Modified = modified
+
+	r.logger.Debug("User found successfully", "email", email, "user_id", user.ID)
+	return &user, nil
+}</pre>
+<h1>#18 found 4 clones</h1>
+<h2>internal/db/users.sql.go:345</h2>
+<pre>func (q *Queries) GetUsersCreatedAfter(ctx context.Context, arg *GetUsersCreatedAfterParams) ([]*Users, error) {
+	rows, err := q.query(ctx, q.getUsersCreatedAfterStmt, GetUsersCreatedAfter, arg.Created, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*Users{}
+	for rows.Next() {
+		var i Users
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Name,
+			&i.Created,
+			&i.Modified,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}</pre>
+<h2>internal/db/users.sql.go:395</h2>
+<pre>func (q *Queries) GetUsersModifiedAfter(ctx context.Context, arg *GetUsersModifiedAfterParams) ([]*Users, error) {
+	rows, err := q.query(ctx, q.getUsersModifiedAfterStmt, GetUsersModifiedAfter, arg.Modified, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*Users{}
+	for rows.Next() {
+		var i Users
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Name,
+			&i.Created,
+			&i.Modified,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}</pre>
+<h2>internal/db/users.sql.go:562</h2>
+<pre>func (q *Queries) SearchUsersByEmail(ctx context.Context, arg *SearchUsersByEmailParams) ([]*Users, error) {
+	rows, err := q.query(ctx, q.searchUsersByEmailStmt, SearchUsersByEmail, arg.Column1, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*Users{}
+	for rows.Next() {
+		var i Users
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Name,
+			&i.Created,
+			&i.Modified,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}</pre>
+<h2>internal/db/users.sql.go:612</h2>
+<pre>func (q *Queries) SearchUsersByName(ctx context.Context, arg *SearchUsersByNameParams) ([]*Users, error) {
+	rows, err := q.query(ctx, q.searchUsersByNameStmt, SearchUsersByName, arg.Column1, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*Users{}
+	for rows.Next() {
+		var i Users
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Name,
+			&i.Created,
+			&i.Modified,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}</pre>
+<h1>#19 found 8 clones</h1>
+<h2>internal/db/users.sql.go:134</h2>
+<pre>for rows.Next() {
+	var i Users
+	if err := rows.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.Created,
+		&i.Modified,
+	); err != nil {
+		return nil, err
+	}
+	items = append(items, &i)
+}</pre>
+<h2>internal/db/users.sql.go:258</h2>
+<pre>for rows.Next() {
+	var i Users
+	if err := rows.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.Created,
+		&i.Modified,
+	); err != nil {
+		return nil, err
+	}
+	items = append(items, &i)
+}</pre>
+<h2>internal/db/users.sql.go:352</h2>
+<pre>for rows.Next() {
+	var i Users
+	if err := rows.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.Created,
+		&i.Modified,
+	); err != nil {
+		return nil, err
+	}
+	items = append(items, &i)
+}</pre>
+<h2>internal/db/users.sql.go:402</h2>
+<pre>for rows.Next() {
+	var i Users
+	if err := rows.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.Created,
+		&i.Modified,
+	); err != nil {
+		return nil, err
+	}
+	items = append(items, &i)
+}</pre>
+<h2>internal/db/users.sql.go:449</h2>
+<pre>for rows.Next() {
+	var i Users
+	if err := rows.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.Created,
+		&i.Modified,
+	); err != nil {
+		return nil, err
+	}
+	items = append(items, &i)
+}</pre>
+<h2>internal/db/users.sql.go:489</h2>
+<pre>for rows.Next() {
+	var i Users
+	if err := rows.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.Created,
+		&i.Modified,
+	); err != nil {
+		return nil, err
+	}
+	items = append(items, &i)
+}</pre>
+<h2>internal/db/users.sql.go:569</h2>
+<pre>for rows.Next() {
+	var i Users
+	if err := rows.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.Created,
+		&i.Modified,
+	); err != nil {
+		return nil, err
+	}
+	items = append(items, &i)
+}</pre>
+<h2>internal/db/users.sql.go:619</h2>
+<pre>for rows.Next() {
+	var i Users
+	if err := rows.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.Created,
+		&i.Modified,
+	); err != nil {
+		return nil, err
+	}
+	items = append(items, &i)
+}</pre>
+<h1>#20 found 2 clones</h1>
+<h2>internal/domain/services/user_service_test.go:53</h2>
+<pre>Context("with invalid email", func() {
+	It("should return validation error for empty email", func() {
+		id, err := values.NewUserID("test-user-1")
+		Expect(err).ToNot(HaveOccurred())
+		email := ""
+		name := "Test User"
+
+		user, err := userService.CreateUser(ctx, id, email, name)
+
+		Expect(user).To(BeNil())
+		Expect(err).To(HaveOccurred())
+		_, isValidationError := errors.AsValidationError(err)
+		Expect(isValidationError).To(BeTrue())
+	})
+
+	It("should return validation error for invalid email format", func() {
+		id, err := values.NewUserID("test-user-1")
+		Expect(err).ToNot(HaveOccurred())
+		email := "invalid-email"
+		name := "Test User"
+
+		user, err := userService.CreateUser(ctx, id, email, name)
+
+		Expect(user).To(BeNil())
+		Expect(err).To(HaveOccurred())
+		_, isValidationError := errors.AsValidationError(err)
+		Expect(isValidationError).To(BeTrue())
+	})
+
+	It("should return validation error for email with spaces", func() {
+		id, err := values.NewUserID("test-user-1")
+		Expect(err).ToNot(HaveOccurred())
+		email := "test @example.com"
+		name := "Test User"
+
+		user, err := userService.CreateUser(ctx, id, email, name)
+
+		Expect(user).To(BeNil())
+		Expect(err).To(HaveOccurred())
+		_, isValidationError := errors.AsValidationError(err)
+		Expect(isValidationError).To(BeTrue())
+	})
+})</pre>
+<h2>internal/domain/services/user_service_test.go:97</h2>
+<pre>Context("with invalid name", func() {
+	It("should return validation error for empty name", func() {
+		id, err := values.NewUserID("test-user-1")
+		Expect(err).ToNot(HaveOccurred())
+		email := "test@example.com"
+		name := ""
+
+		user, err := userService.CreateUser(ctx, id, email, name)
+
+		Expect(user).To(BeNil())
+		Expect(err).To(HaveOccurred())
+		_, isValidationError := errors.AsValidationError(err)
+		Expect(isValidationError).To(BeTrue())
+	})
+
+	It("should return validation error for too short name", func() {
+		id, err := values.NewUserID("test-user-1")
+		Expect(err).ToNot(HaveOccurred())
+		email := "test@example.com"
+		name := "A"
+
+		user, err := userService.CreateUser(ctx, id, email, name)
+
+		Expect(user).To(BeNil())
+		Expect(err).To(HaveOccurred())
+		_, isValidationError := errors.AsValidationError(err)
+		Expect(isValidationError).To(BeTrue())
+	})
+
+	It("should return validation error for name without letters", func() {
+		id, err := values.NewUserID("test-user-1")
+		Expect(err).ToNot(HaveOccurred())
+		email := "test@example.com"
+		name := "123"
+
+		user, err := userService.CreateUser(ctx, id, email, name)
+
+		Expect(user).To(BeNil())
+		Expect(err).To(HaveOccurred())
+		_, isValidationError := errors.AsValidationError(err)
+		Expect(isValidationError).To(BeTrue())
+	})
+})</pre>
