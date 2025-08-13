@@ -307,6 +307,7 @@ exclude:
   # Documentation and configuration
   - "**/docs/**"
   - "**/examples/**"
+  - "example/**"
   - "**/*.md"
   - "**/.git/**"
   - "**/.github/**"

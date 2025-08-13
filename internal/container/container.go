@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"net/http/pprof"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -189,6 +190,23 @@ func (c *Container) registerHandlers() {
 		handler := handlers.NewTemplateHandler(userService, logger)
 		return handler, nil
 	})
+
+	// Register health handler
+	do.Provide(c.injector, func(i *do.Injector) (*handlers.HealthHandler, error) {
+		db := do.MustInvoke[*sql.DB](i)
+		logger := do.MustInvoke[*slog.Logger](i)
+
+		handler := handlers.NewHealthHandler(db, logger)
+		return handler, nil
+	})
+
+	// Register performance handler
+	do.Provide(c.injector, func(i *do.Injector) (*handlers.PerformanceHandler, error) {
+		logger := do.MustInvoke[*slog.Logger](i)
+
+		handler := handlers.NewPerformanceHandler(logger)
+		return handler, nil
+	})
 }
 
 // registerHTTPServer registers the HTTP server and router
@@ -198,13 +216,15 @@ func (c *Container) registerHTTPServer() {
 		logger := do.MustInvoke[*slog.Logger](i)
 		userHandler := do.MustInvoke[*handlers.UserHandler](i)
 		templHandler := do.MustInvoke[*handlers.TemplateHandler](i)
+		healthHandler := do.MustInvoke[*handlers.HealthHandler](i)
+		perfHandler := do.MustInvoke[*handlers.PerformanceHandler](i)
 
 		router := c.createGinRouter(cfg, logger)
-		c.setupCoreRoutes(router, cfg)
+		c.setupCoreRoutes(router, cfg, healthHandler, perfHandler)
 		c.setupTemplateRoutes(router, templHandler)
 		c.setupAPIRoutes(router, userHandler)
 
-		logger.Info("HTTP router configured successfully with template and API routes")
+		logger.Info("HTTP router configured successfully with template, API, health, and performance routes")
 		return router, nil
 	})
 }
@@ -215,7 +235,8 @@ func (c *Container) createGinRouter(cfg *config.Config, logger *slog.Logger) *gi
 
 	router := gin.New()
 	router.Use(gin.Recovery())
-	router.Use(middleware.RequestLoggingMiddleware(logger))
+	router.Use(middleware.WithCorrelationID(logger))
+	router.Use(middleware.WithStructuredLogging(logger))
 
 	return router
 }
@@ -233,20 +254,83 @@ func (c *Container) setGinMode(environment string) {
 }
 
 // setupCoreRoutes sets up core application routes
-func (c *Container) setupCoreRoutes(router *gin.Engine, cfg *config.Config) {
-	// Health check endpoint
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status":  "ok",
-			"version": cfg.App.Version,
-			"name":    cfg.App.Name,
-		})
-	})
+func (c *Container) setupCoreRoutes(router *gin.Engine, cfg *config.Config, healthHandler *handlers.HealthHandler, perfHandler *handlers.PerformanceHandler) {
+	// Register comprehensive health check endpoints
+	handlers.RegisterHealthRoutes(router, healthHandler)
+
+	// Setup performance profiling endpoints (development/debug only)
+	c.setupProfilingRoutes(router, cfg)
+
+	// Setup performance monitoring endpoints
+	c.setupPerformanceRoutes(router, cfg, perfHandler)
 
 	// Root redirect to users page
 	router.GET("/", func(c *gin.Context) {
 		c.Redirect(302, "/users")
 	})
+}
+
+// setupProfilingRoutes configures pprof endpoints for performance analysis
+func (c *Container) setupProfilingRoutes(router *gin.Engine, cfg *config.Config) {
+	// Only enable profiling in development or debug environments
+	if cfg.App.Environment == "development" || cfg.App.Environment == "debug" {
+		// Create a route group for debug endpoints
+		debug := router.Group("/debug")
+		{
+			// Standard pprof endpoints
+			debug.GET("/pprof/", gin.WrapF(pprof.Index))
+			debug.GET("/pprof/allocs", gin.WrapF(pprof.Handler("allocs").ServeHTTP))
+			debug.GET("/pprof/block", gin.WrapF(pprof.Handler("block").ServeHTTP))
+			debug.GET("/pprof/cmdline", gin.WrapF(pprof.Cmdline))
+			debug.GET("/pprof/goroutine", gin.WrapF(pprof.Handler("goroutine").ServeHTTP))
+			debug.GET("/pprof/heap", gin.WrapF(pprof.Handler("heap").ServeHTTP))
+			debug.GET("/pprof/mutex", gin.WrapF(pprof.Handler("mutex").ServeHTTP))
+			debug.GET("/pprof/profile", gin.WrapF(pprof.Profile))
+			debug.GET("/pprof/symbol", gin.WrapF(pprof.Symbol))
+			debug.GET("/pprof/trace", gin.WrapF(pprof.Trace))
+			debug.GET("/pprof/threadcreate", gin.WrapF(pprof.Handler("threadcreate").ServeHTTP))
+
+			// Custom performance metrics endpoint
+			debug.GET("/metrics", func(c *gin.Context) {
+				c.JSON(200, gin.H{
+					"message":         "Performance metrics endpoint",
+					"pprof_available": true,
+					"endpoints": gin.H{
+						"cpu_profile":  "/debug/pprof/profile?seconds=30",
+						"heap_profile": "/debug/pprof/heap",
+						"goroutines":   "/debug/pprof/goroutine",
+						"allocs":       "/debug/pprof/allocs",
+						"trace":        "/debug/pprof/trace?seconds=10",
+					},
+					"usage": gin.H{
+						"cpu_profiling":  "curl http://localhost:8080/debug/pprof/profile?seconds=30 -o cpu.prof",
+						"heap_analysis":  "curl http://localhost:8080/debug/pprof/heap -o heap.prof",
+						"goroutine_dump": "curl http://localhost:8080/debug/pprof/goroutine -o goroutine.prof",
+						"view_profile":   "go tool pprof cpu.prof",
+						"trace_analysis": "curl http://localhost:8080/debug/pprof/trace?seconds=10 -o trace.out && go tool trace trace.out",
+					},
+				})
+			})
+		}
+	}
+}
+
+// setupPerformanceRoutes configures performance monitoring endpoints
+func (c *Container) setupPerformanceRoutes(router *gin.Engine, cfg *config.Config, perfHandler *handlers.PerformanceHandler) {
+	// Performance monitoring is available in all environments but with different access levels
+	perf := router.Group("/performance")
+	{
+		// Basic runtime stats (always available)
+		perf.GET("/stats", perfHandler.RuntimeStats)
+		perf.GET("/health", perfHandler.HealthMetrics)
+		perf.GET("/info", perfHandler.DebugInfo)
+
+		// Development/debug only endpoints
+		if cfg.App.Environment == "development" || cfg.App.Environment == "debug" {
+			perf.POST("/gc", perfHandler.ForceGC)
+			perf.GET("/memory", perfHandler.MemoryDump)
+		}
+	}
 }
 
 // setupTemplateRoutes configures template-based routes for HTMX
