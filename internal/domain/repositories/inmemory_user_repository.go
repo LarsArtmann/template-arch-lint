@@ -23,7 +23,7 @@ func NewInMemoryUserRepository() UserRepository {
 }
 
 // Save persists a user entity
-func (r *InMemoryUserRepository) Save(ctx context.Context, user *entities.User) error {
+func (r *InMemoryUserRepository) Save(_ context.Context, user *entities.User) error {
 	if user == nil {
 		return errors.NewValidationError("user", "user cannot be nil")
 	}
@@ -49,7 +49,7 @@ func (r *InMemoryUserRepository) Save(ctx context.Context, user *entities.User) 
 }
 
 // FindByID retrieves a user by their unique identifier
-func (r *InMemoryUserRepository) FindByID(ctx context.Context, id entities.UserID) (*entities.User, error) {
+func (r *InMemoryUserRepository) FindByID(_ context.Context, id entities.UserID) (*entities.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -64,7 +64,7 @@ func (r *InMemoryUserRepository) FindByID(ctx context.Context, id entities.UserI
 }
 
 // FindByEmail retrieves a user by their email address
-func (r *InMemoryUserRepository) FindByEmail(ctx context.Context, email string) (*entities.User, error) {
+func (r *InMemoryUserRepository) FindByEmail(_ context.Context, email string) (*entities.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -80,7 +80,7 @@ func (r *InMemoryUserRepository) FindByEmail(ctx context.Context, email string) 
 }
 
 // Delete removes a user from the repository
-func (r *InMemoryUserRepository) Delete(ctx context.Context, id entities.UserID) error {
+func (r *InMemoryUserRepository) Delete(_ context.Context, id entities.UserID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -93,7 +93,7 @@ func (r *InMemoryUserRepository) Delete(ctx context.Context, id entities.UserID)
 }
 
 // List retrieves all users
-func (r *InMemoryUserRepository) List(ctx context.Context) ([]*entities.User, error) {
+func (r *InMemoryUserRepository) List(_ context.Context) ([]*entities.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 

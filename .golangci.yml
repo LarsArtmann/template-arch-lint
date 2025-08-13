@@ -3,7 +3,8 @@
 #
 # This configuration enforces the highest standards of Go code quality
 # Designed for mission-critical production systems with zero defect tolerance
-version: "2"
+
+version: 2
 
 run:
   timeout: 5m
@@ -29,19 +30,29 @@ linters:
     # 🔒 SECURITY
     - gosec          # Security audit
     - copyloopvar    # Loop variable copies
+    - noctx          # HTTP context validation
     
     # 📊 CODE QUALITY
     - bodyclose      # HTTP body closure
     - cyclop         # Cyclomatic complexity
+    - exhaustive     # Switch statement completeness
     - funlen         # Function length
     - gocognit       # Cognitive complexity
     - gocyclo        # Cyclomatic complexity
     - goconst        # Repeated constants
     - gocritic       # Opinionated checks
+    - gomoddirectives # go.mod validation
+    - goprintffuncname # Printf function naming
     - ineffassign    # Ineffective assignments
     - misspell       # Spelling errors
     - nakedret       # Naked returns
+    - nestif         # Deep nesting prevention
+    - nolintlint     # Nolint comment validation
+    - prealloc       # Slice preallocation
     - revive         # Comprehensive checks
+    - rowserrcheck   # SQL rows error handling
+    - sqlclosecheck  # SQL resource closure
+    - tparallel      # Test parallelism
     - unconvert      # Unnecessary conversions
     - unparam        # Unused parameters
     - unused         # Unused code
@@ -124,13 +135,33 @@ linters-settings:
   revive:
     severity: error
     enable-all-rules: true
+  
+  # Nesting complexity
+  nestif:
+    min-complexity: 4
+  
+  # Exhaustiveness
+  exhaustive:
+    check-generated: false
+    default-signifies-exhaustive: true
+  
+  # Preallocation
+  prealloc:
+    simple: true
+    range-loops: true
+    for-loops: false
 
 # 🚨 ISSUES CONFIGURATION
+# Note: Formatters (gofumpt, goimports) should be run separately via 'just fix'
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
   
   exclude-use-default: false
+  exclude-rules-use-default: false
+  
+  # Common false positives preset
+  exclude-dir-use-default: false
   
   exclude-rules:
     # Allow panics only in main/cmd
@@ -151,7 +182,6 @@ issues:
     - vendor
     - testdata
     - examples
-    - internal
     - docs
     - generated
     - mocks

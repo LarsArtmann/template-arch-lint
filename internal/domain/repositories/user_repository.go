@@ -1,4 +1,4 @@
-// Repository interface following DDD patterns
+// Package repositories provides domain repository interfaces and implementations.
 package repositories
 
 import (

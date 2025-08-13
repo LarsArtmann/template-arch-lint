@@ -1,4 +1,4 @@
-// UserName value object with validation and business rules
+// Package values provides domain value objects with validation.
 package values
 
 import (

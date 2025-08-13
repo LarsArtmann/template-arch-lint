@@ -1,4 +1,4 @@
-// UserID value object for type-safe user identification
+// Package values provides domain value objects with validation.
 package values
 
 import (
@@ -46,7 +46,7 @@ func (u UserID) String() string {
 	return u.value
 }
 
-// String returns the user ID value for database storage
+// StringValue returns the user ID value for database storage
 func (u UserID) StringValue() string {
 	return u.value
 }
@@ -68,44 +68,64 @@ func (u UserID) IsGenerated() bool {
 
 // validateUserIDFormat enforces business rules for user ID validation
 func validateUserIDFormat(id string) error {
+	if err := validateUserIDNotEmpty(id); err != nil {
+		return err
+	}
+
+	normalized := strings.TrimSpace(id)
+	if err := validateUserIDWhitespace(id, normalized); err != nil {
+		return err
+	}
+
+	if err := validateUserIDLength(normalized); err != nil {
+		return err
+	}
+
+	return validateUserIDCharacters(normalized)
+}
+
+func validateUserIDNotEmpty(id string) error {
 	if id == "" {
 		return fmt.Errorf("user ID cannot be empty")
 	}
+	return nil
+}
 
-	// Trim whitespace for validation
-	normalized := strings.TrimSpace(id)
-
-	// Business rule: No leading/trailing whitespace in original
-	if id != normalized {
+func validateUserIDWhitespace(original, normalized string) error {
+	if original != normalized {
 		return fmt.Errorf("user ID cannot have leading or trailing spaces")
 	}
 
-	// Business rule: Length constraints
-	if len(normalized) < 1 {
-		return fmt.Errorf("user ID too short")
-	}
-
-	if len(normalized) > 100 {
-		return fmt.Errorf("user ID too long (maximum 100 characters)")
-	}
-
-	// Business rule: No whitespace allowed anywhere
-	if strings.Contains(normalized, " ") || strings.Contains(normalized, "\t") ||
-		strings.Contains(normalized, "\n") || strings.Contains(normalized, "\r") {
+	if strings.ContainsAny(normalized, " \t\n\r") {
 		return fmt.Errorf("user ID cannot contain whitespace")
 	}
+	return nil
+}
 
-	// Business rule: Basic character validation - allow alphanumeric, hyphen, underscore
-	for _, char := range normalized {
-		if !((char >= 'a' && char <= 'z') ||
-			(char >= 'A' && char <= 'Z') ||
-			(char >= '0' && char <= '9') ||
-			char == '-' || char == '_') {
+func validateUserIDLength(id string) error {
+	if len(id) < 1 {
+		return fmt.Errorf("user ID too short")
+	}
+	if len(id) > 100 {
+		return fmt.Errorf("user ID too long (maximum 100 characters)")
+	}
+	return nil
+}
+
+func validateUserIDCharacters(id string) error {
+	for _, char := range id {
+		if !isValidUserIDChar(char) {
 			return fmt.Errorf("user ID can only contain letters, numbers, hyphens, and underscores")
 		}
 	}
-
 	return nil
+}
+
+func isValidUserIDChar(char rune) bool {
+	return (char >= 'a' && char <= 'z') ||
+		(char >= 'A' && char <= 'Z') ||
+		(char >= '0' && char <= '9') ||
+		char == '-' || char == '_'
 }
 
 // MarshalJSON implements the json.Marshaler interface

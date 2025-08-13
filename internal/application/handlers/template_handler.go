@@ -1,3 +1,4 @@
+// Package handlers provides HTTP request handlers for the web application.
 package handlers
 
 import (
@@ -69,55 +70,75 @@ func (h *TemplateHandler) UsersPage(c *gin.Context) {
 func (h *TemplateHandler) SearchUsers(c *gin.Context) {
 	h.logger.Debug("Searching users")
 
-	// Parse query parameters
 	query := strings.TrimSpace(c.Query("search"))
-	domain := c.Query("domain")
-	activeParam := c.Query("active")
+	filters := h.buildSearchFilters(c)
 
-	// Build filters
-	filters := make(map[string]interface{})
-	if domain != "" {
-		filters["domain"] = domain
-	}
-	if activeParam != "" {
-		filters["active"] = activeParam == "true"
-	}
-
-	var users []*entities.User
-	var err error
-
-	if query != "" || len(filters) > 0 {
-		// Use filtered search
-		users, err = h.userService.GetUsersWithFilters(c.Request.Context(), filters)
-		if err != nil {
-			h.logger.Error("Failed to search users", "error", err)
-			h.showErrorTemplate(c, "Search failed", err.Error())
-			return
-		}
-
-		// Additional text-based filtering if query provided
-		if query != "" {
-			filteredUsers := make([]*entities.User, 0)
-			queryLower := strings.ToLower(query)
-			for _, user := range users {
-				if strings.Contains(strings.ToLower(user.Name), queryLower) ||
-					strings.Contains(strings.ToLower(user.Email), queryLower) {
-					filteredUsers = append(filteredUsers, user)
-				}
-			}
-			users = filteredUsers
-		}
-	} else {
-		// Get all users
-		users, err = h.userService.ListUsers(c.Request.Context())
-		if err != nil {
-			h.logger.Error("Failed to list users", "error", err)
-			h.showErrorTemplate(c, "Failed to load users", err.Error())
-			return
-		}
+	users, err := h.performUserSearch(c, query, filters)
+	if err != nil {
+		h.logger.Error("Failed to search users", "error", err)
+		h.showErrorTemplate(c, "Search failed", err.Error())
+		return
 	}
 
 	h.renderTemplate(c, pages.SearchUsersContent(users))
+}
+
+// buildSearchFilters constructs filter map from query parameters
+func (h *TemplateHandler) buildSearchFilters(c *gin.Context) map[string]interface{} {
+	filters := make(map[string]interface{})
+	
+	if domain := c.Query("domain"); domain != "" {
+		filters["domain"] = domain
+	}
+	
+	if activeParam := c.Query("active"); activeParam != "" {
+		filters["active"] = activeParam == "true"
+	}
+	
+	return filters
+}
+
+// performUserSearch executes the search with given query and filters
+func (h *TemplateHandler) performUserSearch(c *gin.Context, query string, filters map[string]interface{}) ([]*entities.User, error) {
+	if query != "" || len(filters) > 0 {
+		return h.searchWithFilters(c, query, filters)
+	}
+	
+	return h.userService.ListUsers(c.Request.Context())
+}
+
+// searchWithFilters performs filtered search and applies text filtering if needed
+func (h *TemplateHandler) searchWithFilters(c *gin.Context, query string, filters map[string]interface{}) ([]*entities.User, error) {
+	users, err := h.userService.GetUsersWithFilters(c.Request.Context(), filters)
+	if err != nil {
+		return nil, err
+	}
+
+	if query != "" {
+		return h.filterUsersByText(users, query), nil
+	}
+	
+	return users, nil
+}
+
+// filterUsersByText filters users by text search in name and email
+func (h *TemplateHandler) filterUsersByText(users []*entities.User, query string) []*entities.User {
+	filteredUsers := make([]*entities.User, 0)
+	queryLower := strings.ToLower(query)
+	
+	for _, user := range users {
+		if h.userMatchesQuery(user, queryLower) {
+			filteredUsers = append(filteredUsers, user)
+		}
+	}
+	
+	return filteredUsers
+}
+
+// userMatchesQuery checks if user matches the search query
+func (h *TemplateHandler) userMatchesQuery(user *entities.User, queryLower string) bool {
+	return strings.Contains(strings.ToLower(user.Name), queryLower) ||
+		strings.Contains(strings.ToLower(user.Email), queryLower)
 }
 
 // CreateUserPage renders the create user form

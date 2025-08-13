@@ -42,19 +42,14 @@ func main() {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	diContainer, err := setupContainer()
 	if err != nil {
 		slog.Error("Failed to register dependencies", "error", err)
-		cancel() // Call cancel before exit to avoid exitAfterDefer
+		cancel()
 		os.Exit(ExitCodeFailure)
 	}
-	defer func() {
-		if shutdownErr := shutdownContainer(diContainer); shutdownErr != nil {
-			slog.Error("Error shutting down container", "error", shutdownErr)
-		}
-	}()
+	// Manual cleanup will be handled in exit paths
 
 	cfg, logger, router := getDependencies(diContainer)
 	logServerStart(logger, cfg)
@@ -70,8 +65,18 @@ func main() {
 		cfg,
 	)
 	if err != nil {
-		cancel() // Call cancel before exit to avoid exitAfterDefer
+		cancel()
+		// Call cleanup explicitly, then exit
+		if shutdownErr := shutdownContainer(diContainer); shutdownErr != nil {
+			slog.Error("Error shutting down container", "error", shutdownErr)
+		}
 		os.Exit(ExitCodeFailure)
+	}
+	
+	// Normal cleanup on successful shutdown
+	cancel()
+	if shutdownErr := shutdownContainer(diContainer); shutdownErr != nil {
+		slog.Error("Error shutting down container", "error", shutdownErr)
 	}
 }
 

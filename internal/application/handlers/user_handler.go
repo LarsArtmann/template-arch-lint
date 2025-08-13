@@ -299,7 +299,8 @@ func (h *UserHandler) handleError(c *gin.Context, err error, operation string) {
 	h.logger.Error("Operation failed", "operation", operation, "error", err)
 
 	// Handle domain errors with proper types
-	if domainErr, ok := err.(domainerrors.DomainError); ok {
+	var domainErr domainerrors.DomainError
+	if errors.As(err, &domainErr) {
 		c.JSON(domainErr.HTTPStatus(), gin.H{
 			"error":   domainErr.Code(),
 			"message": domainErr.Error(),

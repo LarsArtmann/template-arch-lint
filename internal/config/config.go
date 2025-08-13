@@ -1,3 +1,4 @@
+// Package config provides configuration management for the application.
 package config
 
 import (
@@ -78,7 +79,7 @@ func LoadConfig(configPath string) (*Config, error) {
 }
 
 // setDefaults sets default values for the configuration
-func setDefaults(config *Config) {
+func setDefaults(_ *Config) {
 	// App defaults
 	viper.SetDefault("app.name", "template-arch-lint")
 	viper.SetDefault("app.version", "1.0.0")

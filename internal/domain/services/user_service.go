@@ -1,8 +1,9 @@
-// User service layer containing business logic and rules
+// Package services provides domain service implementations for business logic.
 package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -10,7 +11,7 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
+	domainerrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/shared"
 )
@@ -31,18 +32,18 @@ func NewUserService(userRepo repositories.UserRepository) *UserService {
 func (s *UserService) CreateUser(ctx context.Context, id entities.UserID, email, name string) (*entities.User, error) {
 	// Business rule: Validate email format
 	if err := s.validateEmail(email); err != nil {
-		return nil, errors.NewValidationError("email", err.Error())
+		return nil, domainerrors.NewValidationError("email", err.Error())
 	}
 
 	// Business rule: Validate username
 	if err := s.validateUserName(name); err != nil {
-		return nil, errors.NewValidationError("name", err.Error())
+		return nil, domainerrors.NewValidationError("name", err.Error())
 	}
 
 	// Business rule: Check if user already exists
 	existingUser, err := s.userRepo.FindByEmail(ctx, email)
-	if err != nil && err != repositories.ErrUserNotFound {
-		return nil, errors.NewInternalError("failed to check existing user", err)
+	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) {
+		return nil, domainerrors.NewInternalError("failed to check existing user", err)
 	}
 	if existingUser != nil {
 		return nil, repositories.ErrUserAlreadyExists
@@ -56,7 +57,7 @@ func (s *UserService) CreateUser(ctx context.Context, id entities.UserID, email,
 
 	// Save to repository
 	if err := s.userRepo.Save(ctx, user); err != nil {
-		return nil, errors.NewInternalError("failed to save user", err)
+		return nil, domainerrors.NewInternalError("failed to save user", err)
 	}
 
 	return user, nil
@@ -89,36 +90,67 @@ func (s *UserService) GetUserByEmail(ctx context.Context, email string) (*entiti
 
 // UpdateUser updates user information with business rules
 func (s *UserService) UpdateUser(ctx context.Context, id entities.UserID, email, name string) (*entities.User, error) {
-	// Get existing user
+	user, err := s.getUserForUpdate(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.validateUserUpdates(ctx, user, email, name); err != nil {
+		return nil, err
+	}
+
+	return s.applyUserUpdates(ctx, user, email, name)
+}
+
+func (s *UserService) getUserForUpdate(ctx context.Context, id entities.UserID) (*entities.User, error) {
 	user, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user for update: %w", err)
 	}
+	return user, nil
+}
 
-	// Business rule: Validate new email if changed
-	if email != user.Email {
-		if err := s.validateEmail(email); err != nil {
-			return nil, fmt.Errorf("invalid email: %w", err)
-		}
-
-		// Check if new email is already taken
-		existingUser, err := s.userRepo.FindByEmail(ctx, email)
-		if err != nil && err != repositories.ErrUserNotFound {
-			return nil, fmt.Errorf("failed to check existing email: %w", err)
-		}
-		if existingUser != nil {
-			return nil, repositories.ErrUserAlreadyExists
-		}
+func (s *UserService) validateUserUpdates(ctx context.Context, user *entities.User, email, name string) error {
+	if err := s.validateEmailUpdate(ctx, user, email); err != nil {
+		return err
 	}
 
-	// Business rule: Validate new name if changed
+	return s.validateNameUpdate(user, name)
+}
+
+func (s *UserService) validateEmailUpdate(ctx context.Context, user *entities.User, email string) error {
+	if email == user.Email {
+		return nil
+	}
+
+	if err := s.validateEmail(email); err != nil {
+		return fmt.Errorf("invalid email: %w", err)
+	}
+
+	return s.checkEmailAvailability(ctx, email)
+}
+
+func (s *UserService) checkEmailAvailability(ctx context.Context, email string) error {
+	existingUser, err := s.userRepo.FindByEmail(ctx, email)
+	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) {
+		return fmt.Errorf("failed to check existing email: %w", err)
+	}
+	if existingUser != nil {
+		return repositories.ErrUserAlreadyExists
+	}
+	return nil
+}
+
+func (s *UserService) validateNameUpdate(user *entities.User, name string) error {
 	if name != user.Name {
 		if err := s.validateUserName(name); err != nil {
-			return nil, fmt.Errorf("invalid username: %w", err)
+			return fmt.Errorf("invalid username: %w", err)
 		}
 	}
+	return nil
+}
 
-	// Update user fields using value objects
+func (s *UserService) applyUserUpdates(ctx context.Context, user *entities.User, email, name string) (*entities.User, error) {
 	if err := user.SetEmail(email); err != nil {
 		return nil, fmt.Errorf("failed to set email: %w", err)
 	}
@@ -127,7 +159,6 @@ func (s *UserService) UpdateUser(ctx context.Context, id entities.UserID, email,
 		return nil, fmt.Errorf("failed to set name: %w", err)
 	}
 
-	// Save updated user
 	if err := s.userRepo.Save(ctx, user); err != nil {
 		return nil, fmt.Errorf("failed to save updated user: %w", err)
 	}
@@ -155,7 +186,7 @@ func (s *UserService) DeleteUser(ctx context.Context, id entities.UserID) error 
 func (s *UserService) ListUsers(ctx context.Context) ([]*entities.User, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
-		return nil, errors.NewInternalError("failed to list users", err)
+		return nil, domainerrors.NewInternalError("failed to list users", err)
 	}
 
 	// Business logic: Could add filtering, sorting, pagination, etc.
@@ -166,7 +197,7 @@ func (s *UserService) ListUsers(ctx context.Context) ([]*entities.User, error) {
 func (s *UserService) FilterActiveUsers(ctx context.Context) ([]*entities.User, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
-		return nil, errors.NewInternalError("failed to list users", err)
+		return nil, domainerrors.NewInternalError("failed to list users", err)
 	}
 
 	// Functional operations using samber/lo
@@ -183,7 +214,7 @@ func (s *UserService) FilterActiveUsers(ctx context.Context) ([]*entities.User, 
 func (s *UserService) GetUserEmailsWithResult(ctx context.Context) shared.Result[[]string] {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
-		return shared.Err[[]string](errors.NewInternalError("failed to list users", err))
+		return shared.Err[[]string](domainerrors.NewInternalError("failed to list users", err))
 	}
 
 	// Functional operation: extract emails
@@ -213,10 +244,10 @@ func (s *UserService) CreateUserWithResult(ctx context.Context, id entities.User
 // validateUserInputsResult validates user inputs using Result pattern
 func (s *UserService) validateUserInputsResult(email, name string) shared.Result[struct{}] {
 	if err := s.validateEmail(email); err != nil {
-		return shared.Err[struct{}](errors.NewValidationError("email", err.Error()))
+		return shared.Err[struct{}](domainerrors.NewValidationError("email", err.Error()))
 	}
 	if err := s.validateUserName(name); err != nil {
-		return shared.Err[struct{}](errors.NewValidationError("name", err.Error()))
+		return shared.Err[struct{}](domainerrors.NewValidationError("name", err.Error()))
 	}
 	return shared.Ok(struct{}{})
 }
@@ -224,8 +255,8 @@ func (s *UserService) validateUserInputsResult(email, name string) shared.Result
 // checkUserNotExistsResult checks if user exists using Result pattern
 func (s *UserService) checkUserNotExistsResult(ctx context.Context, email string) shared.Result[*entities.User] {
 	existingUser, err := s.userRepo.FindByEmail(ctx, email)
-	if err != nil && err != repositories.ErrUserNotFound {
-		return shared.Err[*entities.User](errors.NewInternalError("failed to check existing user", err))
+	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) {
+		return shared.Err[*entities.User](domainerrors.NewInternalError("failed to check existing user", err))
 	}
 	if existingUser != nil {
 		return shared.Err[*entities.User](repositories.ErrUserAlreadyExists)
@@ -241,7 +272,7 @@ func (s *UserService) createAndSaveUserResult(ctx context.Context, id entities.U
 	}
 
 	if err := s.userRepo.Save(ctx, user); err != nil {
-		return shared.Err[*entities.User](errors.NewInternalError("failed to save user", err))
+		return shared.Err[*entities.User](domainerrors.NewInternalError("failed to save user", err))
 	}
 
 	return shared.Ok(user)
@@ -280,7 +311,7 @@ func (s *UserService) BatchValidateUsers(users []*entities.User) map[entities.Us
 func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
-		return nil, errors.NewInternalError("failed to list users", err)
+		return nil, domainerrors.NewInternalError("failed to list users", err)
 	}
 
 	stats := make(map[string]int)
@@ -328,7 +359,7 @@ func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) 
 func (s *UserService) GetUsersWithFilters(ctx context.Context, filters map[string]interface{}) ([]*entities.User, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
-		return nil, errors.NewInternalError("failed to list users", err)
+		return nil, domainerrors.NewInternalError("failed to list users", err)
 	}
 
 	// Use lo.Must for safe operations that should never fail in this context
@@ -378,7 +409,7 @@ func (s *UserService) ValidateUserBatchWithEither(users []*entities.User) shared
 func (s *UserService) GetUsersByEmailDomains(ctx context.Context, domains []string) (map[string][]*entities.User, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
-		return nil, errors.NewInternalError("failed to list users", err)
+		return nil, domainerrors.NewInternalError("failed to list users", err)
 	}
 
 	// Group users by email domain using lo.GroupBy
@@ -392,7 +423,7 @@ func (s *UserService) GetUsersByEmailDomains(ctx context.Context, domains []stri
 		return domain, true
 	})
 	
-	filteredUsers := lo.PickBy(usersByDomain, func(domain string, users []*entities.User) bool {
+	filteredUsers := lo.PickBy(usersByDomain, func(domain string, _ []*entities.User) bool {
 		_, exists := requestedDomainsSet[domain]
 		return exists
 	})
@@ -403,21 +434,21 @@ func (s *UserService) GetUsersByEmailDomains(ctx context.Context, domains []stri
 // validateEmail enforces business rules for email validation
 func (s *UserService) validateEmail(email string) error {
 	if email == "" {
-		return errors.NewRequiredFieldError("email")
+		return domainerrors.NewRequiredFieldError("email")
 	}
 
 	// Basic email validation
 	if !strings.Contains(email, "@") || !strings.Contains(email, ".") {
-		return errors.NewValidationError("email", "must be a valid email address")
+		return domainerrors.NewValidationError("email", "must be a valid email address")
 	}
 
 	if len(email) > 254 {
-		return errors.NewValidationError("email", "too long (max 254 characters)")
+		return domainerrors.NewValidationError("email", "too long (max 254 characters)")
 	}
 
 	// Business rule: No spaces in email
 	if strings.Contains(email, " ") {
-		return errors.NewValidationError("email", "cannot contain spaces")
+		return domainerrors.NewValidationError("email", "cannot contain spaces")
 	}
 
 	return nil
@@ -425,36 +456,50 @@ func (s *UserService) validateEmail(email string) error {
 
 // validateUserName enforces business rules for display name validation
 func (s *UserService) validateUserName(name string) error {
+	if err := s.validateNameNotEmpty(name); err != nil {
+		return err
+	}
+
+	if err := s.validateNameLength(name); err != nil {
+		return err
+	}
+
+	if err := s.validateNameWhitespace(name); err != nil {
+		return err
+	}
+
+	return s.validateNameContainsLetter(name)
+}
+
+func (s *UserService) validateNameNotEmpty(name string) error {
 	if name == "" {
-		return errors.NewRequiredFieldError("name")
+		return domainerrors.NewRequiredFieldError("name")
 	}
+	return nil
+}
 
-	// Business rule: Name length constraints
+func (s *UserService) validateNameLength(name string) error {
 	if len(name) < 2 {
-		return errors.NewValidationError("name", "too short (min 2 characters)")
+		return domainerrors.NewValidationError("name", "too short (min 2 characters)")
 	}
-
 	if len(name) > 100 {
-		return errors.NewValidationError("name", "too long (max 100 characters)")
+		return domainerrors.NewValidationError("name", "too long (max 100 characters)")
 	}
+	return nil
+}
 
-	// Business rule: No leading/trailing whitespace
+func (s *UserService) validateNameWhitespace(name string) error {
 	if strings.TrimSpace(name) != name {
-		return errors.NewValidationError("name", "cannot have leading or trailing spaces")
+		return domainerrors.NewValidationError("name", "cannot have leading or trailing spaces")
 	}
+	return nil
+}
 
-	// Business rule: Must contain at least one letter
-	hasLetter := false
+func (s *UserService) validateNameContainsLetter(name string) error {
 	for _, char := range name {
 		if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') {
-			hasLetter = true
-			break
+			return nil
 		}
 	}
-
-	if !hasLetter {
-		return errors.NewValidationError("name", "must contain at least one letter")
-	}
-
-	return nil
+	return domainerrors.NewValidationError("name", "must contain at least one letter")
 }

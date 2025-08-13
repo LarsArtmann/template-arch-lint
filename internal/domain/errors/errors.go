@@ -21,16 +21,19 @@ type ErrorDetails struct {
 }
 
 const (
-	// Validation error codes
+	// ValidationErrorCode represents validation errors
 	ValidationErrorCode ErrorCode = "VALIDATION_ERROR"
+	// RequiredFieldCode represents required field validation errors
 	RequiredFieldCode   ErrorCode = "REQUIRED_FIELD"
+	// InvalidFormatCode represents invalid format validation errors
 	InvalidFormatCode   ErrorCode = "INVALID_FORMAT"
 
-	// Business logic error codes
+	// NotFoundErrorCode represents resource not found errors
 	NotFoundErrorCode ErrorCode = "NOT_FOUND"
+	// ConflictErrorCode represents business rule conflict errors
 	ConflictErrorCode ErrorCode = "CONFLICT"
 
-	// System error codes
+	// InternalErrorCode represents internal system errors
 	InternalErrorCode ErrorCode = "INTERNAL_ERROR"
 )
 
@@ -78,18 +81,22 @@ func (e *ValidationError) Error() string {
 	return e.message
 }
 
+// Code returns the error code for the validation error
 func (e *ValidationError) Code() ErrorCode {
 	return e.code
 }
 
+// HTTPStatus returns the HTTP status code for the validation error
 func (e *ValidationError) HTTPStatus() int {
 	return http.StatusBadRequest
 }
 
+// Details returns the error details for the validation error
 func (e *ValidationError) Details() ErrorDetails {
 	return e.details
 }
 
+// Field returns the field name that caused the validation error
 func (e *ValidationError) Field() string {
 	return e.field
 }
@@ -121,22 +128,27 @@ func (e *NotFoundError) Error() string {
 	return e.message
 }
 
+// Code returns the error code for the not found error
 func (e *NotFoundError) Code() ErrorCode {
 	return e.code
 }
 
+// HTTPStatus returns the HTTP status code for the not found error
 func (e *NotFoundError) HTTPStatus() int {
 	return http.StatusNotFound
 }
 
+// Details returns the error details for the not found error
 func (e *NotFoundError) Details() ErrorDetails {
 	return e.details
 }
 
+// Resource returns the resource name that was not found
 func (e *NotFoundError) Resource() string {
 	return e.resource
 }
 
+// ID returns the ID of the resource that was not found
 func (e *NotFoundError) ID() string {
 	return e.id
 }
@@ -161,14 +173,17 @@ func (e *ConflictError) Error() string {
 	return e.message
 }
 
+// Code returns the error code for the conflict error
 func (e *ConflictError) Code() ErrorCode {
 	return e.code
 }
 
+// HTTPStatus returns the HTTP status code for the conflict error
 func (e *ConflictError) HTTPStatus() int {
 	return http.StatusConflict
 }
 
+// Details returns the error details for the conflict error
 func (e *ConflictError) Details() ErrorDetails {
 	return e.details
 }
@@ -198,18 +213,22 @@ func (e *InternalError) Error() string {
 	return e.message
 }
 
+// Code returns the error code for the internal error
 func (e *InternalError) Code() ErrorCode {
 	return e.code
 }
 
+// HTTPStatus returns the HTTP status code for the internal error
 func (e *InternalError) HTTPStatus() int {
 	return http.StatusInternalServerError
 }
 
+// Details returns the error details for the internal error
 func (e *InternalError) Details() ErrorDetails {
 	return e.details
 }
 
+// Cause returns the underlying cause of the internal error
 func (e *InternalError) Cause() error {
 	return e.cause
 }

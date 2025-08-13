@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"errors"
 	"net/http"
 	"testing"
 )
@@ -104,7 +105,7 @@ func TestInternalError(t *testing.T) {
 		t.Errorf("Expected status %d, got %d", http.StatusInternalServerError, err.HTTPStatus())
 	}
 
-	if err.Cause() != cause {
+	if !errors.Is(err.Cause(), cause) {
 		t.Errorf("Expected cause to be set correctly")
 	}
 
@@ -115,53 +116,89 @@ func TestInternalError(t *testing.T) {
 }
 
 func TestErrorTypeAssertions(t *testing.T) {
-	validationErr := NewValidationError("email", "invalid")
-	notFoundErr := NewNotFoundError("user", "123")
-	conflictErr := NewConflictError("conflict", ErrorDetails{})
-	internalErr := NewInternalError("internal", nil)
+	testErrors := createTestErrors()
+	
+	testDomainErrorIdentification(t, testErrors)
+	testValidationErrorAssertions(t, testErrors)
+	testNotFoundErrorAssertions(t, testErrors)
+	testConflictErrorAssertions(t, testErrors)
+	testInternalErrorAssertions(t, testErrors)
+}
 
-	// Test IsDomainError
-	if !IsDomainError(validationErr) {
+// testErrorTypes holds all test error instances
+type testErrorTypes struct {
+	validation *ValidationError
+	notFound   *NotFoundError
+	conflict   *ConflictError
+	internal   *InternalError
+}
+
+// createTestErrors creates test error instances
+func createTestErrors() testErrorTypes {
+	return testErrorTypes{
+		validation: NewValidationError("email", "invalid"),
+		notFound:   NewNotFoundError("user", "123"),
+		conflict:   NewConflictError("conflict", ErrorDetails{}),
+		internal:   NewInternalError("internal", nil),
+	}
+}
+
+// testDomainErrorIdentification tests IsDomainError function
+func testDomainErrorIdentification(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+	
+	if !IsDomainError(errors.validation) {
 		t.Error("Expected validation error to be a domain error")
 	}
-
-	if !IsDomainError(notFoundErr) {
+	if !IsDomainError(errors.notFound) {
 		t.Error("Expected not found error to be a domain error")
 	}
+}
 
-	// Test AsValidationError
-	if ve, ok := AsValidationError(validationErr); !ok || ve != validationErr {
+// testValidationErrorAssertions tests AsValidationError function
+func testValidationErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+	
+	if ve, ok := AsValidationError(errors.validation); !ok || ve != errors.validation {
 		t.Error("Expected validation error assertion to succeed")
 	}
-
-	if _, ok := AsValidationError(notFoundErr); ok {
+	if _, ok := AsValidationError(errors.notFound); ok {
 		t.Error("Expected validation error assertion to fail for not found error")
 	}
+}
 
-	// Test AsNotFoundError
-	if nfe, ok := AsNotFoundError(notFoundErr); !ok || nfe != notFoundErr {
+// testNotFoundErrorAssertions tests AsNotFoundError function
+func testNotFoundErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+	
+	if nfe, ok := AsNotFoundError(errors.notFound); !ok || nfe != errors.notFound {
 		t.Error("Expected not found error assertion to succeed")
 	}
-
-	if _, ok := AsNotFoundError(validationErr); ok {
+	if _, ok := AsNotFoundError(errors.validation); ok {
 		t.Error("Expected not found error assertion to fail for validation error")
 	}
+}
 
-	// Test AsConflictError
-	if ce, ok := AsConflictError(conflictErr); !ok || ce != conflictErr {
+// testConflictErrorAssertions tests AsConflictError function
+func testConflictErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+	
+	if ce, ok := AsConflictError(errors.conflict); !ok || ce != errors.conflict {
 		t.Error("Expected conflict error assertion to succeed")
 	}
-
-	if _, ok := AsConflictError(validationErr); ok {
+	if _, ok := AsConflictError(errors.validation); ok {
 		t.Error("Expected conflict error assertion to fail for validation error")
 	}
+}
 
-	// Test AsInternalError
-	if ie, ok := AsInternalError(internalErr); !ok || ie != internalErr {
+// testInternalErrorAssertions tests AsInternalError function
+func testInternalErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+	
+	if ie, ok := AsInternalError(errors.internal); !ok || ie != errors.internal {
 		t.Error("Expected internal error assertion to succeed")
 	}
-
-	if _, ok := AsInternalError(validationErr); ok {
+	if _, ok := AsInternalError(errors.validation); ok {
 		t.Error("Expected internal error assertion to fail for validation error")
 	}
 }

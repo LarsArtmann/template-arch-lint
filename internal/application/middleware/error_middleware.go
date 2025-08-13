@@ -3,18 +3,19 @@ package middleware
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
+	domainerrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 )
 
 // ErrorResponse represents a structured error response
 type ErrorResponse struct {
-	Error   string               `json:"error"`
-	Code    errors.ErrorCode     `json:"code"`
-	Message string               `json:"message"`
-	Details errors.ErrorDetails `json:"details,omitempty"`
+	Error   string                        `json:"error"`
+	Code    domainerrors.ErrorCode       `json:"code"`
+	Message string                       `json:"message"`
+	Details domainerrors.ErrorDetails   `json:"details,omitempty"`
 }
 
 // ErrorHandler wraps a handler and provides structured error handling
@@ -28,11 +29,12 @@ func (eh ErrorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleError processes errors and returns appropriate HTTP responses
-func HandleError(w http.ResponseWriter, r *http.Request, err error) {
+func HandleError(w http.ResponseWriter, _ *http.Request, err error) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// Check if it's a domain error
-	if domainErr, ok := err.(errors.DomainError); ok {
+	var domainErr domainerrors.DomainError
+	if errors.As(err, &domainErr) {
 		status := domainErr.HTTPStatus()
 		w.WriteHeader(status)
 
@@ -53,9 +55,9 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 	w.WriteHeader(http.StatusInternalServerError)
 	response := ErrorResponse{
 		Error:   "internal_error",
-		Code:    errors.InternalErrorCode,
+		Code:    domainerrors.InternalErrorCode,
 		Message: "An internal server error occurred",
-		Details: errors.ErrorDetails{
+		Details: domainerrors.ErrorDetails{
 			Reason: err.Error(),
 		},
 	}
@@ -106,7 +108,7 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 				slog.Error("Panic recovered", "error", err)
 
 				// Convert panic to internal error
-				internalErr := errors.NewInternalError("panic recovered", nil)
+				internalErr := domainerrors.NewInternalError("panic recovered", nil)
 				HandleError(w, r, internalErr)
 			}
 		}()

@@ -53,7 +53,7 @@ func NewMockUserRepository() *MockUserRepository {
 	}
 }
 
-func (m *MockUserRepository) Save(ctx context.Context, user *entities.User) error {
+func (m *MockUserRepository) Save(_ context.Context, user *entities.User) error {
 	if m.shouldError {
 		return fmt.Errorf("repository error")
 	}
@@ -61,7 +61,7 @@ func (m *MockUserRepository) Save(ctx context.Context, user *entities.User) erro
 	return nil
 }
 
-func (m *MockUserRepository) FindByID(ctx context.Context, id values.UserID) (*entities.User, error) {
+func (m *MockUserRepository) FindByID(_ context.Context, id values.UserID) (*entities.User, error) {
 	if m.shouldError {
 		return nil, repositories.ErrUserNotFound
 	}
@@ -73,7 +73,7 @@ func (m *MockUserRepository) FindByID(ctx context.Context, id values.UserID) (*e
 	return user, nil
 }
 
-func (m *MockUserRepository) FindByEmail(ctx context.Context, email string) (*entities.User, error) {
+func (m *MockUserRepository) FindByEmail(_ context.Context, email string) (*entities.User, error) {
 	if m.shouldError {
 		return nil, repositories.ErrUserNotFound
 	}
@@ -86,7 +86,7 @@ func (m *MockUserRepository) FindByEmail(ctx context.Context, email string) (*en
 	return nil, repositories.ErrUserNotFound
 }
 
-func (m *MockUserRepository) List(ctx context.Context) ([]*entities.User, error) {
+func (m *MockUserRepository) List(_ context.Context) ([]*entities.User, error) {
 	if m.shouldError {
 		return nil, fmt.Errorf("repository error")
 	}
@@ -98,7 +98,7 @@ func (m *MockUserRepository) List(ctx context.Context) ([]*entities.User, error)
 	return users, nil
 }
 
-func (m *MockUserRepository) Delete(ctx context.Context, id values.UserID) error {
+func (m *MockUserRepository) Delete(_ context.Context, id values.UserID) error {
 	if m.shouldError {
 		return repositories.ErrUserNotFound
 	}

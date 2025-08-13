@@ -127,39 +127,60 @@ func TestConfigDefaults(t *testing.T) {
 		t.Fatalf("LoadConfig() failed: %v", err)
 	}
 
-	// Test server defaults
-	if config.Server.Host != "localhost" {
-		t.Errorf("Expected default host 'localhost', got '%s'", config.Server.Host)
-	}
-	if config.Server.Port != 8080 {
-		t.Errorf("Expected default port 8080, got %d", config.Server.Port)
-	}
-	if config.Server.ReadTimeout != 5*time.Second {
-		t.Errorf("Expected default read timeout 5s, got %v", config.Server.ReadTimeout)
-	}
+	validateServerDefaults(t, config.Server)
+	validateDatabaseDefaults(t, config.Database)
+	validateLoggingDefaults(t, config.Logging)
+	validateAppDefaults(t, config.App)
+}
 
-	// Test database defaults
-	if config.Database.Driver != "sqlite3" {
-		t.Errorf("Expected default database driver 'sqlite3', got '%s'", config.Database.Driver)
+// validateServerDefaults checks server configuration defaults
+func validateServerDefaults(t *testing.T, server ServerConfig) {
+	t.Helper()
+	
+	if server.Host != "localhost" {
+		t.Errorf("Expected default host 'localhost', got '%s'", server.Host)
 	}
-	if config.Database.DSN != "./app.db" {
-		t.Errorf("Expected default DSN './app.db', got '%s'", config.Database.DSN)
+	if server.Port != 8080 {
+		t.Errorf("Expected default port 8080, got %d", server.Port)
 	}
+	if server.ReadTimeout != 5*time.Second {
+		t.Errorf("Expected default read timeout 5s, got %v", server.ReadTimeout)
+	}
+}
 
-	// Test logging defaults
-	if config.Logging.Level != "info" {
-		t.Errorf("Expected default log level 'info', got '%s'", config.Logging.Level)
+// validateDatabaseDefaults checks database configuration defaults
+func validateDatabaseDefaults(t *testing.T, database DatabaseConfig) {
+	t.Helper()
+	
+	if database.Driver != "sqlite3" {
+		t.Errorf("Expected default database driver 'sqlite3', got '%s'", database.Driver)
 	}
-	if config.Logging.Format != "json" {
-		t.Errorf("Expected default log format 'json', got '%s'", config.Logging.Format)
+	if database.DSN != "./app.db" {
+		t.Errorf("Expected default DSN './app.db', got '%s'", database.DSN)
 	}
+}
 
-	// Test app defaults
-	if config.App.Name != "template-arch-lint" {
-		t.Errorf("Expected default app name 'template-arch-lint', got '%s'", config.App.Name)
+// validateLoggingDefaults checks logging configuration defaults
+func validateLoggingDefaults(t *testing.T, logging LoggingConfig) {
+	t.Helper()
+	
+	if logging.Level != "info" {
+		t.Errorf("Expected default log level 'info', got '%s'", logging.Level)
 	}
-	if config.App.Environment != "development" {
-		t.Errorf("Expected default environment 'development', got '%s'", config.App.Environment)
+	if logging.Format != "json" {
+		t.Errorf("Expected default log format 'json', got '%s'", logging.Format)
+	}
+}
+
+// validateAppDefaults checks app configuration defaults
+func validateAppDefaults(t *testing.T, app AppConfig) {
+	t.Helper()
+	
+	if app.Name != "template-arch-lint" {
+		t.Errorf("Expected default app name 'template-arch-lint', got '%s'", app.Name)
+	}
+	if app.Environment != "development" {
+		t.Errorf("Expected default environment 'development', got '%s'", app.Environment)
 	}
 }
 
@@ -254,38 +275,93 @@ func runConfigValidationTest(t *testing.T, config Config, wantErr bool) {
 
 func TestConfigWithEnvironmentOverrides(t *testing.T) {
 	t.Run("environment variable overrides", func(t *testing.T) {
-		os.Setenv("APP_APP_ENVIRONMENT", "staging")
-		os.Setenv("APP_SERVER_PORT", "9090")
-		os.Setenv("APP_LOGGING_LEVEL", "warn")
-		defer func() {
-			os.Unsetenv("APP_APP_ENVIRONMENT")
-			os.Unsetenv("APP_SERVER_PORT") 
-			os.Unsetenv("APP_LOGGING_LEVEL")
-		}()
-
-		config, err := LoadConfig("")
-		if err != nil {
-			t.Fatalf("LoadConfig() failed: %v", err)
-		}
-		
-		if config.App.Environment != "staging" {
-			t.Errorf("Expected environment 'staging', got '%s'", config.App.Environment)
-		}
-		if config.Server.Port != 9090 {
-			t.Errorf("Expected port 9090, got %d", config.Server.Port)
-		}
-		if config.Logging.Level != "warn" {
-			t.Errorf("Expected log level 'warn', got '%s'", config.Logging.Level)
-		}
+		testConfigOverrides(t)
 	})
 	
 	t.Run("invalid environment validation", func(t *testing.T) {
-		os.Setenv("APP_APP_ENVIRONMENT", "invalid")
-		defer os.Unsetenv("APP_APP_ENVIRONMENT")
-		
-		_, err := LoadConfig("")
-		if err == nil {
-			t.Error("Should reject invalid environment")
-		}
+		testInvalidEnvironment(t)
 	})
+}
+
+// testConfigOverrides tests that environment variables override config defaults
+func testConfigOverrides(t *testing.T) {
+	t.Helper()
+	
+	setTestEnvVars(t)
+	defer unsetTestEnvVars(t)
+
+	config, err := LoadConfig("")
+	if err != nil {
+		t.Fatalf("LoadConfig() failed: %v", err)
+	}
+	
+	validateOverriddenConfig(t, config)
+}
+
+// setTestEnvVars sets test environment variables
+func setTestEnvVars(t *testing.T) {
+	t.Helper()
+	
+	envVars := map[string]string{
+		"APP_APP_ENVIRONMENT": "staging",
+		"APP_SERVER_PORT":     "9090",
+		"APP_LOGGING_LEVEL":   "warn",
+	}
+	
+	for key, value := range envVars {
+		if err := os.Setenv(key, value); err != nil {
+			t.Fatalf("Failed to set %s: %v", key, err)
+		}
+	}
+}
+
+// unsetTestEnvVars cleans up test environment variables
+func unsetTestEnvVars(t *testing.T) {
+	t.Helper()
+	
+	envVars := []string{
+		"APP_APP_ENVIRONMENT",
+		"APP_SERVER_PORT",
+		"APP_LOGGING_LEVEL",
+	}
+	
+	for _, key := range envVars {
+		if err := os.Unsetenv(key); err != nil {
+			t.Errorf("Failed to unset %s: %v", key, err)
+		}
+	}
+}
+
+// validateOverriddenConfig validates that config was properly overridden
+func validateOverriddenConfig(t *testing.T, config *Config) {
+	t.Helper()
+	
+	if config.App.Environment != "staging" {
+		t.Errorf("Expected environment 'staging', got '%s'", config.App.Environment)
+	}
+	if config.Server.Port != 9090 {
+		t.Errorf("Expected port 9090, got %d", config.Server.Port)
+	}
+	if config.Logging.Level != "warn" {
+		t.Errorf("Expected log level 'warn', got '%s'", config.Logging.Level)
+	}
+}
+
+// testInvalidEnvironment tests that invalid environment values are rejected
+func testInvalidEnvironment(t *testing.T) {
+	t.Helper()
+	
+	if err := os.Setenv("APP_APP_ENVIRONMENT", "invalid"); err != nil {
+		t.Fatalf("Failed to set APP_APP_ENVIRONMENT: %v", err)
+	}
+	defer func() {
+		if err := os.Unsetenv("APP_APP_ENVIRONMENT"); err != nil {
+			t.Errorf("Failed to unset APP_APP_ENVIRONMENT: %v", err)
+		}
+	}()
+	
+	_, err := LoadConfig("")
+	if err == nil {
+		t.Error("Should reject invalid environment")
+	}
 }

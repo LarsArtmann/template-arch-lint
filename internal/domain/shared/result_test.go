@@ -5,9 +5,11 @@ import (
 	"testing"
 )
 
+const testValue = "test value"
+
 func TestResult(t *testing.T) {
 	// Test successful result
-	result := Ok("test value")
+	result := Ok(testValue)
 
 	if !result.IsOk() {
 		t.Error("Expected result to be successful")
@@ -18,12 +20,12 @@ func TestResult(t *testing.T) {
 	}
 
 	value := result.MustGet()
-	if value != "test value" {
-		t.Errorf("Expected 'test value', got %s", value)
+	if value != testValue {
+		t.Errorf("Expected %q, got %s", testValue, value)
 	}
 
-	if result.OrElse("default") != "test value" {
-		t.Errorf("Expected 'test value', got %s", result.OrElse("default"))
+	if result.OrElse("default") != testValue {
+		t.Errorf("Expected %q, got %s", testValue, result.OrElse("default"))
 	}
 }
 
@@ -41,7 +43,7 @@ func TestResultError(t *testing.T) {
 	}
 
 	err := result.Error()
-	if err != testErr {
+	if !errors.Is(err, testErr) {
 		t.Errorf("Expected error %v, got %v", testErr, err)
 	}
 
@@ -52,7 +54,7 @@ func TestResultError(t *testing.T) {
 
 func TestOption(t *testing.T) {
 	// Test Some option
-	option := Some("test value")
+	option := Some(testValue)
 
 	if !option.IsPresent() {
 		t.Error("Expected option to have some value")
@@ -62,12 +64,12 @@ func TestOption(t *testing.T) {
 		t.Error("Expected option not to be none")
 	}
 
-	if option.MustGet() != "test value" {
-		t.Errorf("Expected 'test value', got %s", option.MustGet())
+	if option.MustGet() != testValue {
+		t.Errorf("Expected %q, got %s", testValue, option.MustGet())
 	}
 
-	if option.OrElse("default") != "test value" {
-		t.Errorf("Expected 'test value', got %s", option.OrElse("default"))
+	if option.OrElse("default") != testValue {
+		t.Errorf("Expected %q, got %s", testValue, option.OrElse("default"))
 	}
 }
 

@@ -28,6 +28,8 @@ dist/
 reports/
 coverage.out
 coverage.html
+duplication-report.html
+duplication-report.txt
 
 # IDE files
 .vscode/

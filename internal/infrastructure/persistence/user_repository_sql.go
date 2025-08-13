@@ -1,4 +1,4 @@
-// SQL implementation of UserRepository
+// Package persistence provides infrastructure layer data persistence implementations.
 package persistence
 
 import (
@@ -49,7 +49,7 @@ func (r *SQLUserRepository) initSchema() error {
 		CREATE INDEX IF NOT EXISTS idx_users_created ON users(created);
 	`
 
-	_, err := r.db.Exec(query)
+	_, err := r.db.ExecContext(context.Background(), query)
 	if err != nil {
 		return fmt.Errorf("failed to create users table: %w", err)
 	}

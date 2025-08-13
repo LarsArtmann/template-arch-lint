@@ -1,4 +1,4 @@
-// Domain entity example - good architectural design
+// Package entities contains the core domain entities for the application.
 package entities
 
 import (
