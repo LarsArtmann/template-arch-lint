@@ -164,12 +164,31 @@ deps:
       - domain-shared
       - domain-values
       - domain-errors
+      - app-dto
+      - app-http
       - web-templates-components
       - web-templates-layouts
       - web-templates-pages
 
   app-middleware:
     mayDependOn:
+      - domain-shared
+      - domain-errors
+      - app-dto
+      - app-http
+
+  app-dto:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-shared
+      - domain-values
+      - domain-errors
+
+  app-http:
+    anyVendorDeps: true
+    mayDependOn:
+      - app-dto
       - domain-shared
       - domain-errors
 

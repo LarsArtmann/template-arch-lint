@@ -167,7 +167,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	var req UpdateUserRequest
+	var req dto.UpdateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("Invalid request payload", "error", err)
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -407,7 +407,7 @@ func (h *UserHandler) GetUserEmails(c *gin.Context) {
 func (h *UserHandler) CreateUserFunctional(c *gin.Context) {
 	h.logger.Info("Creating user functionally", "remote_addr", c.ClientIP())
 
-	var req CreateUserRequest
+	var req dto.CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("Invalid request payload", "error", err)
 		c.JSON(http.StatusBadRequest, gin.H{

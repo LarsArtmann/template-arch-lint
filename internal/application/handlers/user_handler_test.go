@@ -13,6 +13,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/LarsArtmann/template-arch-lint/internal/application/dto"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
@@ -155,7 +156,7 @@ var _ = Describe("UserHandler", func() {
 		Context("with valid request", func() {
 			It("should create user successfully", func() {
 				// Given
-				requestBody := CreateUserRequest{
+				requestBody := dto.CreateUserRequest{
 					ID:    "user-123",
 					Email: "test@example.com",
 					Name:  "TestUser",
@@ -204,7 +205,7 @@ var _ = Describe("UserHandler", func() {
 
 			It("should return error for missing required fields", func() {
 				// Given
-				requestBody := CreateUserRequest{
+				requestBody := dto.CreateUserRequest{
 					// Missing ID
 					Email: "test@example.com",
 					Name:  "TestUser",
@@ -225,7 +226,7 @@ var _ = Describe("UserHandler", func() {
 
 			It("should return error for invalid email format", func() {
 				// Given
-				requestBody := CreateUserRequest{
+				requestBody := dto.CreateUserRequest{
 					ID:    "user-123",
 					Email: "invalid-email", // Invalid email
 					Name:  "TestUser",
@@ -246,7 +247,7 @@ var _ = Describe("UserHandler", func() {
 
 			It("should return error for invalid user ID format", func() {
 				// Given
-				requestBody := CreateUserRequest{
+				requestBody := dto.CreateUserRequest{
 					ID:    "invalid id with spaces", // Invalid user ID
 					Email: "test@example.com",
 					Name:  "TestUser",
@@ -339,7 +340,7 @@ var _ = Describe("UserHandler", func() {
 		Context("with valid request", func() {
 			It("should update user successfully", func() {
 				// Given
-				requestBody := UpdateUserRequest{
+				requestBody := dto.UpdateUserRequest{
 					Email: "updated@example.com",
 					Name:  "UpdatedUser",
 				}
