@@ -101,23 +101,23 @@ func validateUserNameFormat(username string) error {
 	}
 
 	normalized := strings.TrimSpace(username)
-	
+
 	if err := validateUsernameLength(normalized); err != nil {
 		return err
 	}
-	
+
 	if err := validateUsernameWhitespace(username, normalized); err != nil {
 		return err
 	}
-	
+
 	if err := validateUsernameCharacters(normalized); err != nil {
 		return err
 	}
-	
+
 	if err := validateUsernameEdges(normalized); err != nil {
 		return err
 	}
-	
+
 	if err := validateUsernameContent(normalized); err != nil {
 		return err
 	}
@@ -157,9 +157,9 @@ func validateUsernameCharacters(normalized string) error {
 // isValidUsernameChar checks if a character is allowed in usernames
 func isValidUsernameChar(char rune) bool {
 	return (char >= 'a' && char <= 'z') ||
-		   (char >= 'A' && char <= 'Z') ||
-		   (char >= '0' && char <= '9') ||
-		   char == '-' || char == '_' || char == '.' || char == ' '
+		(char >= 'A' && char <= 'Z') ||
+		(char >= '0' && char <= '9') ||
+		char == '-' || char == '_' || char == '.' || char == ' '
 }
 
 // validateUsernameEdges checks start/end character restrictions and consecutive characters
@@ -188,15 +188,15 @@ func validateUsernameContent(normalized string) error {
 	if err := validateHasLetter(normalized); err != nil {
 		return err
 	}
-	
+
 	if err := validateNotReserved(normalized); err != nil {
 		return err
 	}
-	
+
 	if err := validateNotAllNumbers(normalized); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 

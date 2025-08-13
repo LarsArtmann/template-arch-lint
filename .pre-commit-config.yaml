@@ -1,0 +1,271 @@
+# 🪝 ENTERPRISE-GRADE PRE-COMMIT HOOKS
+# Prevents bad code from entering the repository in the first place
+#
+# This configuration provides:
+# - ✅ Go architecture validation (go-arch-lint)
+# - ✅ Code quality enforcement (golangci-lint)
+# - ✅ Basic file integrity checks
+# - ✅ Performance optimization (runs only on changed files)
+# - ✅ Fast feedback loop for developers
+
+# See https://pre-commit.com for more information
+repos:
+  # ==============================================
+  # BUILT-IN HOOKS - Basic File Integrity
+  # ==============================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # File format validation
+      - id: check-yaml
+        name: "🔍 Check YAML syntax"
+        description: "Validates YAML file syntax"
+
+      - id: check-json
+        name: "🔍 Check JSON syntax"
+        description: "Validates JSON file syntax"
+
+      - id: check-toml
+        name: "🔍 Check TOML syntax"
+        description: "Validates TOML file syntax"
+
+      # File content validation
+      - id: trailing-whitespace
+        name: "✂️  Remove trailing whitespace"
+        description: "Trims trailing whitespace from all files"
+        args: [--markdown-linebreak-ext=md]
+
+      - id: end-of-file-fixer
+        name: "📝 Fix end of files"
+        description: "Ensures files end with newline"
+
+      - id: check-merge-conflict
+        name: "🔒 Check merge conflicts"
+        description: "Prevents committing merge conflict markers"
+
+      - id: check-added-large-files
+        name: "📏 Check large files"
+        description: "Prevents committing large files (>500kB)"
+        args: ['--maxkb=500']
+
+      # Security checks
+      - id: detect-private-key
+        name: "🔐 Detect private keys"
+        description: "Prevents committing private keys"
+
+      - id: check-executables-have-shebangs
+        name: "🔧 Check executable shebangs"
+        description: "Ensures executable files have proper shebangs"
+
+  # ==============================================
+  # GO ARCHITECTURE VALIDATION
+  # ==============================================
+  - repo: local
+    hooks:
+      - id: go-arch-lint
+        name: "🏗️  Architecture Validation (go-arch-lint)"
+        description: "Enforces Clean Architecture boundaries"
+        entry: bash
+        language: system
+        files: '\.go$'
+        args:
+          - -c
+          - |
+            # Check if go-arch-lint is installed
+            if ! command -v go-arch-lint >/dev/null 2>&1; then
+              echo "❌ go-arch-lint not installed. Installing..."
+              go install github.com/fe3dback/go-arch-lint@v1.12.0
+            fi
+
+            # Run architecture validation
+            echo "🏗️  Running architecture validation..."
+            go-arch-lint check
+        pass_filenames: false
+        require_serial: true
+
+  # ==============================================
+  # GO CODE QUALITY ENFORCEMENT
+  # ==============================================
+  - repo: local
+    hooks:
+      - id: golangci-lint
+        name: "📝 Code Quality (golangci-lint)"
+        description: "Enforces code quality standards and catches bugs"
+        entry: bash
+        language: system
+        files: '\.go$'
+        args:
+          - -c
+          - |
+            # Ensure we have the correct golangci-lint v2 version
+            REQUIRED_VERSION="v2.3.1"
+            GOLANGCI_PATH="$HOME/go/bin/golangci-lint"
+
+            # Check if correct version is installed
+            if ! $HOME/go/bin/golangci-lint version 2>/dev/null | grep -q "golangci-lint has version 2.3.1"; then
+              echo "📦 Installing golangci-lint $REQUIRED_VERSION..."
+              go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$REQUIRED_VERSION
+
+              # Ensure the installed version is in PATH
+              export PATH="$HOME/go/bin:$PATH"
+
+              # Verify installation
+              if ! $HOME/go/bin/golangci-lint version 2>/dev/null | grep -q "golangci-lint has version 2.3.1"; then
+                echo "❌ Failed to install correct golangci-lint version"
+                exit 1
+              fi
+            fi
+
+            # Get packages containing changed Go files
+            changed_packages=()
+            for file in "$@"; do
+              if [[ "$file" == *.go ]]; then
+                # Extract package path from file
+                package_dir=$(dirname "$file")
+                if [[ ! " ${changed_packages[*]} " =~ " $package_dir " ]]; then
+                  changed_packages+=("$package_dir")
+                fi
+              fi
+            done
+
+            if [ ${#changed_packages[@]} -eq 0 ]; then
+              echo "📝 No Go files changed, skipping golangci-lint"
+              exit 0
+            fi
+
+            echo "📝 Running code quality checks on ${#changed_packages[@]} package(s)..."
+            echo "   Packages: ${changed_packages[*]}"
+
+            # Run golangci-lint on packages to avoid cross-package issues
+            $HOME/go/bin/golangci-lint run --config .golangci.yml "${changed_packages[@]}"
+        pass_filenames: true
+        require_serial: false
+
+  # ==============================================
+  # GO FORMATTING (Auto-fix)
+  # ==============================================
+  - repo: local
+    hooks:
+      - id: gofmt
+        name: "🎨 Format Go code (gofmt)"
+        description: "Formats Go code with standard formatting"
+        entry: gofmt
+        language: system
+        files: '\.go$'
+        args: [-w, -s]
+        pass_filenames: true
+
+      - id: goimports
+        name: "📦 Organize imports (goimports)"
+        description: "Organizes Go imports and removes unused ones"
+        entry: bash
+        language: system
+        files: '\.go$'
+        args:
+          - -c
+          - |
+            # Install goimports if not available
+            if ! command -v goimports >/dev/null 2>&1; then
+              echo "Installing goimports..."
+              go install golang.org/x/tools/cmd/goimports@latest
+            fi
+            goimports -w "$@"
+        pass_filenames: true
+
+  # ==============================================
+  # GO MODULE VALIDATION
+  # ==============================================
+  - repo: local
+    hooks:
+      - id: go-mod-tidy
+        name: "📋 Tidy Go modules (go mod tidy)"
+        description: "Ensures go.mod and go.sum are up to date"
+        entry: bash
+        language: system
+        files: '^go\.(mod|sum)$'
+        args:
+          - -c
+          - |
+            echo "📋 Tidying Go modules..."
+            go mod tidy
+
+            # Check if go.mod or go.sum changed
+            if ! git diff --quiet HEAD go.mod go.sum; then
+              echo "⚠️  go mod tidy made changes to go.mod or go.sum"
+              echo "   Please stage the changes and commit again"
+              exit 1
+            fi
+        pass_filenames: false
+        require_serial: true
+
+  # ==============================================
+  # FILENAME VALIDATION
+  # ==============================================
+  - repo: local
+    hooks:
+      - id: check-problematic-filenames
+        name: "📁 Check problematic filenames"
+        description: "Prevents files with problematic characters in names"
+        entry: bash
+        language: system
+        args:
+          - -c
+          - |
+            echo "📁 Checking for problematic filenames..."
+            problematic_files=$(find . -name "*:*" -not -path "./.git/*" 2>/dev/null || true)
+            if [ -n "$problematic_files" ]; then
+              echo "❌ Found files with colons in names:"
+              echo "$problematic_files"
+              echo "   Colons in filenames can cause issues on Windows systems"
+              exit 1
+            fi
+            echo "✅ No problematic filenames found"
+        files: '.*'
+        pass_filenames: false
+        require_serial: true
+
+# ==============================================
+# PERFORMANCE & RELIABILITY SETTINGS
+# ==============================================
+ci:
+  autofix_commit_msg: |
+    🔧 [pre-commit.ci] auto fixes from pre-commit hooks
+
+    For more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '🔄 [pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false
+
+# ==============================================
+# HOOK CONFIGURATION NOTES
+# ==============================================
+#
+# Performance Optimizations:
+# - golangci-lint runs only on changed Go files (not full project scan)
+# - Architecture validation runs on full project (required for boundary checks)
+# - File checks run on all relevant files but are lightweight
+#
+# Error Handling:
+# - Tools are auto-installed if missing (development convenience)
+# - Serial execution for architecture and module checks (prevents conflicts)
+# - Parallel execution for formatting and file checks (performance)
+#
+# Developer Experience:
+# - Clear hook names with emojis for easy identification
+# - Informative descriptions for each hook's purpose
+# - Auto-fixing hooks run before validation hooks
+# - Detailed error messages with guidance
+#
+# Integration:
+# - Works with existing justfile commands (just lint, just fix)
+# - Respects .golangci.yml and .go-arch-lint.yml configurations
+# - Compatible with IDE workflows and CI/CD pipelines
+#
+# To customize for your project:
+# 1. Adjust file patterns in 'files:' sections
+# 2. Modify tool versions in install commands
+# 3. Add project-specific validation hooks
+# 4. Configure skip patterns for generated files

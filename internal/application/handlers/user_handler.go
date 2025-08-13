@@ -9,8 +9,8 @@ import (
 
 	"github.com/samber/lo"
 
-	domainerrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
+	domainerrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
@@ -30,7 +30,6 @@ func NewUserHandler(userService *services.UserService, logger *slog.Logger) *Use
 		logger:      logger,
 	}
 }
-
 
 // CreateUserRequest represents the request payload for creating a user
 type CreateUserRequest struct {
@@ -52,7 +51,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	var req CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("Invalid request payload", "error", err)
-			c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Invalid request payload",
 			"details": err.Error(),
 		})
@@ -406,7 +405,7 @@ func (h *UserHandler) CreateUserFunctional(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("Invalid request payload", "error", err)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Invalid request payload", 
+			"error":   "Invalid request payload",
 			"details": err.Error(),
 		})
 		return
@@ -425,7 +424,7 @@ func (h *UserHandler) CreateUserFunctional(c *gin.Context) {
 
 	// Use the functional Result-based method
 	result := h.userService.CreateUserWithResult(c.Request.Context(), userID, req.Email, req.Name)
-	
+
 	if result.IsError() {
 		h.handleError(c, result.Error(), "create_user_functional")
 		return
@@ -440,16 +439,17 @@ func (h *UserHandler) CreateUserFunctional(c *gin.Context) {
 func (h *UserHandler) GetUsersFiltered(c *gin.Context) {
 	h.logger.Debug("Getting filtered users")
 
-	// Parse query parameters functionally
-	filters := make(map[string]interface{})
-	
-	// Use lo.Ternary for conditional parameter parsing
+	// Parse query parameters into type-safe filters
+	var filters services.UserFilters
+
+	// Use pointer assignment for optional filters
 	if domain := c.Query("domain"); domain != "" {
-		filters["domain"] = domain
+		filters.Domain = &domain
 	}
-	
+
 	if active := c.Query("active"); active != "" {
-		filters["active"] = active == "true"
+		isActive := active == "true"
+		filters.Active = &isActive
 	}
 
 	users, err := h.userService.GetUsersWithFilters(c.Request.Context(), filters)
@@ -480,7 +480,7 @@ func (h *UserHandler) GetUsersByDomains(c *gin.Context) {
 	}
 
 	domains := strings.Split(domainsParam, ",")
-	
+
 	usersByDomain, err := h.userService.GetUsersByEmailDomains(c.Request.Context(), domains)
 	if err != nil {
 		h.handleError(c, err, "get_users_by_domains")
@@ -494,8 +494,8 @@ func (h *UserHandler) GetUsersByDomains(c *gin.Context) {
 
 	h.logger.Info("Users by domains retrieved successfully", "domains", totals)
 	c.JSON(http.StatusOK, gin.H{
-		"users_by_domain": usersByDomain,
-		"totals":          totals,
+		"users_by_domain":   usersByDomain,
+		"totals":            totals,
 		"requested_domains": domains,
 	})
 }
@@ -516,13 +516,13 @@ func (h *UserHandler) ValidateUsersBatch(c *gin.Context) {
 
 	// Use Either pattern for batch validation
 	result := h.userService.ValidateUserBatchWithEither(users)
-	
+
 	if result.IsLeft() {
 		// Validation errors occurred
 		errors := result.MustLeft()
 		h.logger.Warn("Batch validation failed", "error_count", len(errors))
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error":  "Batch validation failed", 
+			"error": "Batch validation failed",
 			"errors": lo.Map(errors, func(err error, _ int) string {
 				return err.Error()
 			}),

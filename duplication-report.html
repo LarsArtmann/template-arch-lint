@@ -53,6 +53,25 @@
 	})
 })</pre>
 <h1>#3 found 2 clones</h1>
+<h2>internal/domain/services/user_service.go:73</h2>
+<pre>func (s *UserService) GetUser(ctx context.Context, id entities.UserID) (*entities.User, error) {
+	user, err := s.userRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	// Business logic: Could add user activity tracking, audit logging, etc.
+	return user, nil
+}</pre>
+<h2>internal/domain/services/user_service.go:111</h2>
+<pre>func (s *UserService) getUserForUpdate(ctx context.Context, id entities.UserID) (*entities.User, error) {
+	user, err := s.userRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user for update: %w", err)
+	}
+	return user, nil
+}</pre>
+<h1>#4 found 2 clones</h1>
 <h2>internal/application/handlers/user_handler_test.go:376</h2>
 <pre>Context("with valid user ID", func() {
 	It("should delete user successfully", func() {
@@ -91,7 +110,54 @@
 		Expect(response.Total).To(Equal(3))
 	})
 })</pre>
-<h1>#4 found 2 clones</h1>
+<h1>#5 found 2 clones</h1>
+<h2>internal/config/config_test.go:153</h2>
+<pre>func validateDatabaseDefaults(t *testing.T, database DatabaseConfig) {
+	t.Helper()
+
+	if database.Driver != "sqlite3" {
+		t.Errorf("Expected default database driver 'sqlite3', got '%s'", database.Driver)
+	}
+	if database.DSN != "./app.db" {
+		t.Errorf("Expected default DSN './app.db', got '%s'", database.DSN)
+	}
+}
+
+// validateLoggingDefaults checks logging configuration defaults
+func validateLoggingDefaults(t *testing.T, logging LoggingConfig) {
+	t.Helper()
+
+	if logging.Level != "info" {
+		t.Errorf("Expected default log level 'info', got '%s'", logging.Level)
+	}
+	if logging.Format != "json" {
+		t.Errorf("Expected default log format 'json', got '%s'", logging.Format)
+	}
+}</pre>
+<h2>internal/config/config_test.go:165</h2>
+<pre>func validateLoggingDefaults(t *testing.T, logging LoggingConfig) {
+	t.Helper()
+
+	if logging.Level != "info" {
+		t.Errorf("Expected default log level 'info', got '%s'", logging.Level)
+	}
+	if logging.Format != "json" {
+		t.Errorf("Expected default log format 'json', got '%s'", logging.Format)
+	}
+}
+
+// validateAppDefaults checks app configuration defaults
+func validateAppDefaults(t *testing.T, app AppConfig) {
+	t.Helper()
+
+	if app.Name != "template-arch-lint" {
+		t.Errorf("Expected default app name 'template-arch-lint', got '%s'", app.Name)
+	}
+	if app.Environment != "development" {
+		t.Errorf("Expected default environment 'development', got '%s'", app.Environment)
+	}
+}</pre>
+<h1>#6 found 2 clones</h1>
 <h2>web/templates/components/user_components_templ.go:590</h2>
 <pre>if user != nil {
 	templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, " value=\"")
@@ -132,7 +198,56 @@
 		return templ_7745c5c3_Err
 	}
 }</pre>
-<h1>#5 found 2 clones</h1>
+<h1>#7 found 3 clones</h1>
+<h2>internal/config/config_test.go:153</h2>
+<pre>func validateDatabaseDefaults(t *testing.T, database DatabaseConfig) {
+	t.Helper()
+
+	if database.Driver != "sqlite3" {
+		t.Errorf("Expected default database driver 'sqlite3', got '%s'", database.Driver)
+	}
+	if database.DSN != "./app.db" {
+		t.Errorf("Expected default DSN './app.db', got '%s'", database.DSN)
+	}
+}</pre>
+<h2>internal/config/config_test.go:165</h2>
+<pre>func validateLoggingDefaults(t *testing.T, logging LoggingConfig) {
+	t.Helper()
+
+	if logging.Level != "info" {
+		t.Errorf("Expected default log level 'info', got '%s'", logging.Level)
+	}
+	if logging.Format != "json" {
+		t.Errorf("Expected default log format 'json', got '%s'", logging.Format)
+	}
+}</pre>
+<h2>internal/config/config_test.go:177</h2>
+<pre>func validateAppDefaults(t *testing.T, app AppConfig) {
+	t.Helper()
+
+	if app.Name != "template-arch-lint" {
+		t.Errorf("Expected default app name 'template-arch-lint', got '%s'", app.Name)
+	}
+	if app.Environment != "development" {
+		t.Errorf("Expected default environment 'development', got '%s'", app.Environment)
+	}
+}</pre>
+<h1>#8 found 2 clones</h1>
+<h2>internal/testhelpers/infrastructure/repositories/user_repository.go:286</h2>
+<pre>func (t *RepositoryBehaviorTester) TestSaveAndFindByID() {
+	user := t.suite.CreateTestUser()
+	foundUser, err := t.suite.repository.FindByID(t.suite.ctx, user.ID)
+	base.AssertSuccess(foundUser, err)
+	Expect(foundUser.ID).To(Equal(user.ID))
+}</pre>
+<h2>internal/testhelpers/infrastructure/repositories/user_repository.go:294</h2>
+<pre>func (t *RepositoryBehaviorTester) TestFindByEmail() {
+	user := t.suite.CreateTestUser()
+	foundUser, err := t.suite.repository.FindByEmail(t.suite.ctx, user.Email)
+	base.AssertSuccess(foundUser, err)
+	Expect(foundUser.Email).To(Equal(user.Email))
+}</pre>
+<h1>#9 found 2 clones</h1>
 <h2>internal/db/users.sql.go:48</h2>
 <pre>func (q *Queries) BulkInsertUsers(ctx context.Context, arg *BulkInsertUsersParams) error {
 	_, err := q.exec(ctx, q.bulkInsertUsersStmt, BulkInsertUsers,
@@ -155,8 +270,8 @@
 	)
 	return err
 }</pre>
-<h1>#6 found 2 clones</h1>
-<h2>internal/application/handlers/template_handler.go:186</h2>
+<h1>#10 found 2 clones</h1>
+<h2>internal/application/handlers/template_handler.go:209</h2>
 <pre>func (h *TemplateHandler) EditUserInline(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := values.NewUserID(idStr)
@@ -175,7 +290,7 @@
 
 	h.renderTemplate(c, components.UserEditRow(user))
 }</pre>
-<h2>internal/application/handlers/template_handler.go:206</h2>
+<h2>internal/application/handlers/template_handler.go:229</h2>
 <pre>func (h *TemplateHandler) CancelUserEdit(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := values.NewUserID(idStr)
@@ -194,7 +309,7 @@
 
 	h.renderTemplate(c, components.UserRow(user))
 }</pre>
-<h1>#7 found 2 clones</h1>
+<h1>#11 found 2 clones</h1>
 <h2>web/templates/pages/user_form_templ.go:48</h2>
 <pre>                                         {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -269,7 +384,7 @@
 		return nil
 	})
 }</pre>
-<h1>#8 found 2 clones</h1>
+<h1>#12 found 2 clones</h1>
 <h2>internal/domain/entities/user_test.go:168</h2>
 <pre>It("should fail validation when email is empty", func() {
 	// Given
@@ -308,7 +423,7 @@
 	Expect(err).To(HaveOccurred())
 	Expect(err.Error()).To(ContainSubstring("name"))
 })</pre>
-<h1>#9 found 2 clones</h1>
+<h1>#13 found 2 clones</h1>
 <h2>internal/infrastructure/persistence/user_repository_sqlc.go:88</h2>
 <pre>                                                                                                       {
 	r.logger.Debug("Finding user by ID", "user_id", id)
@@ -361,8 +476,8 @@
 	r.logger.Debug("User found successfully", "email", email, "user_id", user.ID)
 	return user, nil
 }</pre>
-<h1>#10 found 2 clones</h1>
-<h2>internal/container/container.go:195</h2>
+<h1>#14 found 2 clones</h1>
+<h2>internal/container/container.go:176</h2>
 <pre>do.Provide(c.injector, func(i *do.Injector) (*handlers.UserHandler, error) {
 	userService := do.MustInvoke[*services.UserService](i)
 	logger := do.MustInvoke[*slog.Logger](i)
@@ -370,7 +485,7 @@
 	handler := handlers.NewUserHandler(userService, logger)
 	return handler, nil
 })</pre>
-<h2>internal/container/container.go:204</h2>
+<h2>internal/container/container.go:185</h2>
 <pre>do.Provide(c.injector, func(i *do.Injector) (*handlers.TemplateHandler, error) {
 	userService := do.MustInvoke[*services.UserService](i)
 	logger := do.MustInvoke[*slog.Logger](i)
@@ -378,7 +493,7 @@
 	handler := handlers.NewTemplateHandler(userService, logger)
 	return handler, nil
 })</pre>
-<h1>#11 found 2 clones</h1>
+<h1>#15 found 2 clones</h1>
 <h2>internal/application/handlers/user_handler_test.go:302</h2>
 <pre>Context("with invalid user ID", func() {
 	It("should return error for invalid ID format", func() {
@@ -407,8 +522,8 @@
 		Expect(recorder.Code).To(Equal(http.StatusNotFound))
 	})
 })</pre>
-<h1>#12 found 2 clones</h1>
-<h2>internal/application/handlers/user_handler.go:133</h2>
+<h1>#16 found 2 clones</h1>
+<h2>internal/application/handlers/user_handler.go:132</h2>
 <pre>              {
 	h.logger.Error("Failed to get user", "error", err, "user_id", id)
 
@@ -424,7 +539,7 @@
 	})
 	return
 }</pre>
-<h2>internal/application/handlers/user_handler.go:223</h2>
+<h2>internal/application/handlers/user_handler.go:222</h2>
 <pre>                                                                        {
 	h.logger.Error("Failed to delete user", "error", err, "user_id", id)
 
@@ -441,7 +556,136 @@
 	})
 	return
 }</pre>
-<h1>#13 found 2 clones</h1>
+<h1>#17 found 2 clones</h1>
+<h2>internal/testhelpers/infrastructure/repositories/memory.go:148</h2>
+<pre>d.scenarios["same_domain"] = []*entities.User{
+	entityHelpers.NewUserBuilder().WithID("user1").WithEmail("user1@company.com").WithName("User One").Build(),
+	entityHelpers.NewUserBuilder().WithID("user2").WithEmail("user2@company.com").WithName("User Two").Build(),
+	entityHelpers.NewUserBuilder().WithID("user3").WithEmail("user3@company.com").WithName("User Three").Build(),
+}</pre>
+<h2>internal/testhelpers/infrastructure/repositories/memory.go:155</h2>
+<pre>d.scenarios["mixed_domains"] = []*entities.User{
+	entityHelpers.NewUserBuilder().WithID("gmail-user").WithEmail("user@gmail.com").WithName("Gmail User").Build(),
+	entityHelpers.NewUserBuilder().WithID("yahoo-user").WithEmail("user@yahoo.com").WithName("Yahoo User").Build(),
+	entityHelpers.NewUserBuilder().WithID("company-user").WithEmail("user@company.com").WithName("Company User").Build(),
+}</pre>
+<h1>#18 found 2 clones</h1>
+<h2>internal/domain/errors/errors_test.go:159</h2>
+<pre>func testValidationErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if ve, ok := AsValidationError(errors.validation); !ok || ve != errors.validation {
+		t.Error("Expected validation error assertion to succeed")
+	}
+	if _, ok := AsValidationError(errors.notFound); ok {
+		t.Error("Expected validation error assertion to fail for not found error")
+	}
+}
+
+// testNotFoundErrorAssertions tests AsNotFoundError function
+func testNotFoundErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if nfe, ok := AsNotFoundError(errors.notFound); !ok || nfe != errors.notFound {
+		t.Error("Expected not found error assertion to succeed")
+	}
+	if _, ok := AsNotFoundError(errors.validation); ok {
+		t.Error("Expected not found error assertion to fail for validation error")
+	}
+}
+
+// testConflictErrorAssertions tests AsConflictError function
+func testConflictErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if ce, ok := AsConflictError(errors.conflict); !ok || ce != errors.conflict {
+		t.Error("Expected conflict error assertion to succeed")
+	}
+	if _, ok := AsConflictError(errors.validation); ok {
+		t.Error("Expected conflict error assertion to fail for validation error")
+	}
+}</pre>
+<h2>internal/domain/errors/errors_test.go:171</h2>
+<pre>func testNotFoundErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if nfe, ok := AsNotFoundError(errors.notFound); !ok || nfe != errors.notFound {
+		t.Error("Expected not found error assertion to succeed")
+	}
+	if _, ok := AsNotFoundError(errors.validation); ok {
+		t.Error("Expected not found error assertion to fail for validation error")
+	}
+}
+
+// testConflictErrorAssertions tests AsConflictError function
+func testConflictErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if ce, ok := AsConflictError(errors.conflict); !ok || ce != errors.conflict {
+		t.Error("Expected conflict error assertion to succeed")
+	}
+	if _, ok := AsConflictError(errors.validation); ok {
+		t.Error("Expected conflict error assertion to fail for validation error")
+	}
+}
+
+// testInternalErrorAssertions tests AsInternalError function
+func testInternalErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if ie, ok := AsInternalError(errors.internal); !ok || ie != errors.internal {
+		t.Error("Expected internal error assertion to succeed")
+	}
+	if _, ok := AsInternalError(errors.validation); ok {
+		t.Error("Expected internal error assertion to fail for validation error")
+	}
+}</pre>
+<h1>#19 found 4 clones</h1>
+<h2>internal/domain/errors/errors_test.go:159</h2>
+<pre>func testValidationErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if ve, ok := AsValidationError(errors.validation); !ok || ve != errors.validation {
+		t.Error("Expected validation error assertion to succeed")
+	}
+	if _, ok := AsValidationError(errors.notFound); ok {
+		t.Error("Expected validation error assertion to fail for not found error")
+	}
+}</pre>
+<h2>internal/domain/errors/errors_test.go:171</h2>
+<pre>func testNotFoundErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if nfe, ok := AsNotFoundError(errors.notFound); !ok || nfe != errors.notFound {
+		t.Error("Expected not found error assertion to succeed")
+	}
+	if _, ok := AsNotFoundError(errors.validation); ok {
+		t.Error("Expected not found error assertion to fail for validation error")
+	}
+}</pre>
+<h2>internal/domain/errors/errors_test.go:183</h2>
+<pre>func testConflictErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if ce, ok := AsConflictError(errors.conflict); !ok || ce != errors.conflict {
+		t.Error("Expected conflict error assertion to succeed")
+	}
+	if _, ok := AsConflictError(errors.validation); ok {
+		t.Error("Expected conflict error assertion to fail for validation error")
+	}
+}</pre>
+<h2>internal/domain/errors/errors_test.go:195</h2>
+<pre>func testInternalErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if ie, ok := AsInternalError(errors.internal); !ok || ie != errors.internal {
+		t.Error("Expected internal error assertion to succeed")
+	}
+	if _, ok := AsInternalError(errors.validation); ok {
+		t.Error("Expected internal error assertion to fail for validation error")
+	}
+}</pre>
+<h1>#20 found 2 clones</h1>
 <h2>internal/domain/entities/user.go:110</h2>
 <pre>func (u *User) SetEmail(email string) error {
 	emailVO, err := values.NewEmail(email)
@@ -466,7 +710,7 @@
 	u.Modified = time.Now()
 	return nil
 }</pre>
-<h1>#14 found 2 clones</h1>
+<h1>#21 found 2 clones</h1>
 <h2>internal/db/users.sql.go:127</h2>
 <pre>func (q *Queries) FindRecentUsers(ctx context.Context, arg *FindRecentUsersParams) ([]*Users, error) {
 	rows, err := q.query(ctx, q.findRecentUsersStmt, FindRecentUsers, arg.Limit, arg.Offset)
@@ -525,7 +769,77 @@
 	}
 	return items, nil
 }</pre>
-<h1>#15 found 2 clones</h1>
+<h1>#22 found 3 clones</h1>
+<h2>internal/domain/errors/errors_test.go:159</h2>
+<pre>func testValidationErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if ve, ok := AsValidationError(errors.validation); !ok || ve != errors.validation {
+		t.Error("Expected validation error assertion to succeed")
+	}
+	if _, ok := AsValidationError(errors.notFound); ok {
+		t.Error("Expected validation error assertion to fail for not found error")
+	}
+}
+
+// testNotFoundErrorAssertions tests AsNotFoundError function
+func testNotFoundErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if nfe, ok := AsNotFoundError(errors.notFound); !ok || nfe != errors.notFound {
+		t.Error("Expected not found error assertion to succeed")
+	}
+	if _, ok := AsNotFoundError(errors.validation); ok {
+		t.Error("Expected not found error assertion to fail for validation error")
+	}
+}</pre>
+<h2>internal/domain/errors/errors_test.go:171</h2>
+<pre>func testNotFoundErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if nfe, ok := AsNotFoundError(errors.notFound); !ok || nfe != errors.notFound {
+		t.Error("Expected not found error assertion to succeed")
+	}
+	if _, ok := AsNotFoundError(errors.validation); ok {
+		t.Error("Expected not found error assertion to fail for validation error")
+	}
+}
+
+// testConflictErrorAssertions tests AsConflictError function
+func testConflictErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if ce, ok := AsConflictError(errors.conflict); !ok || ce != errors.conflict {
+		t.Error("Expected conflict error assertion to succeed")
+	}
+	if _, ok := AsConflictError(errors.validation); ok {
+		t.Error("Expected conflict error assertion to fail for validation error")
+	}
+}</pre>
+<h2>internal/domain/errors/errors_test.go:183</h2>
+<pre>func testConflictErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if ce, ok := AsConflictError(errors.conflict); !ok || ce != errors.conflict {
+		t.Error("Expected conflict error assertion to succeed")
+	}
+	if _, ok := AsConflictError(errors.validation); ok {
+		t.Error("Expected conflict error assertion to fail for validation error")
+	}
+}
+
+// testInternalErrorAssertions tests AsInternalError function
+func testInternalErrorAssertions(t *testing.T, errors testErrorTypes) {
+	t.Helper()
+
+	if ie, ok := AsInternalError(errors.internal); !ok || ie != errors.internal {
+		t.Error("Expected internal error assertion to succeed")
+	}
+	if _, ok := AsInternalError(errors.validation); ok {
+		t.Error("Expected internal error assertion to fail for validation error")
+	}
+}</pre>
+<h1>#23 found 2 clones</h1>
 <h2>internal/infrastructure/persistence/user_repository_sql.go:87</h2>
 <pre>                                                                                                      {
 	r.logger.Debug("Finding user by ID", "user_id", id)
@@ -596,7 +910,84 @@
 	r.logger.Debug("User found successfully", "email", email, "user_id", user.ID)
 	return &user, nil
 }</pre>
-<h1>#16 found 4 clones</h1>
+<h1>#24 found 4 clones</h1>
+<h2>web/templates/layouts/base_test.go:62</h2>
+<pre>It("should include all required external dependencies", func() {
+	// Given
+	title := "Dependencies Test"
+
+	// When
+	component := BaseLayout(title, sampleContent)
+	err := component.Render(ctx, buffer)
+
+	// Then
+	Expect(err).To(BeNil())
+	html := buffer.String()
+
+	// Should include TailwindCSS
+	Expect(html).To(ContainSubstring("https://cdn.tailwindcss.com"))
+
+	// Should include HTMX
+	Expect(html).To(ContainSubstring("https://unpkg.com/htmx.org@2.0.3"))
+
+	// Should include Heroicons
+	Expect(html).To(ContainSubstring("heroicons"))
+})</pre>
+<h2>web/templates/layouts/base_test.go:101</h2>
+<pre>It("should include navigation component", func() {
+	// Given
+	title := "Navigation Test"
+
+	// When
+	component := BaseLayout(title, sampleContent)
+	err := component.Render(ctx, buffer)
+
+	// Then
+	Expect(err).To(BeNil())
+	html := buffer.String()
+
+	// Should contain navigation elements
+	Expect(html).To(ContainSubstring("User Management"))
+	Expect(html).To(ContainSubstring("href=\"/users\""))
+	Expect(html).To(ContainSubstring("href=\"/users/new\""))
+})</pre>
+<h2>web/templates/layouts/base_test.go:141</h2>
+<pre>It("should include loading indicator", func() {
+	// Given
+	title := "Loading Test"
+
+	// When
+	component := BaseLayout(title, sampleContent)
+	err := component.Render(ctx, buffer)
+
+	// Then
+	Expect(err).To(BeNil())
+	html := buffer.String()
+
+	// Should contain loading indicator
+	Expect(html).To(ContainSubstring("id=\"loading-indicator\""))
+	Expect(html).To(ContainSubstring("Loading..."))
+	Expect(html).To(ContainSubstring("animate-spin"))
+})</pre>
+<h2>web/templates/layouts/base_test.go:374</h2>
+<pre>It("should include custom CSS for HTMX", func() {
+	// Given
+	title := "HTMX CSS Test"
+
+	// When
+	component := BaseLayout(title, sampleContent)
+	err := component.Render(ctx, buffer)
+
+	// Then
+	Expect(err).To(BeNil())
+	html := buffer.String()
+
+	// Should contain HTMX-specific styles
+	Expect(html).To(ContainSubstring(".loading"))
+	Expect(html).To(ContainSubstring(".htmx-indicator"))
+	Expect(html).To(ContainSubstring(".htmx-request"))
+})</pre>
+<h1>#25 found 4 clones</h1>
 <h2>internal/db/users.sql.go:345</h2>
 <pre>func (q *Queries) GetUsersCreatedAfter(ctx context.Context, arg *GetUsersCreatedAfterParams) ([]*Users, error) {
 	rows, err := q.query(ctx, q.getUsersCreatedAfterStmt, GetUsersCreatedAfter, arg.Created, arg.Limit, arg.Offset)
@@ -713,7 +1104,48 @@
 	}
 	return items, nil
 }</pre>
-<h1>#17 found 8 clones</h1>
+<h1>#26 found 2 clones</h1>
+<h2>internal/testhelpers/infrastructure/repositories/memory.go:38</h2>
+<pre>                                                                                      {
+	r.operationLog = append(r.operationLog, "Save")
+
+	if r.beforeSave != nil {
+		if err := r.beforeSave(user); err != nil {
+			return err
+		}
+	}
+
+	err := r.InMemoryUserRepository.Save(ctx, user)
+
+	if err == nil && r.afterSave != nil {
+		if afterErr := r.afterSave(user); afterErr != nil {
+			return afterErr
+		}
+	}
+
+	return err
+}</pre>
+<h2>internal/testhelpers/infrastructure/repositories/memory.go:59</h2>
+<pre>                                                                                     {
+	r.operationLog = append(r.operationLog, "Delete")
+
+	if r.beforeDelete != nil {
+		if err := r.beforeDelete(id); err != nil {
+			return err
+		}
+	}
+
+	err := r.InMemoryUserRepository.Delete(ctx, id)
+
+	if err == nil && r.afterDelete != nil {
+		if afterErr := r.afterDelete(id); afterErr != nil {
+			return afterErr
+		}
+	}
+
+	return err
+}</pre>
+<h1>#27 found 8 clones</h1>
 <h2>internal/db/users.sql.go:134</h2>
 <pre>for rows.Next() {
 	var i Users
@@ -826,3 +1258,88 @@
 	}
 	items = append(items, &i)
 }</pre>
+<h1>#28 found 3 clones</h1>
+<h2>architecture_test.go:191</h2>
+<pre>for i := 0; i < emailType.NumField(); i++ {
+	field := emailType.Field(i)
+	firstChar := field.Name[0:1]
+	if strings.ToUpper(firstChar) == firstChar {
+		Fail(fmt.Sprintf("❌ VALUE OBJECT MUTABILITY VIOLATION: %s.%s is exported\n"+
+			"Value objects must be immutable. All fields should be unexported.\n"+
+			"Use getter methods to access field values.",
+			emailType.Name(), field.Name))
+	}
+}</pre>
+<h2>architecture_test.go:206</h2>
+<pre>for i := 0; i < userIDType.NumField(); i++ {
+	field := userIDType.Field(i)
+	firstChar := field.Name[0:1]
+	if strings.ToUpper(firstChar) == firstChar {
+		Fail(fmt.Sprintf("❌ VALUE OBJECT MUTABILITY VIOLATION: %s.%s is exported\n"+
+			"Value objects must be immutable. All fields should be unexported.\n"+
+			"Use getter methods to access field values.",
+			userIDType.Name(), field.Name))
+	}
+}</pre>
+<h2>architecture_test.go:221</h2>
+<pre>for i := 0; i < userNameType.NumField(); i++ {
+	field := userNameType.Field(i)
+	firstChar := field.Name[0:1]
+	if strings.ToUpper(firstChar) == firstChar {
+		Fail(fmt.Sprintf("❌ VALUE OBJECT MUTABILITY VIOLATION: %s.%s is exported\n"+
+			"Value objects must be immutable. All fields should be unexported.\n"+
+			"Use getter methods to access field values.",
+			userNameType.Name(), field.Name))
+	}
+}</pre>
+<h1>#29 found 2 clones</h1>
+<h2>internal/testhelpers/base/context.go:76</h2>
+<pre>func (b *TestContextBuilder) WithTimeout(timeout time.Duration) *TestContextBuilder {
+	ctx, cancel := context.WithTimeout(b.ctx, timeout)
+	if b.cancelFunc != nil {
+		b.cancelFunc() // Cancel previous context if it exists
+	}
+	b.ctx = ctx
+	b.cancelFunc = cancel
+	return b
+}</pre>
+<h2>internal/testhelpers/base/context.go:87</h2>
+<pre>func (b *TestContextBuilder) WithDeadline(deadline time.Time) *TestContextBuilder {
+	ctx, cancel := context.WithDeadline(b.ctx, deadline)
+	if b.cancelFunc != nil {
+		b.cancelFunc()
+	}
+	b.ctx = ctx
+	b.cancelFunc = cancel
+	return b
+}</pre>
+<h1>#30 found 2 clones</h1>
+<h2>web/templates/layouts/base_test.go:161</h2>
+<pre>It("should handle empty title gracefully", func() {
+	// Given
+	title := ""
+
+	// When
+	component := BaseLayout(title, sampleContent)
+	err := component.Render(ctx, buffer)
+
+	// Then
+	Expect(err).To(BeNil())
+	html := buffer.String()
+	Expect(html).To(ContainSubstring("<title> - User Management System</title>"))
+})</pre>
+<h2>web/templates/layouts/base_test.go:175</h2>
+<pre>It("should handle special characters in title", func() {
+	// Given
+	title := "Test & Special <Characters> \"Quotes\""
+
+	// When
+	component := BaseLayout(title, sampleContent)
+	err := component.Render(ctx, buffer)
+
+	// Then
+	Expect(err).To(BeNil())
+	html := buffer.String()
+	// Should be properly escaped
+	Expect(html).To(ContainSubstring("Test &amp; Special &lt;Characters&gt; &#34;Quotes&#34; - User Management System"))
+})</pre>

@@ -48,7 +48,7 @@ func (r *SQLCUserRepository) initSchema() error {
 			created DATETIME NOT NULL,
 			modified DATETIME NOT NULL
 		);
-		
+
 		CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 		CREATE INDEX IF NOT EXISTS idx_users_created ON users(created);
 	`

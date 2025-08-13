@@ -34,30 +34,30 @@ observability:
   service_version: "1.0.0"
   environment: "development"
   sampling_rate: 1.0
-  
+
   tracing:
     enabled: true
     endpoint: "http://localhost:4318/v1/traces"
     http_details: true
     db_queries: true
-  
+
   metrics:
     enabled: true
     endpoint: "http://localhost:4318/v1/metrics"
     push_interval: "15s"
     business_metrics: true
-  
+
   exporters:
     prometheus:
       enabled: true
       port: 2112
       path: "/metrics"
-    
+
     otlp:
       enabled: true
       endpoint: "http://localhost:4318"
       insecure: true
-    
+
     jaeger:
       enabled: false
       endpoint: "http://localhost:14268/api/traces"

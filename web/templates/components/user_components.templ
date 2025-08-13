@@ -22,7 +22,7 @@ templ StatsGrid(stats map[string]int) {
 				</div>
 			</div>
 		</div>
-		
+
 		<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
 			<div class="flex items-center">
 				<div class="flex-shrink-0">
@@ -36,7 +36,7 @@ templ StatsGrid(stats map[string]int) {
 				</div>
 			</div>
 		</div>
-		
+
 		<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
 			<div class="flex items-center">
 				<div class="flex-shrink-0">
@@ -50,7 +50,7 @@ templ StatsGrid(stats map[string]int) {
 				</div>
 			</div>
 		</div>
-		
+
 		<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
 			<div class="flex items-center">
 				<div class="flex-shrink-0">
@@ -94,7 +94,7 @@ templ UsersList(users []*entities.User) {
 						</div>
 					</div>
 				</div>
-				
+
 				<!-- User Rows -->
 				<div class="bg-white divide-y divide-gray-200">
 					for _, user := range users {
@@ -117,7 +117,7 @@ templ UserRow(user *entities.User) {
 						<span class="text-white font-medium">{ string(user.Name[0]) }</span>
 					</div>
 				</div>
-				
+
 				<!-- User Info -->
 				<div class="flex-1 min-w-0">
 					<div class="flex items-center space-x-2">
@@ -129,13 +129,13 @@ templ UserRow(user *entities.User) {
 					<p class="text-sm text-gray-500 truncate">{ user.Email }</p>
 					<p class="text-xs text-gray-400">ID: { user.ID.String() }</p>
 				</div>
-				
+
 				<!-- Created Date -->
 				<div class="hidden md:block text-sm text-gray-500">
 					{ user.Created.Format("Jan 2, 2006") }
 				</div>
 			</div>
-			
+
 			<!-- Actions -->
 			<div class="flex items-center space-x-2">
 				<!-- Edit Button -->
@@ -146,7 +146,7 @@ templ UserRow(user *entities.User) {
 						hx-swap="outerHTML">
 					Edit
 				</button>
-				
+
 				<!-- Delete Button -->
 				<button type="button"
 						class="text-red-600 hover:text-red-900 text-sm font-medium"
@@ -156,7 +156,7 @@ templ UserRow(user *entities.User) {
 						hx-swap="outerHTML swap:1s">
 					Delete
 				</button>
-				
+
 				<!-- View Detail Button -->
 				<a href={ templ.URL(fmt.Sprintf("/users/%s", user.ID.String())) }
 				   class="text-gray-600 hover:text-gray-900 text-sm font-medium">
@@ -181,14 +181,14 @@ templ UserEditRow(user *entities.User) {
 						<span class="text-white font-medium">{ string(user.Name[0]) }</span>
 					</div>
 				</div>
-				
+
 				<!-- Edit Form -->
 				<div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
 					<div>
 						<label for={ fmt.Sprintf("name-%s", user.ID.String()) } class="sr-only">Name</label>
-						<input type="text" 
+						<input type="text"
 							   id={ fmt.Sprintf("name-%s", user.ID.String()) }
-							   name="name" 
+							   name="name"
 							   value={ user.Name }
 							   class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
 							   placeholder="User name"
@@ -196,19 +196,19 @@ templ UserEditRow(user *entities.User) {
 					</div>
 					<div>
 						<label for={ fmt.Sprintf("email-%s", user.ID.String()) } class="sr-only">Email</label>
-						<input type="email" 
+						<input type="email"
 							   id={ fmt.Sprintf("email-%s", user.ID.String()) }
-							   name="email" 
+							   name="email"
 							   value={ user.Email }
 							   class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
 							   placeholder="user@example.com"
 							   required/>
 					</div>
 				</div>
-				
+
 				<!-- Action Buttons -->
 				<div class="flex items-center space-x-2">
-					<button type="submit" 
+					<button type="submit"
 							class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors">
 						Save
 					</button>
@@ -236,26 +236,26 @@ templ UserForm(user *entities.User, mode string) {
 			hx-target="this"
 			hx-swap="outerHTML"
 		  }>
-		
+
 		<div class="space-y-4">
 			if mode == "create" {
 				<div>
 					<label for="id" class="block text-sm font-medium text-gray-700">User ID</label>
-					<input type="text" 
-						   id="id" 
-						   name="id" 
+					<input type="text"
+						   id="id"
+						   name="id"
 						   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
 						   placeholder="unique-user-id"
 						   required/>
 					<p class="mt-1 text-xs text-gray-500">Must be unique (e.g., user123)</p>
 				</div>
 			}
-			
+
 			<div>
 				<label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
-				<input type="text" 
-					   id="name" 
-					   name="name" 
+				<input type="text"
+					   id="name"
+					   name="name"
 					   if user != nil {
 					   		value={ user.Name }
 					   }
@@ -263,12 +263,12 @@ templ UserForm(user *entities.User, mode string) {
 					   placeholder="John Doe"
 					   required/>
 			</div>
-			
+
 			<div>
 				<label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
-				<input type="email" 
-					   id="email" 
-					   name="email" 
+				<input type="email"
+					   id="email"
+					   name="email"
 					   if user != nil {
 					   		value={ user.Email }
 					   }
@@ -277,13 +277,13 @@ templ UserForm(user *entities.User, mode string) {
 					   required/>
 			</div>
 		</div>
-		
+
 		<div class="mt-6 flex justify-end space-x-3">
-			<a href="/users" 
+			<a href="/users"
 			   class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
 				Cancel
 			</a>
-			<button type="submit" 
+			<button type="submit"
 					class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
 				if mode == "create" {
 					Create User

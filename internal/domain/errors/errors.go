@@ -12,11 +12,11 @@ type ErrorCode string
 
 // ErrorDetails represents strongly typed error details
 type ErrorDetails struct {
-	Field    string `json:"field,omitempty"`
-	Resource string `json:"resource,omitempty"`
-	ID       string `json:"id,omitempty"`
-	Value    string `json:"value,omitempty"`
-	Reason   string `json:"reason,omitempty"`
+	Field    string            `json:"field,omitempty"`
+	Resource string            `json:"resource,omitempty"`
+	ID       string            `json:"id,omitempty"`
+	Value    string            `json:"value,omitempty"`
+	Reason   string            `json:"reason,omitempty"`
 	Extra    map[string]string `json:"extra,omitempty"`
 }
 
@@ -24,9 +24,9 @@ const (
 	// ValidationErrorCode represents validation errors
 	ValidationErrorCode ErrorCode = "VALIDATION_ERROR"
 	// RequiredFieldCode represents required field validation errors
-	RequiredFieldCode   ErrorCode = "REQUIRED_FIELD"
+	RequiredFieldCode ErrorCode = "REQUIRED_FIELD"
 	// InvalidFormatCode represents invalid format validation errors
-	InvalidFormatCode   ErrorCode = "INVALID_FORMAT"
+	InvalidFormatCode ErrorCode = "INVALID_FORMAT"
 
 	// NotFoundErrorCode represents resource not found errors
 	NotFoundErrorCode ErrorCode = "NOT_FOUND"

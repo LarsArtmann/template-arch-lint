@@ -12,10 +12,10 @@ import (
 
 // ErrorResponse represents a structured error response
 type ErrorResponse struct {
-	Error   string                        `json:"error"`
-	Code    domainerrors.ErrorCode       `json:"code"`
-	Message string                       `json:"message"`
-	Details domainerrors.ErrorDetails   `json:"details,omitempty"`
+	Error   string                    `json:"error"`
+	Code    domainerrors.ErrorCode    `json:"code"`
+	Message string                    `json:"message"`
+	Details domainerrors.ErrorDetails `json:"details,omitempty"`
 }
 
 // ErrorHandler wraps a handler and provides structured error handling

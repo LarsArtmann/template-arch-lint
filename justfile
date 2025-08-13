@@ -25,8 +25,9 @@ help:
     @echo "\033[1mQUICK START:\033[0m"
     @echo "  1. \033[0;36mjust install\033[0m  - Install required tools"
     @echo "  2. \033[0;36mjust lint\033[0m     - Run all linters"
-    @echo "  3. \033[0;36mjust fix\033[0m      - Auto-fix issues"
-    @echo "  4. \033[0;36mjust run\033[0m      - Run the application"
+    @echo "  3. \033[0;36mjust format\033[0m   - Format code (gofumpt + goimports)"
+    @echo "  4. \033[0;36mjust fix\033[0m      - Auto-fix issues"
+    @echo "  5. \033[0;36mjust run\033[0m      - Run the application"
     @echo ""
     @echo "\033[1mDOCKER COMMANDS:\033[0m"
     @echo "  • \033[0;36mjust docker-test\033[0m         - Build and test Docker image"
@@ -70,20 +71,20 @@ lint-arch:
 # Run code quality linting only
 lint-code:
     @echo "\033[1m📝 CODE QUALITY LINTING\033[0m"
-    @echo "\033[0;36mRunning golangci-lint...\033[0m"
-    @if command -v golangci-lint >/dev/null 2>&1; then \
-        if golangci-lint run --config .golangci.yml; then \
+    @echo "\033[0;36mRunning golangci-lint v2...\033[0m"
+    @if command -v $(go env GOPATH)/bin/golangci-lint >/dev/null 2>&1; then \
+        if $(go env GOPATH)/bin/golangci-lint run --config .golangci.yml; then \
             echo "\033[0;32m✅ Code quality validation passed!\033[0m"; \
         else \
             echo "\033[0;31m❌ Code quality issues found!\033[0m" >&2; \
             exit 1; \
         fi; \
     else \
-        echo "\033[0;31m❌ golangci-lint not installed. Run 'just install' first.\033[0m" >&2; \
+        echo "\033[0;31m❌ golangci-lint v2 not installed. Run 'just install' first.\033[0m" >&2; \
         exit 1; \
     fi
 
-# Run filename verification only  
+# Run filename verification only
 lint-files:
     @echo "\033[1m📁 FILENAME VERIFICATION\033[0m"
     @echo "\033[0;36mChecking for problematic filenames...\033[0m"
@@ -98,18 +99,10 @@ lint-files:
 # Auto-fix issues where possible
 fix:
     @echo "\033[1m🔧 AUTO-FIXING ISSUES\033[0m"
-    @echo "\033[0;33mRunning gofmt...\033[0m"
-    gofmt -w -s .
-    @echo "\033[0;33mRunning goimports...\033[0m"
-    @if command -v goimports >/dev/null 2>&1; then \
-        goimports -w .; \
-    else \
-        go install golang.org/x/tools/cmd/goimports@latest; \
-        goimports -w .; \
-    fi
-    @echo "\033[0;33mRunning golangci-lint with --fix...\033[0m"
-    @if command -v golangci-lint >/dev/null 2>&1; then \
-        golangci-lint run --fix --config .golangci.yml || true; \
+    just format
+    @echo "\033[0;33mRunning golangci-lint v2 with --fix...\033[0m"
+    @if command -v $(go env GOPATH)/bin/golangci-lint >/dev/null 2>&1; then \
+        $(go env GOPATH)/bin/golangci-lint run --fix --config .golangci.yml || true; \
     fi
     @echo "\033[0;32m✅ Auto-fix completed!\033[0m"
 
@@ -139,10 +132,10 @@ report:
         echo "  → {{REPORT_DIR}}/dependencies.dot"; \
     fi
     @echo "\033[0;33mGenerating code quality report...\033[0m"
-    @if command -v golangci-lint >/dev/null 2>&1; then \
-        golangci-lint run --out-format json > {{REPORT_DIR}}/quality.json 2>/dev/null || true; \
-        golangci-lint run --out-format checkstyle > {{REPORT_DIR}}/checkstyle.xml 2>/dev/null || true; \
-        golangci-lint run --out-format junit-xml > {{REPORT_DIR}}/junit.xml 2>/dev/null || true; \
+    @if command -v $(go env GOPATH)/bin/golangci-lint >/dev/null 2>&1; then \
+        $(go env GOPATH)/bin/golangci-lint run --out-format json > {{REPORT_DIR}}/quality.json 2>/dev/null || true; \
+        $(go env GOPATH)/bin/golangci-lint run --out-format checkstyle > {{REPORT_DIR}}/checkstyle.xml 2>/dev/null || true; \
+        $(go env GOPATH)/bin/golangci-lint run --out-format junit-xml > {{REPORT_DIR}}/junit.xml 2>/dev/null || true; \
         echo "  → {{REPORT_DIR}}/quality.json"; \
         echo "  → {{REPORT_DIR}}/checkstyle.xml"; \
         echo "  → {{REPORT_DIR}}/junit.xml"; \
@@ -164,26 +157,41 @@ clean:
 # Run minimal essential linters only
 lint-minimal:
     @echo "\033[1m⚡ MINIMAL LINTING\033[0m"
-    golangci-lint run --fast --config .golangci.yml
+    $(go env GOPATH)/bin/golangci-lint run --fast --config .golangci.yml
 
 # Run with maximum strictness (slower but thorough)
 lint-strict:
     @echo "\033[1m🔥 MAXIMUM STRICTNESS LINTING\033[0m"
-    golangci-lint run --config .golangci.yml --max-issues-per-linter 0 --max-same-issues 0
+    $(go env GOPATH)/bin/golangci-lint run --config .golangci.yml --max-issues-per-linter 0 --max-same-issues 0
 
 # Run security-focused linters only
 lint-security:
     @echo "\033[1m🔒 SECURITY LINTING\033[0m"
-    golangci-lint run --config .golangci.yml --enable-only gosec,copyloopvar
+    $(go env GOPATH)/bin/golangci-lint run --config .golangci.yml --enable-only gosec,copyloopvar
 
-# Format code
-fmt:
+# Format code with enhanced formatters (gofumpt + goimports)
+format:
     @echo "\033[1m📝 FORMATTING CODE\033[0m"
-    gofmt -w -s .
+    @echo "\033[0;33mRunning gofumpt (enhanced gofmt)...\033[0m"
+    @if command -v gofumpt >/dev/null 2>&1; then \
+        gofumpt -w .; \
+    else \
+        echo "\033[0;31m❌ gofumpt not installed. Installing...\033[0m"; \
+        go install mvdan.cc/gofumpt@latest; \
+        gofumpt -w .; \
+    fi
+    @echo "\033[0;33mRunning goimports...\033[0m"
     @if command -v goimports >/dev/null 2>&1; then \
+        goimports -w .; \
+    else \
+        echo "\033[0;31m❌ goimports not installed. Installing...\033[0m"; \
+        go install golang.org/x/tools/cmd/goimports@latest; \
         goimports -w .; \
     fi
     @echo "\033[0;32m✅ Code formatted!\033[0m"
+
+# Format code (legacy alias - use 'format' instead)
+fmt: format
 
 # Generate templates and build Go modules
 build:
@@ -265,7 +273,7 @@ config-test:
 verbose:
     @echo "\033[1m🔍 VERBOSE LINTING\033[0m"
     go-arch-lint check -v
-    golangci-lint run -v --config .golangci.yml
+    $(go env GOPATH)/bin/golangci-lint run -v --config .golangci.yml
 
 # Git hooks setup
 setup-hooks:
@@ -289,9 +297,9 @@ version:
     @echo "\033[1m📋 VERSION INFORMATION\033[0m"
     @echo "Go version:"
     @go version
-    @if command -v golangci-lint >/dev/null 2>&1; then \
+    @if command -v $(go env GOPATH)/bin/golangci-lint >/dev/null 2>&1; then \
         echo "golangci-lint version:"; \
-        golangci-lint version; \
+        $(go env GOPATH)/bin/golangci-lint version; \
     fi
     @if command -v go-arch-lint >/dev/null 2>&1; then \
         echo "go-arch-lint version:"; \
@@ -414,5 +422,5 @@ fd threshold="50": (find-duplicates threshold)
 # Find high-confidence duplicates (stricter threshold)
 find-duplicates-strict: (find-duplicates "100")
 
-# Find all potential duplicates (looser threshold) 
+# Find all potential duplicates (looser threshold)
 find-duplicates-loose: (find-duplicates "25")

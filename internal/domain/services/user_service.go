@@ -16,6 +16,12 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/shared"
 )
 
+// UserFilters represents the available filters for user queries
+type UserFilters struct {
+	Domain *string
+	Active *bool
+}
+
 // UserService handles business logic for user operations
 type UserService struct {
 	userRepo repositories.UserRepository
@@ -231,12 +237,12 @@ func (s *UserService) CreateUserWithResult(ctx context.Context, id entities.User
 	if validationResult := s.validateUserInputsResult(email, name); validationResult.IsError() {
 		return shared.Err[*entities.User](validationResult.Error())
 	}
-	
+
 	// Step 2: Check user doesn't exist
 	if existsResult := s.checkUserNotExistsResult(ctx, email); existsResult.IsError() {
 		return shared.Err[*entities.User](existsResult.Error())
 	}
-	
+
 	// Step 3: Create and save user
 	return s.createAndSaveUserResult(ctx, id, email, name)
 }
@@ -346,7 +352,7 @@ func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) 
 		}
 		return acc + days
 	}, 0)
-	
+
 	// Safe division using lo.Max to prevent divide by zero
 	userCount := lo.Max([]int{len(users), 1}) // Ensure at least 1 to prevent division by zero
 	avgDays := lo.Ternary(len(users) > 0, totalDays/userCount, 0)
@@ -355,27 +361,27 @@ func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) 
 	return stats, nil
 }
 
-// GetUsersWithFilters demonstrates advanced functional programming with lo.Must
-func (s *UserService) GetUsersWithFilters(ctx context.Context, filters map[string]interface{}) ([]*entities.User, error) {
+// GetUsersWithFilters demonstrates advanced functional programming with type-safe filters
+func (s *UserService) GetUsersWithFilters(ctx context.Context, filters UserFilters) ([]*entities.User, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
 		return nil, domainerrors.NewInternalError("failed to list users", err)
 	}
 
-	// Use lo.Must for safe operations that should never fail in this context
+	// Start with all users
 	filteredUsers := users
-	
+
 	// Filter by domain if specified
-	if domain, exists := filters["domain"]; exists {
-		domainStr := lo.Must(domain.(string), "domain filter must be string")
+	if filters.Domain != nil {
+		domainStr := *filters.Domain
 		filteredUsers = lo.Filter(filteredUsers, func(user *entities.User, _ int) bool {
 			parts := strings.Split(user.Email, "@")
 			return len(parts) > 1 && parts[1] == domainStr
 		})
 	}
-	
+
 	// Filter by active status if specified
-	if activeOnly, exists := filters["active"]; exists && lo.Must(activeOnly.(bool), "active filter must be bool") {
+	if filters.Active != nil && *filters.Active {
 		thirtyDaysAgo := time.Now().AddDate(0, 0, -30)
 		filteredUsers = lo.Filter(filteredUsers, func(user *entities.User, _ int) bool {
 			return user.Created.After(thirtyDaysAgo)
@@ -422,7 +428,7 @@ func (s *UserService) GetUsersByEmailDomains(ctx context.Context, domains []stri
 	requestedDomainsSet := lo.SliceToMap(domains, func(domain string) (string, bool) {
 		return domain, true
 	})
-	
+
 	filteredUsers := lo.PickBy(usersByDomain, func(domain string, _ []*entities.User) bool {
 		_, exists := requestedDomainsSet[domain]
 		return exists

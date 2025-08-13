@@ -93,30 +93,30 @@ func TestOptionNone(t *testing.T) {
 func TestEither(t *testing.T) {
 	// Test Right either
 	rightEither := Right[string, int](42)
-	
+
 	if !rightEither.IsRight() {
 		t.Error("Expected either to be right")
 	}
-	
+
 	if rightEither.IsLeft() {
 		t.Error("Expected either not to be left")
 	}
-	
+
 	if rightEither.MustRight() != 42 {
 		t.Errorf("Expected 42, got %d", rightEither.MustRight())
 	}
 
-	// Test Left either 
+	// Test Left either
 	leftEither := Left[string, int]("error")
-	
+
 	if !leftEither.IsLeft() {
 		t.Error("Expected either to be left")
 	}
-	
+
 	if leftEither.IsRight() {
 		t.Error("Expected either not to be right")
 	}
-	
+
 	if leftEither.MustLeft() != "error" {
 		t.Errorf("Expected 'error', got %s", leftEither.MustLeft())
 	}

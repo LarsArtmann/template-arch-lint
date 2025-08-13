@@ -65,7 +65,7 @@ var _ = Describe("Email", func() {
 				// Create an email longer than 254 characters
 				longLocal := "verylonglocapartthatexceedsthemaximumlengthof64charactersallowedverylonglocapartthatexceedsthemaximumlengthof64charactersallowedverylonglocapartthatexceedsthemaximumlengthof64charactersallowedverylonglocapartthatexceedsthemaximumlengthof64charactersallowed"
 				longEmail := longLocal + "@example.com"
-				
+
 				_, err := values.NewEmail(longEmail)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("too long"))
@@ -110,21 +110,21 @@ var _ = Describe("Email", func() {
 			It("should return true for equal emails", func() {
 				other, err := values.NewEmail("user.name@example.com")
 				Expect(err).ToNot(HaveOccurred())
-				
+
 				Expect(email.Equals(other)).To(BeTrue())
 			})
 
 			It("should return false for different emails", func() {
 				other, err := values.NewEmail("different@example.com")
 				Expect(err).ToNot(HaveOccurred())
-				
+
 				Expect(email.Equals(other)).To(BeFalse())
 			})
 
 			It("should handle case insensitive comparison", func() {
 				upper, err := values.NewEmail("USER.NAME@EXAMPLE.COM")
 				Expect(err).ToNot(HaveOccurred())
-				
+
 				Expect(email.Equals(upper)).To(BeTrue())
 			})
 		})
@@ -254,14 +254,14 @@ var _ = Describe("UserID", func() {
 			It("should return true for equal user IDs", func() {
 				other, err := values.NewUserID("test-user-123")
 				Expect(err).ToNot(HaveOccurred())
-				
+
 				Expect(userID.Equals(other)).To(BeTrue())
 			})
 
 			It("should return false for different user IDs", func() {
 				other, err := values.NewUserID("different-user")
 				Expect(err).ToNot(HaveOccurred())
-				
+
 				Expect(userID.Equals(other)).To(BeFalse())
 			})
 		})
@@ -311,7 +311,7 @@ var _ = Describe("UserID", func() {
 			It("should unmarshal from JSON string", func() {
 				data := []byte(`"test-user-123"`)
 				var unmarshaled values.UserID
-				
+
 				err := json.Unmarshal(data, &unmarshaled)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(unmarshaled.Equals(userID)).To(BeTrue())
@@ -320,7 +320,7 @@ var _ = Describe("UserID", func() {
 			It("should return error for invalid JSON", func() {
 				data := []byte(`invalid-json`)
 				var unmarshaled values.UserID
-				
+
 				err := json.Unmarshal(data, &unmarshaled)
 				Expect(err).To(HaveOccurred())
 			})
@@ -328,7 +328,7 @@ var _ = Describe("UserID", func() {
 			It("should return error for invalid user ID in JSON", func() {
 				data := []byte(`"invalid user id"`)
 				var unmarshaled values.UserID
-				
+
 				err := json.Unmarshal(data, &unmarshaled)
 				Expect(err).To(HaveOccurred())
 			})

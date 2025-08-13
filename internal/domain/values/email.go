@@ -71,7 +71,7 @@ func validateEmailFormat(email string) error {
 	}
 
 	normalized := strings.ToLower(strings.TrimSpace(email))
-	
+
 	if err := validateEmailLength(normalized); err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func validateEmailParts(email string) error {
 	}
 
 	localPart, domain := parts[0], parts[1]
-	
+
 	if err := validateEmailLocalPart(localPart); err != nil {
 		return err
 	}

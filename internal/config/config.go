@@ -56,25 +56,25 @@ type AppConfig struct {
 // LoadConfig loads configuration from various sources
 func LoadConfig(configPath string) (*Config, error) {
 	config := &Config{}
-	
+
 	// Set defaults
 	setDefaults(config)
-	
+
 	// Configure viper
 	if err := configureViper(configPath); err != nil {
 		return nil, fmt.Errorf("failed to configure viper: %w", err)
 	}
-	
+
 	// Unmarshal configuration
 	if err := viper.Unmarshal(config); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal configuration: %w", err)
 	}
-	
+
 	// Validate configuration
 	if err := validateConfig(config); err != nil {
 		return nil, fmt.Errorf("validation errors: %w", err)
 	}
-	
+
 	return config, nil
 }
 
@@ -85,7 +85,7 @@ func setDefaults(_ *Config) {
 	viper.SetDefault("app.version", "1.0.0")
 	viper.SetDefault("app.environment", "development")
 	viper.SetDefault("app.debug", false)
-	
+
 	// Server defaults
 	viper.SetDefault("server.host", "localhost")
 	viper.SetDefault("server.port", 8080)
@@ -93,7 +93,7 @@ func setDefaults(_ *Config) {
 	viper.SetDefault("server.write_timeout", 10*time.Second)
 	viper.SetDefault("server.idle_timeout", 120*time.Second)
 	viper.SetDefault("server.graceful_shutdown_timeout", 30*time.Second)
-	
+
 	// Database defaults
 	viper.SetDefault("database.driver", "sqlite3")
 	viper.SetDefault("database.dsn", "./app.db")
@@ -101,7 +101,7 @@ func setDefaults(_ *Config) {
 	viper.SetDefault("database.max_idle_conns", 25)
 	viper.SetDefault("database.conn_max_lifetime", 5*time.Minute)
 	viper.SetDefault("database.conn_max_idle_time", 5*time.Minute)
-	
+
 	// Logging defaults
 	viper.SetDefault("logging.level", "info")
 	viper.SetDefault("logging.format", "json")
@@ -114,7 +114,7 @@ func configureViper(configPath string) error {
 	viper.SetEnvPrefix("APP")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
-	
+
 	// File configuration (optional)
 	if configPath != "" {
 		viper.SetConfigFile(configPath)
@@ -122,23 +122,23 @@ func configureViper(configPath string) error {
 			return fmt.Errorf("failed to read config file: %w", err)
 		}
 	}
-	
+
 	return nil
 }
 
 // validateConfig validates the configuration
 func validateConfig(config *Config) error {
 	validate := validator.New()
-	
+
 	// Register custom validators
 	if err := validate.RegisterValidation("valid_log_level", validateLogLevel); err != nil {
 		return fmt.Errorf("failed to register log level validator: %w", err)
 	}
-	
+
 	if err := validate.RegisterValidation("valid_environment", validateEnvironment); err != nil {
 		return fmt.Errorf("failed to register environment validator: %w", err)
 	}
-	
+
 	return validate.Struct(config)
 }
 

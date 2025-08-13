@@ -212,11 +212,11 @@ func (c *Container) registerHTTPServer() {
 // createGinRouter creates and configures gin router with middleware
 func (c *Container) createGinRouter(cfg *config.Config, logger *slog.Logger) *gin.Engine {
 	c.setGinMode(cfg.App.Environment)
-	
+
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(middleware.RequestLoggingMiddleware(logger))
-	
+
 	return router
 }
 
@@ -271,7 +271,7 @@ func (c *Container) setupTemplateRoutes(router *gin.Engine, templHandler *handle
 func (c *Container) setupAPIRoutes(router *gin.Engine, userHandler *handlers.UserHandler) {
 	api := router.Group("/api/v1")
 	users := api.Group("/users")
-	
+
 	// Standard CRUD operations
 	users.POST("", userHandler.CreateUser)
 	users.GET("/:id", userHandler.GetUser)

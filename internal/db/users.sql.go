@@ -278,23 +278,23 @@ func (q *Queries) GetQueryPlan(ctx context.Context, email string) ([]*Users, err
 }
 
 const GetUserStats = `-- name: GetUserStats :one
-SELECT 
+SELECT
     COUNT(*) as total_users,
     COUNT(CASE WHEN created > datetime('now', '-1 day') THEN 1 END) as users_today,
     COUNT(CASE WHEN created > datetime('now', '-7 days') THEN 1 END) as users_week,
     COUNT(CASE WHEN created > datetime('now', '-30 days') THEN 1 END) as users_month,
-    MIN(created) as first_user_created,
-    MAX(created) as last_user_created
+    CAST(COALESCE(MIN(created), '1900-01-01 00:00:00') AS TEXT) as first_user_created,
+    CAST(COALESCE(MAX(created), '1900-01-01 00:00:00') AS TEXT) as last_user_created
 FROM users
 `
 
 type GetUserStatsRow struct {
-	TotalUsers       int64       `db:"total_users" json:"totalUsers"`
-	UsersToday       int64       `db:"users_today" json:"usersToday"`
-	UsersWeek        int64       `db:"users_week" json:"usersWeek"`
-	UsersMonth       int64       `db:"users_month" json:"usersMonth"`
-	FirstUserCreated interface{} `db:"first_user_created" json:"firstUserCreated"`
-	LastUserCreated  interface{} `db:"last_user_created" json:"lastUserCreated"`
+	TotalUsers       int64  `db:"total_users" json:"totalUsers"`
+	UsersToday       int64  `db:"users_today" json:"usersToday"`
+	UsersWeek        int64  `db:"users_week" json:"usersWeek"`
+	UsersMonth       int64  `db:"users_month" json:"usersMonth"`
+	FirstUserCreated string `db:"first_user_created" json:"firstUserCreated"`
+	LastUserCreated  string `db:"last_user_created" json:"lastUserCreated"`
 }
 
 // GetUserStats
@@ -304,8 +304,8 @@ type GetUserStatsRow struct {
 //	    COUNT(CASE WHEN created > datetime('now', '-1 day') THEN 1 END) as users_today,
 //	    COUNT(CASE WHEN created > datetime('now', '-7 days') THEN 1 END) as users_week,
 //	    COUNT(CASE WHEN created > datetime('now', '-30 days') THEN 1 END) as users_month,
-//	    MIN(created) as first_user_created,
-//	    MAX(created) as last_user_created
+//	    CAST(COALESCE(MIN(created), '1900-01-01 00:00:00') AS TEXT) as first_user_created,
+//	    CAST(COALESCE(MAX(created), '1900-01-01 00:00:00') AS TEXT) as last_user_created
 //	FROM users
 func (q *Queries) GetUserStats(ctx context.Context) (*GetUserStatsRow, error) {
 	row := q.queryRow(ctx, q.getUserStatsStmt, GetUserStats)
@@ -639,8 +639,8 @@ func (q *Queries) SearchUsersByName(ctx context.Context, arg *SearchUsersByNameP
 }
 
 const UpdateUserModified = `-- name: UpdateUserModified :exec
-UPDATE users 
-SET modified = CURRENT_TIMESTAMP 
+UPDATE users
+SET modified = CURRENT_TIMESTAMP
 WHERE id = ?
 `
 

@@ -76,13 +76,13 @@ SELECT COUNT(*) FROM users
 WHERE created BETWEEN ? AND ?;
 
 -- name: GetUserStats :one
-SELECT 
+SELECT
     COUNT(*) as total_users,
     COUNT(CASE WHEN created > datetime('now', '-1 day') THEN 1 END) as users_today,
     COUNT(CASE WHEN created > datetime('now', '-7 days') THEN 1 END) as users_week,
     COUNT(CASE WHEN created > datetime('now', '-30 days') THEN 1 END) as users_month,
-    MIN(created) as first_user_created,
-    MAX(created) as last_user_created
+    CAST(COALESCE(MIN(created), '1900-01-01 00:00:00') AS TEXT) as first_user_created,
+    CAST(COALESCE(MAX(created), '1900-01-01 00:00:00') AS TEXT) as last_user_created
 FROM users;
 
 -- name: GetActiveUserEmails :many
@@ -98,8 +98,8 @@ INSERT OR IGNORE INTO users (id, email, name, created, modified)
 VALUES (?, ?, ?, ?, ?);
 
 -- name: UpdateUserModified :exec
-UPDATE users 
-SET modified = CURRENT_TIMESTAMP 
+UPDATE users
+SET modified = CURRENT_TIMESTAMP
 WHERE id = ?;
 
 -- name: BulkDeleteUsers :exec

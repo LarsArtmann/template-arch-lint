@@ -20,7 +20,7 @@ CREATE INDEX IF NOT EXISTS idx_users_name_created ON users(name, created);
 CREATE INDEX IF NOT EXISTS idx_users_email_created ON users(email, created);
 
 -- Partial indexes for active/recent users (performance optimization)
-CREATE INDEX IF NOT EXISTS idx_users_recent ON users(created, modified) 
+CREATE INDEX IF NOT EXISTS idx_users_recent ON users(created, modified)
 WHERE created > datetime('now', '-30 days');
 
 -- Full-text search index for name (if needed for search functionality)

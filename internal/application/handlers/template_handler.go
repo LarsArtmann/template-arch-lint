@@ -6,14 +6,14 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/a-h/templ"
+	"github.com/gin-gonic/gin"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
-	"github.com/LarsArtmann/template-arch-lint/web/templates/pages"
 	"github.com/LarsArtmann/template-arch-lint/web/templates/components"
+	"github.com/LarsArtmann/template-arch-lint/web/templates/pages"
 )
 
 // TemplateHandler handles template-based HTTP requests with HTMX support
@@ -83,32 +83,34 @@ func (h *TemplateHandler) SearchUsers(c *gin.Context) {
 	h.renderTemplate(c, pages.SearchUsersContent(users))
 }
 
-// buildSearchFilters constructs filter map from query parameters
-func (h *TemplateHandler) buildSearchFilters(c *gin.Context) map[string]interface{} {
-	filters := make(map[string]interface{})
-	
+// buildSearchFilters constructs type-safe filters from query parameters
+func (h *TemplateHandler) buildSearchFilters(c *gin.Context) services.UserFilters {
+	var filters services.UserFilters
+
 	if domain := c.Query("domain"); domain != "" {
-		filters["domain"] = domain
+		filters.Domain = &domain
 	}
-	
+
 	if activeParam := c.Query("active"); activeParam != "" {
-		filters["active"] = activeParam == "true"
+		isActive := activeParam == "true"
+		filters.Active = &isActive
 	}
-	
+
 	return filters
 }
 
 // performUserSearch executes the search with given query and filters
-func (h *TemplateHandler) performUserSearch(c *gin.Context, query string, filters map[string]interface{}) ([]*entities.User, error) {
-	if query != "" || len(filters) > 0 {
+func (h *TemplateHandler) performUserSearch(c *gin.Context, query string, filters services.UserFilters) ([]*entities.User, error) {
+	hasFilters := filters.Domain != nil || filters.Active != nil
+	if query != "" || hasFilters {
 		return h.searchWithFilters(c, query, filters)
 	}
-	
+
 	return h.userService.ListUsers(c.Request.Context())
 }
 
 // searchWithFilters performs filtered search and applies text filtering if needed
-func (h *TemplateHandler) searchWithFilters(c *gin.Context, query string, filters map[string]interface{}) ([]*entities.User, error) {
+func (h *TemplateHandler) searchWithFilters(c *gin.Context, query string, filters services.UserFilters) ([]*entities.User, error) {
 	users, err := h.userService.GetUsersWithFilters(c.Request.Context(), filters)
 	if err != nil {
 		return nil, err
@@ -117,7 +119,7 @@ func (h *TemplateHandler) searchWithFilters(c *gin.Context, query string, filter
 	if query != "" {
 		return h.filterUsersByText(users, query), nil
 	}
-	
+
 	return users, nil
 }
 
@@ -125,13 +127,13 @@ func (h *TemplateHandler) searchWithFilters(c *gin.Context, query string, filter
 func (h *TemplateHandler) filterUsersByText(users []*entities.User, query string) []*entities.User {
 	filteredUsers := make([]*entities.User, 0)
 	queryLower := strings.ToLower(query)
-	
+
 	for _, user := range users {
 		if h.userMatchesQuery(user, queryLower) {
 			filteredUsers = append(filteredUsers, user)
 		}
 	}
-	
+
 	return filteredUsers
 }
 
@@ -273,7 +275,7 @@ func (h *TemplateHandler) UpdateUser(c *gin.Context) {
 	}
 
 	h.logger.Info("User updated successfully via template", "user_id", user.ID)
-	
+
 	// Check if this is a form page update or inline update
 	if c.GetHeader("HX-Request") != "" && strings.Contains(c.GetHeader("HX-Target"), "user-") {
 		// Inline update - return updated row
@@ -302,7 +304,7 @@ func (h *TemplateHandler) DeleteUser(c *gin.Context) {
 	}
 
 	h.logger.Info("User deleted successfully via template", "user_id", id)
-	
+
 	// Return empty content to remove the row from DOM
 	c.Header("Content-Type", "text/html; charset=utf-8")
 	c.String(http.StatusOK, "")

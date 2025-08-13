@@ -121,12 +121,12 @@ deps:
   domain-entities:
     mayDependOn: [domain-shared]  # ✅ Pure business logic
     # ❌ CANNOT depend on infrastructure, database, HTTP, etc.
-  
+
   app-handlers:
     mayDependOn: [domain-entities, domain-shared]
     # ✅ Orchestrates domain logic
-    
-  infrastructure: 
+
+  infrastructure:
     mayDependOn: [domain-entities, domain-shared]
     # ✅ Implements domain interfaces
 ```
@@ -297,11 +297,11 @@ deps:
   domain-user:
     mayDependOn: [domain-shared]
     # ❌ Cannot import: app-*, infra-*, external libs
-    
+
   app-api:
     mayDependOn: [domain-user, domain-order, domain-shared]
     # ✅ Can orchestrate domain logic
-    
+
   infra-database:
     mayDependOn: [domain-user, domain-shared]
     # ✅ Can implement domain repository interfaces
@@ -318,7 +318,7 @@ components:
   service-order:     { in: services/order/** }
   service-payment:   { in: services/payment/** }
   shared-events:     { in: shared/events/** }
-  
+
 deps:
   service-user:
     mayDependOn: [shared-events]
@@ -587,7 +587,7 @@ internal/
 
 **Problem**: `domain layer cannot depend on infrastructure`
 ```
-internal/domain/user/service.go:5:2: 
+internal/domain/user/service.go:5:2:
   domain-entities cannot depend on infrastructure
 ```
 

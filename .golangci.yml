@@ -21,17 +21,18 @@ linters:
     - forbidigo      # Custom forbidden patterns
     - govet          # Suspicious constructs
     - staticcheck    # Advanced static analysis
-    
+
     # 🛡️ ERROR HANDLING
     - errcheck       # Unchecked errors
     - errorlint      # Error wrapping
     - nilerr         # Nil error returns
-    
+
     # 🔒 SECURITY
     - gosec          # Security audit
     - copyloopvar    # Loop variable copies
     - noctx          # HTTP context validation
-    
+    - wrapcheck      # Error wrapping enforcement
+
     # 📊 CODE QUALITY
     - bodyclose      # HTTP body closure
     - cyclop         # Cyclomatic complexity
@@ -57,6 +58,7 @@ linters:
     - unparam        # Unused parameters
     - unused         # Unused code
     - whitespace     # Trailing whitespace
+    - godot          # Comment punctuation
 
 
 # 🔧 LINTER SETTINGS - Maximum strictness
@@ -68,53 +70,53 @@ linters-settings:
       - '\bany\b'
       - 'panic\('
       - 'fmt\.Print'
-    
+
     analyze-types: true
-  
+
   # Cyclomatic complexity
   cyclop:
     max-complexity: 10
     package-average: 5.0
     skip-tests: false
-  
+
   gocyclo:
     min-complexity: 10
-  
+
   # Cognitive complexity
   gocognit:
     min-complexity: 10
-  
+
   # Function length
   funlen:
     lines: 50
     statements: 30
     ignore-comments: false
-  
+
   # Error handling
   errcheck:
     check-type-assertions: true
     check-blank: true
     exclude-functions: []
-  
+
   errorlint:
     errorf: true
     errorf-multi: true
     asserts: true
     comparison: true
-  
+
   # Security
   gosec:
     severity: low
     confidence: low
     excludes: []
-  
+
   # Static analysis
   staticcheck:
     checks: ["all"]
-  
+
   stylecheck:
     checks: ["all"]
-  
+
   # Go critic
   gocritic:
     enabled-tags:
@@ -124,52 +126,72 @@ linters-settings:
       - performance
       - style
     disabled-checks: []
-  
+
   # Unused code
   unused: {}
-  
+
   unparam:
     check-exported: true
-  
+
   # Revive rules
   revive:
     severity: error
     enable-all-rules: true
-  
+
   # Nesting complexity
   nestif:
     min-complexity: 4
-  
+
   # Exhaustiveness
   exhaustive:
     check-generated: false
     default-signifies-exhaustive: true
-  
+
   # Preallocation
   prealloc:
     simple: true
     range-loops: true
     for-loops: false
 
+  # Error wrapping
+  wrapcheck:
+    ignoreSigs:
+      - .Errorf(
+      - errors.New(
+      - errors.Unwrap(
+      - .Wrap(
+      - .Wrapf(
+    ignoreSigRegexps:
+      - \.New.*Error\(
+    ignorePackageGlobs:
+      - encoding/*
+      - github.com/pkg/*
+
+  # Comment punctuation
+  godot:
+    scope: declarations
+    exclude: []
+    capital: false
+
 # 🚨 ISSUES CONFIGURATION
 # Note: Formatters (gofumpt, goimports) should be run separately via 'just fix'
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
-  
+
   exclude-use-default: false
   exclude-rules-use-default: false
-  
+
   # Common false positives preset
   exclude-dir-use-default: false
-  
+
   exclude-rules:
     # Allow panics only in main/cmd
     - path: ^(main\.go|cmd/.+)$
       linters:
         - forbidigo
       text: "panic"
-    
+
     # Allow longer functions in tests
     - path: _test\.go
       linters:
@@ -177,7 +199,7 @@ issues:
         - gocognit
         - gocyclo
         - cyclop
-  
+
   exclude-dirs:
     - vendor
     - testdata
@@ -187,7 +209,7 @@ issues:
     - mocks
     - .git
     - .github
-  
+
   exclude-files:
     - ".*\\.pb\\.go$"
     - ".*_generated\\.go$"

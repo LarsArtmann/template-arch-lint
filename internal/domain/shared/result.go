@@ -39,7 +39,7 @@ func Left[L, R any](value L) Either[L, R] {
 	return mo.Left[L, R](value)
 }
 
-// Right creates an Either with right value (typically success case)  
+// Right creates an Either with right value (typically success case)
 func Right[L, R any](value R) Either[L, R] {
 	return mo.Right[L, R](value)
 }

@@ -8,7 +8,7 @@ import (
 
 func TestLoadConfig(t *testing.T) {
 	tests := getLoadConfigTestCases()
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			setupTestEnvironment(t, tt.envVars)
@@ -95,9 +95,10 @@ func runLoadConfigTest(t *testing.T, tt struct {
 	wantErr     bool
 	expectPort  int
 	expectLevel string
-}) {
+},
+) {
 	t.Helper()
-	
+
 	config, err := LoadConfig(tt.configPath)
 	if (err != nil) != tt.wantErr {
 		t.Errorf("LoadConfig() error = %v, wantErr %v", err, tt.wantErr)
@@ -112,7 +113,7 @@ func runLoadConfigTest(t *testing.T, tt struct {
 // validateLoadConfigResult validates the loaded config matches expectations
 func validateLoadConfigResult(t *testing.T, config *Config, expectPort int, expectLevel string) {
 	t.Helper()
-	
+
 	if config.Server.Port != expectPort {
 		t.Errorf("LoadConfig() port = %v, want %v", config.Server.Port, expectPort)
 	}
@@ -136,7 +137,7 @@ func TestConfigDefaults(t *testing.T) {
 // validateServerDefaults checks server configuration defaults
 func validateServerDefaults(t *testing.T, server ServerConfig) {
 	t.Helper()
-	
+
 	if server.Host != "localhost" {
 		t.Errorf("Expected default host 'localhost', got '%s'", server.Host)
 	}
@@ -151,7 +152,7 @@ func validateServerDefaults(t *testing.T, server ServerConfig) {
 // validateDatabaseDefaults checks database configuration defaults
 func validateDatabaseDefaults(t *testing.T, database DatabaseConfig) {
 	t.Helper()
-	
+
 	if database.Driver != "sqlite3" {
 		t.Errorf("Expected default database driver 'sqlite3', got '%s'", database.Driver)
 	}
@@ -163,7 +164,7 @@ func validateDatabaseDefaults(t *testing.T, database DatabaseConfig) {
 // validateLoggingDefaults checks logging configuration defaults
 func validateLoggingDefaults(t *testing.T, logging LoggingConfig) {
 	t.Helper()
-	
+
 	if logging.Level != "info" {
 		t.Errorf("Expected default log level 'info', got '%s'", logging.Level)
 	}
@@ -175,7 +176,7 @@ func validateLoggingDefaults(t *testing.T, logging LoggingConfig) {
 // validateAppDefaults checks app configuration defaults
 func validateAppDefaults(t *testing.T, app AppConfig) {
 	t.Helper()
-	
+
 	if app.Name != "template-arch-lint" {
 		t.Errorf("Expected default app name 'template-arch-lint', got '%s'", app.Name)
 	}
@@ -264,7 +265,7 @@ func createConfigWithInvalidDriver() Config {
 // runConfigValidationTest executes a single config validation test
 func runConfigValidationTest(t *testing.T, config Config, wantErr bool) {
 	t.Helper()
-	
+
 	err := validateConfig(&config)
 	if (err != nil) != wantErr {
 		t.Errorf("validateConfig() error = %v, wantErr %v", err, wantErr)
@@ -277,7 +278,7 @@ func TestConfigWithEnvironmentOverrides(t *testing.T) {
 	t.Run("environment variable overrides", func(t *testing.T) {
 		testConfigOverrides(t)
 	})
-	
+
 	t.Run("invalid environment validation", func(t *testing.T) {
 		testInvalidEnvironment(t)
 	})
@@ -286,7 +287,7 @@ func TestConfigWithEnvironmentOverrides(t *testing.T) {
 // testConfigOverrides tests that environment variables override config defaults
 func testConfigOverrides(t *testing.T) {
 	t.Helper()
-	
+
 	setTestEnvVars(t)
 	defer unsetTestEnvVars(t)
 
@@ -294,20 +295,20 @@ func testConfigOverrides(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadConfig() failed: %v", err)
 	}
-	
+
 	validateOverriddenConfig(t, config)
 }
 
 // setTestEnvVars sets test environment variables
 func setTestEnvVars(t *testing.T) {
 	t.Helper()
-	
+
 	envVars := map[string]string{
 		"APP_APP_ENVIRONMENT": "staging",
 		"APP_SERVER_PORT":     "9090",
 		"APP_LOGGING_LEVEL":   "warn",
 	}
-	
+
 	for key, value := range envVars {
 		if err := os.Setenv(key, value); err != nil {
 			t.Fatalf("Failed to set %s: %v", key, err)
@@ -318,13 +319,13 @@ func setTestEnvVars(t *testing.T) {
 // unsetTestEnvVars cleans up test environment variables
 func unsetTestEnvVars(t *testing.T) {
 	t.Helper()
-	
+
 	envVars := []string{
 		"APP_APP_ENVIRONMENT",
 		"APP_SERVER_PORT",
 		"APP_LOGGING_LEVEL",
 	}
-	
+
 	for _, key := range envVars {
 		if err := os.Unsetenv(key); err != nil {
 			t.Errorf("Failed to unset %s: %v", key, err)
@@ -335,7 +336,7 @@ func unsetTestEnvVars(t *testing.T) {
 // validateOverriddenConfig validates that config was properly overridden
 func validateOverriddenConfig(t *testing.T, config *Config) {
 	t.Helper()
-	
+
 	if config.App.Environment != "staging" {
 		t.Errorf("Expected environment 'staging', got '%s'", config.App.Environment)
 	}
@@ -350,7 +351,7 @@ func validateOverriddenConfig(t *testing.T, config *Config) {
 // testInvalidEnvironment tests that invalid environment values are rejected
 func testInvalidEnvironment(t *testing.T) {
 	t.Helper()
-	
+
 	if err := os.Setenv("APP_APP_ENVIRONMENT", "invalid"); err != nil {
 		t.Fatalf("Failed to set APP_APP_ENVIRONMENT: %v", err)
 	}
@@ -359,7 +360,7 @@ func testInvalidEnvironment(t *testing.T) {
 			t.Errorf("Failed to unset APP_APP_ENVIRONMENT: %v", err)
 		}
 	}()
-	
+
 	_, err := LoadConfig("")
 	if err == nil {
 		t.Error("Should reject invalid environment")

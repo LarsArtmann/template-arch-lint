@@ -296,7 +296,7 @@ jobs:
           echo "Testing default configuration..."
           timeout 10 go run example/main.go || echo "Configuration test completed"
 
-  # 🐳 Container image preparation and scanning  
+  # 🐳 Container image preparation and scanning
   prepare-metadata:
     name: 🐳 Prepare Container Metadata
     runs-on: ubuntu-latest
@@ -507,16 +507,16 @@ jobs:
         run: |
           IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.prepare-metadata.outputs.version }}"
           echo "Testing image: $IMAGE on platform: ${{ matrix.platform }}"
-          
+
           # Pull the specific platform image
           docker pull --platform=${{ matrix.platform }} "$IMAGE"
-          
+
           # Run container with health check
           CONTAINER_ID=$(docker run -d --platform=${{ matrix.platform }} -p 8080:8080 "$IMAGE")
-          
+
           # Wait for container to start
           sleep 10
-          
+
           # Check if container is running
           if docker ps | grep -q "$CONTAINER_ID"; then
             echo "✅ Container started successfully"
@@ -525,7 +525,7 @@ jobs:
             docker logs "$CONTAINER_ID"
             exit 1
           fi
-          
+
           # Test health check endpoint
           for i in {1..10}; do
             if docker exec "$CONTAINER_ID" /server -health-check; then
@@ -540,7 +540,7 @@ jobs:
               sleep 5
             fi
           done
-          
+
           # Clean up
           docker stop "$CONTAINER_ID"
           docker rm "$CONTAINER_ID"

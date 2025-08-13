@@ -143,7 +143,7 @@ Infrastructure → Application → Domain
 ## Architecture Violations You'll Get
 
 Common violations the linters catch:
-- `domain-entities cannot depend on infrastructure` 
+- `domain-entities cannot depend on infrastructure`
 - `🚨 BANNED: interface{} erases type safety`
 - `DELETE statements should include WHERE clauses`
 - Function too long (max 50 lines)

@@ -1,0 +1,213 @@
+# 🔥 Enterprise-Grade Linting Pipeline
+# Enforces maximum code quality and architectural compliance
+# Uses project's justfile commands for consistency with local development
+
+name: 🔍 Code Quality & Architecture Validation
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+  workflow_dispatch: # Allow manual triggering
+
+# Cancel in-progress runs on new pushes to same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Tool versions - matches justfile configuration
+  GOLANGCI_VERSION: "v2.3.1"
+  GO_ARCH_LINT_VERSION: "v1.12.0"
+
+jobs:
+  # ==============================================
+  # Fast pre-checks to fail early if basic issues
+  # ==============================================
+  pre-checks:
+    name: 🚦 Pre-flight Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: 🔍 Validate Workflow Files
+      run: |
+        echo "Validating GitHub workflows syntax..."
+        for file in .github/workflows/*.yml; do
+          echo "✓ Checking $file"
+          # Basic YAML syntax validation
+          python3 -c "import yaml; yaml.safe_load(open('$file'))"
+        done
+
+    - name: 📁 Check Critical Files
+      run: |
+        echo "Verifying required configuration files exist..."
+        test -f .golangci.yml && echo "✓ .golangci.yml found" || exit 1
+        test -f .go-arch-lint.yml && echo "✓ .go-arch-lint.yml found" || exit 1
+        test -f justfile && echo "✓ justfile found" || exit 1
+        test -f go.mod && echo "✓ go.mod found" || exit 1
+
+  # ==============================================
+  # Comprehensive linting across Go versions
+  # ==============================================
+  lint:
+    name: 🔍 Lint (Go ${{ matrix.go-version }})
+    runs-on: ubuntu-latest
+    needs: pre-checks
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false # Continue testing other versions even if one fails
+      matrix:
+        go-version: ['1.21', '1.22', '1.23', '1.24']
+
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Full history for better analysis
+
+    - name: 🏗️ Setup Go ${{ matrix.go-version }}
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go-version }}
+        cache: true
+        cache-dependency-path: |
+          go.sum
+          go.mod
+
+    - name: 📦 Verify Go Installation
+      run: |
+        go version
+        go env GOVERSION
+        go env GOOS
+        go env GOARCH
+
+    - name: 📋 Download Dependencies
+      run: |
+        go mod download
+        go mod verify
+
+    - name: 🔧 Install Just Command Runner
+      uses: extractions/setup-just@v2
+      with:
+        just-version: '1.36.0'
+
+    - name: 📦 Install Linting Tools
+      run: |
+        echo "Installing golangci-lint ${GOLANGCI_VERSION}..."
+        go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@${GOLANGCI_VERSION}
+
+        echo "Installing go-arch-lint ${GO_ARCH_LINT_VERSION}..."
+        go install github.com/fe3dback/go-arch-lint@${GO_ARCH_LINT_VERSION}
+
+        echo "Installing additional tools..."
+        go install golang.org/x/tools/cmd/goimports@latest
+        go install github.com/a-h/templ/cmd/templ@latest
+
+        # Verify installations
+        golangci-lint version
+        go-arch-lint version
+        just --version
+
+    - name: 📁 Filename Verification
+      run: |
+        echo "🔍 Checking for problematic filenames..."
+        just lint-files
+
+    - name: 🏗️ Architecture Validation
+      run: |
+        echo "🔍 Validating architectural boundaries..."
+        just lint-arch
+
+    - name: 📝 Code Quality Analysis
+      run: |
+        echo "🔍 Running comprehensive code quality checks..."
+        just lint-code
+
+    - name: 🔧 Template Generation
+      run: |
+        echo "🔍 Generating templates to verify they compile..."
+        just templ
+
+    - name: 🚀 Build Verification
+      run: |
+        echo "🔍 Verifying project builds successfully..."
+        go build ./...
+
+    - name: 📊 Generate Linting Reports
+      if: matrix.go-version == '1.24' # Only generate reports on latest version
+      run: |
+        echo "📊 Generating detailed reports..."
+        just report
+
+    - name: 📤 Upload Linting Reports
+      if: matrix.go-version == '1.24'
+      uses: actions/upload-artifact@v4
+      with:
+        name: lint-reports-${{ github.run_number }}
+        path: reports/
+        retention-days: 30
+
+  # ==============================================
+  # Security-focused linting
+  # ==============================================
+  security-scan:
+    name: 🔒 Security Analysis
+    runs-on: ubuntu-latest
+    needs: pre-checks
+    timeout-minutes: 10
+
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: 🏗️ Setup Go 1.24
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+        cache: true
+        cache-dependency-path: go.sum
+
+    - name: 🔧 Install Just and Tools
+      run: |
+        # Install just
+        curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
+
+        # Install linting tools
+        go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@${GOLANGCI_VERSION}
+
+    - name: 🔒 Security Linting
+      run: |
+        echo "🔒 Running security-focused analysis..."
+        just lint-security
+
+    - name: 🛡️ Go Vulnerability Check
+      run: |
+        echo "🛡️ Checking for known vulnerabilities..."
+        go install golang.org/x/vuln/cmd/govulncheck@latest
+        govulncheck ./...
+
+  # ==============================================
+  # Summary job that requires all linting to pass
+  # ==============================================
+  lint-success:
+    name: ✅ Linting Complete
+    runs-on: ubuntu-latest
+    needs: [pre-checks, lint, security-scan]
+    timeout-minutes: 2
+
+    steps:
+    - name: 🎉 All Linting Passed
+      run: |
+        echo "🎉 All linting checks completed successfully!"
+        echo "✅ Pre-flight checks passed"
+        echo "✅ Code quality validation passed across all Go versions"
+        echo "✅ Architecture boundaries validated"
+        echo "✅ Security analysis completed"
+        echo ""
+        echo "🚀 Code is ready for deployment!"

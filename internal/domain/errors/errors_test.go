@@ -117,7 +117,7 @@ func TestInternalError(t *testing.T) {
 
 func TestErrorTypeAssertions(t *testing.T) {
 	testErrors := createTestErrors()
-	
+
 	testDomainErrorIdentification(t, testErrors)
 	testValidationErrorAssertions(t, testErrors)
 	testNotFoundErrorAssertions(t, testErrors)
@@ -146,7 +146,7 @@ func createTestErrors() testErrorTypes {
 // testDomainErrorIdentification tests IsDomainError function
 func testDomainErrorIdentification(t *testing.T, errors testErrorTypes) {
 	t.Helper()
-	
+
 	if !IsDomainError(errors.validation) {
 		t.Error("Expected validation error to be a domain error")
 	}
@@ -158,7 +158,7 @@ func testDomainErrorIdentification(t *testing.T, errors testErrorTypes) {
 // testValidationErrorAssertions tests AsValidationError function
 func testValidationErrorAssertions(t *testing.T, errors testErrorTypes) {
 	t.Helper()
-	
+
 	if ve, ok := AsValidationError(errors.validation); !ok || ve != errors.validation {
 		t.Error("Expected validation error assertion to succeed")
 	}
@@ -170,7 +170,7 @@ func testValidationErrorAssertions(t *testing.T, errors testErrorTypes) {
 // testNotFoundErrorAssertions tests AsNotFoundError function
 func testNotFoundErrorAssertions(t *testing.T, errors testErrorTypes) {
 	t.Helper()
-	
+
 	if nfe, ok := AsNotFoundError(errors.notFound); !ok || nfe != errors.notFound {
 		t.Error("Expected not found error assertion to succeed")
 	}
@@ -182,7 +182,7 @@ func testNotFoundErrorAssertions(t *testing.T, errors testErrorTypes) {
 // testConflictErrorAssertions tests AsConflictError function
 func testConflictErrorAssertions(t *testing.T, errors testErrorTypes) {
 	t.Helper()
-	
+
 	if ce, ok := AsConflictError(errors.conflict); !ok || ce != errors.conflict {
 		t.Error("Expected conflict error assertion to succeed")
 	}
@@ -194,7 +194,7 @@ func testConflictErrorAssertions(t *testing.T, errors testErrorTypes) {
 // testInternalErrorAssertions tests AsInternalError function
 func testInternalErrorAssertions(t *testing.T, errors testErrorTypes) {
 	t.Helper()
-	
+
 	if ie, ok := AsInternalError(errors.internal); !ok || ie != errors.internal {
 		t.Error("Expected internal error assertion to succeed")
 	}

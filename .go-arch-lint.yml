@@ -6,7 +6,7 @@
 #
 # Features:
 # - ✅ Domain isolation (zero infrastructure dependencies)
-# - ✅ Application layer mediates between domain and infrastructure  
+# - ✅ Application layer mediates between domain and infrastructure
 # - ✅ Infrastructure abstractions via interfaces
 # - ✅ Clear dependency flow: Infrastructure → Application → Domain
 
@@ -16,9 +16,9 @@ workdir: .
 # 🚨 VENDOR DEPENDENCY CONFIGURATION
 allow:
   depOnAnyVendor: true  # Allow vendor dependencies (set to false for stricter control)
-  
+
   # ARCHITECTURAL DECISION: Disable Deep Scanning
-  # 
+  #
   # Deep scanning enables advanced AST analysis for method calls and dependency
   # injection patterns, but can cause internal errors in go-arch-lint v1.12.0
   # when encountering certain Go package structures.
@@ -50,27 +50,27 @@ components:
     in: internal/domain/repositories/**
   domain-services:
     in: internal/domain/services/**
-  
-  # ========================================  
+
+  # ========================================
   # APPLICATION LAYER - Use Cases & Coordination
   # ========================================
   app-handlers:
     in: internal/application/handlers/**
   app-middleware:
     in: internal/application/middleware/**
-    
+
   # ========================================
   # INFRASTRUCTURE LAYER - External Concerns
   # ========================================
   infrastructure:
     in: internal/infrastructure/**
-    
+
   # ========================================
   # DATA ACCESS & PERSISTENCE
   # ========================================
   database:
     in: internal/db/**
-    
+
   # ========================================
   # WEB LAYER - Templates & Static Assets
   # ========================================
@@ -82,7 +82,7 @@ components:
     in: web/templates/pages/**
   web-static:
     in: web/static/**
-    
+
   # ========================================
   # CONFIGURATION & STARTUP
   # ========================================
@@ -93,6 +93,22 @@ components:
   main:
     in: cmd/**
 
+  # ========================================
+  # TEST HELPERS - Testing Utilities
+  # ========================================
+  test-helpers-base:
+    in: internal/testhelpers/base/**
+  test-helpers-domain-entities:
+    in: internal/testhelpers/domain/entities/**
+  test-helpers-domain-values:
+    in: internal/testhelpers/domain/values/**
+  test-helpers-domain-validation:
+    in: internal/testhelpers/domain/validation/**
+  test-helpers-application-handlers:
+    in: internal/testhelpers/application/handlers/**
+  test-helpers-infrastructure-repositories:
+    in: internal/testhelpers/infrastructure/repositories/**
+
 # 🔒 DEPENDENCY RULES - Enforce Clean Architecture
 deps:
   # DOMAIN LAYER - Zero infrastructure dependencies
@@ -102,22 +118,22 @@ deps:
       - domain-shared
       - domain-values
       - domain-errors
-  
+
   domain-shared:
     anyVendorDeps: true
     mayDependOn: []
-    
+
   domain-values:
     anyVendorDeps: true
     mayDependOn:
       - domain-shared
       - domain-errors
-      
+
   domain-errors:
     anyVendorDeps: true
     mayDependOn:
       - domain-shared
-      
+
   domain-repositories:
     anyVendorDeps: true
     mayDependOn:
@@ -125,7 +141,7 @@ deps:
       - domain-shared
       - domain-values
       - domain-errors
-      
+
   domain-services:
     anyVendorDeps: true
     mayDependOn:
@@ -134,7 +150,7 @@ deps:
       - domain-shared
       - domain-values
       - domain-errors
-  
+
   # APPLICATION LAYER - Orchestrates domain and infrastructure
   app-handlers:
     mayDependOn:
@@ -147,12 +163,12 @@ deps:
       - web-templates-components
       - web-templates-layouts
       - web-templates-pages
-      
+
   app-middleware:
     mayDependOn:
       - domain-shared
       - domain-errors
-  
+
   # INFRASTRUCTURE LAYER - External integrations
   infrastructure:
     mayDependOn:
@@ -162,7 +178,7 @@ deps:
       - domain-values
       - domain-errors
       - database
-      
+
   # DATA ACCESS & PERSISTENCE
   database:
     anyVendorDeps: true
@@ -171,7 +187,7 @@ deps:
       - domain-shared
       - domain-values
       - domain-errors
-      
+
   # WEB LAYER - Templates & Static Assets
   web-templates-components:
     anyVendorDeps: true
@@ -179,14 +195,14 @@ deps:
       - domain-entities
       - domain-shared
       - domain-values
-      
+
   web-templates-layouts:
     anyVendorDeps: true
     mayDependOn:
       - domain-entities
       - domain-shared
       - domain-values
-      
+
   web-templates-pages:
     anyVendorDeps: true
     mayDependOn:
@@ -195,21 +211,46 @@ deps:
       - domain-values
       - web-templates-components
       - web-templates-layouts
-      
+
   web-static:
     anyVendorDeps: true
     mayDependOn: []
-  
+
   # CONFIGURATION & STARTUP
   config:
     anyVendorDeps: true
     mayDependOn: []
-    
+
   container:
     anyProjectDeps: true
-    
+
   main:
     anyProjectDeps: true
+
+  # TEST HELPERS - Allow broad dependencies for testing utilities
+  test-helpers-base:
+    anyProjectDeps: true
+    anyVendorDeps: true
+
+  test-helpers-domain-entities:
+    anyProjectDeps: true
+    anyVendorDeps: true
+
+  test-helpers-domain-values:
+    anyProjectDeps: true
+    anyVendorDeps: true
+
+  test-helpers-domain-validation:
+    anyProjectDeps: true
+    anyVendorDeps: true
+
+  test-helpers-application-handlers:
+    anyProjectDeps: true
+    anyVendorDeps: true
+
+  test-helpers-infrastructure-repositories:
+    anyProjectDeps: true
+    anyVendorDeps: true
 
 # 🌍 COMMON COMPONENTS - Available everywhere
 commonComponents:
@@ -218,13 +259,13 @@ commonComponents:
 
 # 🚫 EXCLUSION PATTERNS (glob patterns)
 exclude:
-  # Generated and temporary files  
+  # Generated and temporary files
   - "**/*.pb.go"
-  - "**/*_generated.go" 
+  - "**/*_generated.go"
   - "**/*_gen.go"
   - "**/*_templ.go"
   - "**/mock_*.go"
-  
+
   # Test directories and testdata
   - "**/testdata/**"
   - "**/test/**"
@@ -232,21 +273,21 @@ exclude:
   - "test/**"
   - "integration-test/**"
   - "**/integration-test/**"
-  
+
   # Build and vendor
   - "**/vendor/**"
-  - "**/bin/**" 
+  - "**/bin/**"
   - "**/build/**"
   - "**/dist/**"
   - "**/node_modules/**"
-  
+
   # Documentation and configuration
   - "**/docs/**"
-  - "**/examples/**" 
+  - "**/examples/**"
   - "**/*.md"
   - "**/.git/**"
   - "**/.github/**"
-  
+
   # IDE and editor files
   - "**/.vscode/**"
   - "**/.idea/**"
@@ -254,15 +295,15 @@ exclude:
   - "**/.DS_Store"
 
 # 🚫 EXCLUSION FILES (regex patterns)
-# 
+#
 # ARCHITECTURAL DECISION: Exclude Test Files from Import Validation
-# 
+#
 # Test files in Go commonly use the `package_test` naming convention and import
 # their corresponding implementation packages. This is the standard Go testing
 # pattern and should NOT be considered an architecture violation.
-# 
+#
 # Examples of normal Go test patterns:
-# - package services_test imports "myapp/services"  
+# - package services_test imports "myapp/services"
 # - package entities_test imports "myapp/entities"
 # - package values_test imports "myapp/values"
 #
@@ -316,7 +357,7 @@ excludeFiles:
 #
 # DEPENDENCY RULES ENFORCED:
 # ✅ Domain entities can only depend on domain layer components
-# ✅ Application layer can orchestrate domain and infrastructure  
+# ✅ Application layer can orchestrate domain and infrastructure
 # ✅ Infrastructure implements domain interfaces (dependency inversion)
 # ✅ No circular dependencies between components
 # ✅ Test files excluded from architecture validation

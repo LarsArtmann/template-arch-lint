@@ -20,43 +20,69 @@ import (
 )
 
 const (
-	// ChannelBufferSize represents the buffer size for error channels
+	// ChannelBufferSize represents the buffer size for error channels.
 	ChannelBufferSize = 1
-	// ExitCodeFailure represents the exit code for application failure
+	// ExitCodeFailure represents the exit code for application failure.
 	ExitCodeFailure = 1
-	// ErrorConstant represents the repeated string literal for error logging
+	// ErrorConstant represents the repeated string literal for error logging.
 	ErrorConstant = "error"
-	// NewlineConstant represents the newline character constant
+	// NewlineConstant represents the newline character constant.
 	NewlineConstant = "\n"
+	// ErrorShuttingDownContainer represents the repeated error message for
+	// container shutdown.
+	ErrorShuttingDownContainer = "Error shutting down container"
+	// HealthCheckFlag represents the health check command line flag.
+	HealthCheckFlag = "health-check"
+	// HealthCheckFlagDescription represents the health check flag description.
+	HealthCheckFlagDescription = "Perform health check and exit"
+	// VersionKey represents the version key for logging.
+	VersionKey = "version"
+	// ServiceKey represents the service key for logging.
+	ServiceKey = "service"
+	// HealthCheckWarningMsg represents health check warning message.
+	HealthCheckWarningMsg = "Health check warning: unable to shutdown " +
+		"container cleanly"
+	// HealthCheckPassedMsg represents health check success message.
+	HealthCheckPassedMsg = "Health check passed"
 )
 
 func main() {
 	// Parse command line flags
-	healthCheck := flag.Bool("health-check", false, "Perform health check and exit")
+	healthCheck := flag.Bool(HealthCheckFlag, false, HealthCheckFlagDescription)
 	flag.Parse()
 
 	// Handle health check flag
 	if *healthCheck {
-		performHealthCheck()
+		if err := performHealthCheck(); err != nil {
+			slog.Error("Health check failed", ErrorConstant, err)
+			os.Exit(ExitCodeFailure)
+		}
 		return
 	}
 
+	// Run the main server
+	if err := runServer(); err != nil {
+		os.Exit(ExitCodeFailure)
+	}
+}
+
+// runServer initializes and runs the main server.
+func runServer() error {
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	diContainer, err := setupContainer()
 	if err != nil {
-		slog.Error("Failed to register dependencies", "error", err)
-		cancel()
-		os.Exit(ExitCodeFailure)
+		slog.Error("Failed to register dependencies", ErrorConstant, err)
+		return err
 	}
-	// Manual cleanup will be handled in exit paths
 
 	cfg, logger, router := getDependencies(diContainer)
 	logServerStart(logger, cfg)
 
 	server := createHTTPServer(cfg, router)
 	serverErrors := startServer(server, logger)
-	
+
 	err = runServerWithGracefulShutdown(
 		ctx,
 		server,
@@ -64,23 +90,23 @@ func main() {
 		logger,
 		cfg,
 	)
+
+	// Handle shutdown
 	if err != nil {
-		cancel()
-		// Call cleanup explicitly, then exit
 		if shutdownErr := shutdownContainer(diContainer); shutdownErr != nil {
-			slog.Error("Error shutting down container", "error", shutdownErr)
+			slog.Error(ErrorShuttingDownContainer, ErrorConstant, shutdownErr)
 		}
-		os.Exit(ExitCodeFailure)
+		return err
 	}
-	
+
 	// Normal cleanup on successful shutdown
-	cancel()
 	if shutdownErr := shutdownContainer(diContainer); shutdownErr != nil {
-		slog.Error("Error shutting down container", "error", shutdownErr)
+		slog.Error(ErrorShuttingDownContainer, ErrorConstant, shutdownErr)
 	}
+	return nil
 }
 
-// setupContainer creates and registers all dependencies
+// setupContainer creates and registers all dependencies.
 func setupContainer() (*container.Container, error) {
 	diContainer := container.New()
 	if err := diContainer.RegisterAll(); err != nil {
@@ -89,12 +115,15 @@ func setupContainer() (*container.Container, error) {
 	return diContainer, nil
 }
 
-// shutdownContainer safely shuts down the DI container
+// shutdownContainer safely shuts down the DI container.
 func shutdownContainer(diContainer *container.Container) error {
-	return diContainer.Shutdown()
+	if err := diContainer.Shutdown(); err != nil {
+		return fmt.Errorf("failed to shutdown DI container: %w", err)
+	}
+	return nil
 }
 
-// getDependencies extracts required dependencies from the container
+// getDependencies extracts required dependencies from the container.
 func getDependencies(
 	diContainer *container.Container,
 ) (*config.Config, *slog.Logger, *gin.Engine) {
@@ -105,7 +134,7 @@ func getDependencies(
 	return cfg, logger, router
 }
 
-// logServerStart logs the server startup information
+// logServerStart logs the server startup information.
 func logServerStart(logger *slog.Logger, cfg *config.Config) {
 	logger.Info("Starting server",
 		"name", cfg.App.Name,
@@ -116,7 +145,7 @@ func logServerStart(logger *slog.Logger, cfg *config.Config) {
 	)
 }
 
-// createHTTPServer creates and configures the HTTP server
+// createHTTPServer creates and configures the HTTP server.
 func createHTTPServer(cfg *config.Config, router *gin.Engine) *http.Server {
 	return &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
@@ -127,7 +156,7 @@ func createHTTPServer(cfg *config.Config, router *gin.Engine) *http.Server {
 	}
 }
 
-// startServer starts the HTTP server in a goroutine
+// startServer starts the HTTP server in a goroutine.
 func startServer(server *http.Server, logger *slog.Logger) chan error {
 	serverErrors := make(chan error, ChannelBufferSize)
 	go func() {
@@ -137,7 +166,7 @@ func startServer(server *http.Server, logger *slog.Logger) chan error {
 	return serverErrors
 }
 
-// runServerWithGracefulShutdown handles server lifecycle and graceful shutdown
+// runServerWithGracefulShutdown handles server lifecycle and graceful shutdown.
 func runServerWithGracefulShutdown(
 	ctx context.Context,
 	server *http.Server,
@@ -161,7 +190,7 @@ func runServerWithGracefulShutdown(
 	return nil
 }
 
-// performGracefulShutdown handles the graceful shutdown process
+// performGracefulShutdown handles the graceful shutdown process.
 func performGracefulShutdown(
 	ctx context.Context,
 	server *http.Server,
@@ -176,45 +205,46 @@ func performGracefulShutdown(
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
 		logger.Error("Failed to shutdown server gracefully", ErrorConstant, err)
-		
+
 		if closeErr := server.Close(); closeErr != nil {
 			logger.Error("Failed to close server", ErrorConstant, closeErr)
 		}
-		return err
+		return fmt.Errorf("server graceful shutdown failed: %w", err)
 	}
 
 	logger.Info("Server shutdown completed successfully")
 	return nil
 }
 
-// performHealthCheck performs a simple health check for Docker health checks
-func performHealthCheck() {
+// performHealthCheck performs a simple health check for Docker health checks.
+func performHealthCheck() error {
 	// For Docker health checks, we verify basic application health
 	// This includes config loading and basic dependency validation
-	
+
 	// Try to load config
 	cfg, err := config.LoadConfig("")
 	if err != nil {
-		slog.Error("Health check failed: unable to load config", "error", err)
-		os.Exit(ExitCodeFailure)
+		return fmt.Errorf("unable to load config: %w", err)
 	}
-	
+
 	// Validate that we can create a basic container (dependency injection)
 	diContainer := container.New()
 	if err := diContainer.RegisterAll(); err != nil {
-		slog.Error("Health check failed: unable to register dependencies", "error", err)
-		os.Exit(ExitCodeFailure)
+		return fmt.Errorf("unable to register dependencies: %w", err)
 	}
-	
+
 	// Clean up
 	if err := diContainer.Shutdown(); err != nil {
-		slog.Error("Health check warning: unable to shutdown container cleanly", "error", err)
+		slog.Error(HealthCheckWarningMsg, ErrorConstant, err)
 	}
-	
-	slog.Info("Health check passed", "service", cfg.App.Name, "version", cfg.App.Version)
+
+	slog.Info(HealthCheckPassedMsg,
+		ServiceKey, cfg.App.Name,
+		VersionKey, cfg.App.Version)
+	return nil
 }
 
-// init sets up initial configuration before main runs
+// init sets up initial configuration before main runs.
 func init() {
 	// Set up basic logging before the DI container is ready
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
