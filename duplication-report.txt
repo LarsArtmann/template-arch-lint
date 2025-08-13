@@ -1,13 +1,6 @@
 found 2 clones:
   internal/domain/entities/user.go:88,96
   internal/domain/entities/user.go:99,107
-found 6 clones:
-  internal/domain/services/user_service_test.go:54,66
-  internal/domain/services/user_service_test.go:68,80
-  internal/domain/services/user_service_test.go:82,94
-  internal/domain/services/user_service_test.go:98,110
-  internal/domain/services/user_service_test.go:112,124
-  internal/domain/services/user_service_test.go:126,138
 found 2 clones:
   internal/domain/values/values_test.go:132,141
   internal/domain/values/values_test.go:269,278
@@ -23,9 +16,6 @@ found 2 clones:
 found 2 clones:
   internal/application/handlers/template_handler.go:186,203
   internal/application/handlers/template_handler.go:206,223
-found 2 clones:
-  internal/domain/services/user_service_test.go:203,211
-  internal/domain/services/user_service_test.go:257,265
 found 2 clones:
   web/templates/pages/user_form_templ.go:48,83
   web/templates/pages/user_form_templ.go:116,151
@@ -67,8 +57,5 @@ found 8 clones:
   internal/db/users.sql.go:489,501
   internal/db/users.sql.go:569,581
   internal/db/users.sql.go:619,631
-found 2 clones:
-  internal/domain/services/user_service_test.go:53,95
-  internal/domain/services/user_service_test.go:97,139
 
-Found total 20 clone groups.
+Found total 17 clone groups.

@@ -59,21 +59,33 @@ var _ = Describe("UserService", func() {
 		return user
 	}
 
+	// Additional test helpers to eliminate duplication
+	createTestUser := func(idSuffix, email, name string) (*entities.User, error) {
+		id := createTestUserID(idSuffix)
+		return userService.CreateUser(ctx, id, email, name)
+	}
+
+	defaultTestEmail := "test@example.com"
+	defaultTestName := "Test User"
+
+	createDefaultTestUser := func(idSuffix string) *entities.User {
+		return createValidTestUser(idSuffix, defaultTestEmail, defaultTestName)
+	}
+
+	expectSuccessfulUserCreation := func(user *entities.User, err error, expectedID values.UserID, expectedEmail, expectedName string) {
+		Expect(err).ToNot(HaveOccurred())
+		Expect(user).ToNot(BeNil())
+		Expect(user.ID).To(Equal(expectedID))
+		Expect(user.Email).To(Equal(expectedEmail))
+		Expect(user.Name).To(Equal(expectedName))
+	}
+
 	Describe("CreateUser", func() {
 		Context("with valid input", func() {
 			It("should create a new user successfully", func() {
-				id, err := values.NewUserID("test-user-1")
-				Expect(err).ToNot(HaveOccurred())
-				email := "test@example.com"
-				name := "Test User"
-
-				user, err := userService.CreateUser(ctx, id, email, name)
-
-				Expect(err).ToNot(HaveOccurred())
-				Expect(user).ToNot(BeNil())
-				Expect(user.ID).To(Equal(id))
-				Expect(user.Email).To(Equal(email))
-				Expect(user.Name).To(Equal(name))
+				id := createTestUserID("test-user-1")
+				user, err := createTestUser("test-user-1", defaultTestEmail, defaultTestName)
+				expectSuccessfulUserCreation(user, err, id, defaultTestEmail, defaultTestName)
 			})
 		})
 
@@ -107,19 +119,12 @@ var _ = Describe("UserService", func() {
 
 		Context("when user already exists", func() {
 			It("should return conflict error", func() {
-				id1, err := values.NewUserID("test-user-1")
-				Expect(err).ToNot(HaveOccurred())
-				id2, err := values.NewUserID("test-user-2")
-				Expect(err).ToNot(HaveOccurred())
-				email := "test@example.com"
-				name := "Test User"
-
 				// Create first user
-				_, err = userService.CreateUser(ctx, id1, email, name)
-				Expect(err).ToNot(HaveOccurred())
+				createDefaultTestUser("test-user-1")
 
 				// Try to create second user with same email
-				user, err := userService.CreateUser(ctx, id2, email, name)
+				id2 := createTestUserID("test-user-2")
+				user, err := userService.CreateUser(ctx, id2, defaultTestEmail, defaultTestName)
 
 				Expect(user).To(BeNil())
 				Expect(err).To(HaveOccurred())
@@ -131,17 +136,11 @@ var _ = Describe("UserService", func() {
 	Describe("GetUser", func() {
 		Context("when user exists", func() {
 			It("should return the user", func() {
-				id, err := values.NewUserID("test-user-1")
-				Expect(err).ToNot(HaveOccurred())
-				email := "test@example.com"
-				name := "Test User"
-
 				// Create user first
-				createdUser, err := userService.CreateUser(ctx, id, email, name)
-				Expect(err).ToNot(HaveOccurred())
+				createdUser := createDefaultTestUser("test-user-1")
 
 				// Get user
-				user, err := userService.GetUser(ctx, id)
+				user, err := userService.GetUser(ctx, createdUser.ID)
 
 				Expect(err).ToNot(HaveOccurred())
 				Expect(user).ToNot(BeNil())
@@ -153,8 +152,7 @@ var _ = Describe("UserService", func() {
 
 		Context("when user does not exist", func() {
 			It("should return not found error", func() {
-				id, err := values.NewUserID("nonexistent-user")
-				Expect(err).ToNot(HaveOccurred())
+				id := createTestUserID("nonexistent-user")
 
 				user, err := userService.GetUser(ctx, id)
 
@@ -168,7 +166,7 @@ var _ = Describe("UserService", func() {
 		var existingUser *entities.User
 
 		BeforeEach(func() {
-			existingUser = createValidTestUser("test-user-1", "test@example.com", "Test User")
+			existingUser = createDefaultTestUser("test-user-1")
 		})
 
 		Context("with valid input", func() {
@@ -187,12 +185,9 @@ var _ = Describe("UserService", func() {
 
 		Context("when user does not exist", func() {
 			It("should return error", func() {
-				id, err := values.NewUserID("nonexistent-user")
-				Expect(err).ToNot(HaveOccurred())
-				email := "updated@example.com"
-				name := "Updated User"
+				id := createTestUserID("nonexistent-user")
 
-				user, err := userService.UpdateUser(ctx, id, email, name)
+				user, err := userService.UpdateUser(ctx, id, "updated@example.com", "Updated User")
 
 				Expect(user).To(BeNil())
 				Expect(err).To(HaveOccurred())
@@ -248,15 +243,8 @@ var _ = Describe("UserService", func() {
 		Context("when users exist", func() {
 			It("should return all users", func() {
 				// Create multiple users
-				id1, err := values.NewUserID("user-1")
-				Expect(err).ToNot(HaveOccurred())
-				user1, err := userService.CreateUser(ctx, id1, "user1@example.com", "User One")
-				Expect(err).ToNot(HaveOccurred())
-
-				id2, err := values.NewUserID("user-2")
-				Expect(err).ToNot(HaveOccurred())
-				user2, err := userService.CreateUser(ctx, id2, "user2@example.com", "User Two")
-				Expect(err).ToNot(HaveOccurred())
+				user1 := createValidTestUser("user-1", "user1@example.com", "User One")
+				user2 := createValidTestUser("user-2", "user2@example.com", "User Two")
 
 				users, err := userService.ListUsers(ctx)
 
@@ -281,10 +269,7 @@ var _ = Describe("UserService", func() {
 		Describe("FilterActiveUsers", func() {
 			It("should filter users created in the last 30 days", func() {
 				// Create a user
-				id, err := values.NewUserID("user-1")
-				Expect(err).ToNot(HaveOccurred())
-				_, err = userService.CreateUser(ctx, id, "user1@example.com", "User One")
-				Expect(err).ToNot(HaveOccurred())
+				createValidTestUser("user-1", "user1@example.com", "User One")
 
 				activeUsers, err := userService.FilterActiveUsers(ctx)
 
@@ -296,15 +281,8 @@ var _ = Describe("UserService", func() {
 		Describe("GetUserEmailsWithResult", func() {
 			It("should return user emails using Result pattern", func() {
 				// Create users
-				id1, err := values.NewUserID("user-1")
-				Expect(err).ToNot(HaveOccurred())
-				_, err = userService.CreateUser(ctx, id1, "user1@example.com", "User One")
-				Expect(err).ToNot(HaveOccurred())
-
-				id2, err := values.NewUserID("user-2")
-				Expect(err).ToNot(HaveOccurred())
-				_, err = userService.CreateUser(ctx, id2, "user2@example.com", "User Two")
-				Expect(err).ToNot(HaveOccurred())
+				createValidTestUser("user-1", "user1@example.com", "User One")
+				createValidTestUser("user-2", "user2@example.com", "User Two")
 
 				result := userService.GetUserEmailsWithResult(ctx)
 
@@ -319,15 +297,8 @@ var _ = Describe("UserService", func() {
 		Describe("GetUserStats", func() {
 			It("should return user statistics", func() {
 				// Create users
-				id1, err := values.NewUserID("user-1")
-				Expect(err).ToNot(HaveOccurred())
-				_, err = userService.CreateUser(ctx, id1, "user1@example.com", "User One")
-				Expect(err).ToNot(HaveOccurred())
-
-				id2, err := values.NewUserID("user-2")
-				Expect(err).ToNot(HaveOccurred())
-				_, err = userService.CreateUser(ctx, id2, "user2@example.com", "User Two")
-				Expect(err).ToNot(HaveOccurred())
+				createValidTestUser("user-1", "user1@example.com", "User One")
+				createValidTestUser("user-2", "user2@example.com", "User Two")
 
 				stats, err := userService.GetUserStats(ctx)
 
@@ -361,12 +332,9 @@ var _ = Describe("UserService", func() {
 
 			Context("with invalid input", func() {
 				It("should return error result", func() {
-					id, err := values.NewUserID("test-user-1")
-					Expect(err).ToNot(HaveOccurred())
-					email := "invalid-email"
-					name := "Test User"
+					id := createTestUserID("test-user-1")
 
-					result := userService.CreateUserWithResult(ctx, id, email, name)
+					result := userService.CreateUserWithResult(ctx, id, "invalid-email", defaultTestName)
 
 					Expect(result.IsError()).To(BeTrue())
 					_, isValidationError := errors.AsValidationError(result.Error())
@@ -378,20 +346,14 @@ var _ = Describe("UserService", func() {
 		Describe("FindUserByEmailOption", func() {
 			Context("when user exists", func() {
 				It("should return Some with user", func() {
-					id, err := values.NewUserID("test-user-1")
-					Expect(err).ToNot(HaveOccurred())
-					email := "test@example.com"
-					name := "Test User"
-
 					// Create user first
-					_, err = userService.CreateUser(ctx, id, email, name)
-					Expect(err).ToNot(HaveOccurred())
+					createDefaultTestUser("test-user-1")
 
-					option := userService.FindUserByEmailOption(ctx, email)
+					option := userService.FindUserByEmailOption(ctx, defaultTestEmail)
 
 					Expect(option.IsPresent()).To(BeTrue())
 					user, _ := option.Get()
-					Expect(user.Email).To(Equal(email))
+					Expect(user.Email).To(Equal(defaultTestEmail))
 				})
 			})
 
