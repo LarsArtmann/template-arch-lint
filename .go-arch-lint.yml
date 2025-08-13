@@ -58,6 +58,10 @@ components:
     in: internal/application/handlers/**
   app-middleware:
     in: internal/application/middleware/**
+  app-dto:
+    in: internal/application/dto/**
+  app-http:
+    in: internal/application/http/**
 
   # ========================================
   # INFRASTRUCTURE LAYER - External Concerns

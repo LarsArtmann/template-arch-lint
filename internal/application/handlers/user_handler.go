@@ -9,6 +9,8 @@ import (
 
 	"github.com/samber/lo"
 
+	"github.com/LarsArtmann/template-arch-lint/internal/application/dto"
+	httputil "github.com/LarsArtmann/template-arch-lint/internal/application/http"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	domainerrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
@@ -31,121 +33,125 @@ func NewUserHandler(userService *services.UserService, logger *slog.Logger) *Use
 	}
 }
 
-// CreateUserRequest represents the request payload for creating a user
-type CreateUserRequest struct {
-	ID    string `json:"id" binding:"required"`
-	Email string `json:"email" binding:"required,email"`
-	Name  string `json:"name" binding:"required"`
-}
-
-// UpdateUserRequest represents the request payload for updating a user
-type UpdateUserRequest struct {
-	Email string `json:"email" binding:"required,email"`
-	Name  string `json:"name" binding:"required"`
-}
+// Note: Request types moved to dto package for better separation of concerns
 
 // CreateUser creates a new user
 func (h *UserHandler) CreateUser(c *gin.Context) {
-	h.logger.Info("Creating user", "remote_addr", c.ClientIP())
+	correlationID := httputil.GetCorrelationID(c)
+	h.logger.Info("Creating user",
+		"remote_addr", c.ClientIP(),
+		"correlation_id", correlationID)
 
-	var req CreateUserRequest
+	var req dto.CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		h.logger.Warn("Invalid request payload", "error", err)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Invalid request payload",
-			"details": err.Error(),
+		h.logger.Warn("Invalid request payload",
+			"error", err,
+			"correlation_id", correlationID)
+
+		httputil.RespondValidationError(c, map[string]string{
+			"request": "Invalid JSON payload: " + err.Error(),
 		})
 		return
 	}
-
-	// Record validation success for request payload
 
 	// Create user using service layer
 	userID, err := values.NewUserID(req.ID)
 	if err != nil {
-		h.logger.Warn("Invalid user ID format", "error", err, "user_id", req.ID)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Invalid user ID format",
-			"details": err.Error(),
-		})
-		return
-	}
+		h.logger.Warn("Invalid user ID format",
+			"error", err,
+			"user_id", req.ID,
+			"correlation_id", correlationID)
 
-	// Record validation success for user ID
-
-	// Validate email format
-	if !strings.Contains(req.Email, "@") {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid email format",
-		})
-		return
-	}
-
-	// Validate name
-	if strings.TrimSpace(req.Name) == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Name cannot be empty",
+		httputil.RespondValidationError(c, map[string]string{
+			"id": "Invalid user ID format: " + err.Error(),
 		})
 		return
 	}
 
 	user, err := h.userService.CreateUser(c.Request.Context(), userID, req.Email, req.Name)
 	if err != nil {
-		h.logger.Error("Failed to create user", "error", err, "user_id", req.ID)
+		h.logger.Error("Failed to create user",
+			"error", err,
+			"user_id", req.ID,
+			"correlation_id", correlationID)
 
 		if errors.Is(err, repositories.ErrUserAlreadyExists) {
-			c.JSON(http.StatusConflict, gin.H{
-				"error": "User or email already exists",
+			httputil.RespondError(c, http.StatusConflict,
+				"USER_ALREADY_EXISTS",
+				"User or email already exists",
+				"conflict",
+				map[string]string{
+					"id": req.ID,
+					"email": req.Email,
+				})
+			return
+		}
+
+		if validationErr, ok := domainerrors.AsValidationError(err); ok {
+			httputil.RespondValidationError(c, map[string]string{
+				"validation": validationErr.Error(),
 			})
 			return
 		}
 
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Failed to create user",
-			"details": err.Error(),
-		})
+		httputil.RespondInternalError(c)
 		return
 	}
 
-	// Record successful user creation
+	// Record successful user creation and return standardized response
+	h.logger.Info("User created successfully",
+		"user_id", user.ID.String(),
+		"email", user.Email,
+		"correlation_id", correlationID)
 
-	h.logger.Info("User created successfully", "user_id", user.ID, "email", user.Email)
-	c.JSON(http.StatusCreated, user)
+	userResponse := dto.ToUserResponse(user)
+	httputil.RespondCreated(c, userResponse, "User created successfully")
 }
 
 // GetUser retrieves a user by ID
 func (h *UserHandler) GetUser(c *gin.Context) {
+	correlationID := httputil.GetCorrelationID(c)
 	idStr := c.Param("id")
+
+	h.logger.Info("Getting user",
+		"user_id", idStr,
+		"correlation_id", correlationID)
+
 	id, err := values.NewUserID(idStr)
 	if err != nil {
-		h.logger.Warn("Invalid user ID format", "error", err, "user_id", idStr)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Invalid user ID format",
-			"details": err.Error(),
+		h.logger.Warn("Invalid user ID format",
+			"error", err,
+			"user_id", idStr,
+			"correlation_id", correlationID)
+
+		httputil.RespondValidationError(c, map[string]string{
+			"id": "Invalid user ID format: " + err.Error(),
 		})
 		return
 	}
-
-	h.logger.Debug("Getting user", "user_id", id)
 
 	user, err := h.userService.GetUser(c.Request.Context(), id)
 	if err != nil {
-		h.logger.Error("Failed to get user", "error", err, "user_id", id)
+		h.logger.Error("Failed to get user",
+			"error", err,
+			"user_id", id.String(),
+			"correlation_id", correlationID)
 
 		if errors.Is(err, repositories.ErrUserNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": "User not found",
-			})
+			httputil.RespondNotFound(c, "User", id.String())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to retrieve user",
-			"details": err.Error(),
-		})
+
+		httputil.RespondInternalError(c)
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	h.logger.Info("User retrieved successfully",
+		"user_id", user.ID.String(),
+		"correlation_id", correlationID)
+
+	userResponse := dto.ToUserResponse(user)
+	httputil.RespondOK(c, userResponse, "User retrieved successfully")
 }
 
 // UpdateUser updates an existing user
