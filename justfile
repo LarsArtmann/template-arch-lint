@@ -19,11 +19,22 @@ default: help
 install-hooks:
     @echo "\033[1m🪝 INSTALLING GIT HOOKS\033[0m"
     @echo "#!/bin/sh" > .git/hooks/pre-commit
-    @echo "# Auto-generated pre-commit hook" >> .git/hooks/pre-commit
-    @echo "just check-pre-commit" >> .git/hooks/pre-commit
+    @echo "# Auto-generated pre-commit hook - fast formatting check only" >> .git/hooks/pre-commit
+    @echo "just check-pre-commit-fast" >> .git/hooks/pre-commit
     @chmod +x .git/hooks/pre-commit
     @echo "\033[0;32m✅ Git pre-commit hook installed!\033[0m"
-    @echo "\033[0;36mThe hook will check (but not modify) files before each commit.\033[0m"
+    @echo "\033[0;36mThe hook will do fast formatting checks only.\033[0m"
+    @echo "\033[0;36mFor full checks including architecture: just check-pre-commit\033[0m"
+
+# Install comprehensive git hooks (includes architecture validation)
+install-hooks-full:
+    @echo "\033[1m🪝 INSTALLING COMPREHENSIVE GIT HOOKS\033[0m"
+    @echo "#!/bin/sh" > .git/hooks/pre-commit
+    @echo "# Auto-generated pre-commit hook - comprehensive checks" >> .git/hooks/pre-commit
+    @echo "just check-pre-commit" >> .git/hooks/pre-commit
+    @chmod +x .git/hooks/pre-commit
+    @echo "\033[0;32m✅ Comprehensive git pre-commit hook installed!\033[0m"
+    @echo "\033[0;33m⚠️  This includes architecture graph validation - commits will be slower.\033[0m"
 
 # Show this help message
 help:
@@ -203,6 +214,18 @@ check-pre-commit:
         echo "\033[0;32m✅ Architecture graph is up-to-date\033[0m"; \
     fi
     @rm -f /tmp/test-graph.svg
+
+# Fast pre-commit check for git hooks (formatting only)
+check-pre-commit-fast:
+    @echo "\033[1m⚡ FAST PRE-COMMIT CHECK\033[0m"
+    @if gofumpt -l . | grep -q .; then \
+        echo "\033[0;31m❌ Files need formatting. Run 'just format' first.\033[0m"; \
+        echo "\033[0;36mFiles needing formatting:\033[0m"; \
+        gofumpt -l .; \
+        exit 1; \
+    else \
+        echo "\033[0;32m✅ Code formatting is clean\033[0m"; \
+    fi
     go mod tidy -diff
     @echo "\033[0;32m\033[1m✅ CI/CD checks passed!\033[0m"
 

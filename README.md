@@ -180,19 +180,25 @@ just commit-auto
 
 **Workflow Options:**
 
-1. **Safe Check** (Recommended for git hooks):
+1. **Fast Git Hook** (Recommended - formatting check only):
    ```bash
-   just install-hooks         # One-time setup
-   git commit -m "..."       # Hook runs check-pre-commit automatically
+   just install-hooks         # One-time fast setup (~1.5s per commit)
+   git commit -m "..."       # Hook runs formatting check only
    ```
 
-2. **Manual Update & Commit**:
+1. **Comprehensive Git Hook** (Architecture validation included):
+   ```bash
+   just install-hooks-full    # Slower setup (~5-10s per commit)
+   git commit -m "..."       # Hook runs full architecture validation
+   ```
+
+3. **Manual Update & Commit**:
    ```bash
    just pre-commit           # Format code & update graph
    git add -A && git commit -m "..."
    ```
 
-3. **Fully Automated**:
+4. **Fully Automated**:
    ```bash
    just commit-auto          # Format, update, stage, and commit with detailed message
    git push                  # Review commit first, then push
