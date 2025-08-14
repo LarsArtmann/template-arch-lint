@@ -131,7 +131,7 @@ func NewProduct(id values.ProductID, name string, price int64) (*Product, error)
     if price < 0 {
         return nil, errors.New("product price cannot be negative")
     }
-    
+
     now := time.Now()
     return &Product{
         ID:        id,
@@ -191,7 +191,7 @@ func (h *ProductHandler) ListProducts(c *gin.Context) {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
     }
-    
+
     c.JSON(http.StatusOK, gin.H{"products": products})
 }
 ```
@@ -225,7 +225,7 @@ func NewMemoryProductRepository() repositories.ProductRepository {
 func (r *MemoryProductRepository) Save(ctx context.Context, product *entities.Product) error {
     r.mutex.Lock()
     defer r.mutex.Unlock()
-    
+
     r.products[product.ID.String()] = product
     return nil
 }
@@ -277,10 +277,10 @@ func CreateProduct(data interface{}) error {  // ❌ interface{} usage
     if data == nil {
         panic("data is nil")  // ❌ panic usage
     }
-    
+
     // ❌ Function too long (>50 lines)
     // ... 60 lines of code ...
-    
+
     return nil  // ❌ Missing error wrapping
 }
 ```
@@ -292,17 +292,17 @@ func CreateProduct(name string, price int64) (*entities.Product, error) {
     if name == "" {
         return nil, fmt.Errorf("product name cannot be empty")
     }
-    
+
     id, err := values.NewProductID(generateID())
     if err != nil {
         return nil, fmt.Errorf("failed to create product ID: %w", err)
     }
-    
+
     product, err := entities.NewProduct(id, name, price)
     if err != nil {
         return nil, fmt.Errorf("failed to create product: %w", err)
     }
-    
+
     return product, nil
 }
 ```
@@ -376,19 +376,19 @@ var _ = Describe("Product", func() {
         It("should create a valid product", func() {
             id, err := values.NewProductID("prod-123")
             Expect(err).NotTo(HaveOccurred())
-            
+
             product, err := entities.NewProduct(id, "Test Product", 1000)
-            
+
             Expect(err).NotTo(HaveOccurred())
             Expect(product.Name).To(Equal("Test Product"))
             Expect(product.Price).To(Equal(int64(1000)))
         })
-        
+
         It("should reject empty name", func() {
             id, _ := values.NewProductID("prod-123")
-            
+
             _, err := entities.NewProduct(id, "", 1000)
-            
+
             Expect(err).To(HaveOccurred())
             Expect(err.Error()).To(ContainSubstring("name cannot be empty"))
         })

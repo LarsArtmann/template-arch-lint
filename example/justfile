@@ -46,7 +46,7 @@ lint-arch:
     @echo "🏗️ Checking architecture boundaries..."
     arch-go -c .go-arch-lint.yml
 
-# Run code quality linting only  
+# Run code quality linting only
 lint-code:
     @echo "🔍 Running code quality analysis..."
     golangci-lint run

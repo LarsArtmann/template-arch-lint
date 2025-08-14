@@ -54,39 +54,39 @@ linters:
     - staticcheck      # Go static analysis
     - typecheck        # Parse and type-check Go code
     - unused           # Check for unused variables/functions
-    
+
     # CODE STYLE & FORMATTING
     - gofmt           # Check if code is gofmt-ed
     - gofumpt         # Stricter gofmt
     - goimports       # Fix imports
-    
+
     # COMPLEXITY & MAINTAINABILITY
     - funlen          # Check function length
     - cyclop          # Check cyclomatic complexity
     - gocognit        # Compute cognitive complexity
-    
+
     # ERROR HANDLING
     - wrapcheck       # Check that errors are wrapped
     - errorlint       # Find mismatches with error types
-    
+
     # PERFORMANCE
     - prealloc        # Check for slice preallocation
-    
+
     # NAMING & STYLE
     - goconst         # Find repeated strings that could be constants
     - misspell        # Find misspelled words
-    
+
     # BEST PRACTICES
     - unconvert       # Remove unnecessary conversions
     - unparam         # Report unused function parameters
-    
+
   disable:
     - godot           # Simplified for example
 
 issues:
   max-issues-per-linter: 50
   max-same-issues: 10
-  
+
   exclude-rules:
     # Exclude some linters from running on tests files
     - path: _test\.go
