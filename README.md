@@ -54,6 +54,40 @@
 
 ---
 
+## 📖 **HOW TO USE THIS?**
+
+### 🎯 **RECOMMENDED: Git Subtree Integration** 
+
+Use git subtree to pull linting configurations into your project while maintaining independent version control:
+
+```bash
+# Add this template as a subtree in your project's linting directory
+git subtree add --prefix=linting https://github.com/LarsArtmann/template-arch-lint.git master --squash
+
+# Copy the essential linting files to your project root
+cp linting/.go-arch-lint.yml .
+cp linting/.golangci.yml .
+cp linting/justfile .
+
+# Install linting tools
+just install
+
+# Run linting on your codebase
+just lint
+
+# Later: Pull updates from the template
+git subtree pull --prefix=linting https://github.com/LarsArtmann/template-arch-lint.git master --squash
+```
+
+**Benefits of Git Subtree:**
+- ✅ **Version Control**: Track template updates in your git history
+- ✅ **Independence**: No external dependencies after initial pull
+- ✅ **Selective Updates**: Choose when to pull template improvements
+- ✅ **Custom Modifications**: Modify configs while still pulling updates
+- ✅ **Team Friendly**: No additional setup for team members
+
+---
+
 ## 🚀 **QUICK START** (< 5 minutes)
 
 ### 1. **Clone & Install**
@@ -119,6 +153,131 @@ just docker-stop
 ## 🛠️ **WHAT'S INCLUDED**
 
 ### 🏗️ **Architecture Enforcement** (`.go-arch-lint.yml`)
+
+#### **Architecture Visualization**
+
+Generate an interactive architecture dependency graph:
+```bash
+# Generate SVG graph of your architecture (automated in CI)
+just graph
+
+# Or manually:
+go-arch-lint graph --out ./go-arch-lint-graph.svg
+
+# Generate graph focusing on specific component
+just graph-component domain-entities
+
+# Generate DOT format for Graphviz processing
+go-arch-lint graph > architecture.dot
+dot -Tpng architecture.dot -o architecture.png
+
+# Check (without modifying) before commits
+just check-pre-commit
+
+# Auto-format and update graph, then commit
+just commit-auto
+```
+
+**Workflow Options:**
+
+1. **Safe Check** (Recommended for git hooks):
+   ```bash
+   just install-hooks         # One-time setup
+   git commit -m "..."       # Hook runs check-pre-commit automatically
+   ```
+
+2. **Manual Update & Commit**:
+   ```bash
+   just pre-commit           # Format code & update graph
+   git add -A && git commit -m "..."
+   ```
+
+3. **Fully Automated**:
+   ```bash
+   just commit-auto          # Format, update, stage, and commit with detailed message
+   git push                  # Review commit first, then push
+   ```
+
+The graph is automatically regenerated:
+- ✅ During CI/CD pipeline (`just ci`)
+- ✅ Via `just commit-auto` (with automatic commit)
+- ✅ On-demand (`just graph`)
+
+#### **Enforced Architecture Boundaries**
+
+```mermaid
+graph TB
+    subgraph "🌐 External World"
+        HTTP[HTTP Requests]
+        DB[(Database)]
+        EXT[External Services]
+    end
+    
+    subgraph "📦 Infrastructure Layer"
+        REPO[Repository Implementations]
+        PERSIST[Persistence]
+        HTTPSRV[HTTP Server]
+    end
+    
+    subgraph "⚙️ Application Layer"
+        HANDLER[Handlers/Controllers]
+        DTO[DTOs]
+        MIDDLEWARE[Middleware]
+    end
+    
+    subgraph "🎯 Domain Layer"
+        ENTITY[Entities]
+        SERVICE[Domain Services]
+        VALUE[Value Objects]
+        IFACE[Repository Interfaces]
+    end
+    
+    HTTP --> HTTPSRV
+    HTTPSRV --> HANDLER
+    HANDLER --> SERVICE
+    SERVICE --> ENTITY
+    SERVICE --> VALUE
+    SERVICE --> IFACE
+    REPO -.->|implements| IFACE
+    REPO --> DB
+    PERSIST --> DB
+    
+    style ENTITY fill:#e1f5fe
+    style SERVICE fill:#e1f5fe
+    style VALUE fill:#e1f5fe
+    style IFACE fill:#e1f5fe
+    style HANDLER fill:#fff3e0
+    style DTO fill:#fff3e0
+    style MIDDLEWARE fill:#fff3e0
+    style REPO fill:#fce4ec
+    style PERSIST fill:#fce4ec
+    style HTTPSRV fill:#fce4ec
+```
+
+#### **Dependency Flow Rules**
+
+```mermaid
+graph LR
+    subgraph "Allowed Dependencies"
+        I[Infrastructure] --> A[Application]
+        A --> D[Domain]
+        I --> D
+    end
+    
+    subgraph "❌ Forbidden Dependencies"
+        D2[Domain] -.->|FORBIDDEN| I2[Infrastructure]
+        D2 -.->|FORBIDDEN| A2[Application]
+        A2 -.->|FORBIDDEN| I2
+    end
+    
+    style D fill:#4caf50
+    style A fill:#ff9800
+    style I fill:#f44336
+    style D2 fill:#ffebee
+    style A2 fill:#ffebee
+    style I2 fill:#ffebee
+```
+
 ```yaml
 # Clean Architecture with Domain-Driven Design
 components:

@@ -2,6 +2,10 @@ version: "2"
 
 # SQLC configuration for template-arch-lint project
 # Focused on SQLite with comprehensive type-safe database operations
+#
+# 📝 NOTE: For a comprehensive multi-database sqlc.yaml template with 
+# PostgreSQL, MySQL, and advanced plugin support, see:
+# https://github.com/LarsArtmann/template-sqlc
 
 # === GLOBAL VALIDATION RULES ===
 # CEL (Common Expression Language) rules for query validation
