@@ -63,3 +63,7 @@ vendor/
 # Database files
 *.db
 app.db
+
+# Generated files (NEVER commit these!)
+*_templ.go
+*.sql.go
