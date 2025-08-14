@@ -90,7 +90,6 @@ func runServer() error {
 		logger,
 		cfg,
 	)
-
 	// Handle shutdown
 	if err != nil {
 		if shutdownErr := shutdownContainer(diContainer); shutdownErr != nil {

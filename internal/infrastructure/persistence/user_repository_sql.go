@@ -13,13 +13,13 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 )
 
-// SQLUserRepository implements UserRepository using SQL database
+// SQLUserRepository implements UserRepository using SQL database.
 type SQLUserRepository struct {
 	db     *sql.DB
 	logger *slog.Logger
 }
 
-// NewSQLUserRepository creates a new SQL user repository
+// NewSQLUserRepository creates a new SQL user repository.
 func NewSQLUserRepository(db *sql.DB, logger *slog.Logger) *SQLUserRepository {
 	repo := &SQLUserRepository{
 		db:     db,
@@ -38,7 +38,7 @@ func NewSQLUserRepository(db *sql.DB, logger *slog.Logger) *SQLUserRepository {
 	return repo
 }
 
-// initSchema creates the users table if it doesn't exist
+// initSchema creates the users table if it doesn't exist.
 func (r *SQLUserRepository) initSchema() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS users (
@@ -64,7 +64,7 @@ func (r *SQLUserRepository) initSchema() error {
 	return nil
 }
 
-// Save persists a user entity
+// Save persists a user entity.
 func (r *SQLUserRepository) Save(ctx context.Context, user *entities.User) error {
 	if r.db == nil {
 		return fmt.Errorf("database connection is nil")
@@ -102,7 +102,7 @@ func (r *SQLUserRepository) Save(ctx context.Context, user *entities.User) error
 	return nil
 }
 
-// FindByID retrieves a user by their unique identifier
+// FindByID retrieves a user by their unique identifier.
 func (r *SQLUserRepository) FindByID(ctx context.Context, id entities.UserID) (*entities.User, error) {
 	if r.db == nil {
 		return nil, fmt.Errorf("database connection is nil")
@@ -150,7 +150,7 @@ func (r *SQLUserRepository) FindByID(ctx context.Context, id entities.UserID) (*
 	return &user, nil
 }
 
-// FindByEmail retrieves a user by their email address
+// FindByEmail retrieves a user by their email address.
 func (r *SQLUserRepository) FindByEmail(ctx context.Context, email string) (*entities.User, error) {
 	if r.db == nil {
 		return nil, fmt.Errorf("database connection is nil")
@@ -198,7 +198,7 @@ func (r *SQLUserRepository) FindByEmail(ctx context.Context, email string) (*ent
 	return &user, nil
 }
 
-// Delete removes a user from the repository
+// Delete removes a user from the repository.
 func (r *SQLUserRepository) Delete(ctx context.Context, id entities.UserID) error {
 	if r.db == nil {
 		return fmt.Errorf("database connection is nil")
@@ -239,7 +239,7 @@ func (r *SQLUserRepository) Delete(ctx context.Context, id entities.UserID) erro
 	return nil
 }
 
-// List retrieves all users (useful for testing and admin operations)
+// List retrieves all users (useful for testing and admin operations).
 func (r *SQLUserRepository) List(ctx context.Context) ([]*entities.User, error) {
 	if r.db == nil {
 		return nil, fmt.Errorf("database connection is nil")
@@ -307,7 +307,7 @@ func (r *SQLUserRepository) List(ctx context.Context) ([]*entities.User, error) 
 	return users, nil
 }
 
-// FindByUsername retrieves a user by their username (name field)
+// FindByUsername retrieves a user by their username (name field).
 func (r *SQLUserRepository) FindByUsername(ctx context.Context, username string) (*entities.User, error) {
 	if r.db == nil {
 		return nil, fmt.Errorf("database connection is nil")
@@ -355,7 +355,7 @@ func (r *SQLUserRepository) FindByUsername(ctx context.Context, username string)
 	return &user, nil
 }
 
-// Update updates an existing user
+// Update updates an existing user.
 func (r *SQLUserRepository) Update(ctx context.Context, user *entities.User) error {
 	if r.db == nil {
 		return fmt.Errorf("database connection is nil")
@@ -414,7 +414,7 @@ func (r *SQLUserRepository) Update(ctx context.Context, user *entities.User) err
 	return nil
 }
 
-// Count returns the total number of users
+// Count returns the total number of users.
 func (r *SQLUserRepository) Count(ctx context.Context) (int, error) {
 	if r.db == nil {
 		return 0, fmt.Errorf("database connection is nil")
@@ -441,7 +441,7 @@ func (r *SQLUserRepository) Count(ctx context.Context) (int, error) {
 	return count, nil
 }
 
-// Exists checks if a user with the given ID exists
+// Exists checks if a user with the given ID exists.
 func (r *SQLUserRepository) Exists(ctx context.Context, id entities.UserID) (bool, error) {
 	if r.db == nil {
 		return false, fmt.Errorf("database connection is nil")

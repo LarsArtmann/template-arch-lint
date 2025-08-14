@@ -1,10 +1,19 @@
 # 🔥 Template Architecture Lint
 ## Enterprise-Grade Go Architecture & Code Quality Enforcement
 
-[![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?style=flat&logo=go)](https://golang.org)
+[![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat&logo=go)](https://golang.org)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean%20%7C%20DDD%20%7C%20Hexagonal-brightgreen)](https://github.com/LarsArtmann/template-arch-lint)
 [![Quality](https://img.shields.io/badge/Quality-Enterprise%20Grade-gold)](https://github.com/LarsArtmann/template-arch-lint)
+
+[![🧪 Tests](https://github.com/LarsArtmann/template-arch-lint/actions/workflows/test.yml/badge.svg)](https://github.com/LarsArtmann/template-arch-lint/actions/workflows/test.yml)
+[![📝 Linting](https://github.com/LarsArtmann/template-arch-lint/actions/workflows/lint.yml/badge.svg)](https://github.com/LarsArtmann/template-arch-lint/actions/workflows/lint.yml)
+[![🔧 CI/CD](https://github.com/LarsArtmann/template-arch-lint/actions/workflows/ci.yml/badge.svg)](https://github.com/LarsArtmann/template-arch-lint/actions/workflows/ci.yml)
+[![📊 Coverage](https://codecov.io/gh/LarsArtmann/template-arch-lint/branch/master/graph/badge.svg)](https://codecov.io/gh/LarsArtmann/template-arch-lint)
+[![🛡️ Security](https://img.shields.io/badge/Security-gosec%20%7C%20trivy-blue)](https://github.com/LarsArtmann/template-arch-lint/actions)
+[![🏗️ Architecture](https://img.shields.io/badge/Architecture-go--arch--lint-green)](https://github.com/fe3dback/go-arch-lint)
+[![📦 Dependencies](https://img.shields.io/badge/Dependencies-Up%20to%20Date-brightgreen)](https://github.com/LarsArtmann/template-arch-lint)
+[![📋 Code Quality](https://goreportcard.com/badge/github.com/LarsArtmann/template-arch-lint)](https://goreportcard.com/report/github.com/LarsArtmann/template-arch-lint)
 
 > 🚨 **MAXIMUM STRICTNESS** - Zero tolerance for architectural violations and technical debt
 
@@ -137,18 +146,54 @@ deps:
 - ✅ **Clean Architecture Flow** - Infrastructure → Application → Domain
 - ✅ **Bounded Context Separation** - Event-driven communication between contexts
 
-### 📝 **Code Quality Enforcement** (`.golangci.yml`)
+### 📝 **Enterprise-Grade Linting System** (`.golangci.yml`)
 ```yaml
-# 30+ Linters with Maximum Strictness
+# 32 Active Linters with Maximum Strictness
 linters:
   enable:
+    # 🚨 TYPE SAFETY ENFORCEMENT
     - forbidigo      # 🚨 BANS: interface{}, any, panic()
-    - staticcheck    # Advanced static analysis  
-    - errcheck       # Unchecked error detection
-    - gosec          # Security vulnerability scanning
-    - cyclop         # Complexity limits (max 10)
-    - funlen         # Function length limits (max 50 lines)
-    # ... 25 more linters
+    - staticcheck    # Advanced static analysis
+    - govet          # Suspicious constructs
+
+    # 🛡️ ERROR HANDLING
+    - errcheck       # Unchecked errors
+    - errorlint      # Error wrapping
+    - nilerr         # Nil error returns
+    - wrapcheck      # Error context validation
+
+    # 🔒 SECURITY
+    - gosec          # Security audit
+    - copyloopvar    # Loop variable copies
+
+    # 📊 CODE QUALITY
+    - bodyclose      # HTTP body closure
+    - cyclop         # Cyclomatic complexity
+    - exhaustive     # Switch statement completeness
+    - funlen         # Function length
+    - gocognit       # Cognitive complexity
+    - gocyclo        # Cyclomatic complexity
+    - goconst        # Repeated constants
+    - gocritic       # Opinionated checks
+    - godot          # Comment punctuation
+    - gomoddirectives # go.mod validation
+    - goprintffuncname # Printf function naming
+    - ineffassign    # Ineffective assignments
+    - misspell       # Spelling errors
+    - nakedret       # Naked returns
+    - nestif         # Deep nesting prevention
+    - nilerr         # Nil error returns
+    - noctx          # HTTP context validation
+    - nolintlint     # Nolint comment validation
+    - prealloc       # Slice preallocation
+    - revive         # Comprehensive checks
+    - rowserrcheck   # SQL rows error handling
+    - sqlclosecheck  # SQL resource closure
+    - tparallel      # Test parallelism
+    - unconvert      # Unnecessary conversions
+    - unparam        # Unused parameters
+    - unused         # Unused code
+    - whitespace     # Trailing whitespace
 
 linters-settings:
   forbidigo:
@@ -159,14 +204,87 @@ linters-settings:
         msg: "🚨 BANNED: 'any' erases type safety"
       - p: 'panic\('
         msg: "🚨 BANNED: panic() causes runtime crashes"
+      - p: 'fmt\.Print'
+        msg: "🚨 BANNED: Use structured logging instead"
+
+  cyclop:
+    max-complexity: 10
+    package-average: 5.0
+
+  funlen:
+    lines: 50
+    statements: 30
+    ignore-comments: false
+
+  nestif:
+    min-complexity: 4
+
+  exhaustive:
+    check-generated: false
+    default-signifies-exhaustive: true
+
+  prealloc:
+    simple: true
+    range-loops: true
+    for-loops: false
 ```
 
-**Quality Standards:**
+**🏆 Enterprise Quality Standards:**
 - 🚫 **Zero Tolerance**: No `interface{}`, `any`, or `panic()` usage
-- 🔍 **Security Scanning**: Automatic vulnerability detection
+- 🔍 **Security Scanning**: gosec + govulncheck vulnerability detection
 - 📊 **Complexity Limits**: Functions max 50 lines, complexity max 10
-- ⚡ **Performance**: Detects inefficient patterns automatically
-- 🧪 **Test Quality**: Comprehensive test linting and best practices
+- ⚡ **Performance**: Preallocation and efficiency checks
+- 🧪 **Test Quality**: Comprehensive test linting and parallelism validation
+- 🎯 **Error Handling**: Complete error wrapping and context validation
+- 📝 **Documentation**: Comment standards and punctuation enforcement
+- 🔧 **Formatting**: Automated gofumpt + goimports integration
+
+### 🎨 **Automated Code Formatting**
+```bash
+# Enhanced formatting pipeline
+just format          # gofumpt (stricter than gofmt) + goimports
+just fix             # Auto-fix + formatting + linting
+```
+
+**Formatters Integrated:**
+- **gofumpt**: Stricter formatting than standard gofmt
+- **goimports**: Automatic import organization and cleanup
+- **Seamless Integration**: Works with existing development workflow
+
+### 🪝 **Pre-commit Quality Gates**
+```yaml
+# .pre-commit-config.yaml - 15 Quality Gates
+hooks:
+  - Architecture Validation (go-arch-lint)
+  - Code Quality (golangci-lint v2)
+  - File Integrity (YAML, JSON, TOML)
+  - Security Checks (private key detection)
+  - Formatting (gofmt, goimports)
+  - Module Management (go mod tidy)
+```
+
+**Prevention at Source:**
+- 🚫 **No Bad Code**: Issues caught before they enter repository
+- ⚡ **Fast Feedback**: Immediate validation on every commit
+- 🔧 **Auto-fixing**: Many issues resolved automatically
+- 🏗️ **Architecture Protection**: Boundary violations prevented early
+
+### 🚀 **CI/CD Automation**
+```yaml
+# 4 GitHub Actions Workflows
+workflows:
+  lint.yml:     # Code quality & architecture validation
+  test.yml:     # Comprehensive testing with coverage
+  ci.yml:       # Cross-platform builds & Docker
+  status.yml:   # Project health monitoring
+```
+
+**Features:**
+- **Multi-version Testing**: Go 1.21, 1.22, 1.23, 1.24
+- **Cross-platform Builds**: Ubuntu, Windows, macOS
+- **Security Scanning**: gosec, govulncheck, trivy
+- **Performance Benchmarks**: CPU and memory benchmarking
+- **Coverage Analysis**: 80% threshold enforcement
 
 ### 📁 **Filename Compliance** (Built-in validation)
 ```bash

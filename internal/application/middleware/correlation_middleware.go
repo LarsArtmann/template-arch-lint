@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CorrelationIDConfig contains configuration for correlation ID middleware
+// CorrelationIDConfig contains configuration for correlation ID middleware.
 type CorrelationIDConfig struct {
 	// HeaderName is the name of the HTTP header for correlation ID
 	HeaderName string
@@ -20,7 +20,7 @@ type CorrelationIDConfig struct {
 	Logger *slog.Logger
 }
 
-// DefaultCorrelationIDConfig returns a default configuration
+// DefaultCorrelationIDConfig returns a default configuration.
 func DefaultCorrelationIDConfig() CorrelationIDConfig {
 	return CorrelationIDConfig{
 		HeaderName: httputil.CorrelationIDKey,
@@ -29,7 +29,7 @@ func DefaultCorrelationIDConfig() CorrelationIDConfig {
 	}
 }
 
-// CorrelationID returns a middleware that adds correlation IDs to requests
+// CorrelationID returns a middleware that adds correlation IDs to requests.
 func CorrelationID(config ...CorrelationIDConfig) gin.HandlerFunc {
 	cfg := DefaultCorrelationIDConfig()
 	if len(config) > 0 {
@@ -65,7 +65,7 @@ func CorrelationID(config ...CorrelationIDConfig) gin.HandlerFunc {
 	}
 }
 
-// generateCorrelationID generates a random hex correlation ID
+// generateCorrelationID generates a random hex correlation ID.
 func generateCorrelationID() string {
 	bytes := make([]byte, 16) // 32 hex characters
 	if _, err := rand.Read(bytes); err != nil {
@@ -75,14 +75,14 @@ func generateCorrelationID() string {
 	return hex.EncodeToString(bytes)
 }
 
-// generateTimestampID generates a timestamp-based correlation ID as fallback
+// generateTimestampID generates a timestamp-based correlation ID as fallback.
 func generateTimestampID() string {
 	// Simple fallback using nanosecond timestamp
 	// In production, you might want to use a more sophisticated approach
 	return hex.EncodeToString([]byte("fallback-" + hex.EncodeToString([]byte("timestamp"))))
 }
 
-// WithCorrelationID is a convenience function to create correlation ID middleware
+// WithCorrelationID is a convenience function to create correlation ID middleware.
 func WithCorrelationID(logger *slog.Logger) gin.HandlerFunc {
 	return CorrelationID(CorrelationIDConfig{
 		Logger: logger,
@@ -90,7 +90,7 @@ func WithCorrelationID(logger *slog.Logger) gin.HandlerFunc {
 }
 
 // GetCorrelationIDFromContext retrieves correlation ID from gin context
-// This is a convenience function that wraps the httputil function
+// This is a convenience function that wraps the httputil function.
 func GetCorrelationIDFromContext(c *gin.Context) string {
 	return httputil.GetCorrelationID(c)
 }

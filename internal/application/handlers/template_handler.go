@@ -16,13 +16,13 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/web/templates/pages"
 )
 
-// TemplateHandler handles template-based HTTP requests with HTMX support
+// TemplateHandler handles template-based HTTP requests with HTMX support.
 type TemplateHandler struct {
 	userService *services.UserService
 	logger      *slog.Logger
 }
 
-// NewTemplateHandler creates a new TemplateHandler
+// NewTemplateHandler creates a new TemplateHandler.
 func NewTemplateHandler(userService *services.UserService, logger *slog.Logger) *TemplateHandler {
 	return &TemplateHandler{
 		userService: userService,
@@ -30,7 +30,7 @@ func NewTemplateHandler(userService *services.UserService, logger *slog.Logger) 
 	}
 }
 
-// renderTemplate is a helper function to render templ components
+// renderTemplate is a helper function to render templ components.
 func (h *TemplateHandler) renderTemplate(c *gin.Context, component templ.Component) {
 	c.Header("Content-Type", "text/html; charset=utf-8")
 	if err := component.Render(c.Request.Context(), c.Writer); err != nil {
@@ -39,12 +39,12 @@ func (h *TemplateHandler) renderTemplate(c *gin.Context, component templ.Compone
 	}
 }
 
-// showErrorTemplate renders error messages for HTMX responses
+// showErrorTemplate renders error messages for HTMX responses.
 func (h *TemplateHandler) showErrorTemplate(c *gin.Context, message, details string) {
 	h.renderTemplate(c, components.ErrorMessage(message, details))
 }
 
-// UsersPage renders the main users list page
+// UsersPage renders the main users list page.
 func (h *TemplateHandler) UsersPage(c *gin.Context) {
 	h.logger.Debug("Rendering users page")
 
@@ -66,7 +66,7 @@ func (h *TemplateHandler) UsersPage(c *gin.Context) {
 	h.renderTemplate(c, pages.UsersPage(users, stats))
 }
 
-// SearchUsers handles HTMX search requests
+// SearchUsers handles HTMX search requests.
 func (h *TemplateHandler) SearchUsers(c *gin.Context) {
 	h.logger.Debug("Searching users")
 
@@ -83,7 +83,7 @@ func (h *TemplateHandler) SearchUsers(c *gin.Context) {
 	h.renderTemplate(c, pages.SearchUsersContent(users))
 }
 
-// buildSearchFilters constructs type-safe filters from query parameters
+// buildSearchFilters constructs type-safe filters from query parameters.
 func (h *TemplateHandler) buildSearchFilters(c *gin.Context) services.UserFilters {
 	var filters services.UserFilters
 
@@ -99,7 +99,7 @@ func (h *TemplateHandler) buildSearchFilters(c *gin.Context) services.UserFilter
 	return filters
 }
 
-// performUserSearch executes the search with given query and filters
+// performUserSearch executes the search with given query and filters.
 func (h *TemplateHandler) performUserSearch(c *gin.Context, query string, filters services.UserFilters) ([]*entities.User, error) {
 	hasFilters := filters.Domain != nil || filters.Active != nil
 	if query != "" || hasFilters {
@@ -109,7 +109,7 @@ func (h *TemplateHandler) performUserSearch(c *gin.Context, query string, filter
 	return h.userService.ListUsers(c.Request.Context())
 }
 
-// searchWithFilters performs filtered search and applies text filtering if needed
+// searchWithFilters performs filtered search and applies text filtering if needed.
 func (h *TemplateHandler) searchWithFilters(c *gin.Context, query string, filters services.UserFilters) ([]*entities.User, error) {
 	users, err := h.userService.GetUsersWithFilters(c.Request.Context(), filters)
 	if err != nil {
@@ -123,7 +123,7 @@ func (h *TemplateHandler) searchWithFilters(c *gin.Context, query string, filter
 	return users, nil
 }
 
-// filterUsersByText filters users by text search in name and email
+// filterUsersByText filters users by text search in name and email.
 func (h *TemplateHandler) filterUsersByText(users []*entities.User, query string) []*entities.User {
 	filteredUsers := make([]*entities.User, 0)
 	queryLower := strings.ToLower(query)
@@ -137,19 +137,19 @@ func (h *TemplateHandler) filterUsersByText(users []*entities.User, query string
 	return filteredUsers
 }
 
-// userMatchesQuery checks if user matches the search query
+// userMatchesQuery checks if user matches the search query.
 func (h *TemplateHandler) userMatchesQuery(user *entities.User, queryLower string) bool {
 	return strings.Contains(strings.ToLower(user.Name), queryLower) ||
 		strings.Contains(strings.ToLower(user.Email), queryLower)
 }
 
-// CreateUserPage renders the create user form
+// CreateUserPage renders the create user form.
 func (h *TemplateHandler) CreateUserPage(c *gin.Context) {
 	h.logger.Debug("Rendering create user page")
 	h.renderTemplate(c, pages.CreateUserPage())
 }
 
-// CreateUser handles user creation via HTMX form submission
+// CreateUser handles user creation via HTMX form submission.
 func (h *TemplateHandler) CreateUser(c *gin.Context) {
 	h.logger.Info("Creating user via template", "remote_addr", c.ClientIP())
 
@@ -185,7 +185,7 @@ func (h *TemplateHandler) CreateUser(c *gin.Context) {
 	h.renderTemplate(c, components.UserFormSuccess(user, "created"))
 }
 
-// EditUserPage renders the edit user form
+// EditUserPage renders the edit user form.
 func (h *TemplateHandler) EditUserPage(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := values.NewUserID(idStr)
@@ -205,7 +205,7 @@ func (h *TemplateHandler) EditUserPage(c *gin.Context) {
 	h.renderTemplate(c, pages.EditUserPage(user))
 }
 
-// EditUserInline renders inline edit form for HTMX
+// EditUserInline renders inline edit form for HTMX.
 func (h *TemplateHandler) EditUserInline(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := values.NewUserID(idStr)
@@ -225,7 +225,7 @@ func (h *TemplateHandler) EditUserInline(c *gin.Context) {
 	h.renderTemplate(c, components.UserEditRow(user))
 }
 
-// CancelUserEdit cancels inline editing and returns to view mode
+// CancelUserEdit cancels inline editing and returns to view mode.
 func (h *TemplateHandler) CancelUserEdit(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := values.NewUserID(idStr)
@@ -245,7 +245,7 @@ func (h *TemplateHandler) CancelUserEdit(c *gin.Context) {
 	h.renderTemplate(c, components.UserRow(user))
 }
 
-// UpdateUser handles user updates via HTMX
+// UpdateUser handles user updates via HTMX.
 func (h *TemplateHandler) UpdateUser(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := values.NewUserID(idStr)
@@ -286,7 +286,7 @@ func (h *TemplateHandler) UpdateUser(c *gin.Context) {
 	}
 }
 
-// DeleteUser handles user deletion via HTMX
+// DeleteUser handles user deletion via HTMX.
 func (h *TemplateHandler) DeleteUser(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := values.NewUserID(idStr)
@@ -310,7 +310,7 @@ func (h *TemplateHandler) DeleteUser(c *gin.Context) {
 	c.String(http.StatusOK, "")
 }
 
-// UserStatsPartial returns user statistics as HTML partial for HTMX updates
+// UserStatsPartial returns user statistics as HTML partial for HTMX updates.
 func (h *TemplateHandler) UserStatsPartial(c *gin.Context) {
 	stats, err := h.userService.GetUserStats(c.Request.Context())
 	if err != nil {

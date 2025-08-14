@@ -21,12 +21,12 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/infrastructure/persistence"
 )
 
-// Container represents the DI container
+// Container represents the DI container.
 type Container struct {
 	injector *do.Injector
 }
 
-// New creates a new DI container
+// New creates a new DI container.
 func New() *Container {
 	injector := do.New()
 	return &Container{
@@ -34,7 +34,7 @@ func New() *Container {
 	}
 }
 
-// RegisterAll registers all dependencies in the container
+// RegisterAll registers all dependencies in the container.
 func (c *Container) RegisterAll() error {
 	// Register configuration
 	c.registerConfig()
@@ -60,17 +60,17 @@ func (c *Container) RegisterAll() error {
 	return nil
 }
 
-// GetInjector returns the underlying do.Injector
+// GetInjector returns the underlying do.Injector.
 func (c *Container) GetInjector() *do.Injector {
 	return c.injector
 }
 
-// Shutdown gracefully shuts down the container
+// Shutdown gracefully shuts down the container.
 func (c *Container) Shutdown() error {
 	return c.injector.Shutdown()
 }
 
-// registerConfig registers the configuration
+// registerConfig registers the configuration.
 func (c *Container) registerConfig() {
 	do.Provide(c.injector, func(_ *do.Injector) (*config.Config, error) {
 		configPath := os.Getenv("CONFIG_PATH")
@@ -82,7 +82,7 @@ func (c *Container) registerConfig() {
 	})
 }
 
-// registerLogger registers the logger
+// registerLogger registers the logger.
 func (c *Container) registerLogger() {
 	do.Provide(c.injector, func(i *do.Injector) (*slog.Logger, error) {
 		cfg := do.MustInvoke[*config.Config](i)
@@ -117,7 +117,7 @@ func (c *Container) registerLogger() {
 	})
 }
 
-// registerDatabase registers the database connection
+// registerDatabase registers the database connection.
 func (c *Container) registerDatabase() {
 	do.Provide(c.injector, func(i *do.Injector) (*sql.DB, error) {
 		cfg := do.MustInvoke[*config.Config](i)
@@ -150,7 +150,7 @@ func (c *Container) registerDatabase() {
 	})
 }
 
-// registerRepositories registers all repositories
+// registerRepositories registers all repositories.
 func (c *Container) registerRepositories() {
 	do.Provide(c.injector, func(i *do.Injector) (repositories.UserRepository, error) {
 		db := do.MustInvoke[*sql.DB](i)
@@ -162,7 +162,7 @@ func (c *Container) registerRepositories() {
 	})
 }
 
-// registerServices registers all domain services
+// registerServices registers all domain services.
 func (c *Container) registerServices() {
 	do.Provide(c.injector, func(i *do.Injector) (*services.UserService, error) {
 		userRepo := do.MustInvoke[repositories.UserRepository](i)
@@ -171,7 +171,7 @@ func (c *Container) registerServices() {
 	})
 }
 
-// registerHandlers registers all HTTP handlers
+// registerHandlers registers all HTTP handlers.
 func (c *Container) registerHandlers() {
 	// Register API handler
 	do.Provide(c.injector, func(i *do.Injector) (*handlers.UserHandler, error) {
@@ -209,7 +209,7 @@ func (c *Container) registerHandlers() {
 	})
 }
 
-// registerHTTPServer registers the HTTP server and router
+// registerHTTPServer registers the HTTP server and router.
 func (c *Container) registerHTTPServer() {
 	do.Provide(c.injector, func(i *do.Injector) (*gin.Engine, error) {
 		cfg := do.MustInvoke[*config.Config](i)
@@ -229,7 +229,7 @@ func (c *Container) registerHTTPServer() {
 	})
 }
 
-// createGinRouter creates and configures gin router with middleware
+// createGinRouter creates and configures gin router with middleware.
 func (c *Container) createGinRouter(cfg *config.Config, logger *slog.Logger) *gin.Engine {
 	c.setGinMode(cfg.App.Environment)
 
@@ -241,7 +241,7 @@ func (c *Container) createGinRouter(cfg *config.Config, logger *slog.Logger) *gi
 	return router
 }
 
-// setGinMode sets gin mode based on environment
+// setGinMode sets gin mode based on environment.
 func (c *Container) setGinMode(environment string) {
 	switch environment {
 	case "production":
@@ -253,7 +253,7 @@ func (c *Container) setGinMode(environment string) {
 	}
 }
 
-// setupCoreRoutes sets up core application routes
+// setupCoreRoutes sets up core application routes.
 func (c *Container) setupCoreRoutes(router *gin.Engine, cfg *config.Config, healthHandler *handlers.HealthHandler, perfHandler *handlers.PerformanceHandler) {
 	// Register comprehensive health check endpoints
 	handlers.RegisterHealthRoutes(router, healthHandler)
@@ -270,7 +270,7 @@ func (c *Container) setupCoreRoutes(router *gin.Engine, cfg *config.Config, heal
 	})
 }
 
-// setupProfilingRoutes configures pprof endpoints for performance analysis
+// setupProfilingRoutes configures pprof endpoints for performance analysis.
 func (c *Container) setupProfilingRoutes(router *gin.Engine, cfg *config.Config) {
 	// Only enable profiling in development or debug environments
 	if cfg.App.Environment == "development" || cfg.App.Environment == "debug" {
@@ -315,7 +315,7 @@ func (c *Container) setupProfilingRoutes(router *gin.Engine, cfg *config.Config)
 	}
 }
 
-// setupPerformanceRoutes configures performance monitoring endpoints
+// setupPerformanceRoutes configures performance monitoring endpoints.
 func (c *Container) setupPerformanceRoutes(router *gin.Engine, cfg *config.Config, perfHandler *handlers.PerformanceHandler) {
 	// Performance monitoring is available in all environments but with different access levels
 	perf := router.Group("/performance")
@@ -333,7 +333,7 @@ func (c *Container) setupPerformanceRoutes(router *gin.Engine, cfg *config.Confi
 	}
 }
 
-// setupTemplateRoutes configures template-based routes for HTMX
+// setupTemplateRoutes configures template-based routes for HTMX.
 func (c *Container) setupTemplateRoutes(router *gin.Engine, templHandler *handlers.TemplateHandler) {
 	// Main pages
 	router.GET("/users", templHandler.UsersPage)
@@ -351,7 +351,7 @@ func (c *Container) setupTemplateRoutes(router *gin.Engine, templHandler *handle
 	router.DELETE("/users/:id", templHandler.DeleteUser)
 }
 
-// setupAPIRoutes configures JSON API routes
+// setupAPIRoutes configures JSON API routes.
 func (c *Container) setupAPIRoutes(router *gin.Engine, userHandler *handlers.UserHandler) {
 	api := router.Group("/api/v1")
 	users := api.Group("/users")

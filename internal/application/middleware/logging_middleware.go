@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// StructuredLoggingMiddleware provides structured logging for HTTP requests
+// StructuredLoggingMiddleware provides structured logging for HTTP requests.
 func StructuredLoggingMiddleware(logger *slog.Logger) gin.HandlerFunc {
 	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		// Log with structured fields instead of returning a formatted string
@@ -27,7 +27,7 @@ func StructuredLoggingMiddleware(logger *slog.Logger) gin.HandlerFunc {
 	})
 }
 
-// RequestLoggingMiddleware logs detailed request information
+// RequestLoggingMiddleware logs detailed request information.
 func RequestLoggingMiddleware(logger *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()

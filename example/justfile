@@ -1,0 +1,143 @@
+# 🚀 Example Project - Development Commands
+# Simplified justfile based on Template Architecture Lint
+
+# Default recipe (shows help)
+default:
+    @just --list
+
+# 🏗️ BUILD & DEVELOPMENT
+# ==========================================
+
+# Build the application
+build:
+    @echo "🔨 Building example application..."
+    go build -o bin/api ./cmd/api
+
+# Run the application (development server)
+run:
+    @echo "🚀 Starting development server on :8090..."
+    go run ./cmd/api
+
+# Clean build artifacts
+clean:
+    @echo "🧹 Cleaning build artifacts..."
+    rm -rf bin/
+    go clean
+
+# 🔍 CODE QUALITY & LINTING
+# ==========================================
+
+# Install required tools
+install:
+    @echo "🔧 Installing required tools..."
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+    go install github.com/fdaines/arch-go@latest
+    @echo "✅ Tools installed successfully!"
+
+# Run all linting (architecture + code quality)
+lint:
+    @echo "🔍 Running complete linting suite..."
+    @just lint-arch
+    @just lint-code
+    @echo "✅ All linting completed!"
+
+# Run architecture linting only
+lint-arch:
+    @echo "🏗️ Checking architecture boundaries..."
+    arch-go -c .go-arch-lint.yml
+
+# Run code quality linting only  
+lint-code:
+    @echo "🔍 Running code quality analysis..."
+    golangci-lint run
+
+# Auto-fix formatting issues
+fix:
+    @echo "🔧 Auto-fixing code formatting..."
+    gofmt -w .
+    goimports -w .
+    @echo "✅ Formatting fixes applied!"
+
+# 🧪 TESTING
+# ==========================================
+
+# Run all tests
+test:
+    @echo "🧪 Running all tests..."
+    go test ./... -v
+
+# Run tests with coverage
+coverage:
+    @echo "📊 Running tests with coverage..."
+    go test ./... -coverprofile=coverage.out
+    go tool cover -html=coverage.out -o coverage.html
+    @echo "✅ Coverage report generated: coverage.html"
+
+# Run tests in watch mode (requires entr)
+test-watch:
+    @echo "👀 Running tests in watch mode..."
+    find . -name "*.go" | entr -c go test ./...
+
+# 📊 PERFORMANCE
+# ==========================================
+
+# Run benchmarks
+bench:
+    @echo "⚡ Running benchmarks..."
+    go test -bench=. -benchmem ./...
+
+# Generate CPU profile
+profile:
+    @echo "📊 Generating CPU profile..."
+    @echo "Start the server first with 'just run', then run benchmarks"
+    @echo "Example: go test -bench=BenchmarkCreateProduct -cpuprofile=cpu.prof"
+
+# 🔧 DEVELOPMENT HELPERS
+# ==========================================
+
+# Show project structure
+tree:
+    @echo "📁 Project structure:"
+    tree -I 'bin|coverage.*|*.prof'
+
+# Initialize go modules
+mod-init NAME:
+    go mod init {{NAME}}
+    go mod tidy
+
+# Update dependencies
+mod-update:
+    @echo "📦 Updating dependencies..."
+    go mod tidy
+    go mod download
+
+# 🎯 EXAMPLE COMMANDS
+# ==========================================
+
+# Demonstrate linting violations (will fail)
+demo-violations:
+    @echo "🚨 Demonstrating common linting violations..."
+    @echo "This will intentionally fail to show what the linters catch"
+    @echo ""
+    @echo "Try adding these violations to see the linters in action:"
+    @echo "1. Add 'import \"github.com/gin-gonic/gin\"' to internal/domain/entities/product.go"
+    @echo "2. Add 'func BadFunction(data interface{}) { panic(\"error\") }' anywhere"
+    @echo "3. Create a function with more than 50 lines"
+    @echo ""
+    @echo "Then run 'just lint' to see the violations caught"
+
+# Show example of correct vs incorrect patterns
+demo-patterns:
+    @echo "📚 Example patterns:"
+    @echo ""
+    @echo "✅ CORRECT - Domain entity:"
+    @echo "   package entities"
+    @echo "   import \"time\""
+    @echo "   type Product struct { Name string; CreatedAt time.Time }"
+    @echo ""
+    @echo "❌ INCORRECT - Domain with infrastructure:"
+    @echo "   package entities"
+    @echo "   import \"database/sql\""
+    @echo "   type Product struct { Name string; DB *sql.DB }"
+    @echo ""
+    @echo "Use 'just lint-arch' to catch architectural violations"

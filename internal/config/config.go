@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Config represents the application configuration
+// Config represents the application configuration.
 type Config struct {
 	Server   ServerConfig   `mapstructure:"server" validate:"required"`
 	Database DatabaseConfig `mapstructure:"database" validate:"required"`
@@ -18,7 +18,7 @@ type Config struct {
 	App      AppConfig      `mapstructure:"app" validate:"required"`
 }
 
-// ServerConfig contains HTTP server configuration
+// ServerConfig contains HTTP server configuration.
 type ServerConfig struct {
 	Host                    string        `mapstructure:"host" validate:"required"`
 	Port                    int           `mapstructure:"port" validate:"required,min=1,max=65535"`
@@ -28,7 +28,7 @@ type ServerConfig struct {
 	GracefulShutdownTimeout time.Duration `mapstructure:"graceful_shutdown_timeout"`
 }
 
-// DatabaseConfig contains database configuration
+// DatabaseConfig contains database configuration.
 type DatabaseConfig struct {
 	Driver          string        `mapstructure:"driver" validate:"required,oneof=sqlite3 postgres mysql"`
 	DSN             string        `mapstructure:"dsn" validate:"required"`
@@ -38,14 +38,14 @@ type DatabaseConfig struct {
 	ConnMaxIdleTime time.Duration `mapstructure:"conn_max_idle_time"`
 }
 
-// LoggingConfig contains logging configuration
+// LoggingConfig contains logging configuration.
 type LoggingConfig struct {
 	Level  string `mapstructure:"level" validate:"required,valid_log_level"`
 	Format string `mapstructure:"format" validate:"required,oneof=json text"`
 	Output string `mapstructure:"output" validate:"required"`
 }
 
-// AppConfig contains application-specific configuration
+// AppConfig contains application-specific configuration.
 type AppConfig struct {
 	Name        string `mapstructure:"name" validate:"required"`
 	Version     string `mapstructure:"version" validate:"required"`
@@ -53,7 +53,7 @@ type AppConfig struct {
 	Debug       bool   `mapstructure:"debug"`
 }
 
-// LoadConfig loads configuration from various sources
+// LoadConfig loads configuration from various sources.
 func LoadConfig(configPath string) (*Config, error) {
 	config := &Config{}
 
@@ -78,7 +78,7 @@ func LoadConfig(configPath string) (*Config, error) {
 	return config, nil
 }
 
-// setDefaults sets default values for the configuration
+// setDefaults sets default values for the configuration.
 func setDefaults(_ *Config) {
 	// App defaults
 	viper.SetDefault("app.name", "template-arch-lint")
@@ -108,7 +108,7 @@ func setDefaults(_ *Config) {
 	viper.SetDefault("logging.output", "stdout")
 }
 
-// configureViper sets up viper configuration
+// configureViper sets up viper configuration.
 func configureViper(configPath string) error {
 	// Environment variable configuration
 	viper.SetEnvPrefix("APP")
@@ -126,7 +126,7 @@ func configureViper(configPath string) error {
 	return nil
 }
 
-// validateConfig validates the configuration
+// validateConfig validates the configuration.
 func validateConfig(config *Config) error {
 	validate := validator.New()
 
@@ -142,7 +142,7 @@ func validateConfig(config *Config) error {
 	return validate.Struct(config)
 }
 
-// validateLogLevel validates log level values
+// validateLogLevel validates log level values.
 func validateLogLevel(fl validator.FieldLevel) bool {
 	level := fl.Field().String()
 	switch level {
@@ -153,7 +153,7 @@ func validateLogLevel(fl validator.FieldLevel) bool {
 	}
 }
 
-// validateEnvironment validates environment values
+// validateEnvironment validates environment values.
 func validateEnvironment(fl validator.FieldLevel) bool {
 	env := fl.Field().String()
 	switch env {

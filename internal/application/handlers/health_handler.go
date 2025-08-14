@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	// HealthStatus constants
+	// HealthStatus constants.
 	StatusHealthy   = "healthy"
 	StatusUnhealthy = "unhealthy"
 	StatusReady     = "ready"
@@ -20,13 +20,13 @@ const (
 	StatusAlive     = "alive"
 )
 
-// HealthHandler provides health check endpoints
+// HealthHandler provides health check endpoints.
 type HealthHandler struct {
 	db     *sql.DB
 	logger *slog.Logger
 }
 
-// NewHealthHandler creates a new health handler
+// NewHealthHandler creates a new health handler.
 func NewHealthHandler(db *sql.DB, logger *slog.Logger) *HealthHandler {
 	return &HealthHandler{
 		db:     db,
@@ -34,7 +34,7 @@ func NewHealthHandler(db *sql.DB, logger *slog.Logger) *HealthHandler {
 	}
 }
 
-// HealthResponse represents a health check response
+// HealthResponse represents a health check response.
 type HealthResponse struct {
 	Status      string           `json:"status"`
 	Timestamp   time.Time        `json:"timestamp"`
@@ -44,7 +44,7 @@ type HealthResponse struct {
 	Checks      map[string]Check `json:"checks,omitempty"`
 }
 
-// Check represents an individual health check
+// Check represents an individual health check.
 type Check struct {
 	Status    string    `json:"status"`
 	Timestamp time.Time `json:"timestamp"`
@@ -52,7 +52,7 @@ type Check struct {
 	Error     string    `json:"error,omitempty"`
 }
 
-// Health returns the overall health status of the application
+// Health returns the overall health status of the application.
 func (h *HealthHandler) Health(c *gin.Context) {
 	correlationID := httputil.GetCorrelationID(c)
 	h.logger.Info("Health check requested", "correlation_id", correlationID)
@@ -92,7 +92,7 @@ func (h *HealthHandler) Health(c *gin.Context) {
 	}
 }
 
-// Ready returns the readiness status of the application
+// Ready returns the readiness status of the application.
 func (h *HealthHandler) Ready(c *gin.Context) {
 	correlationID := httputil.GetCorrelationID(c)
 	h.logger.Info("Readiness check requested", "correlation_id", correlationID)
@@ -133,7 +133,7 @@ func (h *HealthHandler) Ready(c *gin.Context) {
 	}
 }
 
-// Live is a simple liveness check (always returns OK if the service is running)
+// Live is a simple liveness check (always returns OK if the service is running).
 func (h *HealthHandler) Live(c *gin.Context) {
 	correlationID := httputil.GetCorrelationID(c)
 
@@ -148,7 +148,7 @@ func (h *HealthHandler) Live(c *gin.Context) {
 	h.logger.Debug("Liveness check completed", "correlation_id", correlationID)
 }
 
-// checkDatabase performs a database health check
+// checkDatabase performs a database health check.
 func (h *HealthHandler) checkDatabase() Check {
 	start := time.Now()
 
@@ -179,7 +179,7 @@ func (h *HealthHandler) checkDatabase() Check {
 	return check
 }
 
-// RegisterHealthRoutes registers health check routes
+// RegisterHealthRoutes registers health check routes.
 func RegisterHealthRoutes(router gin.IRouter, handler *HealthHandler) {
 	router.GET("/health", handler.Health)
 	router.GET("/ready", handler.Ready)

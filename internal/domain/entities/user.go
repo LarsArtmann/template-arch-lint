@@ -8,10 +8,10 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
-// UserID represents a unique user identifier (alias for convenience)
+// UserID represents a unique user identifier (alias for convenience).
 type UserID = values.UserID
 
-// User represents a domain entity with value objects
+// User represents a domain entity with value objects.
 type User struct {
 	ID       values.UserID `json:"id"`
 	Email    string        `json:"email"` // String for JSON serialization
@@ -24,7 +24,7 @@ type User struct {
 	nameVO  values.UserName
 }
 
-// NewUser creates a new user with validation using value objects
+// NewUser creates a new user with validation using value objects.
 func NewUser(id values.UserID, email, name string) (*User, error) {
 	// Validate and create value objects
 	emailVO, err := values.NewEmail(email)
@@ -53,7 +53,7 @@ func NewUser(id values.UserID, email, name string) (*User, error) {
 	}, nil
 }
 
-// NewUserFromStrings creates a new user with string ID (for backward compatibility)
+// NewUserFromStrings creates a new user with string ID (for backward compatibility).
 func NewUserFromStrings(id, email, name string) (*User, error) {
 	userID, err := values.NewUserID(id)
 	if err != nil {
@@ -63,7 +63,7 @@ func NewUserFromStrings(id, email, name string) (*User, error) {
 	return NewUser(userID, email, name)
 }
 
-// Validate ensures the user is in a valid state using value objects
+// Validate ensures the user is in a valid state using value objects.
 func (u *User) Validate() error {
 	if u.ID.IsEmpty() {
 		return errors.NewRequiredFieldError("user ID")
@@ -84,7 +84,7 @@ func (u *User) Validate() error {
 	return nil
 }
 
-// GetEmail returns the email value object
+// GetEmail returns the email value object.
 func (u *User) GetEmail() values.Email {
 	// Lazy initialization if value object is not set
 	if u.emailVO.IsEmpty() && u.Email != "" {
@@ -95,7 +95,7 @@ func (u *User) GetEmail() values.Email {
 	return u.emailVO
 }
 
-// GetUserName returns the username value object
+// GetUserName returns the username value object.
 func (u *User) GetUserName() values.UserName {
 	// Lazy initialization if value object is not set
 	if u.nameVO.IsEmpty() && u.Name != "" {
@@ -106,7 +106,7 @@ func (u *User) GetUserName() values.UserName {
 	return u.nameVO
 }
 
-// SetEmail updates the email with validation
+// SetEmail updates the email with validation.
 func (u *User) SetEmail(email string) error {
 	emailVO, err := values.NewEmail(email)
 	if err != nil {
@@ -119,7 +119,7 @@ func (u *User) SetEmail(email string) error {
 	return nil
 }
 
-// SetName updates the name with validation
+// SetName updates the name with validation.
 func (u *User) SetName(name string) error {
 	nameVO, err := values.NewUserName(name)
 	if err != nil {
@@ -132,18 +132,18 @@ func (u *User) SetName(name string) error {
 	return nil
 }
 
-// EmailDomain returns the domain part of the user's email
+// EmailDomain returns the domain part of the user's email.
 func (u *User) EmailDomain() string {
 	return u.GetEmail().Domain()
 }
 
-// IsEmailValid checks if the user's email is valid
+// IsEmailValid checks if the user's email is valid.
 func (u *User) IsEmailValid() bool {
 	email := u.GetEmail()
 	return !email.IsEmpty()
 }
 
-// IsNameReserved checks if the username is reserved
+// IsNameReserved checks if the username is reserved.
 func (u *User) IsNameReserved() bool {
 	return u.GetUserName().IsReserved()
 }

@@ -9,20 +9,20 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 )
 
-// InMemoryUserRepository implements UserRepository interface with in-memory storage
+// InMemoryUserRepository implements UserRepository interface with in-memory storage.
 type InMemoryUserRepository struct {
 	mu    sync.RWMutex
 	users map[entities.UserID]*entities.User
 }
 
-// NewInMemoryUserRepository creates a new in-memory user repository
+// NewInMemoryUserRepository creates a new in-memory user repository.
 func NewInMemoryUserRepository() UserRepository {
 	return &InMemoryUserRepository{
 		users: make(map[entities.UserID]*entities.User),
 	}
 }
 
-// Save persists a user entity
+// Save persists a user entity.
 func (r *InMemoryUserRepository) Save(_ context.Context, user *entities.User) error {
 	if user == nil {
 		return errors.NewValidationError("user", "user cannot be nil")
@@ -48,7 +48,7 @@ func (r *InMemoryUserRepository) Save(_ context.Context, user *entities.User) er
 	return nil
 }
 
-// FindByID retrieves a user by their unique identifier
+// FindByID retrieves a user by their unique identifier.
 func (r *InMemoryUserRepository) FindByID(_ context.Context, id entities.UserID) (*entities.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -63,7 +63,7 @@ func (r *InMemoryUserRepository) FindByID(_ context.Context, id entities.UserID)
 	return &userCopy, nil
 }
 
-// FindByEmail retrieves a user by their email address
+// FindByEmail retrieves a user by their email address.
 func (r *InMemoryUserRepository) FindByEmail(_ context.Context, email string) (*entities.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -79,7 +79,7 @@ func (r *InMemoryUserRepository) FindByEmail(_ context.Context, email string) (*
 	return nil, ErrUserNotFound
 }
 
-// Delete removes a user from the repository
+// Delete removes a user from the repository.
 func (r *InMemoryUserRepository) Delete(_ context.Context, id entities.UserID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -92,7 +92,7 @@ func (r *InMemoryUserRepository) Delete(_ context.Context, id entities.UserID) e
 	return nil
 }
 
-// List retrieves all users
+// List retrieves all users.
 func (r *InMemoryUserRepository) List(_ context.Context) ([]*entities.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()

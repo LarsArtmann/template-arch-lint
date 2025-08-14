@@ -19,13 +19,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// UserHandler handles user-related HTTP requests
+// UserHandler handles user-related HTTP requests.
 type UserHandler struct {
 	userService *services.UserService
 	logger      *slog.Logger
 }
 
-// NewUserHandler creates a new UserHandler with dependency injection
+// NewUserHandler creates a new UserHandler with dependency injection.
 func NewUserHandler(userService *services.UserService, logger *slog.Logger) *UserHandler {
 	return &UserHandler{
 		userService: userService,
@@ -35,7 +35,7 @@ func NewUserHandler(userService *services.UserService, logger *slog.Logger) *Use
 
 // Note: Request types moved to dto package for better separation of concerns
 
-// CreateUser creates a new user
+// CreateUser creates a new user.
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	correlationID := httputil.GetCorrelationID(c)
 	h.logger.Info("Creating user",
@@ -81,7 +81,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 				"User or email already exists",
 				"conflict",
 				map[string]string{
-					"id": req.ID,
+					"id":    req.ID,
 					"email": req.Email,
 				})
 			return
@@ -108,7 +108,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	httputil.RespondCreated(c, userResponse, "User created successfully")
 }
 
-// GetUser retrieves a user by ID
+// GetUser retrieves a user by ID.
 func (h *UserHandler) GetUser(c *gin.Context) {
 	correlationID := httputil.GetCorrelationID(c)
 	idStr := c.Param("id")
@@ -154,7 +154,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	httputil.RespondOK(c, userResponse, "User retrieved successfully")
 }
 
-// UpdateUser updates an existing user
+// UpdateUser updates an existing user.
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := values.NewUserID(idStr)
@@ -209,7 +209,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// DeleteUser removes a user
+// DeleteUser removes a user.
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := values.NewUserID(idStr)
@@ -248,7 +248,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 	})
 }
 
-// ListUsers retrieves all users
+// ListUsers retrieves all users.
 func (h *UserHandler) ListUsers(c *gin.Context) {
 	// Parse optional query parameters
 	limitStr := c.DefaultQuery("limit", "50")
@@ -299,7 +299,7 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 	})
 }
 
-// handleError processes errors and returns appropriate HTTP responses using typed errors
+// handleError processes errors and returns appropriate HTTP responses using typed errors.
 func (h *UserHandler) handleError(c *gin.Context, err error, operation string) {
 	h.logger.Error("Operation failed", "operation", operation, "error", err)
 
@@ -352,7 +352,7 @@ func (h *UserHandler) handleError(c *gin.Context, err error, operation string) {
 	})
 }
 
-// GetUserStats demonstrates functional operations endpoint
+// GetUserStats demonstrates functional operations endpoint.
 func (h *UserHandler) GetUserStats(c *gin.Context) {
 	h.logger.Debug("Getting user statistics")
 
@@ -368,7 +368,7 @@ func (h *UserHandler) GetUserStats(c *gin.Context) {
 	})
 }
 
-// GetActiveUsers demonstrates functional programming endpoint
+// GetActiveUsers demonstrates functional programming endpoint.
 func (h *UserHandler) GetActiveUsers(c *gin.Context) {
 	h.logger.Debug("Getting active users")
 
@@ -385,7 +385,7 @@ func (h *UserHandler) GetActiveUsers(c *gin.Context) {
 	})
 }
 
-// GetUserEmails demonstrates Result pattern endpoint
+// GetUserEmails demonstrates Result pattern endpoint.
 func (h *UserHandler) GetUserEmails(c *gin.Context) {
 	h.logger.Debug("Getting user emails")
 
@@ -403,7 +403,7 @@ func (h *UserHandler) GetUserEmails(c *gin.Context) {
 	})
 }
 
-// CreateUserFunctional demonstrates functional programming with Result pattern
+// CreateUserFunctional demonstrates functional programming with Result pattern.
 func (h *UserHandler) CreateUserFunctional(c *gin.Context) {
 	h.logger.Info("Creating user functionally", "remote_addr", c.ClientIP())
 
@@ -441,7 +441,7 @@ func (h *UserHandler) CreateUserFunctional(c *gin.Context) {
 	c.JSON(http.StatusCreated, user)
 }
 
-// GetUsersFiltered demonstrates functional filtering with lo operations
+// GetUsersFiltered demonstrates functional filtering with lo operations.
 func (h *UserHandler) GetUsersFiltered(c *gin.Context) {
 	h.logger.Debug("Getting filtered users")
 
@@ -472,7 +472,7 @@ func (h *UserHandler) GetUsersFiltered(c *gin.Context) {
 	})
 }
 
-// GetUsersByDomains demonstrates complex functional operations
+// GetUsersByDomains demonstrates complex functional operations.
 func (h *UserHandler) GetUsersByDomains(c *gin.Context) {
 	h.logger.Debug("Getting users by domains")
 
@@ -506,7 +506,7 @@ func (h *UserHandler) GetUsersByDomains(c *gin.Context) {
 	})
 }
 
-// ValidateUsersBatch demonstrates Either pattern for batch operations
+// ValidateUsersBatch demonstrates Either pattern for batch operations.
 func (h *UserHandler) ValidateUsersBatch(c *gin.Context) {
 	h.logger.Debug("Validating users batch")
 

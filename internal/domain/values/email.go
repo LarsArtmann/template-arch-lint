@@ -7,15 +7,15 @@ import (
 	"strings"
 )
 
-// Email represents a validated email address value object
+// Email represents a validated email address value object.
 type Email struct {
 	value string
 }
 
-// emailRegex provides basic email validation pattern
+// emailRegex provides basic email validation pattern.
 var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
-// NewEmail creates a new Email value object with validation
+// NewEmail creates a new Email value object with validation.
 func NewEmail(email string) (Email, error) {
 	if err := validateEmailFormat(email); err != nil {
 		return Email{}, err
@@ -26,17 +26,17 @@ func NewEmail(email string) (Email, error) {
 	}, nil
 }
 
-// String returns the string representation of the email
+// String returns the string representation of the email.
 func (e Email) String() string {
 	return e.value
 }
 
-// Value returns the email value for database storage
+// Value returns the email value for database storage.
 func (e Email) Value() string {
 	return e.value
 }
 
-// Domain returns the domain part of the email
+// Domain returns the domain part of the email.
 func (e Email) Domain() string {
 	parts := strings.Split(e.value, "@")
 	if len(parts) != 2 {
@@ -45,7 +45,7 @@ func (e Email) Domain() string {
 	return parts[1]
 }
 
-// LocalPart returns the local part of the email (before @)
+// LocalPart returns the local part of the email (before @).
 func (e Email) LocalPart() string {
 	parts := strings.Split(e.value, "@")
 	if len(parts) != 2 {
@@ -54,17 +54,17 @@ func (e Email) LocalPart() string {
 	return parts[0]
 }
 
-// Equals compares two Email value objects
+// Equals compares two Email value objects.
 func (e Email) Equals(other Email) bool {
 	return e.value == other.value
 }
 
-// IsEmpty checks if the email is empty
+// IsEmpty checks if the email is empty.
 func (e Email) IsEmpty() bool {
 	return e.value == ""
 }
 
-// validateEmailFormat enforces business rules for email validation
+// validateEmailFormat enforces business rules for email validation.
 func validateEmailFormat(email string) error {
 	if err := validateEmailNotEmpty(email); err != nil {
 		return err

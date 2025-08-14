@@ -27,7 +27,7 @@ func TestArchitecture(t *testing.T) {
 	RunSpecs(t, "🏗️ Architecture Test Suite - Clean Architecture & DDD Enforcement")
 }
 
-// packageInfo holds information about a Go package discovered during analysis
+// packageInfo holds information about a Go package discovered during analysis.
 type packageInfo struct {
 	path      string
 	layer     string
@@ -36,7 +36,7 @@ type packageInfo struct {
 	types     []string
 }
 
-// domainLayers defines the architectural layers and their allowed dependencies
+// domainLayers defines the architectural layers and their allowed dependencies.
 var domainLayers = map[string][]string{
 	"domain/entities":     {"domain/shared", "domain/values", "domain/errors"},
 	"domain/values":       {"domain/shared", "domain/errors"},

@@ -1,0 +1,233 @@
+name: 🐛 Bug Report
+description: Report a bug in Template Architecture Lint
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees: ["LarsArtmann"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐛 Bug Report
+
+        Thank you for taking the time to report a bug! Please provide as much detail as possible to help us reproduce and fix the issue.
+
+        **Before submitting:**
+        - [ ] I have searched the existing issues to avoid duplicates
+        - [ ] I have read the [troubleshooting guide](../../README.md#-troubleshooting)
+        - [ ] I have tested with the latest version
+
+  - type: dropdown
+    id: bug-type
+    attributes:
+      label: 🔍 Bug Category
+      description: What type of bug are you experiencing?
+      options:
+        - "🏗️ Architecture Linting (go-arch-lint)"
+        - "📝 Code Quality Linting (golangci-lint)"
+        - "📁 Filename Validation"
+        - "🔧 Build/Installation Issues"
+        - "⚙️ Configuration Problems"
+        - "🐳 Docker-related Issues"
+        - "🚀 CI/CD Workflow Problems"
+        - "📚 Documentation Issues"
+        - "🎯 Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 📝 Bug Description
+      description: A clear and concise description of the bug
+      placeholder: |
+        Example: "When running 'just lint-arch', the tool fails with an error about missing dependencies, even though all tools are installed."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 🔄 Steps to Reproduce
+      description: Step-by-step instructions to reproduce the bug
+      placeholder: |
+        1. Clone the repository
+        2. Run `just install`
+        3. Run `just lint-arch`
+        4. Observe the error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: ✅ Expected Behavior
+      description: What should happen instead?
+      placeholder: |
+        Example: "Architecture linting should complete successfully without errors."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: ❌ Actual Behavior
+      description: What actually happened?
+      placeholder: |
+        Example: "The command fails with: 'Error: go-arch-lint: command not found'"
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: 📋 Command Output
+      description: Paste the full command output (if applicable)
+      render: bash
+      placeholder: |
+        $ just lint-arch
+        Error: go-arch-lint: command not found
+        exit status 1
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 💻 Operating System
+      description: Which operating system are you using?
+      options:
+        - "🍎 macOS"
+        - "🐧 Linux (Ubuntu/Debian)"
+        - "🐧 Linux (RHEL/CentOS/Fedora)"
+        - "🐧 Linux (Arch)"
+        - "🐧 Linux (Other)"
+        - "🪟 Windows"
+        - "🐳 Docker Container"
+        - "☁️ GitHub Actions"
+        - "☁️ Other CI/CD"
+    validations:
+      required: true
+
+  - type: input
+    id: go-version
+    attributes:
+      label: 🔧 Go Version
+      description: Output of `go version`
+      placeholder: "go version go1.21.0 darwin/amd64"
+    validations:
+      required: true
+
+  - type: textarea
+    id: tool-versions
+    attributes:
+      label: 🛠️ Tool Versions
+      description: Versions of relevant tools (run `just version` if available)
+      render: bash
+      placeholder: |
+        $ golangci-lint version
+        golangci-lint has version v2.3.1 built from ...
+
+        $ go-arch-lint version
+        go-arch-lint version v1.12.0
+
+        $ just --version
+        just 1.36.0
+
+  - type: textarea
+    id: config
+    attributes:
+      label: ⚙️ Configuration Files
+      description: Relevant configuration that might be causing the issue
+      render: yaml
+      placeholder: |
+        # Paste relevant parts of:
+        # - .golangci.yml
+        # - .go-arch-lint.yml
+        # - justfile (if modified)
+
+  - type: textarea
+    id: project-structure
+    attributes:
+      label: 📁 Project Structure
+      description: Relevant parts of your project structure (if the issue is project-specific)
+      render: text
+      placeholder: |
+        project/
+        ├── internal/
+        │   ├── domain/
+        │   ├── application/
+        │   └── infrastructure/
+        ├── go.mod
+        └── .golangci.yml
+
+  - type: checkboxes
+    id: reproduction
+    attributes:
+      label: 🔬 Reproduction
+      description: Have you verified this issue?
+      options:
+        - label: "✅ I can reproduce this bug consistently"
+        - label: "🧪 I have tested with a minimal example"
+        - label: "🆕 This happens with a fresh clone of the repository"
+        - label: "🔄 This happens after running `just install`"
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: 🚑 Workaround
+      description: Any temporary workaround you've found?
+      placeholder: |
+        Example: "Running the command manually with full path works: ~/go/bin/go-arch-lint check"
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 📎 Additional Context
+      description: |
+        Any additional information that might help:
+        - Screenshots or videos
+        - Related issues or discussions
+        - Environment details
+        - Specific use case
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 🚨 Priority
+      description: How urgent is this issue for you?
+      options:
+        - "🔥 Critical - Blocking development"
+        - "⚠️ High - Significant impact"
+        - "📋 Medium - Moderate impact"
+        - "📝 Low - Minor issue"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 🤝 Contribution
+      description: Are you willing to help?
+      options:
+        - label: "💻 I would like to work on fixing this bug"
+        - label: "🧪 I can help test the fix"
+        - label: "📚 I can help improve documentation related to this issue"
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ## 🙏 Thank You!
+
+        Thank you for reporting this bug! Your contribution helps make Template Architecture Lint better for everyone.
+
+        **What happens next?**
+        1. We'll review your bug report within 24-48 hours
+        2. We may ask for additional information or clarification
+        3. Once confirmed, we'll prioritize the fix based on severity and impact
+        4. You'll be notified when the fix is available
+
+        **Need immediate help?**
+        - Check our [troubleshooting guide](../../README.md#-troubleshooting)
+        - Join the discussion in [GitHub Discussions](../../discussions)
+        - Email: template-arch-lint@lars.software

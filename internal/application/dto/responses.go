@@ -9,17 +9,17 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 )
 
-// APIResponse represents a standardized API response wrapper
+// APIResponse represents a standardized API response wrapper.
 type APIResponse[T any] struct {
-	Success     bool   `json:"success"`
-	Data        *T     `json:"data,omitempty"`
-	Error       *Error `json:"error,omitempty"`
-	Message     string `json:"message,omitempty"`
-	CorrelationID string `json:"correlation_id,omitempty"`
-	Timestamp   time.Time `json:"timestamp"`
+	Success       bool      `json:"success"`
+	Data          *T        `json:"data,omitempty"`
+	Error         *Error    `json:"error,omitempty"`
+	Message       string    `json:"message,omitempty"`
+	CorrelationID string    `json:"correlation_id,omitempty"`
+	Timestamp     time.Time `json:"timestamp"`
 }
 
-// Error represents a standardized API error response
+// Error represents a standardized API error response.
 type Error struct {
 	Code    string            `json:"code"`
 	Message string            `json:"message"`
@@ -27,13 +27,13 @@ type Error struct {
 	Type    string            `json:"type"`
 }
 
-// PaginatedResponse represents a paginated API response
+// PaginatedResponse represents a paginated API response.
 type PaginatedResponse[T any] struct {
 	Items      []T        `json:"items"`
 	Pagination Pagination `json:"pagination"`
 }
 
-// Pagination contains pagination metadata
+// Pagination contains pagination metadata.
 type Pagination struct {
 	Page       int `json:"page"`
 	Size       int `json:"size"`
@@ -41,7 +41,7 @@ type Pagination struct {
 	TotalPages int `json:"total_pages"`
 }
 
-// UserResponse represents a user in API responses
+// UserResponse represents a user in API responses.
 type UserResponse struct {
 	ID          string    `json:"id"`
 	Email       string    `json:"email"`
@@ -51,23 +51,23 @@ type UserResponse struct {
 	Modified    time.Time `json:"modified"`
 }
 
-// UserListResponse represents a list of users
+// UserListResponse represents a list of users.
 type UserListResponse = PaginatedResponse[UserResponse]
 
-// CreateUserRequest represents a user creation request
+// CreateUserRequest represents a user creation request.
 type CreateUserRequest struct {
 	ID    string `json:"id" binding:"required" validate:"required,min=3,max=50"`
 	Email string `json:"email" binding:"required,email" validate:"required,email"`
 	Name  string `json:"name" binding:"required" validate:"required,min=2,max=100"`
 }
 
-// UpdateUserRequest represents a user update request
+// UpdateUserRequest represents a user update request.
 type UpdateUserRequest struct {
 	Email string `json:"email" binding:"required,email" validate:"required,email"`
 	Name  string `json:"name" binding:"required" validate:"required,min=2,max=100"`
 }
 
-// SuccessResponse creates a successful API response
+// SuccessResponse creates a successful API response.
 func SuccessResponse[T any](data T, message string, correlationID string) APIResponse[T] {
 	return APIResponse[T]{
 		Success:       true,
@@ -78,7 +78,7 @@ func SuccessResponse[T any](data T, message string, correlationID string) APIRes
 	}
 }
 
-// ErrorResponse creates an error API response
+// ErrorResponse creates an error API response.
 func ErrorResponse(code, message, errorType, correlationID string, details map[string]string) APIResponse[any] {
 	return APIResponse[any]{
 		Success: false,
@@ -93,7 +93,7 @@ func ErrorResponse(code, message, errorType, correlationID string, details map[s
 	}
 }
 
-// ValidationErrorResponse creates a validation error response
+// ValidationErrorResponse creates a validation error response.
 func ValidationErrorResponse(details map[string]string, correlationID string) APIResponse[any] {
 	return ErrorResponse(
 		"VALIDATION_ERROR",
@@ -104,7 +104,7 @@ func ValidationErrorResponse(details map[string]string, correlationID string) AP
 	)
 }
 
-// NotFoundErrorResponse creates a not found error response
+// NotFoundErrorResponse creates a not found error response.
 func NotFoundErrorResponse(resource, id, correlationID string) APIResponse[any] {
 	return ErrorResponse(
 		"NOT_FOUND",
@@ -115,7 +115,7 @@ func NotFoundErrorResponse(resource, id, correlationID string) APIResponse[any] 
 	)
 }
 
-// InternalErrorResponse creates an internal server error response
+// InternalErrorResponse creates an internal server error response.
 func InternalErrorResponse(correlationID string) APIResponse[any] {
 	return ErrorResponse(
 		"INTERNAL_ERROR",
@@ -126,7 +126,7 @@ func InternalErrorResponse(correlationID string) APIResponse[any] {
 	)
 }
 
-// ToUserResponse converts a domain User entity to API UserResponse
+// ToUserResponse converts a domain User entity to API UserResponse.
 func ToUserResponse(user *entities.User) UserResponse {
 	return UserResponse{
 		ID:          user.ID.String(),
@@ -138,7 +138,7 @@ func ToUserResponse(user *entities.User) UserResponse {
 	}
 }
 
-// ToUserListResponse converts a slice of domain User entities to API UserListResponse
+// ToUserListResponse converts a slice of domain User entities to API UserListResponse.
 func ToUserListResponse(users []*entities.User, page, size int) UserListResponse {
 	items := make([]UserResponse, len(users))
 	for i, user := range users {

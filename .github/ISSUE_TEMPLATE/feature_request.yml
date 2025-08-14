@@ -1,0 +1,279 @@
+name: 🚀 Feature Request
+description: Suggest a new feature or enhancement for Template Architecture Lint
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+assignees: ["LarsArtmann"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🚀 Feature Request
+
+        Thank you for suggesting a new feature! Your ideas help make Template Architecture Lint better for the entire Go community.
+
+        **Before submitting:**
+        - [ ] I have searched existing issues to avoid duplicates
+        - [ ] I have read the [project roadmap](../../README.md) and [contributing guide](../../CONTRIBUTING.md)
+        - [ ] This feature aligns with the project's goals of enterprise-grade architecture enforcement
+
+  - type: dropdown
+    id: feature-category
+    attributes:
+      label: 🎯 Feature Category
+      description: What type of feature are you requesting?
+      options:
+        - "🏗️ Architecture Enforcement (new architectural patterns)"
+        - "📝 Code Quality (new linters or rules)"
+        - "⚙️ Configuration & Setup (easier installation, configuration)"
+        - "🚀 CI/CD Integration (new workflows, actions)"
+        - "📊 Reporting & Analytics (coverage, metrics, dashboards)"
+        - "🔧 Developer Experience (tooling, commands, automation)"
+        - "📚 Documentation (guides, examples, tutorials)"
+        - "🏢 Enterprise Features (scalability, compliance, governance)"
+        - "🎨 Templates & Examples (project templates, reference implementations)"
+        - "🔌 Integrations (IDE plugins, external tools)"
+        - "🌐 Community & Ecosystem (sharing, discovery, marketplace)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 🎯 Problem Statement
+      description: What problem would this feature solve? What pain point are you experiencing?
+      placeholder: |
+        Example: "Currently, there's no way to enforce Event Sourcing patterns in the architecture linting. Teams using CQRS and Event Sourcing need to manually review code to ensure proper event handling and aggregate boundaries."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 💡 Proposed Solution
+      description: Describe your ideal solution in detail
+      placeholder: |
+        Example: "Add support for Event Sourcing patterns in .go-arch-lint.yml:
+
+        components:
+          event-handlers: { in: internal/events/handlers/** }
+          aggregates: { in: internal/domain/aggregates/** }
+
+        deps:
+          event-handlers:
+            mayDependOn: [aggregates, events]
+            cannotDependOn: [infrastructure, database]
+
+        This would prevent event handlers from directly accessing databases and ensure proper domain boundaries."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 Alternative Solutions
+      description: Have you considered alternative approaches? What are the trade-offs?
+      placeholder: |
+        Example: "Alternative 1: Custom golangci-lint rules (more complex, less integrated)
+        Alternative 2: External validation scripts (harder to maintain, not automated)
+        Alternative 3: Documentation-only approach (relies on manual enforcement)"
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: 📈 Expected Impact
+      description: How many developers/teams would benefit from this feature?
+      options:
+        - "🌍 High Impact - Benefits most Go developers"
+        - "🏢 Medium-High Impact - Benefits enterprise teams"
+        - "👥 Medium Impact - Benefits specific architectural patterns"
+        - "🎯 Low-Medium Impact - Benefits niche use cases"
+        - "🔬 Low Impact - Experimental or specialized feature"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: use-cases
+    attributes:
+      label: 🎪 Use Cases
+      description: Which scenarios would this feature address?
+      options:
+        - label: "🏢 Enterprise applications with complex architectures"
+        - label: "🔄 Microservices and distributed systems"
+        - label: "📊 Domain-driven design implementations"
+        - label: "⚡ Event-driven architectures"
+        - label: "🏗️ CQRS and Event Sourcing patterns"
+        - label: "🔐 Security and compliance requirements"
+        - label: "📈 Performance and scalability concerns"
+        - label: "🧪 Testing and quality assurance"
+        - label: "📚 Educational and learning purposes"
+        - label: "🔧 Developer productivity and experience"
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: 📝 Concrete Examples
+      description: Provide specific examples of how this feature would be used
+      render: yaml
+      placeholder: |
+        # Example configuration that would be possible:
+        components:
+          sagas: { in: internal/sagas/** }
+          commands: { in: internal/commands/** }
+          events: { in: internal/events/** }
+
+        deps:
+          sagas:
+            mayDependOn: [commands, events]
+            mustImplement: ["SagaHandler"]
+
+        # Example violation that would be caught:
+        # internal/sagas/payment_saga.go imports database/sql ❌
+        # Should use command/event interfaces instead ✅
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 🚨 Priority
+      description: How important is this feature for your work?
+      options:
+        - "🔥 Critical - Blocking adoption"
+        - "⚠️ High - Significant value add"
+        - "📋 Medium - Nice to have"
+        - "📝 Low - Future consideration"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: 🧩 Implementation Complexity (Your Estimate)
+      description: How complex do you think this feature would be to implement?
+      options:
+        - "🟢 Low - Configuration or documentation change"
+        - "🟡 Medium - New rules or moderate code changes"
+        - "🟠 High - Significant architecture changes"
+        - "🔴 Very High - Major system redesign"
+        - "❓ Unknown - Need technical investigation"
+
+  - type: textarea
+    id: technical-details
+    attributes:
+      label: 🔧 Technical Details
+      description: Any technical considerations, constraints, or implementation ideas?
+      placeholder: |
+        Example:
+        - Could leverage existing go-arch-lint component system
+        - Might need new AST analysis for method call patterns
+        - Should integrate with existing CI/CD workflows
+        - Consider backward compatibility with current configs
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: ✅ Acceptance Criteria
+      description: How would you know this feature is complete and working correctly?
+      placeholder: |
+        Example:
+        - [ ] Event handlers cannot import database packages
+        - [ ] Aggregates can only be modified through commands
+        - [ ] Configuration validates correctly with new components
+        - [ ] Clear error messages when violations are detected
+        - [ ] Documentation and examples are provided
+        - [ ] Backward compatibility is maintained
+
+  - type: checkboxes
+    id: research
+    attributes:
+      label: 🔍 Research & References
+      description: Have you researched this feature?
+      options:
+        - label: "📚 I have researched similar solutions in other tools/languages"
+        - label: "🏗️ I have architectural patterns or standards to reference"
+        - label: "📖 I have found relevant academic papers or industry articles"
+        - label: "💼 I have real-world examples where this would be valuable"
+        - label: "🛠️ I understand the technical challenges involved"
+
+  - type: textarea
+    id: references
+    attributes:
+      label: 📚 References & Research
+      description: Links, articles, or resources that support this feature request
+      placeholder: |
+        Example:
+        - Event Sourcing Pattern: https://martinfowler.com/eaaDev/EventSourcing.html
+        - CQRS Guide: https://docs.microsoft.com/en-us/azure/architecture/patterns/cqrs
+        - Similar tool: ArchUnit for Java (https://www.archunit.org/)
+        - Industry adoption: Survey showing 40% of teams use Event Sourcing
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 🤝 Contribution
+      description: How would you like to help with this feature?
+      options:
+        - label: "💻 I would like to implement this feature"
+        - label: "🎨 I can help with design and architecture"
+        - label: "📝 I can help write documentation and examples"
+        - label: "🧪 I can help test the feature"
+        - label: "💡 I can provide domain expertise and feedback"
+        - label: "📢 I can help promote adoption in the community"
+
+  - type: textarea
+    id: timeline
+    attributes:
+      label: ⏰ Timeline & Urgency
+      description: Is there a specific timeline when you would need this feature?
+      placeholder: |
+        Example: "Our team is planning to migrate to Event Sourcing in Q2 2024, so having this feature by March would be very helpful for our architecture validation."
+
+  - type: dropdown
+    id: breaking-changes
+    attributes:
+      label: 💥 Breaking Changes
+      description: Would you be okay with this feature introducing breaking changes?
+      options:
+        - "✅ Yes - Worth it for the improvement"
+        - "🔄 Only if there's a migration path"
+        - "❌ No - Must be backward compatible"
+        - "❓ Not sure - Depends on the specifics"
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📎 Additional Context
+      description: |
+        Any additional information that might help:
+        - Screenshots or mockups
+        - Related discussions or issues
+        - Industry trends or standards
+        - Team/organization context
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ## 🙏 Thank You!
+
+        Thank you for this feature request! Your input helps shape the future of Template Architecture Lint.
+
+        **What happens next?**
+        1. We'll review your request within 1-2 weeks
+        2. We may ask for clarification or additional details
+        3. If approved, we'll add it to our roadmap and prioritize based on:
+           - Community impact and demand
+           - Alignment with project goals
+           - Technical feasibility
+           - Available contributor resources
+        4. You'll be notified of any updates or decisions
+
+        **Want to speed things up?**
+        - 💻 Contributing code or documentation accelerates development
+        - 👥 Getting community support (👍 reactions, comments) helps prioritization
+        - 📢 Sharing in relevant Go communities helps validate demand
+
+        **Stay connected:**
+        - 💬 [GitHub Discussions](../../discussions) for design conversations
+        - 📧 Email: template-arch-lint@lars.software for direct communication
+        - 🐦 Twitter: [@LarsArtmann](https://twitter.com/LarsArtmann) for updates

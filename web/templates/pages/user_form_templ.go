@@ -5,13 +5,12 @@ package pages
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
-
 import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/web/templates/components"
 	"github.com/LarsArtmann/template-arch-lint/web/templates/layouts"
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
 )
 
 // CreateUserPage renders the create user form page

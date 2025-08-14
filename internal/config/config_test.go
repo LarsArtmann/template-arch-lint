@@ -17,7 +17,7 @@ func TestLoadConfig(t *testing.T) {
 	}
 }
 
-// getLoadConfigTestCases returns test cases for LoadConfig function
+// getLoadConfigTestCases returns test cases for LoadConfig function.
 func getLoadConfigTestCases() []struct {
 	name        string
 	configPath  string
@@ -72,7 +72,7 @@ func getLoadConfigTestCases() []struct {
 	}
 }
 
-// setupTestEnvironment sets up and cleans up environment variables for testing
+// setupTestEnvironment sets up and cleans up environment variables for testing.
 func setupTestEnvironment(t *testing.T, envVars map[string]string) {
 	t.Helper()
 	for key, value := range envVars {
@@ -87,7 +87,7 @@ func setupTestEnvironment(t *testing.T, envVars map[string]string) {
 	}
 }
 
-// runLoadConfigTest executes the LoadConfig test logic
+// runLoadConfigTest executes the LoadConfig test logic.
 func runLoadConfigTest(t *testing.T, tt struct {
 	name        string
 	configPath  string
@@ -110,7 +110,7 @@ func runLoadConfigTest(t *testing.T, tt struct {
 	}
 }
 
-// validateLoadConfigResult validates the loaded config matches expectations
+// validateLoadConfigResult validates the loaded config matches expectations.
 func validateLoadConfigResult(t *testing.T, config *Config, expectPort int, expectLevel string) {
 	t.Helper()
 
@@ -134,7 +134,7 @@ func TestConfigDefaults(t *testing.T) {
 	validateAppDefaults(t, config.App)
 }
 
-// validateServerDefaults checks server configuration defaults
+// validateServerDefaults checks server configuration defaults.
 func validateServerDefaults(t *testing.T, server ServerConfig) {
 	t.Helper()
 
@@ -149,7 +149,7 @@ func validateServerDefaults(t *testing.T, server ServerConfig) {
 	}
 }
 
-// validateDatabaseDefaults checks database configuration defaults
+// validateDatabaseDefaults checks database configuration defaults.
 func validateDatabaseDefaults(t *testing.T, database DatabaseConfig) {
 	t.Helper()
 
@@ -161,7 +161,7 @@ func validateDatabaseDefaults(t *testing.T, database DatabaseConfig) {
 	}
 }
 
-// validateLoggingDefaults checks logging configuration defaults
+// validateLoggingDefaults checks logging configuration defaults.
 func validateLoggingDefaults(t *testing.T, logging LoggingConfig) {
 	t.Helper()
 
@@ -173,7 +173,7 @@ func validateLoggingDefaults(t *testing.T, logging LoggingConfig) {
 	}
 }
 
-// validateAppDefaults checks app configuration defaults
+// validateAppDefaults checks app configuration defaults.
 func validateAppDefaults(t *testing.T, app AppConfig) {
 	t.Helper()
 
@@ -195,7 +195,7 @@ func TestConfigValidation(t *testing.T) {
 	}
 }
 
-// getConfigValidationTestCases returns test cases for config validation
+// getConfigValidationTestCases returns test cases for config validation.
 func getConfigValidationTestCases() []struct {
 	name    string
 	config  Config
@@ -224,7 +224,7 @@ func getConfigValidationTestCases() []struct {
 	}
 }
 
-// createValidTestConfig creates a valid configuration for testing
+// createValidTestConfig creates a valid configuration for testing.
 func createValidTestConfig() Config {
 	return Config{
 		Server: ServerConfig{
@@ -248,21 +248,21 @@ func createValidTestConfig() Config {
 	}
 }
 
-// createConfigWithInvalidPort creates a config with invalid port for testing
+// createConfigWithInvalidPort creates a config with invalid port for testing.
 func createConfigWithInvalidPort() Config {
 	config := createValidTestConfig()
 	config.Server.Port = 0 // Invalid port
 	return config
 }
 
-// createConfigWithInvalidDriver creates a config with invalid database driver for testing
+// createConfigWithInvalidDriver creates a config with invalid database driver for testing.
 func createConfigWithInvalidDriver() Config {
 	config := createValidTestConfig()
 	config.Database.Driver = "invalid" // Invalid driver
 	return config
 }
 
-// runConfigValidationTest executes a single config validation test
+// runConfigValidationTest executes a single config validation test.
 func runConfigValidationTest(t *testing.T, config Config, wantErr bool) {
 	t.Helper()
 
@@ -284,7 +284,7 @@ func TestConfigWithEnvironmentOverrides(t *testing.T) {
 	})
 }
 
-// testConfigOverrides tests that environment variables override config defaults
+// testConfigOverrides tests that environment variables override config defaults.
 func testConfigOverrides(t *testing.T) {
 	t.Helper()
 
@@ -299,7 +299,7 @@ func testConfigOverrides(t *testing.T) {
 	validateOverriddenConfig(t, config)
 }
 
-// setTestEnvVars sets test environment variables
+// setTestEnvVars sets test environment variables.
 func setTestEnvVars(t *testing.T) {
 	t.Helper()
 
@@ -316,7 +316,7 @@ func setTestEnvVars(t *testing.T) {
 	}
 }
 
-// unsetTestEnvVars cleans up test environment variables
+// unsetTestEnvVars cleans up test environment variables.
 func unsetTestEnvVars(t *testing.T) {
 	t.Helper()
 
@@ -333,7 +333,7 @@ func unsetTestEnvVars(t *testing.T) {
 	}
 }
 
-// validateOverriddenConfig validates that config was properly overridden
+// validateOverriddenConfig validates that config was properly overridden.
 func validateOverriddenConfig(t *testing.T, config *Config) {
 	t.Helper()
 
@@ -348,7 +348,7 @@ func validateOverriddenConfig(t *testing.T, config *Config) {
 	}
 }
 
-// testInvalidEnvironment tests that invalid environment values are rejected
+// testInvalidEnvironment tests that invalid environment values are rejected.
 func testInvalidEnvironment(t *testing.T) {
 	t.Helper()
 

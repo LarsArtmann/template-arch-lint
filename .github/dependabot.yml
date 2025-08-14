@@ -1,0 +1,176 @@
+# 🔄 Dependabot Configuration for Template Architecture Lint
+# Automated dependency updates for security and maintenance
+
+version: 2
+
+updates:
+  # ==================================================
+  # Go Modules - Core Dependencies
+  # ==================================================
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    assignees:
+      - "LarsArtmann"
+    reviewers:
+      - "LarsArtmann"
+    labels:
+      - "dependencies"
+      - "go"
+      - "security"
+    commit-message:
+      prefix: "📦"
+      include: "scope"
+    ignore:
+      # Ignore patch updates for stable dependencies
+      - dependency-name: "github.com/gin-gonic/gin"
+        update-types: ["version-update:semver-patch"]
+      - dependency-name: "github.com/spf13/viper"
+        update-types: ["version-update:semver-patch"]
+    groups:
+      # Group testing dependencies together
+      testing-deps:
+        patterns:
+          - "github.com/onsi/ginkgo*"
+          - "github.com/onsi/gomega*"
+          - "github.com/stretchr/testify*"
+      # Group linting tools together
+      linting-tools:
+        patterns:
+          - "github.com/golangci/golangci-lint*"
+          - "github.com/fe3dback/go-arch-lint*"
+      # Group domain-driven design libraries
+      ddd-libraries:
+        patterns:
+          - "github.com/samber/*"
+          - "github.com/go-playground/validator*"
+
+  # ==================================================
+  # GitHub Actions - CI/CD Dependencies
+  # ==================================================
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "10:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    assignees:
+      - "LarsArtmann"
+    reviewers:
+      - "LarsArtmann"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci-cd"
+    commit-message:
+      prefix: "🔧"
+      include: "scope"
+    groups:
+      # Group setup actions together
+      setup-actions:
+        patterns:
+          - "actions/checkout*"
+          - "actions/setup-go*"
+          - "actions/setup-node*"
+          - "actions/cache*"
+      # Group security scanning actions
+      security-actions:
+        patterns:
+          - "github/codeql-action*"
+          - "securecodewarrior/github-action-add-sarif*"
+          - "aquasecurity/trivy-action*"
+      # Group artifact and deployment actions
+      artifact-actions:
+        patterns:
+          - "actions/upload-artifact*"
+          - "actions/download-artifact*"
+          - "codecov/codecov-action*"
+
+  # ==================================================
+  # Docker Dependencies
+  # ==================================================
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "11:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 2
+    assignees:
+      - "LarsArtmann"
+    reviewers:
+      - "LarsArtmann"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "infrastructure"
+    commit-message:
+      prefix: "🐳"
+      include: "scope"
+
+  # ==================================================
+  # Pre-commit Hooks
+  # ==================================================
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "1"
+      time: "12:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 2
+    assignees:
+      - "LarsArtmann"
+    reviewers:
+      - "LarsArtmann"
+    labels:
+      - "dependencies"
+      - "pre-commit"
+      - "tooling"
+    commit-message:
+      prefix: "🪝"
+      include: "scope"
+
+# ==================================================
+# Configuration Notes
+# ==================================================
+#
+# Update Schedule Strategy:
+# - Go modules: Weekly on Monday (start of work week)
+# - GitHub Actions: Weekly on Tuesday (CI/CD focus)
+# - Docker: Weekly on Wednesday (infrastructure focus)
+# - Pre-commit: Monthly (less frequent, more stable)
+#
+# Security Considerations:
+# - All dependency updates are reviewed before merge
+# - Critical security updates are processed immediately
+# - Patch version updates may be grouped for efficiency
+# - Major version updates require manual review
+#
+# Labels for Organization:
+# - dependencies: All dependency updates
+# - security: Security-related updates
+# - go/docker/github-actions: Technology-specific tags
+#
+# Pull Request Limits:
+# - Prevents overwhelming the repository with PRs
+# - Ensures manageable review workload
+# - Balances automation with control
+#
+# Grouping Strategy:
+# - Related dependencies updated together
+# - Reduces PR noise and review overhead
+# - Maintains logical separation of concerns
+#
+# Commit Message Convention:
+# - Uses semantic prefixes for easy identification
+# - Includes scope information for better tracking
+# - Follows conventional commit format

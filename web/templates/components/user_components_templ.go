@@ -5,13 +5,13 @@ package components
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
-
 import (
 	"fmt"
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"strconv"
+
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
 )
 
 // StatsGrid renders statistics cards

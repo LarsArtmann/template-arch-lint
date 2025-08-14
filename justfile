@@ -34,9 +34,30 @@ help:
     @echo "  • \033[0;36mjust docker-dev-detached\033[0m - Start full dev environment"
     @echo "  • \033[0;36mjust docker-stop\033[0m         - Stop development environment"
     @echo ""
+    @echo "\033[1mTESTING & COVERAGE:\033[0m"
+    @echo "  • \033[0;36mjust test\033[0m                - Run tests with coverage"
+    @echo "  • \033[0;36mjust coverage\033[0m            - Run coverage analysis with 80% threshold"
+    @echo "  • \033[0;36mjust coverage 90\033[0m         - Run coverage analysis with custom threshold"
+    @echo "  • \033[0;36mjust coverage-check\033[0m      - Quick coverage check (silent)"
+    @echo "  • \033[0;36mjust coverage-detailed\033[0m   - Coverage breakdown by architectural layer"
+    @echo ""
     @echo "\033[1mCODE ANALYSIS:\033[0m"
     @echo "  • \033[0;36mjust fd\033[0m                  - Find duplicate code (alias for find-duplicates)"
     @echo "  • \033[0;36mjust find-duplicates\033[0m     - Find duplicate code with custom threshold"
+    @echo ""
+    @echo "\033[1mPERFORMANCE PROFILING:\033[0m"
+    @echo "  • \033[0;36mjust profile-cpu\033[0m         - Capture 30-second CPU profile"
+    @echo "  • \033[0;36mjust profile-heap\033[0m        - Capture heap memory profile"
+    @echo "  • \033[0;36mjust profile-goroutines\033[0m  - Capture goroutine dump"
+    @echo "  • \033[0;36mjust profile-trace\033[0m       - Capture 10-second execution trace"
+    @echo "  • \033[0;36mjust analyze-cpu\033[0m         - Open CPU profile in browser"
+    @echo "  • \033[0;36mjust analyze-heap\033[0m        - Open heap profile in browser"
+    @echo ""
+    @echo "\033[1mBENCHMARKING:\033[0m"
+    @echo "  • \033[0;36mjust bench\033[0m               - Run all benchmarks"
+    @echo "  • \033[0;36mjust bench-cpu\033[0m           - Run CPU-focused benchmarks"
+    @echo "  • \033[0;36mjust bench-memory\033[0m        - Run memory-focused benchmarks"
+    @echo "  • \033[0;36mjust bench-compare\033[0m       - Compare benchmark results"
 
 # Install all required linting tools
 install:
@@ -119,6 +140,63 @@ test:
     @echo "\033[0;36mRunning tests with coverage...\033[0m"
     go test ./... -v -race -coverprofile=coverage.out
     @echo "\033[0;32m✅ Tests completed!\033[0m"
+
+# Run comprehensive coverage analysis with threshold enforcement
+coverage THRESHOLD="80":
+    @echo "\033[1m📊 COVERAGE ANALYSIS\033[0m"
+    @echo "\033[0;36mRunning tests with coverage...\033[0m"
+    go test ./... -v -race -coverprofile=coverage.out -covermode=atomic
+    @echo "\033[0;36mGenerating coverage reports...\033[0m"
+    go tool cover -html=coverage.out -o coverage.html
+    @echo "\033[0;33mCoverage Summary:\033[0m"
+    @go tool cover -func=coverage.out | tail -1
+    @echo "\033[0;36mChecking coverage threshold ({{THRESHOLD}}%)...\033[0m"
+    @COVERAGE_PERCENT=$$(go tool cover -func=coverage.out | grep total: | awk '{print $$3}' | sed 's/%//'); \
+    if [ "$$(echo "$$COVERAGE_PERCENT < {{THRESHOLD}}" | bc -l)" -eq 1 ]; then \
+        echo "\033[0;31m❌ Coverage $$COVERAGE_PERCENT% is below threshold {{THRESHOLD}}%\033[0m"; \
+        echo "\033[0;33m📈 Generated reports:\033[0m"; \
+        echo "  → coverage.out (machine readable)"; \
+        echo "  → coverage.html (browser viewable)"; \
+        exit 1; \
+    else \
+        echo "\033[0;32m✅ Coverage $$COVERAGE_PERCENT% meets threshold {{THRESHOLD}}%\033[0m"; \
+        echo "\033[0;33m📈 Generated reports:\033[0m"; \
+        echo "  → coverage.out (machine readable)"; \
+        echo "  → coverage.html (browser viewable)"; \
+    fi
+
+# Quick coverage check without detailed output
+coverage-check THRESHOLD="80":
+    @echo "\033[1m📊 QUICK COVERAGE CHECK\033[0m"
+    @go test ./... -coverprofile=coverage.out -covermode=atomic >/dev/null 2>&1
+    @COVERAGE_PERCENT=$$(go tool cover -func=coverage.out | grep total: | awk '{print $$3}' | sed 's/%//'); \
+    if [ "$$(echo "$$COVERAGE_PERCENT < {{THRESHOLD}}" | bc -l)" -eq 1 ]; then \
+        echo "\033[0;31m❌ Coverage: $$COVERAGE_PERCENT% (threshold: {{THRESHOLD}}%)\033[0m"; \
+        exit 1; \
+    else \
+        echo "\033[0;32m✅ Coverage: $$COVERAGE_PERCENT% (threshold: {{THRESHOLD}}%)\033[0m"; \
+    fi
+
+# Coverage by package/component breakdown
+coverage-detailed:
+    @echo "\033[1m📊 DETAILED COVERAGE ANALYSIS\033[0m"
+    go test ./... -v -race -coverprofile=coverage.out -covermode=atomic
+    @echo "\033[0;33mCoverage by component:\033[0m"
+    @echo ""
+    @echo "\033[1mDomain Layer:\033[0m"
+    @go tool cover -func=coverage.out | grep "internal/domain" || echo "  No domain coverage data"
+    @echo ""
+    @echo "\033[1mApplication Layer:\033[0m"
+    @go tool cover -func=coverage.out | grep "internal/application" || echo "  No application coverage data"
+    @echo ""
+    @echo "\033[1mInfrastructure Layer:\033[0m"
+    @go tool cover -func=coverage.out | grep "internal/infrastructure" || echo "  No infrastructure coverage data"
+    @echo ""
+    @echo "\033[1mConfiguration:\033[0m"
+    @go tool cover -func=coverage.out | grep "internal/config\|internal/container" || echo "  No config coverage data"
+    @echo ""
+    @echo "\033[1mOverall Summary:\033[0m"
+    @go tool cover -func=coverage.out | tail -1
 
 # Generate detailed linting reports
 report:
@@ -253,10 +331,7 @@ update-deps:
     go mod tidy
     @echo "\033[0;32m✅ Dependencies updated!\033[0m"
 
-# Run benchmarks
-bench:
-    @echo "\033[1m⚡ RUNNING BENCHMARKS\033[0m"
-    go test -bench=. -benchmem ./...
+# Note: Main bench recipe is defined later with comprehensive reporting
 
 # Test configuration system
 config-test:
@@ -424,3 +499,297 @@ find-duplicates-strict: (find-duplicates "100")
 
 # Find all potential duplicates (looser threshold)
 find-duplicates-loose: (find-duplicates "25")
+
+# ==============================================
+# PERFORMANCE PROFILING COMMANDS
+# ==============================================
+
+# Capture CPU profile for 30 seconds
+profile-cpu:
+    @echo "\033[1m📊 CAPTURING CPU PROFILE\033[0m"
+    @echo "\033[0;36mCapturing CPU profile for 30 seconds...\033[0m"
+    @if curl -s "http://localhost:8080/debug/pprof/profile?seconds=30" -o cpu.prof; then \
+        echo "\033[0;32m✅ CPU profile saved to cpu.prof\033[0m"; \
+        echo "\033[0;33m💡 Use 'just analyze-cpu' to view analysis\033[0m"; \
+    else \
+        echo "\033[0;31m❌ Failed to capture CPU profile. Is the server running in development mode?\033[0m"; \
+        exit 1; \
+    fi
+
+# Capture heap memory profile
+profile-heap:
+    @echo "\033[1m📊 CAPTURING HEAP PROFILE\033[0m"
+    @echo "\033[0;36mCapturing heap memory profile...\033[0m"
+    @if curl -s http://localhost:8080/debug/pprof/heap -o heap.prof; then \
+        echo "\033[0;32m✅ Heap profile saved to heap.prof\033[0m"; \
+        echo "\033[0;33m💡 Use 'just analyze-heap' to view analysis\033[0m"; \
+    else \
+        echo "\033[0;31m❌ Failed to capture heap profile. Is the server running in development mode?\033[0m"; \
+        exit 1; \
+    fi
+
+# Capture goroutine dump
+profile-goroutines:
+    @echo "\033[1m📊 CAPTURING GOROUTINE DUMP\033[0m"
+    @echo "\033[0;36mCapturing goroutine dump...\033[0m"
+    @if curl -s http://localhost:8080/debug/pprof/goroutine -o goroutine.prof; then \
+        echo "\033[0;32m✅ Goroutine dump saved to goroutine.prof\033[0m"; \
+        echo "\033[0;33m💡 Use 'go tool pprof goroutine.prof' to analyze\033[0m"; \
+    else \
+        echo "\033[0;31m❌ Failed to capture goroutine dump. Is the server running in development mode?\033[0m"; \
+        exit 1; \
+    fi
+
+# Capture execution trace for 10 seconds
+profile-trace:
+    @echo "\033[1m📊 CAPTURING EXECUTION TRACE\033[0m"
+    @echo "\033[0;36mCapturing execution trace for 10 seconds...\033[0m"
+    @if curl -s "http://localhost:8080/debug/pprof/trace?seconds=10" -o trace.out; then \
+        echo "\033[0;32m✅ Execution trace saved to trace.out\033[0m"; \
+        echo "\033[0;33m💡 Use 'go tool trace trace.out' to analyze\033[0m"; \
+    else \
+        echo "\033[0;31m❌ Failed to capture execution trace. Is the server running in development mode?\033[0m"; \
+        exit 1; \
+    fi
+
+# Capture allocation profile
+profile-allocs:
+    @echo "\033[1m📊 CAPTURING ALLOCATION PROFILE\033[0m"
+    @echo "\033[0;36mCapturing allocation profile...\033[0m"
+    @if curl -s http://localhost:8080/debug/pprof/allocs -o allocs.prof; then \
+        echo "\033[0;32m✅ Allocation profile saved to allocs.prof\033[0m"; \
+        echo "\033[0;33m💡 Use 'go tool pprof allocs.prof' to analyze\033[0m"; \
+    else \
+        echo "\033[0;31m❌ Failed to capture allocation profile. Is the server running in development mode?\033[0m"; \
+        exit 1; \
+    fi
+
+# Open CPU profile analysis in browser
+analyze-cpu:
+    @echo "\033[1m🔍 ANALYZING CPU PROFILE\033[0m"
+    @if [ -f cpu.prof ]; then \
+        echo "\033[0;36mOpening CPU profile analysis in browser...\033[0m"; \
+        echo "\033[0;33mBrowser will open at http://localhost:8081\033[0m"; \
+        go tool pprof -http=:8081 cpu.prof; \
+    else \
+        echo "\033[0;31m❌ CPU profile not found. Run 'just profile-cpu' first.\033[0m"; \
+        exit 1; \
+    fi
+
+# Open heap profile analysis in browser
+analyze-heap:
+    @echo "\033[1m🔍 ANALYZING HEAP PROFILE\033[0m"
+    @if [ -f heap.prof ]; then \
+        echo "\033[0;36mOpening heap profile analysis in browser...\033[0m"; \
+        echo "\033[0;33mBrowser will open at http://localhost:8081\033[0m"; \
+        go tool pprof -http=:8081 heap.prof; \
+    else \
+        echo "\033[0;31m❌ Heap profile not found. Run 'just profile-heap' first.\033[0m"; \
+        exit 1; \
+    fi
+
+# Get runtime performance statistics
+profile-stats:
+    @echo "\033[1m📊 RUNTIME STATISTICS\033[0m"
+    @if curl -s http://localhost:8080/performance/stats | jq .; then \
+        echo ""; \
+        echo "\033[0;32m✅ Runtime statistics retrieved successfully\033[0m"; \
+    else \
+        echo "\033[0;31m❌ Failed to get runtime statistics. Is the server running?\033[0m"; \
+        exit 1; \
+    fi
+
+# Check application health metrics
+profile-health:
+    @echo "\033[1m🏥 HEALTH METRICS\033[0m"
+    @if curl -s http://localhost:8080/performance/health | jq .; then \
+        echo ""; \
+        echo "\033[0;32m✅ Health metrics retrieved successfully\033[0m"; \
+    else \
+        echo "\033[0;31m❌ Failed to get health metrics. Is the server running?\033[0m"; \
+        exit 1; \
+    fi
+
+# Force garbage collection and show results
+profile-gc:
+    @echo "\033[1m🗑️ FORCE GARBAGE COLLECTION\033[0m"
+    @echo "\033[0;36mTriggering garbage collection...\033[0m"
+    @if curl -s -X POST http://localhost:8080/performance/gc | jq .; then \
+        echo ""; \
+        echo "\033[0;32m✅ Garbage collection completed\033[0m"; \
+    else \
+        echo "\033[0;31m❌ Failed to trigger garbage collection. Is the server running in development mode?\033[0m"; \
+        exit 1; \
+    fi
+
+# Capture all performance profiles in one command
+profile-all:
+    @echo "\033[1m📊 CAPTURING ALL PROFILES\033[0m"
+    @echo "\033[0;36mThis will capture CPU (30s), heap, goroutines, allocations, and trace (10s)...\033[0m"
+    @echo "\033[0;33mTotal time: ~45 seconds\033[0m"
+    @echo ""
+    just profile-heap
+    @echo ""
+    just profile-goroutines
+    @echo ""
+    just profile-allocs
+    @echo ""
+    just profile-cpu
+    @echo ""
+    just profile-trace
+    @echo ""
+    @echo "\033[0;32m🎉 All profiles captured successfully!\033[0m"
+    @echo "\033[0;36mFiles created:\033[0m"
+    @echo "  • cpu.prof - CPU profiling data"
+    @echo "  • heap.prof - Heap memory allocations"
+    @echo "  • goroutine.prof - Goroutine dump"
+    @echo "  • allocs.prof - Allocation history"
+    @echo "  • trace.out - Execution trace"
+
+# Clean up profile files
+profile-clean:
+    @echo "\033[1m🧹 CLEANING PROFILE FILES\033[0m"
+    rm -f *.prof *.out
+    @echo "\033[0;32m✅ Profile files cleaned!\033[0m"
+
+# ==============================================
+# BENCHMARKING COMMANDS
+# ==============================================
+
+# Run all benchmarks with comprehensive reporting
+bench:
+    @echo "\033[1m🏎️ RUNNING ALL BENCHMARKS\033[0m"
+    @echo "\033[0;36mRunning comprehensive benchmark suite...\033[0m"
+    @mkdir -p benchmarks
+    @go test -bench=. -benchmem -run=^$$ ./... | tee benchmarks/benchmark-results.txt
+    @echo ""
+    @echo "\033[0;32m✅ Benchmarks completed!\033[0m"
+    @echo "\033[0;36m→ Results saved to: benchmarks/benchmark-results.txt\033[0m"
+
+# Run CPU-focused benchmarks (no memory allocation reporting)
+bench-cpu:
+    @echo "\033[1m⚡ RUNNING CPU BENCHMARKS\033[0m"
+    @echo "\033[0;36mFocusing on CPU performance metrics...\033[0m"
+    @mkdir -p benchmarks
+    @go test -bench=. -run=^$$ ./internal/domain/services/ | tee benchmarks/cpu-benchmarks.txt
+    @go test -bench=. -run=^$$ ./internal/infrastructure/persistence/ | tee -a benchmarks/cpu-benchmarks.txt
+    @echo ""
+    @echo "\033[0;32m✅ CPU benchmarks completed!\033[0m"
+    @echo "\033[0;36m→ Results saved to: benchmarks/cpu-benchmarks.txt\033[0m"
+
+# Run memory-focused benchmarks (with allocation reporting)
+bench-memory:
+    @echo "\033[1m🧠 RUNNING MEMORY BENCHMARKS\033[0m"
+    @echo "\033[0;36mFocusing on memory allocation patterns...\033[0m"
+    @mkdir -p benchmarks
+    @go test -bench=BenchmarkMemory -benchmem -run=^$$ ./... | tee benchmarks/memory-benchmarks.txt
+    @go test -bench=BenchmarkAllocation -benchmem -run=^$$ ./... | tee -a benchmarks/memory-benchmarks.txt
+    @go test -bench=BenchmarkConcurrent -benchmem -run=^$$ ./... | tee -a benchmarks/memory-benchmarks.txt
+    @echo ""
+    @echo "\033[0;32m✅ Memory benchmarks completed!\033[0m"
+    @echo "\033[0;36m→ Results saved to: benchmarks/memory-benchmarks.txt\033[0m"
+
+# Run specific benchmark by name
+bench-specific PATTERN:
+    @echo "\033[1m🎯 RUNNING SPECIFIC BENCHMARK\033[0m"
+    @echo "\033[0;36mRunning benchmarks matching: {{PATTERN}}\033[0m"
+    @mkdir -p benchmarks
+    @go test -bench={{PATTERN}} -benchmem -run=^$$ ./... | tee benchmarks/specific-{{PATTERN}}.txt
+    @echo ""
+    @echo "\033[0;32m✅ Specific benchmarks completed!\033[0m"
+    @echo "\033[0;36m→ Results saved to: benchmarks/specific-{{PATTERN}}.txt\033[0m"
+
+# Establish performance baseline
+bench-baseline:
+    @echo "\033[1m📊 ESTABLISHING PERFORMANCE BASELINE\033[0m"
+    @echo "\033[0;36mCreating baseline benchmark results...\033[0m"
+    @mkdir -p benchmarks/baseline
+    @go test -bench=. -benchmem -count=5 -run=^$$ ./... > benchmarks/baseline/results.txt 2>&1
+    @echo ""
+    @echo "\033[0;32m✅ Baseline established!\033[0m"
+    @echo "\033[0;36m→ Baseline saved to: benchmarks/baseline/results.txt\033[0m"
+    @echo "\033[0;33m💡 Use 'just bench-compare' to compare future runs against this baseline\033[0m"
+
+# Compare current benchmarks with baseline
+bench-compare:
+    @echo "\033[1m📈 COMPARING BENCHMARK RESULTS\033[0m"
+    @if [ ! -f benchmarks/baseline/results.txt ]; then \
+        echo "\033[0;31m❌ No baseline found. Run 'just bench-baseline' first.\033[0m"; \
+        exit 1; \
+    fi
+    @echo "\033[0;36mRunning current benchmarks for comparison...\033[0m"
+    @mkdir -p benchmarks/current
+    @go test -bench=. -benchmem -count=5 -run=^$$ ./... > benchmarks/current/results.txt 2>&1
+    @echo "\033[0;36mComparing results with baseline...\033[0m"
+    @if command -v benchcmp >/dev/null 2>&1; then \
+        benchcmp benchmarks/baseline/results.txt benchmarks/current/results.txt | tee benchmarks/comparison.txt; \
+        echo "\033[0;32m✅ Comparison completed!\033[0m"; \
+        echo "\033[0;36m→ Results saved to: benchmarks/comparison.txt\033[0m"; \
+    else \
+        echo "\033[0;33m⚠️ benchcmp tool not found. Install with: go install golang.org/x/tools/cmd/benchcmp@latest\033[0m"; \
+        echo "\033[0;36mManual comparison available in:\033[0m"; \
+        echo "  → benchmarks/baseline/results.txt"; \
+        echo "  → benchmarks/current/results.txt"; \
+    fi
+
+# Generate benchmark report with analysis
+bench-report:
+    @echo "\033[1m📋 GENERATING BENCHMARK REPORT\033[0m"
+    @mkdir -p benchmarks/reports
+    @echo "\033[0;36mRunning comprehensive benchmarks...\033[0m"
+    @go test -bench=. -benchmem -count=3 -run=^$$ ./... > benchmarks/reports/full-report.txt 2>&1
+    @echo "\033[0;36mGenerating summary report...\033[0m"
+    @echo "# Benchmark Report - $$(date)" > benchmarks/reports/summary.md
+    @echo "" >> benchmarks/reports/summary.md
+    @echo "## Performance Summary" >> benchmarks/reports/summary.md
+    @echo "" >> benchmarks/reports/summary.md
+    @echo "\`\`\`" >> benchmarks/reports/summary.md
+    @grep "Benchmark" benchmarks/reports/full-report.txt | head -20 >> benchmarks/reports/summary.md
+    @echo "\`\`\`" >> benchmarks/reports/summary.md
+    @echo "" >> benchmarks/reports/summary.md
+    @echo "## Analysis" >> benchmarks/reports/summary.md
+    @echo "- Generated on: $$(date)" >> benchmarks/reports/summary.md
+    @echo "- Go version: $$(go version)" >> benchmarks/reports/summary.md
+    @echo "- Test count: $$(grep -c "Benchmark" benchmarks/reports/full-report.txt) benchmarks" >> benchmarks/reports/summary.md
+    @echo ""
+    @echo "\033[0;32m✅ Benchmark report generated!\033[0m"
+    @echo "\033[0;36m→ Full report: benchmarks/reports/full-report.txt\033[0m"
+    @echo "\033[0;36m→ Summary: benchmarks/reports/summary.md\033[0m"
+
+# Run benchmarks with profiling integration
+bench-profile:
+    @echo "\033[1m🔬 RUNNING BENCHMARKS WITH PROFILING\033[0m"
+    @echo "\033[0;36mRunning benchmarks and generating profiles...\033[0m"
+    @mkdir -p benchmarks/profiles
+    @go test -bench=BenchmarkCreateUser -benchmem -run=^$$ -cpuprofile=benchmarks/profiles/cpu.prof -memprofile=benchmarks/profiles/mem.prof ./internal/domain/services/
+    @echo ""
+    @echo "\033[0;32m✅ Profiled benchmarks completed!\033[0m"
+    @echo "\033[0;36mProfiles generated:\033[0m"
+    @echo "  → benchmarks/profiles/cpu.prof"
+    @echo "  → benchmarks/profiles/mem.prof"
+    @echo "\033[0;33m💡 Analyze with: go tool pprof benchmarks/profiles/cpu.prof\033[0m"
+
+# Stress test with high iteration count
+bench-stress:
+    @echo "\033[1m💪 RUNNING STRESS BENCHMARKS\033[0m"
+    @echo "\033[0;36mRunning high-iteration stress tests...\033[0m"
+    @mkdir -p benchmarks/stress
+    @go test -bench=. -benchtime=10s -benchmem -run=^$$ ./internal/domain/services/ | tee benchmarks/stress/services.txt
+    @go test -bench=. -benchtime=10s -benchmem -run=^$$ ./internal/infrastructure/persistence/ | tee benchmarks/stress/persistence.txt
+    @echo ""
+    @echo "\033[0;32m✅ Stress benchmarks completed!\033[0m"
+    @echo "\033[0;36m→ Results saved to: benchmarks/stress/\033[0m"
+
+# Quick benchmark run (fast feedback)
+bench-quick:
+    @echo "\033[1m⚡ RUNNING QUICK BENCHMARKS\033[0m"
+    @echo "\033[0;36mRunning short benchmarks for quick feedback...\033[0m"
+    @go test -bench=. -benchtime=1s -run=^$$ ./internal/domain/services/ | grep -E "(Benchmark|PASS|FAIL)"
+    @echo ""
+    @echo "\033[0;32m✅ Quick benchmarks completed!\033[0m"
+
+# Clean up benchmark results
+bench-clean:
+    @echo "\033[1m🧹 CLEANING BENCHMARK FILES\033[0m"
+    rm -rf benchmarks/
+    @echo "\033[0;32m✅ Benchmark files cleaned!\033[0m"

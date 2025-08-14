@@ -16,25 +16,25 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/shared"
 )
 
-// UserFilters represents the available filters for user queries
+// UserFilters represents the available filters for user queries.
 type UserFilters struct {
 	Domain *string
 	Active *bool
 }
 
-// UserService handles business logic for user operations
+// UserService handles business logic for user operations.
 type UserService struct {
 	userRepo repositories.UserRepository
 }
 
-// NewUserService creates a new user service with dependency injection
+// NewUserService creates a new user service with dependency injection.
 func NewUserService(userRepo repositories.UserRepository) *UserService {
 	return &UserService{
 		userRepo: userRepo,
 	}
 }
 
-// CreateUser creates a new user with business validation
+// CreateUser creates a new user with business validation.
 func (s *UserService) CreateUser(ctx context.Context, id entities.UserID, email, name string) (*entities.User, error) {
 	// Business rule: Validate email format
 	if err := s.validateEmail(email); err != nil {
@@ -69,7 +69,7 @@ func (s *UserService) CreateUser(ctx context.Context, id entities.UserID, email,
 	return user, nil
 }
 
-// GetUser retrieves a user by ID with business logic
+// GetUser retrieves a user by ID with business logic.
 func (s *UserService) GetUser(ctx context.Context, id entities.UserID) (*entities.User, error) {
 	user, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
@@ -80,7 +80,7 @@ func (s *UserService) GetUser(ctx context.Context, id entities.UserID) (*entitie
 	return user, nil
 }
 
-// GetUserByEmail retrieves a user by email
+// GetUserByEmail retrieves a user by email.
 func (s *UserService) GetUserByEmail(ctx context.Context, email string) (*entities.User, error) {
 	if err := s.validateEmail(email); err != nil {
 		return nil, fmt.Errorf("invalid email: %w", err)
@@ -94,7 +94,7 @@ func (s *UserService) GetUserByEmail(ctx context.Context, email string) (*entiti
 	return user, nil
 }
 
-// UpdateUser updates user information with business rules
+// UpdateUser updates user information with business rules.
 func (s *UserService) UpdateUser(ctx context.Context, id entities.UserID, email, name string) (*entities.User, error) {
 	user, err := s.getUserForUpdate(ctx, id)
 	if err != nil {
@@ -172,7 +172,7 @@ func (s *UserService) applyUserUpdates(ctx context.Context, user *entities.User,
 	return user, nil
 }
 
-// DeleteUser removes a user with business rules
+// DeleteUser removes a user with business rules.
 func (s *UserService) DeleteUser(ctx context.Context, id entities.UserID) error {
 	// Business rule: Check if user exists before deletion
 	_, err := s.userRepo.FindByID(ctx, id)
@@ -188,7 +188,7 @@ func (s *UserService) DeleteUser(ctx context.Context, id entities.UserID) error 
 	return nil
 }
 
-// ListUsers retrieves all users with business logic
+// ListUsers retrieves all users with business logic.
 func (s *UserService) ListUsers(ctx context.Context) ([]*entities.User, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
@@ -199,7 +199,7 @@ func (s *UserService) ListUsers(ctx context.Context) ([]*entities.User, error) {
 	return users, nil
 }
 
-// FilterActiveUsers demonstrates functional programming with lo library
+// FilterActiveUsers demonstrates functional programming with lo library.
 func (s *UserService) FilterActiveUsers(ctx context.Context) ([]*entities.User, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
@@ -216,7 +216,7 @@ func (s *UserService) FilterActiveUsers(ctx context.Context) ([]*entities.User, 
 	return activeUsers, nil
 }
 
-// GetUserEmailsWithResult demonstrates Result pattern with Railway Oriented Programming
+// GetUserEmailsWithResult demonstrates Result pattern with Railway Oriented Programming.
 func (s *UserService) GetUserEmailsWithResult(ctx context.Context) shared.Result[[]string] {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
@@ -231,7 +231,7 @@ func (s *UserService) GetUserEmailsWithResult(ctx context.Context) shared.Result
 	return shared.Ok(emails)
 }
 
-// CreateUserWithResult demonstrates Railway Oriented Programming
+// CreateUserWithResult demonstrates Railway Oriented Programming.
 func (s *UserService) CreateUserWithResult(ctx context.Context, id entities.UserID, email, name string) shared.Result[*entities.User] {
 	// Step 1: Validate inputs
 	if validationResult := s.validateUserInputsResult(email, name); validationResult.IsError() {
@@ -247,7 +247,7 @@ func (s *UserService) CreateUserWithResult(ctx context.Context, id entities.User
 	return s.createAndSaveUserResult(ctx, id, email, name)
 }
 
-// validateUserInputsResult validates user inputs using Result pattern
+// validateUserInputsResult validates user inputs using Result pattern.
 func (s *UserService) validateUserInputsResult(email, name string) shared.Result[struct{}] {
 	if err := s.validateEmail(email); err != nil {
 		return shared.Err[struct{}](domainerrors.NewValidationError("email", err.Error()))
@@ -258,7 +258,7 @@ func (s *UserService) validateUserInputsResult(email, name string) shared.Result
 	return shared.Ok(struct{}{})
 }
 
-// checkUserNotExistsResult checks if user exists using Result pattern
+// checkUserNotExistsResult checks if user exists using Result pattern.
 func (s *UserService) checkUserNotExistsResult(ctx context.Context, email string) shared.Result[*entities.User] {
 	existingUser, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) {
@@ -270,7 +270,7 @@ func (s *UserService) checkUserNotExistsResult(ctx context.Context, email string
 	return shared.Ok[*entities.User](nil)
 }
 
-// createAndSaveUserResult creates and saves user using Result pattern
+// createAndSaveUserResult creates and saves user using Result pattern.
 func (s *UserService) createAndSaveUserResult(ctx context.Context, id entities.UserID, email, name string) shared.Result[*entities.User] {
 	user, err := entities.NewUser(id, email, name)
 	if err != nil {
@@ -284,7 +284,7 @@ func (s *UserService) createAndSaveUserResult(ctx context.Context, id entities.U
 	return shared.Ok(user)
 }
 
-// FindUserByEmailOption demonstrates Option pattern
+// FindUserByEmailOption demonstrates Option pattern.
 func (s *UserService) FindUserByEmailOption(ctx context.Context, email string) shared.Option[*entities.User] {
 	if err := s.validateEmail(email); err != nil {
 		return shared.None[*entities.User]()
@@ -298,7 +298,7 @@ func (s *UserService) FindUserByEmailOption(ctx context.Context, email string) s
 	return shared.Some(user)
 }
 
-// BatchValidateUsers demonstrates functional operations for batch processing
+// BatchValidateUsers demonstrates functional operations for batch processing.
 func (s *UserService) BatchValidateUsers(users []*entities.User) map[entities.UserID]error {
 	// Use lo to create a map of validation results
 	validationResults := lo.SliceToMap(users, func(user *entities.User) (entities.UserID, error) {
@@ -313,7 +313,7 @@ func (s *UserService) BatchValidateUsers(users []*entities.User) map[entities.Us
 	return failedValidations
 }
 
-// GetUserStats demonstrates functional aggregation with lo.Reduce and lo.Ternary
+// GetUserStats demonstrates functional aggregation with lo.Reduce and lo.Ternary.
 func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
@@ -361,7 +361,7 @@ func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) 
 	return stats, nil
 }
 
-// GetUsersWithFilters demonstrates advanced functional programming with type-safe filters
+// GetUsersWithFilters demonstrates advanced functional programming with type-safe filters.
 func (s *UserService) GetUsersWithFilters(ctx context.Context, filters UserFilters) ([]*entities.User, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
@@ -391,7 +391,7 @@ func (s *UserService) GetUsersWithFilters(ctx context.Context, filters UserFilte
 	return filteredUsers, nil
 }
 
-// ValidateUserBatchWithEither demonstrates Either pattern for batch operations
+// ValidateUserBatchWithEither demonstrates Either pattern for batch operations.
 func (s *UserService) ValidateUserBatchWithEither(users []*entities.User) shared.Either[[]error, []entities.UserID] {
 	validUsers := make([]entities.UserID, 0)
 	validationErrors := make([]error, 0)
@@ -411,7 +411,7 @@ func (s *UserService) ValidateUserBatchWithEither(users []*entities.User) shared
 	return shared.Right[[]error, []entities.UserID](validUsers)
 }
 
-// GetUsersByEmailDomains demonstrates more complex lo operations
+// GetUsersByEmailDomains demonstrates more complex lo operations.
 func (s *UserService) GetUsersByEmailDomains(ctx context.Context, domains []string) (map[string][]*entities.User, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
@@ -437,7 +437,7 @@ func (s *UserService) GetUsersByEmailDomains(ctx context.Context, domains []stri
 	return filteredUsers, nil
 }
 
-// validateEmail enforces business rules for email validation
+// validateEmail enforces business rules for email validation.
 func (s *UserService) validateEmail(email string) error {
 	if email == "" {
 		return domainerrors.NewRequiredFieldError("email")
@@ -460,7 +460,7 @@ func (s *UserService) validateEmail(email string) error {
 	return nil
 }
 
-// validateUserName enforces business rules for display name validation
+// validateUserName enforces business rules for display name validation.
 func (s *UserService) validateUserName(name string) error {
 	if err := s.validateNameNotEmpty(name); err != nil {
 		return err

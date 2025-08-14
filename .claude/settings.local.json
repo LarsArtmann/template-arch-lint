@@ -29,7 +29,8 @@
       "Bash($HOME/go/bin/golangci-lint version:*)",
       "Bash(/opt/homebrew/bin/golangci-lint --version)",
       "Bash(export PATH=\"$HOME/go/bin:$PATH\")",
-      "Bash($HOME/go/bin/golangci-lint:*)"
+      "Bash($HOME/go/bin/golangci-lint:*)",
+      "Bash(APP_SERVER_PORT=9090 APP_LOGGING_LEVEL=debug gtimeout 5s go run cmd/server/main.go)"
     ],
     "deny": []
   }

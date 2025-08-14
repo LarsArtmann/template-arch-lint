@@ -1,0 +1,123 @@
+# 📊 Codecov Configuration for Template Architecture Lint
+# Enterprise-grade coverage analysis and reporting
+
+coverage:
+  precision: 2
+  round: down
+  range: "80...100"
+
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 1%
+        base: auto
+        flags:
+          - unit
+        paths:
+          - "internal/"
+          - "cmd/"
+    patch:
+      default:
+        target: 80%
+        threshold: 1%
+        base: auto
+        flags:
+          - unit
+
+parsers:
+  gcov:
+    branch_detection:
+      conditional: true
+      loop: true
+      method: false
+      macro: false
+
+ignore:
+  - "**/*_test.go"
+  - "**/testdata/**"
+  - "**/test/**"
+  - "**/tests/**"
+  - "**/mock_*"
+  - "**/*_mock.go"
+  - "**/*_gen.go"
+  - "**/*_generated.go"
+  - "**/*_templ.go"
+  - "**/vendor/**"
+  - "**/bin/**"
+  - "**/build/**"
+  - "**/dist/**"
+  - "**/*.pb.go"
+  - "web/static/**"
+  - "**/examples/**"
+  - "**/docs/**"
+
+flags:
+  unit:
+    paths:
+      - internal/
+      - cmd/
+    carryforward: true
+
+github_checks:
+  annotations: true
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+# Notify settings
+notify:
+  require_ci_to_pass: true
+
+  after_n_builds: 1
+
+  notify:
+    - github_commit_status
+    - github_checks
+
+# Pull request comments
+pull_request_rules:
+  - name: "Flag any decrease in coverage"
+    flag_coverage_not_uploaded_behavior: exclude
+    conditions:
+      - target_coverage_percentage > base_coverage_percentage - 1
+
+# Component coverage (for different parts of the architecture)
+component_management:
+  individual_components:
+    - component_id: domain
+      name: "Domain Layer"
+      paths:
+        - internal/domain/**
+      flag_regexes:
+        - unit
+    - component_id: application
+      name: "Application Layer"
+      paths:
+        - internal/application/**
+      flag_regexes:
+        - unit
+    - component_id: infrastructure
+      name: "Infrastructure Layer"
+      paths:
+        - internal/infrastructure/**
+      flag_regexes:
+        - unit
+    - component_id: config
+      name: "Configuration"
+      paths:
+        - internal/config/**
+        - internal/container/**
+      flag_regexes:
+        - unit
+
+# Profiling settings
+profiling:
+  critical_files_paths:
+    - internal/domain/entities/**
+    - internal/domain/services/**
+    - internal/application/handlers/**

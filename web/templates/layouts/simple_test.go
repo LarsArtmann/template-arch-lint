@@ -22,7 +22,6 @@ func TestBaseLayoutSimple(t *testing.T) {
 
 	component := BaseLayout("Test Title", content)
 	err := component.Render(ctx, buffer)
-
 	if err != nil {
 		t.Fatalf("Failed to render template: %v", err)
 	}

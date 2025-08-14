@@ -8,15 +8,15 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 )
 
-// ErrUserNotFound is returned when a user is not found
+// ErrUserNotFound is returned when a user is not found.
 var ErrUserNotFound = errors.NewNotFoundError("user", "")
 
-// ErrUserAlreadyExists is returned when a user already exists
+// ErrUserAlreadyExists is returned when a user already exists.
 var ErrUserAlreadyExists = errors.NewConflictError("user already exists", errors.ErrorDetails{
 	Resource: "user",
 })
 
-// UserRepository defines the contract for user data persistence
+// UserRepository defines the contract for user data persistence.
 type UserRepository interface {
 	// Save persists a user entity
 	Save(ctx context.Context, user *entities.User) error

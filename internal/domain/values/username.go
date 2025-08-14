@@ -8,15 +8,15 @@ import (
 	"unicode"
 )
 
-// UserName represents a validated username value object
+// UserName represents a validated username value object.
 type UserName struct {
 	value string
 }
 
-// usernameRegex provides basic username validation pattern
+// usernameRegex provides basic username validation pattern.
 var usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 
-// reservedUsernames contains usernames that are not allowed
+// reservedUsernames contains usernames that are not allowed.
 var reservedUsernames = map[string]bool{
 	"admin":      true,
 	"root":       true,
@@ -48,7 +48,7 @@ var reservedUsernames = map[string]bool{
 	"marketing":  true,
 }
 
-// NewUserName creates a new UserName value object with validation
+// NewUserName creates a new UserName value object with validation.
 func NewUserName(username string) (UserName, error) {
 	if err := validateUserNameFormat(username); err != nil {
 		return UserName{}, err
@@ -59,42 +59,42 @@ func NewUserName(username string) (UserName, error) {
 	}, nil
 }
 
-// String returns the string representation of the username
+// String returns the string representation of the username.
 func (u UserName) String() string {
 	return u.value
 }
 
-// Value returns the username value for database storage
+// Value returns the username value for database storage.
 func (u UserName) Value() string {
 	return u.value
 }
 
-// Length returns the length of the username
+// Length returns the length of the username.
 func (u UserName) Length() int {
 	return len(u.value)
 }
 
-// Equals compares two UserName value objects
+// Equals compares two UserName value objects.
 func (u UserName) Equals(other UserName) bool {
 	return u.value == other.value
 }
 
-// IsEmpty checks if the username is empty
+// IsEmpty checks if the username is empty.
 func (u UserName) IsEmpty() bool {
 	return u.value == ""
 }
 
-// IsReserved checks if the username is in the reserved list
+// IsReserved checks if the username is in the reserved list.
 func (u UserName) IsReserved() bool {
 	return reservedUsernames[strings.ToLower(u.value)]
 }
 
-// HasValidCharacters checks if username contains only allowed characters
+// HasValidCharacters checks if username contains only allowed characters.
 func (u UserName) HasValidCharacters() bool {
 	return usernameRegex.MatchString(u.value)
 }
 
-// validateUserNameFormat enforces business rules for username validation
+// validateUserNameFormat enforces business rules for username validation.
 func validateUserNameFormat(username string) error {
 	if username == "" {
 		return fmt.Errorf("username cannot be empty")
@@ -125,7 +125,7 @@ func validateUserNameFormat(username string) error {
 	return nil
 }
 
-// validateUsernameLength checks length constraints
+// validateUsernameLength checks length constraints.
 func validateUsernameLength(normalized string) error {
 	if len(normalized) < 2 {
 		return fmt.Errorf("username too short (minimum 2 characters)")
@@ -136,7 +136,7 @@ func validateUsernameLength(normalized string) error {
 	return nil
 }
 
-// validateUsernameWhitespace checks for leading/trailing whitespace
+// validateUsernameWhitespace checks for leading/trailing whitespace.
 func validateUsernameWhitespace(username, normalized string) error {
 	if username != normalized {
 		return fmt.Errorf("username cannot have leading or trailing spaces")
@@ -144,7 +144,7 @@ func validateUsernameWhitespace(username, normalized string) error {
 	return nil
 }
 
-// validateUsernameCharacters validates allowed characters
+// validateUsernameCharacters validates allowed characters.
 func validateUsernameCharacters(normalized string) error {
 	for _, char := range normalized {
 		if !isValidUsernameChar(char) {
@@ -154,7 +154,7 @@ func validateUsernameCharacters(normalized string) error {
 	return nil
 }
 
-// isValidUsernameChar checks if a character is allowed in usernames
+// isValidUsernameChar checks if a character is allowed in usernames.
 func isValidUsernameChar(char rune) bool {
 	return (char >= 'a' && char <= 'z') ||
 		(char >= 'A' && char <= 'Z') ||
@@ -162,7 +162,7 @@ func isValidUsernameChar(char rune) bool {
 		char == '-' || char == '_' || char == '.' || char == ' '
 }
 
-// validateUsernameEdges checks start/end character restrictions and consecutive characters
+// validateUsernameEdges checks start/end character restrictions and consecutive characters.
 func validateUsernameEdges(normalized string) error {
 	firstChar := normalized[0]
 	lastChar := normalized[len(normalized)-1]
@@ -183,7 +183,7 @@ func validateUsernameEdges(normalized string) error {
 	return nil
 }
 
-// validateUsernameContent validates username content rules (letters, reserved names, numbers)
+// validateUsernameContent validates username content rules (letters, reserved names, numbers).
 func validateUsernameContent(normalized string) error {
 	if err := validateHasLetter(normalized); err != nil {
 		return err
@@ -200,7 +200,7 @@ func validateUsernameContent(normalized string) error {
 	return nil
 }
 
-// validateHasLetter ensures username contains at least one letter
+// validateHasLetter ensures username contains at least one letter.
 func validateHasLetter(normalized string) error {
 	for _, char := range normalized {
 		if unicode.IsLetter(char) {
@@ -210,7 +210,7 @@ func validateHasLetter(normalized string) error {
 	return fmt.Errorf("username must contain at least one letter")
 }
 
-// validateNotReserved checks against reserved usernames
+// validateNotReserved checks against reserved usernames.
 func validateNotReserved(normalized string) error {
 	lowercased := strings.ToLower(strings.ReplaceAll(normalized, " ", ""))
 	if reservedUsernames[lowercased] {
@@ -219,7 +219,7 @@ func validateNotReserved(normalized string) error {
 	return nil
 }
 
-// validateNotAllNumbers ensures username is not all numbers
+// validateNotAllNumbers ensures username is not all numbers.
 func validateNotAllNumbers(normalized string) error {
 	for _, char := range normalized {
 		if !unicode.IsDigit(char) {

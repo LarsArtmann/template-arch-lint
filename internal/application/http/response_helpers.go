@@ -10,10 +10,10 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/application/dto"
 )
 
-// CorrelationIDKey is the key used for correlation ID in context and headers
+// CorrelationIDKey is the key used for correlation ID in context and headers.
 const CorrelationIDKey = "X-Correlation-ID"
 
-// GetCorrelationID extracts correlation ID from gin context
+// GetCorrelationID extracts correlation ID from gin context.
 func GetCorrelationID(c *gin.Context) string {
 	if id := c.GetString(CorrelationIDKey); id != "" {
 		return id
@@ -22,7 +22,7 @@ func GetCorrelationID(c *gin.Context) string {
 	return c.GetHeader(CorrelationIDKey)
 }
 
-// RespondSuccess sends a successful response with data
+// RespondSuccess sends a successful response with data.
 func RespondSuccess[T any](c *gin.Context, statusCode int, data T, message string) {
 	correlationID := GetCorrelationID(c)
 	response := dto.SuccessResponse(data, message, correlationID)
@@ -35,7 +35,7 @@ func RespondSuccess[T any](c *gin.Context, statusCode int, data T, message strin
 	c.JSON(statusCode, response)
 }
 
-// RespondError sends an error response
+// RespondError sends an error response.
 func RespondError(c *gin.Context, statusCode int, code, message, errorType string, details map[string]string) {
 	correlationID := GetCorrelationID(c)
 	response := dto.ErrorResponse(code, message, errorType, correlationID, details)
@@ -48,7 +48,7 @@ func RespondError(c *gin.Context, statusCode int, code, message, errorType strin
 	c.JSON(statusCode, response)
 }
 
-// RespondValidationError sends a validation error response
+// RespondValidationError sends a validation error response.
 func RespondValidationError(c *gin.Context, details map[string]string) {
 	correlationID := GetCorrelationID(c)
 	response := dto.ValidationErrorResponse(details, correlationID)
@@ -61,7 +61,7 @@ func RespondValidationError(c *gin.Context, details map[string]string) {
 	c.JSON(http.StatusBadRequest, response)
 }
 
-// RespondNotFound sends a not found error response
+// RespondNotFound sends a not found error response.
 func RespondNotFound(c *gin.Context, resource, id string) {
 	correlationID := GetCorrelationID(c)
 	response := dto.NotFoundErrorResponse(resource, id, correlationID)
@@ -74,7 +74,7 @@ func RespondNotFound(c *gin.Context, resource, id string) {
 	c.JSON(http.StatusNotFound, response)
 }
 
-// RespondInternalError sends an internal server error response
+// RespondInternalError sends an internal server error response.
 func RespondInternalError(c *gin.Context) {
 	correlationID := GetCorrelationID(c)
 	response := dto.InternalErrorResponse(correlationID)
@@ -87,17 +87,17 @@ func RespondInternalError(c *gin.Context) {
 	c.JSON(http.StatusInternalServerError, response)
 }
 
-// RespondCreated sends a successful creation response
+// RespondCreated sends a successful creation response.
 func RespondCreated[T any](c *gin.Context, data T, message string) {
 	RespondSuccess(c, http.StatusCreated, data, message)
 }
 
-// RespondOK sends a successful OK response
+// RespondOK sends a successful OK response.
 func RespondOK[T any](c *gin.Context, data T, message string) {
 	RespondSuccess(c, http.StatusOK, data, message)
 }
 
-// RespondNoContent sends a successful no content response
+// RespondNoContent sends a successful no content response.
 func RespondNoContent(c *gin.Context) {
 	correlationID := GetCorrelationID(c)
 	if correlationID != "" {

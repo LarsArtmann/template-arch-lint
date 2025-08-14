@@ -10,7 +10,7 @@ import (
 	domainerrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 )
 
-// ErrorResponse represents a structured error response
+// ErrorResponse represents a structured error response.
 type ErrorResponse struct {
 	Error   string                    `json:"error"`
 	Code    domainerrors.ErrorCode    `json:"code"`
@@ -18,17 +18,17 @@ type ErrorResponse struct {
 	Details domainerrors.ErrorDetails `json:"details,omitempty"`
 }
 
-// ErrorHandler wraps a handler and provides structured error handling
+// ErrorHandler wraps a handler and provides structured error handling.
 type ErrorHandler func(w http.ResponseWriter, r *http.Request) error
 
-// ServeHTTP implements the http.Handler interface for ErrorHandler
+// ServeHTTP implements the http.Handler interface for ErrorHandler.
 func (eh ErrorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := eh(w, r); err != nil {
 		HandleError(w, r, err)
 	}
 }
 
-// HandleError processes errors and returns appropriate HTTP responses
+// HandleError processes errors and returns appropriate HTTP responses.
 func HandleError(w http.ResponseWriter, _ *http.Request, err error) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -70,7 +70,7 @@ func HandleError(w http.ResponseWriter, _ *http.Request, err error) {
 	slog.Error("Internal server error", "error", err)
 }
 
-// ValidationErrorMiddleware specifically handles validation errors
+// ValidationErrorMiddleware specifically handles validation errors.
 func ValidationErrorMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Create a custom response writer to capture the response
@@ -83,7 +83,7 @@ func ValidationErrorMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// responseRecorder captures response details for middleware processing
+// responseRecorder captures response details for middleware processing.
 type responseRecorder struct {
 	http.ResponseWriter
 	statusCode int
@@ -100,7 +100,7 @@ func (r *responseRecorder) Write(body []byte) (int, error) {
 	return r.ResponseWriter.Write(body)
 }
 
-// RecoveryMiddleware handles panics and converts them to errors
+// RecoveryMiddleware handles panics and converts them to errors.
 func RecoveryMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -117,7 +117,7 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// LoggingMiddleware logs requests and errors with structured logging
+// LoggingMiddleware logs requests and errors with structured logging.
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		slog.Info("HTTP request started",

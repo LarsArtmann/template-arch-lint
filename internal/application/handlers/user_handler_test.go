@@ -20,7 +20,7 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
-// Test response types to replace interface{} usage
+// Test response types to replace interface{} usage.
 type ErrorResponse struct {
 	Error string `json:"error"`
 	Code  string `json:"code,omitempty"`
@@ -41,7 +41,7 @@ type ListUsersResponse struct {
 	Total int            `json:"total"`
 }
 
-// MockUserRepository implements repositories.UserRepository for testing
+// MockUserRepository implements repositories.UserRepository for testing.
 type MockUserRepository struct {
 	users       map[string]*entities.User
 	shouldError bool

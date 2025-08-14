@@ -125,7 +125,7 @@ func TestErrorTypeAssertions(t *testing.T) {
 	testInternalErrorAssertions(t, testErrors)
 }
 
-// testErrorTypes holds all test error instances
+// testErrorTypes holds all test error instances.
 type testErrorTypes struct {
 	validation *ValidationError
 	notFound   *NotFoundError
@@ -133,7 +133,7 @@ type testErrorTypes struct {
 	internal   *InternalError
 }
 
-// createTestErrors creates test error instances
+// createTestErrors creates test error instances.
 func createTestErrors() testErrorTypes {
 	return testErrorTypes{
 		validation: NewValidationError("email", "invalid"),
@@ -143,7 +143,7 @@ func createTestErrors() testErrorTypes {
 	}
 }
 
-// testDomainErrorIdentification tests IsDomainError function
+// testDomainErrorIdentification tests IsDomainError function.
 func testDomainErrorIdentification(t *testing.T, errors testErrorTypes) {
 	t.Helper()
 
@@ -155,7 +155,7 @@ func testDomainErrorIdentification(t *testing.T, errors testErrorTypes) {
 	}
 }
 
-// testValidationErrorAssertions tests AsValidationError function
+// testValidationErrorAssertions tests AsValidationError function.
 func testValidationErrorAssertions(t *testing.T, errors testErrorTypes) {
 	t.Helper()
 
@@ -167,7 +167,7 @@ func testValidationErrorAssertions(t *testing.T, errors testErrorTypes) {
 	}
 }
 
-// testNotFoundErrorAssertions tests AsNotFoundError function
+// testNotFoundErrorAssertions tests AsNotFoundError function.
 func testNotFoundErrorAssertions(t *testing.T, errors testErrorTypes) {
 	t.Helper()
 
@@ -179,7 +179,7 @@ func testNotFoundErrorAssertions(t *testing.T, errors testErrorTypes) {
 	}
 }
 
-// testConflictErrorAssertions tests AsConflictError function
+// testConflictErrorAssertions tests AsConflictError function.
 func testConflictErrorAssertions(t *testing.T, errors testErrorTypes) {
 	t.Helper()
 
@@ -191,7 +191,7 @@ func testConflictErrorAssertions(t *testing.T, errors testErrorTypes) {
 	}
 }
 
-// testInternalErrorAssertions tests AsInternalError function
+// testInternalErrorAssertions tests AsInternalError function.
 func testInternalErrorAssertions(t *testing.T, errors testErrorTypes) {
 	t.Helper()
 

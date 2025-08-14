@@ -111,7 +111,7 @@ func (a *SuccessAssertions) AssertSuccessWithPredicate(result any, err error, pr
 // Convenience functions for global use
 
 var (
-	// Global assertion helpers for convenient access
+	// Global assertion helpers for convenient access.
 	assert         = NewStandardAssertions()
 	validateAssert = NewValidationAssertions()
 	successAssert  = NewSuccessAssertions()

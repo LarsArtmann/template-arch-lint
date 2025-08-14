@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RequestLoggingConfig contains configuration for request logging middleware
+// RequestLoggingConfig contains configuration for request logging middleware.
 type RequestLoggingConfig struct {
 	// Logger is the structured logger to use
 	Logger *slog.Logger
@@ -21,7 +21,7 @@ type RequestLoggingConfig struct {
 	LogResponseBody bool
 }
 
-// DefaultRequestLoggingConfig returns a default configuration
+// DefaultRequestLoggingConfig returns a default configuration.
 func DefaultRequestLoggingConfig() RequestLoggingConfig {
 	return RequestLoggingConfig{
 		Logger: slog.Default(),
@@ -35,7 +35,7 @@ func DefaultRequestLoggingConfig() RequestLoggingConfig {
 	}
 }
 
-// StructuredRequestLogging returns middleware for structured request logging
+// StructuredRequestLogging returns middleware for structured request logging.
 func StructuredRequestLogging(config ...RequestLoggingConfig) gin.HandlerFunc {
 	cfg := DefaultRequestLoggingConfig()
 	if len(config) > 0 {
@@ -106,7 +106,7 @@ func StructuredRequestLogging(config ...RequestLoggingConfig) gin.HandlerFunc {
 	}
 }
 
-// WithStructuredLogging is a convenience function to create structured logging middleware
+// WithStructuredLogging is a convenience function to create structured logging middleware.
 func WithStructuredLogging(logger *slog.Logger, skipPaths ...string) gin.HandlerFunc {
 	config := DefaultRequestLoggingConfig()
 	config.Logger = logger
