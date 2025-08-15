@@ -4,7 +4,7 @@
 # This configuration enforces the highest standards of Go code quality
 # Designed for mission-critical production systems with zero defect tolerance
 
-version: 2
+# version: 1 (default, compatible with golangci-lint v1.64.8)
 
 run:
   timeout: 5m

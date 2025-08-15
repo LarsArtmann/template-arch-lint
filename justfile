@@ -64,7 +64,7 @@ help:
     @echo ""
     @echo "\033[1mCODE ANALYSIS:\033[0m"
     @echo "  • \033[0;36mjust fd\033[0m                  - Find duplicate code (alias for find-duplicates)"
-    @echo "  • \033[0;36mjust find-duplicates\033[0m     - Find duplicate code with custom threshold"
+    @echo "  • \033[0;36mjust find-duplicates\033[0m     - Find duplicate code with custom threshold (default: 15 tokens)"
     @echo ""
     @echo "\033[1mPERFORMANCE PROFILING:\033[0m"
     @echo "  • \033[0;36mjust profile-cpu\033[0m         - Capture 30-second CPU profile"
@@ -389,6 +389,46 @@ graph-component component:
         exit 1; \
     fi
 
+# Find code duplications in the project
+find-duplicates threshold="15":
+    @echo "\033[1m🔍 FINDING CODE DUPLICATIONS\033[0m"
+    @mkdir -p {{REPORT_DIR}}
+    @echo "\033[0;36mAnalyzing Go code duplications (threshold: {{threshold}} tokens)...\033[0m"
+    @if command -v dupl >/dev/null 2>&1; then \
+        echo "\033[0;33m📋 Go Code Duplication Report (dupl)\033[0m"; \
+        dupl -t {{threshold}} -v . > {{REPORT_DIR}}/go-duplications.txt 2>&1 || true; \
+        dupl -t {{threshold}} -html . > {{REPORT_DIR}}/go-duplications.html 2>&1 || true; \
+        echo "  → {{REPORT_DIR}}/go-duplications.txt"; \
+        echo "  → {{REPORT_DIR}}/go-duplications.html"; \
+        echo ""; \
+        echo "\033[0;33m📊 Summary:\033[0m"; \
+        DUPL_COUNT=`dupl -t {{threshold}} . 2>/dev/null | grep -c "found" || echo "0"`; \
+        echo "  Go duplications found: $DUPL_COUNT"; \
+    else \
+        echo "\033[0;31m❌ dupl not found. Installing...\033[0m"; \
+        go install github.com/mibk/dupl@latest; \
+        dupl -t {{threshold}} -v . > {{REPORT_DIR}}/go-duplications.txt 2>&1 || true; \
+        dupl -t {{threshold}} -html . > {{REPORT_DIR}}/go-duplications.html 2>&1 || true; \
+    fi
+    @echo "\033[0;36mAnalyzing multi-language duplications (jscpd)...\033[0m"
+    @if command -v jscpd >/dev/null 2>&1; then \
+        echo "\033[0;33m📋 Multi-Language Duplication Report (jscpd)\033[0m"; \
+        jscpd . --min-tokens {{threshold}} --reporters json,html --output {{REPORT_DIR}}/jscpd || true; \
+        if [ -f "{{REPORT_DIR}}/jscpd/jscpd-report.json" ]; then \
+            echo "  → {{REPORT_DIR}}/jscpd/jscpd-report.json"; \
+            echo "  → {{REPORT_DIR}}/jscpd/jscpd-report.html"; \
+        fi; \
+    else \
+        echo "\033[0;33m⚠️  jscpd not found, skipping multi-language analysis.\033[0m"; \
+        echo "\033[0;36mTo install: bun install -g jscpd\033[0m"; \
+    fi
+    @echo ""
+    @echo "\033[0;32m✅ Duplication analysis complete!\033[0m"
+    @echo "\033[0;36mOpen {{REPORT_DIR}}/go-duplications.html in browser for detailed Go analysis\033[0m"
+
+# Alias for find-duplicates
+fd threshold="15": (find-duplicates threshold)
+
 # Generate templates and build Go modules
 build:
     @echo "\033[1m🔨 BUILDING\033[0m"
@@ -576,41 +616,6 @@ docker-security: docker-build
         echo "\033[0;31m❌ Trivy not installed. Install with: brew install trivy\033[0m"; \
         exit 1; \
     fi
-
-# 🔍 Code Duplication Detection
-
-# Find duplicate code blocks using dupl tool
-find-duplicates threshold="50":
-    @echo "\033[1m🔍 FINDING DUPLICATE CODE\033[0m"
-    @echo "\033[0;36mUsing threshold: {{threshold}} tokens...\033[0m"
-    @if command -v dupl >/dev/null 2>&1; then \
-        echo "\033[0;33mAnalyzing Go source files...\033[0m"; \
-        dupl -t {{threshold}} . > duplication-report.txt; \
-        if dupl -t {{threshold}} -html . > duplication-report.html; then \
-            echo "\033[0;32m✅ Duplication analysis completed!\033[0m"; \
-            echo "\033[0;36m→ Text report: ./duplication-report.txt\033[0m"; \
-            echo "\033[0;36m→ HTML report: ./duplication-report.html\033[0m"; \
-        else \
-            echo "\033[0;31m❌ Duplication analysis failed!\033[0m" >&2; \
-            exit 1; \
-        fi; \
-    else \
-        echo "\033[0;31m❌ dupl not installed. Installing...\033[0m"; \
-        go install github.com/mibk/dupl@latest; \
-        echo "\033[0;33mAnalyzing Go source files...\033[0m"; \
-        dupl -t {{threshold}} . > duplication-report.txt; \
-        if dupl -t {{threshold}} -html . > duplication-report.html; then \
-            echo "\033[0;32m✅ Duplication analysis completed!\033[0m"; \
-            echo "\033[0;36m→ Text report: ./duplication-report.txt\033[0m"; \
-            echo "\033[0;36m→ HTML report: ./duplication-report.html\033[0m"; \
-        else \
-            echo "\033[0;31m❌ Duplication analysis failed!\033[0m" >&2; \
-            exit 1; \
-        fi; \
-    fi
-
-# Alias for find-duplicates (fd)
-fd threshold="50": (find-duplicates threshold)
 
 # Find high-confidence duplicates (stricter threshold)
 find-duplicates-strict: (find-duplicates "100")
