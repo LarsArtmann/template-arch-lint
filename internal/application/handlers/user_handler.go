@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/samber/lo"
 
@@ -16,34 +18,51 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	utilsErrors "github.com/LarsArtmann/template-arch-lint/internal/utils/errors"
+	utilsValidation "github.com/LarsArtmann/template-arch-lint/internal/utils/validation"
 	"github.com/gin-gonic/gin"
 )
 
 // UserHandler handles user-related HTTP requests.
 type UserHandler struct {
-	userService *services.UserService
-	logger      *slog.Logger
+	userService  *services.UserService
+	logger       *slog.Logger
+	validators   *utilsValidation.PrebuiltValidators
+	errorFactory *utilsErrors.ErrorFactory
 }
 
 // NewUserHandler creates a new UserHandler with dependency injection.
 func NewUserHandler(userService *services.UserService, logger *slog.Logger) *UserHandler {
 	return &UserHandler{
-		userService: userService,
-		logger:      logger,
+		userService:  userService,
+		logger:       logger,
+		validators:   utilsValidation.NewPrebuiltValidators(),
+		errorFactory: utilsErrors.NewErrorFactory(),
 	}
 }
 
 // Note: Request types moved to dto package for better separation of concerns
 
-// CreateUser creates a new user.
+// CreateUser creates a new user with comprehensive validation and sanitization.
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	correlationID := httputil.GetCorrelationID(c)
 	h.logger.Info("Creating user",
 		"remote_addr", c.ClientIP(),
 		"correlation_id", correlationID)
 
+	// Create context with timeout
+	ctx := context.WithValue(c.Request.Context(), utilsErrors.CorrelationIDKey, correlationID)
+	ctx = context.WithValue(ctx, utilsErrors.OperationKey, "create_user")
+
+	timeoutCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
 	var req dto.CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		_ = h.errorFactory.Validation(err, "request_payload").
+			WithContext(timeoutCtx).
+			WithOperation("bind_json")
+
 		h.logger.Warn("Invalid request payload",
 			"error", err,
 			"correlation_id", correlationID)
@@ -54,12 +73,83 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	// Create user using service layer
-	userID, err := values.NewUserID(req.ID)
+	// Sanitize input data
+	sanitizedID := h.validators.Sanitization.TrimWhitespace(req.ID)
+	sanitizedID = h.validators.Sanitization.StripNonPrintable(sanitizedID)
+
+	sanitizedEmail := h.validators.Sanitization.TrimWhitespace(req.Email)
+	sanitizedEmail = h.validators.Sanitization.NormalizeWhitespace(sanitizedEmail)
+
+	sanitizedName := h.validators.Sanitization.TrimWhitespace(req.Name)
+	sanitizedName = h.validators.Sanitization.EscapeHTML(sanitizedName)
+	sanitizedName = h.validators.Sanitization.NormalizeWhitespace(sanitizedName)
+
+	// Validate input using utility validators
+	validationResult := utilsValidation.ValidateWithResult(timeoutCtx, sanitizedID,
+		utilsValidation.ToValidator(h.validators.String.NotEmpty("id")),
+		utilsValidation.ToValidator(h.validators.String.LengthRange("id", 1, 100)),
+		utilsValidation.ToValidator(h.validators.String.NoSpecialChars("id", '-', '_')),
+	)
+
+	if !validationResult.IsValid() {
+		h.logger.Warn("User ID validation failed",
+			"user_id", sanitizedID,
+			"errors", validationResult.AllErrors(),
+			"correlation_id", correlationID)
+
+		httputil.RespondValidationError(c, map[string]string{
+			"id": validationResult.FirstError(),
+		})
+		return
+	}
+
+	// Validate email
+	emailValidation := utilsValidation.ValidateWithResult(timeoutCtx, sanitizedEmail,
+		utilsValidation.ToValidator(h.validators.String.NotEmpty("email")),
+		utilsValidation.ToValidator(h.validators.String.Email("email")),
+		utilsValidation.ToValidator(h.validators.String.MaxLength("email", 255)),
+	)
+
+	if !emailValidation.IsValid() {
+		h.logger.Warn("Email validation failed",
+			"email", sanitizedEmail,
+			"errors", emailValidation.AllErrors(),
+			"correlation_id", correlationID)
+
+		httputil.RespondValidationError(c, map[string]string{
+			"email": emailValidation.FirstError(),
+		})
+		return
+	}
+
+	// Validate name
+	nameValidation := utilsValidation.ValidateWithResult(timeoutCtx, sanitizedName,
+		utilsValidation.ToValidator(h.validators.String.NotEmpty("name")),
+		utilsValidation.ToValidator(h.validators.String.LengthRange("name", 1, 255)),
+	)
+
+	if !nameValidation.IsValid() {
+		h.logger.Warn("Name validation failed",
+			"name", sanitizedName,
+			"errors", nameValidation.AllErrors(),
+			"correlation_id", correlationID)
+
+		httputil.RespondValidationError(c, map[string]string{
+			"name": nameValidation.FirstError(),
+		})
+		return
+	}
+
+	// Create user ID using validated input
+	userID, err := values.NewUserID(sanitizedID)
 	if err != nil {
+		_ = h.errorFactory.Validation(err, "user_id").
+			WithContext(timeoutCtx).
+			WithExtra("user_id", sanitizedID)
+
 		h.logger.Warn("Invalid user ID format",
 			"error", err,
-			"user_id", req.ID,
+			"user_id", sanitizedID,
 			"correlation_id", correlationID)
 
 		httputil.RespondValidationError(c, map[string]string{
@@ -68,11 +158,13 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.CreateUser(c.Request.Context(), userID, req.Email, req.Name)
+	// Create user using service layer with sanitized data
+	user, err := h.userService.CreateUser(timeoutCtx, userID, sanitizedEmail, sanitizedName)
 	if err != nil {
+		wrappedErr := h.errorFactory.WrapWithContext(timeoutCtx, err, "failed to create user")
 		h.logger.Error("Failed to create user",
-			"error", err,
-			"user_id", req.ID,
+			"error", wrappedErr,
+			"user_id", sanitizedID,
 			"correlation_id", correlationID)
 
 		if errors.Is(err, repositories.ErrUserAlreadyExists) {
@@ -81,8 +173,8 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 				"User or email already exists",
 				"conflict",
 				map[string]string{
-					"id":    req.ID,
-					"email": req.Email,
+					"id":    sanitizedID,
+					"email": sanitizedEmail,
 				})
 			return
 		}
@@ -157,14 +249,9 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 // UpdateUser updates an existing user.
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := values.NewUserID(idStr)
+	id, err := h.parseAndValidateUserID(c, idStr)
 	if err != nil {
-		h.logger.Warn("Invalid user ID format", "error", err, "user_id", idStr)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Invalid user ID format",
-			"details": err.Error(),
-		})
-		return
+		return // Error already handled in parseAndValidateUserID
 	}
 
 	var req dto.UpdateUserRequest
@@ -212,14 +299,9 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 // DeleteUser removes a user.
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := values.NewUserID(idStr)
+	id, err := h.parseAndValidateUserID(c, idStr)
 	if err != nil {
-		h.logger.Warn("Invalid user ID format", "error", err, "user_id", idStr)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Invalid user ID format",
-			"details": err.Error(),
-		})
-		return
+		return // Error already handled in parseAndValidateUserID
 	}
 
 	h.logger.Info("Deleting user", "user_id", id)
@@ -248,21 +330,16 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 	})
 }
 
-// ListUsers retrieves all users.
+// ListUsers retrieves all users with optimized pagination.
+// Memory optimization: Pagination should ideally be done at database level,
+// but for demo purposes we'll optimize the slicing logic.
 func (h *UserHandler) ListUsers(c *gin.Context) {
-	// Parse optional query parameters
+	// Parse optional query parameters with validation
 	limitStr := c.DefaultQuery("limit", "50")
 	offsetStr := c.DefaultQuery("offset", "0")
 
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil || limit < 0 {
-		limit = 50
-	}
-
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil || offset < 0 {
-		offset = 0
-	}
+	limit := parsePositiveInt(limitStr, 50, 1000) // Cap at 1000 for safety
+	offset := parsePositiveInt(offsetStr, 0, 0)   // No upper limit for offset
 
 	h.logger.Debug("Listing users", "limit", limit, "offset", offset)
 
@@ -277,18 +354,9 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 		return
 	}
 
-	// Apply pagination
+	// Optimized pagination bounds checking
 	total := len(users)
-	start := offset
-	if start > total {
-		start = total
-	}
-	end := start + limit
-	if end > total {
-		end = total
-	}
-
-	paginatedUsers := users[start:end]
+	paginatedUsers := paginateSlice(users, offset, limit)
 
 	h.logger.Info("Users listed successfully", "total", total, "returned", len(paginatedUsers))
 	c.JSON(http.StatusOK, gin.H{
@@ -297,6 +365,47 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 		"limit":  limit,
 		"offset": offset,
 	})
+}
+
+// parsePositiveInt parses a string to positive int with bounds checking.
+func parsePositiveInt(s string, defaultVal, maxVal int) int {
+	val, err := strconv.Atoi(s)
+	if err != nil || val < 0 {
+		return defaultVal
+	}
+	if maxVal > 0 && val > maxVal {
+		return maxVal
+	}
+	return val
+}
+
+// paginateSlice efficiently paginates a slice with bounds checking.
+func paginateSlice[T any](slice []T, offset, limit int) []T {
+	total := len(slice)
+	if offset >= total {
+		return []T{} // Return empty slice of same type
+	}
+
+	end := offset + limit
+	if end > total {
+		end = total
+	}
+
+	return slice[offset:end]
+}
+
+// parseAndValidateUserID extracts user ID parsing logic to reduce duplication.
+func (h *UserHandler) parseAndValidateUserID(c *gin.Context, idStr string) (values.UserID, error) {
+	id, err := values.NewUserID(idStr)
+	if err != nil {
+		h.logger.Warn("Invalid user ID format", "error", err, "user_id", idStr)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Invalid user ID format",
+			"details": err.Error(),
+		})
+		return values.UserID{}, err
+	}
+	return id, nil
 }
 
 // handleError processes errors and returns appropriate HTTP responses using typed errors.

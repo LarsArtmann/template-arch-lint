@@ -1,0 +1,314 @@
+architecture_suite_test.go:1: line-length-limit: line is 91 characters, out of limit 80 (revive)
+// Package architecture_test contains automated tests that enforce architectural boundaries
+architecture_suite_test.go:2: line-length-limit: line is 82 characters, out of limit 80 (revive)
+// and Clean Architecture/DDD principles to prevent architectural decay over time.
+architecture_suite_test.go:17:2: dot-imports: should not use dot imports (revive)
+	. "github.com/onsi/ginkgo/v2"
+	^
+architecture_suite_test.go:18:2: dot-imports: should not use dot imports (revive)
+	. "github.com/onsi/gomega"
+	^
+architecture_suite_test.go:27: line-length-limit: line is 84 characters, out of limit 80 (revive)
+	RunSpecs(t, "🏗️ Architecture Test Suite - Clean Architecture & DDD Enforcement")
+architecture_suite_test.go:43: line-length-limit: line is 98 characters, out of limit 80 (revive)
+	"domain/repositories": {"domain/entities", "domain/shared", "domain/values", "domain/errors"},
+architecture_suite_test.go:44: line-length-limit: line is 121 characters, out of limit 80 (revive)
+	"domain/services":     {"domain/entities", "domain/repositories", "domain/shared", "domain/values", "domain/errors"},
+architecture_suite_test.go:47: line-length-limit: line is 140 characters, out of limit 80 (revive)
+	"application":         {"domain/entities", "domain/services", "domain/repositories", "domain/shared", "domain/values", "domain/errors"},
+architecture_suite_test.go:48: line-length-limit: line is 121 characters, out of limit 80 (revive)
+	"infrastructure":      {"domain/entities", "domain/repositories", "domain/shared", "domain/values", "domain/errors"},
+architecture_suite_test.go:51: line-length-limit: line is 89 characters, out of limit 80 (revive)
+var _ = Describe("🏗️ Architecture Tests - Clean Architecture & DDD Enforcement", func() {
+architecture_suite_test.go:60:47: unused-parameter: parameter 'info' seems to be unused, consider removing or renaming it as _ (revive)
+		err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
+		                                            ^
+architecture_suite_test.go:65: line-length-limit: line is 85 characters, out of limit 80 (revive)
+			// Skip non-Go files, test files, generated files, and vendor directories
+architecture_suite_test.go:76:16: G304: Potential file inclusion via variable (gosec)
+			src, err := os.ReadFile(path)
+			            ^
+architecture_suite_test.go:78:12: error returned from external package is unwrapped: sig: func os.ReadFile(name string) ([]byte, error) (wrapcheck)
+				return err
+				       ^
+architecture_suite_test.go:81: line-length-limit: line is 83 characters, out of limit 80 (revive)
+			file, err := parser.ParseFile(fileSet, path, src, parser.ParseComments)
+architecture_suite_test.go:97: line-length-limit: line is 93 characters, out of limit 80 (revive)
+		It("should ensure domain layer has no external infrastructure dependencies", func() {
+architecture_suite_test.go:101: line-length-limit: line is 97 characters, out of limit 80 (revive)
+				By(fmt.Sprintf("Checking domain package %s for external dependencies", pkg.path))
+architecture_suite_test.go:105: line-length-limit: line is 82 characters, out of limit 80 (revive)
+					if isStandardLibrary(importPath) || isTestImport(importPath) {
+architecture_suite_test.go:116: line-length-limit: line is 119 characters, out of limit 80 (revive)
+						Fail(fmt.Sprintf("❌ DOMAIN ISOLATION VIOLATION: Package %s imports non-domain dependency %s\n"+
+architecture_suite_test.go:117: line-length-limit: line is 115 characters, out of limit 80 (revive)
+							"Domain layer must not depend on infrastructure, application, or external concerns.\n"+
+architecture_suite_test.go:118: line-length-limit: line is 92 characters, out of limit 80 (revive)
+							"Allowed: domain/*, standard library, approved vendor packages",
+architecture_suite_test.go:129: line-length-limit: line is 97 characters, out of limit 80 (revive)
+		It("should verify proper layer dependency direction follows Clean Architecture", func() {
+architecture_suite_test.go:134: line-length-limit: line is 82 characters, out of limit 80 (revive)
+				if len(allowedDeps) == 0 && layer != "main" && layer != "config" {
+architecture_suite_test.go:138: line-length-limit: line is 98 characters, out of limit 80 (revive)
+				By(fmt.Sprintf("Checking layer dependencies for %s (layer: %s)", pkg.path, layer))
+architecture_suite_test.go:142: line-length-limit: line is 88 characters, out of limit 80 (revive)
+					if isStandardLibrary(importPath) || isVendorDependency(importPath) {
+architecture_suite_test.go:152: line-length-limit: line is 83 characters, out of limit 80 (revive)
+					if !isAllowedLayerDependency(layer, importLayer, allowedDeps) {
+architecture_suite_test.go:153: line-length-limit: line is 122 characters, out of limit 80 (revive)
+						Fail(fmt.Sprintf("❌ LAYER DEPENDENCY VIOLATION: %s (layer: %s) cannot depend on %s (layer: %s)\n"+
+architecture_suite_test.go:154: line-length-limit: line is 98 characters, out of limit 80 (revive)
+							"Clean Architecture rule violated. Allowed dependencies for %s: %v\n"+
+architecture_suite_test.go:155: line-length-limit: line is 92 characters, out of limit 80 (revive)
+							"Dependencies must flow: Infrastructure → Application → Domain",
+architecture_suite_test.go:156: line-length-limit: line is 90 characters, out of limit 80 (revive)
+							pkg.path, layer, importPath, importLayer, layer, allowedDeps))
+architecture_suite_test.go:176: line-length-limit: line is 85 characters, out of limit 80 (revive)
+					cycle := findCycle(pkgPath, graph, visited, recStack, []string{})
+architecture_suite_test.go:179: line-length-limit: line is 115 characters, out of limit 80 (revive)
+							"Circular dependencies violate Clean Architecture and can cause compilation issues.\n"+
+architecture_suite_test.go:180: line-length-limit: line is 121 characters, out of limit 80 (revive)
+							"Refactor to remove the circular dependency by introducing interfaces or reorganizing code.",
+architecture_suite_test.go:191: line-length-limit: line is 90 characters, out of limit 80 (revive)
+		It("should verify value objects are immutable and follow DDD principles", func() {
+architecture_suite_test.go:194: line-length-limit: line is 87 characters, out of limit 80 (revive)
+			By(fmt.Sprintf("Checking value object immutability: %s", emailType.Name()))
+architecture_suite_test.go:201: line-length-limit: line is 96 characters, out of limit 80 (revive)
+					Fail(fmt.Sprintf("❌ VALUE OBJECT MUTABILITY VIOLATION: %s.%s is exported\n"+
+architecture_suite_test.go:202: line-length-limit: line is 94 characters, out of limit 80 (revive)
+						"Value objects must be immutable. All fields should be unexported.\n"+
+architecture_suite_test.go:210: line-length-limit: line is 88 characters, out of limit 80 (revive)
+			By(fmt.Sprintf("Checking value object immutability: %s", userIDType.Name()))
+architecture_suite_test.go:216: line-length-limit: line is 96 characters, out of limit 80 (revive)
+					Fail(fmt.Sprintf("❌ VALUE OBJECT MUTABILITY VIOLATION: %s.%s is exported\n"+
+architecture_suite_test.go:217: line-length-limit: line is 94 characters, out of limit 80 (revive)
+						"Value objects must be immutable. All fields should be unexported.\n"+
+architecture_suite_test.go:225: line-length-limit: line is 90 characters, out of limit 80 (revive)
+			By(fmt.Sprintf("Checking value object immutability: %s", userNameType.Name()))
+architecture_suite_test.go:231: line-length-limit: line is 96 characters, out of limit 80 (revive)
+					Fail(fmt.Sprintf("❌ VALUE OBJECT MUTABILITY VIOLATION: %s.%s is exported\n"+
+architecture_suite_test.go:232: line-length-limit: line is 94 characters, out of limit 80 (revive)
+						"Value objects must be immutable. All fields should be unexported.\n"+
+architecture_suite_test.go:243: line-length-limit: line is 110 characters, out of limit 80 (revive)
+		It("should ensure repository interfaces are in domain and implementations in infrastructure", func() {
+architecture_suite_test.go:245: line-length-limit: line is 86 characters, out of limit 80 (revive)
+			userRepoType := reflect.TypeOf((*repositories.UserRepository)(nil)).Elem()
+architecture_suite_test.go:246: line-length-limit: line is 95 characters, out of limit 80 (revive)
+			By(fmt.Sprintf("Verifying repository interface location: %s", userRepoType.Name()))
+architecture_suite_test.go:263: line-length-limit: line is 98 characters, out of limit 80 (revive)
+				if methodType.NumIn() > 0 { // Interface methods don't have receiver in reflection
+architecture_suite_test.go:265: line-length-limit: line is 82 characters, out of limit 80 (revive)
+					if !strings.Contains(firstParam.String(), "context.Context") {
+architecture_suite_test.go:266: line-length-limit: line is 129 characters, out of limit 80 (revive)
+						Fail(fmt.Sprintf("❌ REPOSITORY METHOD VIOLATION: %s.%s should have context.Context as first parameter\n"+
+architecture_suite_test.go:267: line-length-limit: line is 107 characters, out of limit 80 (revive)
+							"Repository methods must accept context for cancellation and timeout support.",
+architecture_suite_test.go:276: line-length-limit: line is 116 characters, out of limit 80 (revive)
+						Fail(fmt.Sprintf("❌ REPOSITORY METHOD VIOLATION: %s.%s should return error as last value\n"+
+architecture_suite_test.go:277: line-length-limit: line is 95 characters, out of limit 80 (revive)
+							"Repository methods must return errors for proper error handling.",
+architecture_suite_test.go:288: line-length-limit: line is 85 characters, out of limit 80 (revive)
+		It("should verify services don't depend on infrastructure directly", func() {
+architecture_suite_test.go:296: line-length-limit: line is 84 characters, out of limit 80 (revive)
+					if isStandardLibrary(importPath) || isDomainImport(importPath) {
+architecture_suite_test.go:304: line-length-limit: line is 121 characters, out of limit 80 (revive)
+						Fail(fmt.Sprintf("❌ SERVICE PURITY VIOLATION: Service %s imports infrastructure dependency %s\n"+
+architecture_suite_test.go:305: line-length-limit: line is 92 characters, out of limit 80 (revive)
+							"Domain services must not depend directly on infrastructure.\n"+
+architecture_suite_test.go:306: line-length-limit: line is 90 characters, out of limit 80 (revive)
+							"Use repository interfaces and dependency injection instead.",
+architecture_suite_test.go:314: line-length-limit: line is 91 characters, out of limit 80 (revive)
+			By(fmt.Sprintf("Checking service constructor pattern: %s", serviceType.Name()))
+architecture_suite_test.go:316: line-length-limit: line is 94 characters, out of limit 80 (revive)
+			// Services should have repository dependencies injected, not infrastructure types
+architecture_suite_test.go:324: line-length-limit: line is 112 characters, out of limit 80 (revive)
+					Fail(fmt.Sprintf("❌ SERVICE DEPENDENCY VIOLATION: %s.%s has infrastructure dependency %s\n"+
+architecture_suite_test.go:325: line-length-limit: line is 112 characters, out of limit 80 (revive)
+						"Services should depend on repository interfaces, not concrete infrastructure types.\n"+
+architecture_suite_test.go:336: line-length-limit: line is 81 characters, out of limit 80 (revive)
+		It("should report all architectural constraints being enforced", func() {
+architecture_suite_test.go:338: line-length-limit: line is 88 characters, out of limit 80 (revive)
+				"✅ Domain Isolation: Domain layer has zero infrastructure dependencies",
+architecture_suite_test.go:339: line-length-limit: line is 84 characters, out of limit 80 (revive)
+				"✅ Layer Dependencies: Clean Architecture dependency flow enforced",
+architecture_suite_test.go:340: line-length-limit: line is 82 characters, out of limit 80 (revive)
+				"✅ No Circular Dependencies: Package dependency cycles prevented",
+architecture_suite_test.go:342: line-length-limit: line is 82 characters, out of limit 80 (revive)
+				"✅ Repository Interfaces: Repository contracts defined in domain",
+architecture_suite_test.go:343: line-length-limit: line is 86 characters, out of limit 80 (revive)
+				"✅ Service Purity: Domain services free from infrastructure coupling",
+architecture_suite_test.go:344: line-length-limit: line is 86 characters, out of limit 80 (revive)
+				"✅ Dependency Inversion: Infrastructure implements domain interfaces",
+architecture_suite_test.go:345: line-length-limit: line is 82 characters, out of limit 80 (revive)
+				"✅ Single Responsibility: Each layer has clear, focused concerns",
+architecture_suite_test.go:346: line-length-limit: line is 87 characters, out of limit 80 (revive)
+				"✅ Interface Segregation: Repository interfaces follow single purpose",
+architecture_suite_test.go:347: line-length-limit: line is 89 characters, out of limit 80 (revive)
+				"✅ Clean Boundaries: No violations of architectural boundaries detected",
+architecture_suite_test.go:355: line-length-limit: line is 86 characters, out of limit 80 (revive)
+			By(fmt.Sprintf("📦 Analyzed %d packages across all layers", len(packages)))
+architecture_suite_test.go:363:1: cognitive-complexity: function extractPackageInfo has cognitive complexity 15 (> max enabled 7) (revive)
+func extractPackageInfo(path string, file *ast.File) packageInfo {
+	pkg := packageInfo{
+		path:      path,
+		layer:     getLayerFromPath(path),
+		imports:   []string{},
+		functions: []string{},
+		types:     []string{},
+	}
+
+	// Extract imports
+	for _, imp := range file.Imports {
+		importPath, _ := strconv.Unquote(imp.Path.Value)
+		pkg.imports = append(pkg.imports, importPath)
+	}
+
+	// Extract functions and types
+	for _, decl := range file.Decls {
+		switch d := decl.(type) {
+		case *ast.FuncDecl:
+			if d.Name.IsExported() {
+				pkg.functions = append(pkg.functions, d.Name.Name)
+			}
+		case *ast.GenDecl:
+			for _, spec := range d.Specs {
+				if typeSpec, ok := spec.(*ast.TypeSpec); ok && typeSpec.Name.IsExported() {
+					pkg.types = append(pkg.types, typeSpec.Name.Name)
+				}
+			}
+		}
+	}
+
+	return pkg
+}
+architecture_suite_test.go:374:15: Error return value of `strconv.Unquote` is not checked (errcheck)
+		importPath, _ := strconv.Unquote(imp.Path.Value)
+		            ^
+architecture_suite_test.go:387: line-length-limit: line is 91 characters, out of limit 80 (revive)
+				if typeSpec, ok := spec.(*ast.TypeSpec); ok && typeSpec.Name.IsExported() {
+architecture_suite_test.go:397:1: cyclomatic: function getLayerFromPath has cyclomatic complexity 11 (> max enabled 10) (revive)
+func getLayerFromPath(path string) string {
+	if strings.Contains(path, "internal/domain/entities") {
+		return "domain/entities"
+	}
+	if strings.Contains(path, "internal/domain/values") {
+		return "domain/values"
+	}
+	if strings.Contains(path, "internal/domain/repositories") {
+		return "domain/repositories"
+	}
+	if strings.Contains(path, "internal/domain/services") {
+		return "domain/services"
+	}
+	if strings.Contains(path, "internal/domain/shared") {
+		return "domain/shared"
+	}
+	if strings.Contains(path, "internal/domain/errors") {
+		return "domain/errors"
+	}
+	if strings.Contains(path, "internal/application") {
+		return "application"
+	}
+	if strings.Contains(path, "internal/infrastructure") {
+		return "infrastructure"
+	}
+	if strings.Contains(path, "internal/config") {
+		return "config"
+	}
+	if strings.Contains(path, "cmd/") {
+		return "main"
+	}
+	return "unknown"
+}
+architecture_suite_test.go:431:1: cognitive-complexity: function getLayerFromImport has cognitive complexity 8 (> max enabled 7) (revive)
+func getLayerFromImport(importPath string) string {
+	if strings.Contains(importPath, "/domain/entities") {
+		return "domain/entities"
+	}
+	if strings.Contains(importPath, "/domain/values") {
+		return "domain/values"
+	}
+	if strings.Contains(importPath, "/domain/repositories") {
+		return "domain/repositories"
+	}
+	if strings.Contains(importPath, "/domain/services") {
+		return "domain/services"
+	}
+	if strings.Contains(importPath, "/domain/shared") {
+		return "domain/shared"
+	}
+	if strings.Contains(importPath, "/domain/errors") {
+		return "domain/errors"
+	}
+	if strings.Contains(importPath, "/application") {
+		return "application"
+	}
+	if strings.Contains(importPath, "/infrastructure") {
+		return "infrastructure"
+	}
+	return ""
+}
+architecture_suite_test.go:469: line-length-limit: line is 86 characters, out of limit 80 (revive)
+func filterPackagesByPath(packages []packageInfo, pathContains string) []packageInfo {
+architecture_suite_test.go:479:1: cyclomatic: function isStandardLibrary has cyclomatic complexity 16 (> max enabled 10) (revive)
+func isStandardLibrary(importPath string) bool {
+	return !strings.Contains(importPath, ".") ||
+		strings.HasPrefix(importPath, "context") ||
+		strings.HasPrefix(importPath, "database/sql") ||
+		strings.HasPrefix(importPath, "encoding/json") ||
+		strings.HasPrefix(importPath, "fmt") ||
+		strings.HasPrefix(importPath, "log") ||
+		strings.HasPrefix(importPath, "net/http") ||
+		strings.HasPrefix(importPath, "regexp") ||
+		strings.HasPrefix(importPath, "strconv") ||
+		strings.HasPrefix(importPath, "strings") ||
+		strings.HasPrefix(importPath, "time") ||
+		strings.HasPrefix(importPath, "errors") ||
+		strings.HasPrefix(importPath, "go/") ||
+		strings.HasPrefix(importPath, "os") ||
+		strings.HasPrefix(importPath, "path") ||
+		strings.HasPrefix(importPath, "reflect")
+}
+architecture_suite_test.go:534: line-length-limit: line is 85 characters, out of limit 80 (revive)
+func isAllowedLayerDependency(fromLayer, toLayer string, allowedDeps []string) bool {
+architecture_suite_test.go:566:1: cognitive-complexity: function findCycle has cognitive complexity 22 (> max enabled 7) (revive)
+func findCycle(node string, graph map[string][]string, visited, recStack map[string]bool, path []string) []string {
+	visited[node] = true
+	recStack[node] = true
+	path = append(path, node)
+
+	for _, neighbor := range graph[node] {
+		if !visited[neighbor] {
+			if cycle := findCycle(neighbor, graph, visited, recStack, path); len(cycle) > 0 {
+				return cycle
+			}
+		} else if recStack[neighbor] {
+			// Found a cycle - return the cycle path
+			cycleStart := -1
+			for i, p := range path {
+				if p == neighbor {
+					cycleStart = i
+					break
+				}
+			}
+			if cycleStart >= 0 {
+				return append(path[cycleStart:], neighbor)
+			}
+		}
+	}
+
+	recStack[node] = false
+	return nil
+}
+architecture_suite_test.go:572:1: `if !visited[neighbor]` has complex nested blocks (complexity: 4) (nestif)
+		if !visited[neighbor] {
+^
+architecture_suite_test.go:573:82: add-constant: avoid magic numbers like '0', create a named constant for it (revive)
+			if cycle := findCycle(neighbor, graph, visited, recStack, path); len(cycle) > 0 {
+			                                                                              ^
+architecture_suite_test.go:578:19: add-constant: avoid magic numbers like '1', create a named constant for it (revive)
+			cycleStart := -1
+			               ^
+architecture_suite_test.go:585:21: add-constant: avoid magic numbers like '0', create a named constant for it (revive)
+			if cycleStart >= 0 {
+			                 ^

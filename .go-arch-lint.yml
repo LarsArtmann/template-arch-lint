@@ -98,6 +98,20 @@ components:
     in: cmd/**
 
   # ========================================
+  # UTILITY LAYER - Reusable Components
+  # ========================================
+  constants:
+    in: internal/constants/**
+  utils-validation:
+    in: internal/utils/validation/**
+  utils-errors:
+    in: internal/utils/errors/**
+  utils-database:
+    in: internal/utils/database/**
+  testutils:
+    in: internal/testutils/**
+
+  # ========================================
   # TEST HELPERS - Testing Utilities
   # ========================================
   test-helpers-base:
@@ -275,10 +289,36 @@ deps:
     anyProjectDeps: true
     anyVendorDeps: true
 
+  # UTILITY LAYER - Shared reusable components
+  constants:
+    anyVendorDeps: true
+    mayDependOn: []
+
+  utils-validation:
+    anyVendorDeps: true
+    mayDependOn: []
+
+  utils-errors:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-errors
+
+  utils-database:
+    anyVendorDeps: true
+    mayDependOn:
+      - utils-errors
+
+  testutils:
+    anyProjectDeps: true
+    anyVendorDeps: true
+
 # 🌍 COMMON COMPONENTS - Available everywhere
 commonComponents:
   - domain-shared
   - domain-errors
+  - constants
+  - utils-validation
+  - utils-errors
 
 # 🚫 EXCLUSION PATTERNS (glob patterns)
 exclude:

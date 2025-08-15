@@ -73,7 +73,7 @@ func (s *UserService) CreateUser(ctx context.Context, id entities.UserID, email,
 func (s *UserService) GetUser(ctx context.Context, id entities.UserID) (*entities.User, error) {
 	user, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, domainerrors.WrapRepoError("get", "user", err)
 	}
 
 	// Business logic: Could add user activity tracking, audit logging, etc.
@@ -88,7 +88,7 @@ func (s *UserService) GetUserByEmail(ctx context.Context, email string) (*entiti
 
 	user, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user by email: %w", err)
+		return nil, domainerrors.WrapRepoError("get by email", "user", err)
 	}
 
 	return user, nil
@@ -111,7 +111,7 @@ func (s *UserService) UpdateUser(ctx context.Context, id entities.UserID, email,
 func (s *UserService) getUserForUpdate(ctx context.Context, id entities.UserID) (*entities.User, error) {
 	user, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user for update: %w", err)
+		return nil, domainerrors.WrapRepoError("get for update", "user", err)
 	}
 	return user, nil
 }
@@ -139,7 +139,7 @@ func (s *UserService) validateEmailUpdate(ctx context.Context, user *entities.Us
 func (s *UserService) checkEmailAvailability(ctx context.Context, email string) error {
 	existingUser, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) {
-		return fmt.Errorf("failed to check existing email: %w", err)
+		return domainerrors.WrapServiceError("check existing email", err)
 	}
 	if existingUser != nil {
 		return repositories.ErrUserAlreadyExists
@@ -158,15 +158,15 @@ func (s *UserService) validateNameUpdate(user *entities.User, name string) error
 
 func (s *UserService) applyUserUpdates(ctx context.Context, user *entities.User, email, name string) (*entities.User, error) {
 	if err := user.SetEmail(email); err != nil {
-		return nil, fmt.Errorf("failed to set email: %w", err)
+		return nil, domainerrors.WrapServiceError("set email", err)
 	}
 
 	if err := user.SetName(name); err != nil {
-		return nil, fmt.Errorf("failed to set name: %w", err)
+		return nil, domainerrors.WrapServiceError("set name", err)
 	}
 
 	if err := s.userRepo.Save(ctx, user); err != nil {
-		return nil, fmt.Errorf("failed to save updated user: %w", err)
+		return nil, domainerrors.WrapRepoError("save updated", "user", err)
 	}
 
 	return user, nil
@@ -177,12 +177,12 @@ func (s *UserService) DeleteUser(ctx context.Context, id entities.UserID) error 
 	// Business rule: Check if user exists before deletion
 	_, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
-		return fmt.Errorf("failed to find user for deletion: %w", err)
+		return domainerrors.WrapRepoError("find for deletion", "user", err)
 	}
 
 	// Business logic: Could add soft delete, cascade operations, etc.
 	if err := s.userRepo.Delete(ctx, id); err != nil {
-		return fmt.Errorf("failed to delete user: %w", err)
+		return domainerrors.WrapRepoError("delete", "user", err)
 	}
 
 	return nil

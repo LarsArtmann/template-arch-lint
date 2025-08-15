@@ -1,5 +1,7 @@
-// Package architecture_test contains automated tests that enforce architectural boundaries
-// and Clean Architecture/DDD principles to prevent architectural decay over time.
+// Package architecture_test contains automated tests that enforce
+// architectural boundaries
+// and Clean Architecture/DDD principles to prevent architectural
+// decay over time.
 package main
 
 import (
@@ -14,8 +16,8 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	ginkgo "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
@@ -23,8 +25,9 @@ import (
 )
 
 func TestArchitecture(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "🏗️ Architecture Test Suite - Clean Architecture & DDD Enforcement")
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	ginkgo.RunSpecs(t, "🏗️ Architecture Test Suite - Clean "+
+		"Architecture & DDD Enforcement")
 }
 
 // packageInfo holds information about a Go package discovered during analysis.
@@ -38,31 +41,48 @@ type packageInfo struct {
 
 // domainLayers defines the architectural layers and their allowed dependencies.
 var domainLayers = map[string][]string{
-	"domain/entities":     {"domain/shared", "domain/values", "domain/errors"},
-	"domain/values":       {"domain/shared", "domain/errors"},
-	"domain/repositories": {"domain/entities", "domain/shared", "domain/values", "domain/errors"},
-	"domain/services":     {"domain/entities", "domain/repositories", "domain/shared", "domain/values", "domain/errors"},
-	"domain/shared":       {},
-	"domain/errors":       {"domain/shared"},
-	"application":         {"domain/entities", "domain/services", "domain/repositories", "domain/shared", "domain/values", "domain/errors"},
-	"infrastructure":      {"domain/entities", "domain/repositories", "domain/shared", "domain/values", "domain/errors"},
+	"domain/entities": {"domain/shared", "domain/values", "domain/errors"},
+	"domain/values":   {"domain/shared", "domain/errors"},
+	"domain/repositories": {
+		"domain/entities", "domain/shared",
+		"domain/values", "domain/errors",
+	},
+	"domain/services": {
+		"domain/entities", "domain/repositories",
+		"domain/shared", "domain/values", "domain/errors",
+	},
+	"domain/shared": {},
+	"domain/errors": {"domain/shared"},
+	"application": {
+		"domain/entities", "domain/services",
+		"domain/repositories", "domain/shared", "domain/values",
+		"domain/errors",
+	},
+	"infrastructure": {
+		"domain/entities", "domain/repositories",
+		"domain/shared", "domain/values", "domain/errors",
+	},
 }
 
-var _ = Describe("🏗️ Architecture Tests - Clean Architecture & DDD Enforcement", func() {
+var _ = ginkgo.Describe("🏗️ Architecture Tests - Clean "+
+	"Architecture & DDD Enforcement", func() {
 	var packages []packageInfo
 	var fileSet *token.FileSet
 
-	BeforeEach(func() {
+	ginkgo.BeforeEach(func() {
 		packages = []packageInfo{}
 		fileSet = token.NewFileSet()
 
 		// Parse all Go files in the project
-		err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
+		err := filepath.Walk(".", func(path string, _ os.FileInfo,
+			err error,
+		) error {
 			if err != nil {
 				return err
 			}
 
-			// Skip non-Go files, test files, generated files, and vendor directories
+			// Skip non-Go files, test files, generated files, and vendor
+			// directories
 			if !strings.HasSuffix(path, ".go") ||
 				strings.HasSuffix(path, "_test.go") ||
 				strings.Contains(path, "_templ.go") ||
@@ -78,7 +98,8 @@ var _ = Describe("🏗️ Architecture Tests - Clean Architecture & DDD Enforcem
 				return err
 			}
 
-			file, err := parser.ParseFile(fileSet, path, src, parser.ParseComments)
+			file, err := parser.ParseFile(fileSet, path, src,
+				parser.ParseComments)
 			if err != nil {
 				// Skip files that can't be parsed
 				return nil
@@ -90,15 +111,17 @@ var _ = Describe("🏗️ Architecture Tests - Clean Architecture & DDD Enforcem
 
 			return nil
 		})
-		Expect(err).NotTo(HaveOccurred())
+		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 	})
 
-	Describe("🔒 TestDomainIsolation", func() {
-		It("should ensure domain layer has no external infrastructure dependencies", func() {
+	ginkgo.Describe("🔒 TestDomainIsolation", func() {
+		ginkgo.It("should ensure domain layer has no external infrastructure "+
+			"dependencies", func() {
 			domainPackages := filterPackagesByLayer(packages, "domain")
 
 			for _, pkg := range domainPackages {
-				By(fmt.Sprintf("Checking domain package %s for external dependencies", pkg.path))
+				ginkgo.By(fmt.Sprintf("Checking domain package %s for external "+
+					"dependencies", pkg.path))
 
 				for _, importPath := range pkg.imports {
 					// Skip standard library and test imports
@@ -113,20 +136,24 @@ var _ = Describe("🏗️ Architecture Tests - Clean Architecture & DDD Enforcem
 
 					// Domain should only import from other domain packages
 					if !isDomainImport(importPath) {
-						Fail(fmt.Sprintf("❌ DOMAIN ISOLATION VIOLATION: Package %s imports non-domain dependency %s\n"+
-							"Domain layer must not depend on infrastructure, application, or external concerns.\n"+
-							"Allowed: domain/*, standard library, approved vendor packages",
+						ginkgo.Fail(fmt.Sprintf("❌ DOMAIN ISOLATION VIOLATION: Package %s "+
+							"imports non-domain dependency %s\n"+
+							"Domain layer must not depend on infrastructure, "+
+							"application, or external concerns.\n"+
+							"Allowed: domain/*, standard library, approved "+
+							"vendor packages",
 							pkg.path, importPath))
 					}
 				}
 			}
 
-			By("✅ Domain isolation maintained - no external dependencies found")
+			ginkgo.By("✅ Domain isolation maintained - no external dependencies found")
 		})
 	})
 
-	Describe("🔄 TestLayerDependencies", func() {
-		It("should verify proper layer dependency direction follows Clean Architecture", func() {
+	ginkgo.Describe("🔄 TestLayerDependencies", func() {
+		ginkgo.It("should verify proper layer dependency direction follows "+
+			"Clean Architecture", func() {
 			for _, pkg := range packages {
 				layer := pkg.layer
 				allowedDeps := domainLayers[layer]
@@ -135,7 +162,8 @@ var _ = Describe("🏗️ Architecture Tests - Clean Architecture & DDD Enforcem
 					continue // Skip layers not explicitly defined
 				}
 
-				By(fmt.Sprintf("Checking layer dependencies for %s (layer: %s)", pkg.path, layer))
+				ginkgo.By(fmt.Sprintf("Checking layer dependencies for %s "+
+					"(layer: %s)", pkg.path, layer))
 
 				for _, importPath := range pkg.imports {
 					// Skip standard library and vendor dependencies
@@ -150,20 +178,23 @@ var _ = Describe("🏗️ Architecture Tests - Clean Architecture & DDD Enforcem
 
 					// Check if the import is allowed for this layer
 					if !isAllowedLayerDependency(layer, importLayer, allowedDeps) {
-						Fail(fmt.Sprintf("❌ LAYER DEPENDENCY VIOLATION: %s (layer: %s) cannot depend on %s (layer: %s)\n"+
-							"Clean Architecture rule violated. Allowed dependencies for %s: %v\n"+
-							"Dependencies must flow: Infrastructure → Application → Domain",
+						ginkgo.Fail(fmt.Sprintf("❌ LAYER DEPENDENCY VIOLATION: %s "+
+							"(layer: %s) cannot depend on %s (layer: %s)\n"+
+							"Clean Architecture rule violated. Allowed dependencies "+
+							"for %s: %v\n"+
+							"Dependencies must flow: Infrastructure → Application → "+
+							"Domain",
 							pkg.path, layer, importPath, importLayer, layer, allowedDeps))
 					}
 				}
 			}
 
-			By("✅ Layer dependencies follow Clean Architecture principles")
+			ginkgo.By("✅ Layer dependencies follow Clean Architecture principles")
 		})
 	})
 
-	Describe("🔄 TestNoCircularDeps", func() {
-		It("should detect circular dependencies between packages", func() {
+	ginkgo.Describe("🔄 TestNoCircularDeps", func() {
+		ginkgo.It("should detect circular dependencies between packages", func() {
 			// Build dependency graph
 			graph := buildDependencyGraph(packages)
 
@@ -175,31 +206,37 @@ var _ = Describe("🏗️ Architecture Tests - Clean Architecture & DDD Enforcem
 				if !visited[pkgPath] {
 					cycle := findCycle(pkgPath, graph, visited, recStack, []string{})
 					if len(cycle) > 0 {
-						Fail(fmt.Sprintf("❌ CIRCULAR DEPENDENCY DETECTED: %s\n"+
-							"Circular dependencies violate Clean Architecture and can cause compilation issues.\n"+
-							"Refactor to remove the circular dependency by introducing interfaces or reorganizing code.",
+						ginkgo.Fail(fmt.Sprintf("❌ CIRCULAR DEPENDENCY DETECTED: %s\n"+
+							"Circular dependencies violate Clean Architecture and "+
+							"can cause compilation issues.\n"+
+							"Refactor to remove the circular dependency by "+
+							"introducing interfaces or reorganizing code.",
 							strings.Join(cycle, " → ")))
 					}
 				}
 			}
 
-			By("✅ No circular dependencies found")
+			ginkgo.By("✅ No circular dependencies found")
 		})
 	})
 
-	Describe("💎 TestValueObjectsImmutable", func() {
-		It("should verify value objects are immutable and follow DDD principles", func() {
+	ginkgo.Describe("💎 TestValueObjectsImmutable", func() {
+		ginkgo.It("should verify value objects are immutable and follow DDD "+
+			"principles", func() {
 			// Test Email value object
 			emailType := reflect.TypeOf(values.Email{})
-			By(fmt.Sprintf("Checking value object immutability: %s", emailType.Name()))
+			ginkgo.By(fmt.Sprintf("Checking value object immutability: %s",
+				emailType.Name()))
 
 			// Check that all fields are unexported (immutable)
 			for i := 0; i < emailType.NumField(); i++ {
 				field := emailType.Field(i)
 				firstChar := field.Name[0:1]
 				if strings.ToUpper(firstChar) == firstChar {
-					Fail(fmt.Sprintf("❌ VALUE OBJECT MUTABILITY VIOLATION: %s.%s is exported\n"+
-						"Value objects must be immutable. All fields should be unexported.\n"+
+					ginkgo.Fail(fmt.Sprintf("❌ VALUE OBJECT MUTABILITY VIOLATION: %s.%s "+
+						"is exported\n"+
+						"Value objects must be immutable. All fields should be "+
+						"unexported.\n"+
 						"Use getter methods to access field values.",
 						emailType.Name(), field.Name))
 				}
@@ -207,14 +244,17 @@ var _ = Describe("🏗️ Architecture Tests - Clean Architecture & DDD Enforcem
 
 			// Test UserID value object
 			userIDType := reflect.TypeOf(values.UserID{})
-			By(fmt.Sprintf("Checking value object immutability: %s", userIDType.Name()))
+			ginkgo.By(fmt.Sprintf("Checking value object immutability: %s",
+				userIDType.Name()))
 
 			for i := 0; i < userIDType.NumField(); i++ {
 				field := userIDType.Field(i)
 				firstChar := field.Name[0:1]
 				if strings.ToUpper(firstChar) == firstChar {
-					Fail(fmt.Sprintf("❌ VALUE OBJECT MUTABILITY VIOLATION: %s.%s is exported\n"+
-						"Value objects must be immutable. All fields should be unexported.\n"+
+					ginkgo.Fail(fmt.Sprintf("❌ VALUE OBJECT MUTABILITY VIOLATION: %s.%s "+
+						"is exported\n"+
+						"Value objects must be immutable. All fields should be "+
+						"unexported.\n"+
 						"Use getter methods to access field values.",
 						userIDType.Name(), field.Name))
 				}
@@ -222,49 +262,57 @@ var _ = Describe("🏗️ Architecture Tests - Clean Architecture & DDD Enforcem
 
 			// Test UserName value object
 			userNameType := reflect.TypeOf(values.UserName{})
-			By(fmt.Sprintf("Checking value object immutability: %s", userNameType.Name()))
+			ginkgo.By(fmt.Sprintf("Checking value object immutability: %s",
+				userNameType.Name()))
 
 			for i := 0; i < userNameType.NumField(); i++ {
 				field := userNameType.Field(i)
 				firstChar := field.Name[0:1]
 				if strings.ToUpper(firstChar) == firstChar {
-					Fail(fmt.Sprintf("❌ VALUE OBJECT MUTABILITY VIOLATION: %s.%s is exported\n"+
-						"Value objects must be immutable. All fields should be unexported.\n"+
+					ginkgo.Fail(fmt.Sprintf("❌ VALUE OBJECT MUTABILITY VIOLATION: %s.%s "+
+						"is exported\n"+
+						"Value objects must be immutable. All fields should be "+
+						"unexported.\n"+
 						"Use getter methods to access field values.",
 						userNameType.Name(), field.Name))
 				}
 			}
 
-			By("✅ All value objects are properly immutable")
+			ginkgo.By("✅ All value objects are properly immutable")
 		})
 	})
 
-	Describe("🔌 TestRepositoryInterfaces", func() {
-		It("should ensure repository interfaces are in domain and implementations in infrastructure", func() {
+	ginkgo.Describe("🔌 TestRepositoryInterfaces", func() {
+		ginkgo.It("should ensure repository interfaces are in domain and "+
+			"implementations in infrastructure", func() {
 			// Check that UserRepository interface is in domain
 			userRepoType := reflect.TypeOf((*repositories.UserRepository)(nil)).Elem()
-			By(fmt.Sprintf("Verifying repository interface location: %s", userRepoType.Name()))
+			ginkgo.By(fmt.Sprintf("Verifying repository interface location: %s",
+				userRepoType.Name()))
 
-			Expect(userRepoType.Kind()).To(Equal(reflect.Interface),
+			gomega.Expect(userRepoType.Kind()).To(gomega.Equal(reflect.Interface),
 				"Repository should be an interface, not a concrete type")
 
 			// Check repository interface methods follow domain patterns
 			numMethods := userRepoType.NumMethod()
-			Expect(numMethods).To(BeNumerically(">", 0),
+			gomega.Expect(numMethods).To(gomega.BeNumerically(">", 0),
 				"Repository interface should define methods")
 
 			for i := 0; i < numMethods; i++ {
 				method := userRepoType.Method(i)
 				methodType := method.Type
 
-				By(fmt.Sprintf("Checking repository method: %s", method.Name))
+				ginkgo.By(fmt.Sprintf("Checking repository method: %s", method.Name))
 
 				// Repository methods should have context as first parameter
-				if methodType.NumIn() > 0 { // Interface methods don't have receiver in reflection
+				if methodType.NumIn() > 0 { // Interface methods don't have receiver
+					// in reflection
 					firstParam := methodType.In(0)
 					if !strings.Contains(firstParam.String(), "context.Context") {
-						Fail(fmt.Sprintf("❌ REPOSITORY METHOD VIOLATION: %s.%s should have context.Context as first parameter\n"+
-							"Repository methods must accept context for cancellation and timeout support.",
+						ginkgo.Fail(fmt.Sprintf("❌ REPOSITORY METHOD VIOLATION: %s.%s "+
+							"should have context.Context as first parameter\n"+
+							"Repository methods must accept context for "+
+							"cancellation and timeout support.",
 							userRepoType.Name(), method.Name))
 					}
 				}
@@ -273,23 +321,27 @@ var _ = Describe("🏗️ Architecture Tests - Clean Architecture & DDD Enforcem
 				if methodType.NumOut() > 0 {
 					lastReturn := methodType.Out(methodType.NumOut() - 1)
 					if !strings.Contains(lastReturn.String(), "error") {
-						Fail(fmt.Sprintf("❌ REPOSITORY METHOD VIOLATION: %s.%s should return error as last value\n"+
-							"Repository methods must return errors for proper error handling.",
+						ginkgo.Fail(fmt.Sprintf("❌ REPOSITORY METHOD VIOLATION: %s.%s "+
+							"should return error as last value\n"+
+							"Repository methods must return errors for proper "+
+							"error handling.",
 							userRepoType.Name(), method.Name))
 					}
 				}
 			}
 
-			By("✅ Repository interfaces properly defined in domain layer")
+			ginkgo.By("✅ Repository interfaces properly defined in domain " +
+				"layer")
 		})
 	})
 
-	Describe("🧹 TestServicePurity", func() {
-		It("should verify services don't depend on infrastructure directly", func() {
+	ginkgo.Describe("🧹 TestServicePurity", func() {
+		ginkgo.It("should verify services don't depend on infrastructure "+
+			"directly", func() {
 			servicePackages := filterPackagesByPath(packages, "domain/services")
 
 			for _, pkg := range servicePackages {
-				By(fmt.Sprintf("Checking service purity: %s", pkg.path))
+				ginkgo.By(fmt.Sprintf("Checking service purity: %s", pkg.path))
 
 				for _, importPath := range pkg.imports {
 					// Skip standard library and allowed dependencies
@@ -301,9 +353,12 @@ var _ = Describe("🏗️ Architecture Tests - Clean Architecture & DDD Enforcem
 					if strings.Contains(importPath, "infrastructure") ||
 						strings.Contains(importPath, "/db") ||
 						strings.Contains(importPath, "persistence") {
-						Fail(fmt.Sprintf("❌ SERVICE PURITY VIOLATION: Service %s imports infrastructure dependency %s\n"+
-							"Domain services must not depend directly on infrastructure.\n"+
-							"Use repository interfaces and dependency injection instead.",
+						ginkgo.Fail(fmt.Sprintf("❌ SERVICE PURITY VIOLATION: Service %s "+
+							"imports infrastructure dependency %s\n"+
+							"Domain services must not depend directly on "+
+							"infrastructure.\n"+
+							"Use repository interfaces and dependency injection "+
+							"instead.",
 							pkg.path, importPath))
 					}
 				}
@@ -311,9 +366,11 @@ var _ = Describe("🏗️ Architecture Tests - Clean Architecture & DDD Enforcem
 
 			// Test service constructor patterns using reflection
 			serviceType := reflect.TypeOf(services.UserService{})
-			By(fmt.Sprintf("Checking service constructor pattern: %s", serviceType.Name()))
+			ginkgo.By(fmt.Sprintf("Checking service constructor pattern: %s",
+				serviceType.Name()))
 
-			// Services should have repository dependencies injected, not infrastructure types
+			// Services should have repository dependencies injected, not
+			// infrastructure types
 			for i := 0; i < serviceType.NumField(); i++ {
 				field := serviceType.Field(i)
 				fieldType := field.Type.String()
@@ -321,39 +378,54 @@ var _ = Describe("🏗️ Architecture Tests - Clean Architecture & DDD Enforcem
 				if strings.Contains(fieldType, "infrastructure") ||
 					strings.Contains(fieldType, "*sql.DB") ||
 					strings.Contains(fieldType, "persistence") {
-					Fail(fmt.Sprintf("❌ SERVICE DEPENDENCY VIOLATION: %s.%s has infrastructure dependency %s\n"+
-						"Services should depend on repository interfaces, not concrete infrastructure types.\n"+
+					ginkgo.Fail(fmt.Sprintf("❌ SERVICE DEPENDENCY VIOLATION: %s.%s "+
+						"has infrastructure dependency %s\n"+
+						"Services should depend on repository interfaces, not "+
+						"concrete infrastructure types.\n"+
 						"Use dependency injection with repository interfaces.",
 						serviceType.Name(), field.Name, fieldType))
 				}
 			}
 
-			By("✅ Services maintain purity and don't depend on infrastructure")
+			ginkgo.By("✅ Services maintain purity and don't depend on " +
+				"infrastructure")
 		})
 	})
 
-	Describe("📊 Architecture Constraint Summary", func() {
-		It("should report all architectural constraints being enforced", func() {
+	ginkgo.Describe("📊 Architecture Constraint Summary", func() {
+		ginkgo.It("should report all architectural constraints being "+
+			"enforced", func() {
 			constraints := []string{
-				"✅ Domain Isolation: Domain layer has zero infrastructure dependencies",
-				"✅ Layer Dependencies: Clean Architecture dependency flow enforced",
-				"✅ No Circular Dependencies: Package dependency cycles prevented",
+				"✅ Domain Isolation: Domain layer has zero infrastructure " +
+					"dependencies",
+				"✅ Layer Dependencies: Clean Architecture dependency flow " +
+					"enforced",
+				"✅ No Circular Dependencies: Package dependency cycles " +
+					"prevented",
 				"✅ Value Object Immutability: DDD value objects are immutable",
-				"✅ Repository Interfaces: Repository contracts defined in domain",
-				"✅ Service Purity: Domain services free from infrastructure coupling",
-				"✅ Dependency Inversion: Infrastructure implements domain interfaces",
-				"✅ Single Responsibility: Each layer has clear, focused concerns",
-				"✅ Interface Segregation: Repository interfaces follow single purpose",
-				"✅ Clean Boundaries: No violations of architectural boundaries detected",
+				"✅ Repository Interfaces: Repository contracts defined in " +
+					"domain",
+				"✅ Service Purity: Domain services free from infrastructure " +
+					"coupling",
+				"✅ Dependency Inversion: Infrastructure implements domain " +
+					"interfaces",
+				"✅ Single Responsibility: Each layer has clear, focused " +
+					"concerns",
+				"✅ Interface Segregation: Repository interfaces follow single " +
+					"purpose",
+				"✅ Clean Boundaries: No violations of architectural boundaries " +
+					"detected",
 			}
 
-			By("📋 Architectural Constraints Report:")
+			ginkgo.By("📋 Architectural Constraints Report:")
 			for _, constraint := range constraints {
-				By(constraint)
+				ginkgo.By(constraint)
 			}
 
-			By(fmt.Sprintf("📦 Analyzed %d packages across all layers", len(packages)))
-			By("🏛️ Clean Architecture + DDD principles successfully enforced")
+			ginkgo.By(fmt.Sprintf("📦 Analyzed %d packages across all layers",
+				len(packages)))
+			ginkgo.By("🏛️ Clean Architecture + DDD principles successfully " +
+				"enforced")
 		})
 	})
 })
@@ -394,64 +466,50 @@ func extractPackageInfo(path string, file *ast.File) packageInfo {
 	return pkg
 }
 
+// pathToLayerMapping maps path patterns to layer names for efficient lookup.
+var pathToLayerMapping = []struct {
+	pattern string
+	layer   string
+}{
+	{"internal/domain/entities", "domain/entities"},
+	{"internal/domain/values", "domain/values"},
+	{"internal/domain/repositories", "domain/repositories"},
+	{"internal/domain/services", "domain/services"},
+	{"internal/domain/shared", "domain/shared"},
+	{"internal/domain/errors", "domain/errors"},
+	{"internal/application", "application"},
+	{"internal/infrastructure", "infrastructure"},
+	{"internal/config", "config"},
+	{"cmd/", "main"},
+}
+
 func getLayerFromPath(path string) string {
-	if strings.Contains(path, "internal/domain/entities") {
-		return "domain/entities"
-	}
-	if strings.Contains(path, "internal/domain/values") {
-		return "domain/values"
-	}
-	if strings.Contains(path, "internal/domain/repositories") {
-		return "domain/repositories"
-	}
-	if strings.Contains(path, "internal/domain/services") {
-		return "domain/services"
-	}
-	if strings.Contains(path, "internal/domain/shared") {
-		return "domain/shared"
-	}
-	if strings.Contains(path, "internal/domain/errors") {
-		return "domain/errors"
-	}
-	if strings.Contains(path, "internal/application") {
-		return "application"
-	}
-	if strings.Contains(path, "internal/infrastructure") {
-		return "infrastructure"
-	}
-	if strings.Contains(path, "internal/config") {
-		return "config"
-	}
-	if strings.Contains(path, "cmd/") {
-		return "main"
+	for _, mapping := range pathToLayerMapping {
+		if strings.Contains(path, mapping.pattern) {
+			return mapping.layer
+		}
 	}
 	return "unknown"
 }
 
+// importToLayerMapping maps import patterns to layer names for efficient
+// lookup.
+var importToLayerMapping = map[string]string{
+	"/domain/entities":     "domain/entities",
+	"/domain/values":       "domain/values",
+	"/domain/repositories": "domain/repositories",
+	"/domain/services":     "domain/services",
+	"/domain/shared":       "domain/shared",
+	"/domain/errors":       "domain/errors",
+	"/application":         "application",
+	"/infrastructure":      "infrastructure",
+}
+
 func getLayerFromImport(importPath string) string {
-	if strings.Contains(importPath, "/domain/entities") {
-		return "domain/entities"
-	}
-	if strings.Contains(importPath, "/domain/values") {
-		return "domain/values"
-	}
-	if strings.Contains(importPath, "/domain/repositories") {
-		return "domain/repositories"
-	}
-	if strings.Contains(importPath, "/domain/services") {
-		return "domain/services"
-	}
-	if strings.Contains(importPath, "/domain/shared") {
-		return "domain/shared"
-	}
-	if strings.Contains(importPath, "/domain/errors") {
-		return "domain/errors"
-	}
-	if strings.Contains(importPath, "/application") {
-		return "application"
-	}
-	if strings.Contains(importPath, "/infrastructure") {
-		return "infrastructure"
+	for pattern, layer := range importToLayerMapping {
+		if strings.Contains(importPath, pattern) {
+			return layer
+		}
 	}
 	return ""
 }
@@ -466,7 +524,9 @@ func filterPackagesByLayer(packages []packageInfo, layer string) []packageInfo {
 	return filtered
 }
 
-func filterPackagesByPath(packages []packageInfo, pathContains string) []packageInfo {
+func filterPackagesByPath(packages []packageInfo,
+	pathContains string,
+) []packageInfo {
 	var filtered []packageInfo
 	for _, pkg := range packages {
 		if strings.Contains(pkg.path, pathContains) {
@@ -476,23 +536,40 @@ func filterPackagesByPath(packages []packageInfo, pathContains string) []package
 	return filtered
 }
 
+// standardLibraryPrefixes contains standard library package prefixes for
+// efficient lookup.
+var standardLibraryPrefixes = []string{
+	"context",
+	"database/sql",
+	"encoding/json",
+	"fmt",
+	"log",
+	"net/http",
+	"regexp",
+	"strconv",
+	"strings",
+	"time",
+	"errors",
+	"go/",
+	"os",
+	"path",
+	"reflect",
+}
+
 func isStandardLibrary(importPath string) bool {
-	return !strings.Contains(importPath, ".") ||
-		strings.HasPrefix(importPath, "context") ||
-		strings.HasPrefix(importPath, "database/sql") ||
-		strings.HasPrefix(importPath, "encoding/json") ||
-		strings.HasPrefix(importPath, "fmt") ||
-		strings.HasPrefix(importPath, "log") ||
-		strings.HasPrefix(importPath, "net/http") ||
-		strings.HasPrefix(importPath, "regexp") ||
-		strings.HasPrefix(importPath, "strconv") ||
-		strings.HasPrefix(importPath, "strings") ||
-		strings.HasPrefix(importPath, "time") ||
-		strings.HasPrefix(importPath, "errors") ||
-		strings.HasPrefix(importPath, "go/") ||
-		strings.HasPrefix(importPath, "os") ||
-		strings.HasPrefix(importPath, "path") ||
-		strings.HasPrefix(importPath, "reflect")
+	// Fast check for packages without dots (standard library)
+	if !strings.Contains(importPath, ".") {
+		return true
+	}
+
+	// Check against known standard library prefixes
+	for _, prefix := range standardLibraryPrefixes {
+		if strings.HasPrefix(importPath, prefix) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func isTestImport(importPath string) bool {
@@ -531,7 +608,9 @@ func isVendorDependency(importPath string) bool {
 		strings.Contains(importPath, "gopkg.in/")
 }
 
-func isAllowedLayerDependency(fromLayer, toLayer string, allowedDeps []string) bool {
+func isAllowedLayerDependency(fromLayer, toLayer string,
+	allowedDeps []string,
+) bool {
 	// Allow dependencies within same layer
 	if fromLayer == toLayer {
 		return true
@@ -563,31 +642,59 @@ func buildDependencyGraph(packages []packageInfo) map[string][]string {
 	return graph
 }
 
-func findCycle(node string, graph map[string][]string, visited, recStack map[string]bool, path []string) []string {
-	visited[node] = true
-	recStack[node] = true
+func findCycle(node string, graph map[string][]string,
+	visited, recStack map[string]bool, path []string,
+) []string {
+	markNodeAsVisited(node, visited, recStack)
 	path = append(path, node)
 
 	for _, neighbor := range graph[node] {
-		if !visited[neighbor] {
-			if cycle := findCycle(neighbor, graph, visited, recStack, path); len(cycle) > 0 {
-				return cycle
-			}
-		} else if recStack[neighbor] {
-			// Found a cycle - return the cycle path
-			cycleStart := -1
-			for i, p := range path {
-				if p == neighbor {
-					cycleStart = i
-					break
-				}
-			}
-			if cycleStart >= 0 {
-				return append(path[cycleStart:], neighbor)
-			}
+		if cycle := processCycleNeighbor(neighbor, graph, visited, recStack,
+			path); len(cycle) > 0 {
+			return cycle
 		}
 	}
 
 	recStack[node] = false
 	return nil
+}
+
+// markNodeAsVisited marks a node as visited in the DFS traversal
+func markNodeAsVisited(node string, visited, recStack map[string]bool) {
+	visited[node] = true
+	recStack[node] = true
+}
+
+// processCycleNeighbor processes a neighbor during cycle detection
+func processCycleNeighbor(neighbor string, graph map[string][]string,
+	visited, recStack map[string]bool, path []string,
+) []string {
+	if !visited[neighbor] {
+		return findCycle(neighbor, graph, visited, recStack, path)
+	}
+
+	if recStack[neighbor] {
+		return buildCyclePath(neighbor, path)
+	}
+
+	return nil
+}
+
+// buildCyclePath constructs the cycle path when a back edge is found
+func buildCyclePath(neighbor string, path []string) []string {
+	cycleStart := findCycleStart(neighbor, path)
+	if cycleStart >= 0 {
+		return append(path[cycleStart:], neighbor)
+	}
+	return nil
+}
+
+// findCycleStart finds the starting index of the cycle in the path
+func findCycleStart(neighbor string, path []string) int {
+	for i, p := range path {
+		if p == neighbor {
+			return i
+		}
+	}
+	return -1
 }

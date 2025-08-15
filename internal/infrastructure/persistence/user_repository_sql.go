@@ -356,6 +356,7 @@ func (r *SQLUserRepository) FindByUsername(ctx context.Context, username string)
 }
 
 // Update updates an existing user.
+// Optimized to avoid unnecessary FindByID call by using UPDATE with row count check.
 func (r *SQLUserRepository) Update(ctx context.Context, user *entities.User) error {
 	if r.db == nil {
 		return fmt.Errorf("database connection is nil")
@@ -366,12 +367,6 @@ func (r *SQLUserRepository) Update(ctx context.Context, user *entities.User) err
 
 	if r.logger != nil {
 		r.logger.Debug("Updating user", "user_id", user.ID, "email", user.Email)
-	}
-
-	// First check if user exists
-	existingUser, err := r.FindByID(ctx, user.ID)
-	if err != nil {
-		return err
 	}
 
 	query := `
@@ -409,7 +404,7 @@ func (r *SQLUserRepository) Update(ctx context.Context, user *entities.User) err
 	}
 
 	if r.logger != nil {
-		r.logger.Info("User updated successfully", "user_id", user.ID, "email", user.Email, "old_email", existingUser.Email)
+		r.logger.Info("User updated successfully", "user_id", user.ID, "email", user.Email)
 	}
 	return nil
 }

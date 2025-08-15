@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -365,4 +366,334 @@ func testInvalidEnvironment(t *testing.T) {
 	if err == nil {
 		t.Error("Should reject invalid environment")
 	}
+}
+
+// TestConfigurationParameterValidation tests comprehensive configuration validation at startup
+func TestConfigurationParameterValidation(t *testing.T) {
+	t.Run("server configuration validation", func(t *testing.T) {
+		testServerConfigValidation(t)
+	})
+
+	t.Run("database configuration validation", func(t *testing.T) {
+		testDatabaseConfigValidation(t)
+	})
+
+	t.Run("logging configuration validation", func(t *testing.T) {
+		testLoggingConfigValidation(t)
+	})
+
+	t.Run("application configuration validation", func(t *testing.T) {
+		testApplicationConfigValidation(t)
+	})
+
+	t.Run("cross-configuration dependencies", func(t *testing.T) {
+		testCrossConfigurationDependencies(t)
+	})
+}
+
+// testServerConfigValidation tests server configuration parameter validation
+func testServerConfigValidation(t *testing.T) {
+	t.Helper()
+
+	invalidServerConfigs := []struct {
+		envVar      string
+		value       string
+		description string
+	}{
+		{"APP_SERVER_PORT", "0", "port zero"},
+		{"APP_SERVER_PORT", "-1", "negative port"},
+		{"APP_SERVER_PORT", "65536", "port too high"},
+		{"APP_SERVER_PORT", "99999", "port way too high"},
+		{"APP_SERVER_PORT", "abc", "non-numeric port"},
+		{"APP_SERVER_PORT", "80.5", "decimal port"},
+		{"APP_SERVER_PORT", "", "empty port"},
+		{"APP_SERVER_HOST", "", "empty host"},
+		{"APP_SERVER_READ_TIMEOUT", "-1s", "negative timeout"},
+		{"APP_SERVER_READ_TIMEOUT", "0s", "zero timeout"},
+		{"APP_SERVER_READ_TIMEOUT", "invalid", "invalid timeout format"},
+		{"APP_SERVER_WRITE_TIMEOUT", "-1s", "negative write timeout"},
+		{"APP_SERVER_IDLE_TIMEOUT", "-1s", "negative idle timeout"},
+	}
+
+	for _, tc := range invalidServerConfigs {
+		t.Run(tc.description, func(t *testing.T) {
+			// Set invalid environment variable
+			if err := os.Setenv(tc.envVar, tc.value); err != nil {
+				t.Fatalf("Failed to set %s: %v", tc.envVar, err)
+			}
+			defer func() {
+				if err := os.Unsetenv(tc.envVar); err != nil {
+					t.Errorf("Failed to unset %s: %v", tc.envVar, err)
+				}
+			}()
+
+			_, err := LoadConfig("")
+			if err == nil {
+				t.Errorf("Should reject invalid %s: %s", tc.envVar, tc.value)
+			}
+		})
+	}
+}
+
+// testDatabaseConfigValidation tests database configuration parameter validation
+func testDatabaseConfigValidation(t *testing.T) {
+	t.Helper()
+
+	invalidDatabaseConfigs := []struct {
+		envVar      string
+		value       string
+		description string
+	}{
+		{"APP_DATABASE_DRIVER", "", "empty driver"},
+		{"APP_DATABASE_DRIVER", "mysql", "unsupported driver mysql"},
+		{"APP_DATABASE_DRIVER", "postgres", "unsupported driver postgres"},
+		{"APP_DATABASE_DRIVER", "invalid", "invalid driver"},
+		{"APP_DATABASE_DSN", "", "empty DSN"},
+		{"APP_DATABASE_MAX_OPEN_CONNS", "-1", "negative max open connections"},
+		{"APP_DATABASE_MAX_IDLE_CONNS", "-1", "negative max idle connections"},
+		{"APP_DATABASE_MAX_OPEN_CONNS", "0", "zero max open connections"},
+		{"APP_DATABASE_MAX_IDLE_CONNS", "abc", "non-numeric max idle connections"},
+		{"APP_DATABASE_CONN_MAX_LIFETIME", "-1s", "negative connection lifetime"},
+		{"APP_DATABASE_CONN_MAX_LIFETIME", "invalid", "invalid lifetime format"},
+	}
+
+	for _, tc := range invalidDatabaseConfigs {
+		t.Run(tc.description, func(t *testing.T) {
+			if err := os.Setenv(tc.envVar, tc.value); err != nil {
+				t.Fatalf("Failed to set %s: %v", tc.envVar, err)
+			}
+			defer func() {
+				if err := os.Unsetenv(tc.envVar); err != nil {
+					t.Errorf("Failed to unset %s: %v", tc.envVar, err)
+				}
+			}()
+
+			_, err := LoadConfig("")
+			if err == nil {
+				t.Errorf("Should reject invalid %s: %s", tc.envVar, tc.value)
+			}
+		})
+	}
+}
+
+// testLoggingConfigValidation tests logging configuration parameter validation
+func testLoggingConfigValidation(t *testing.T) {
+	t.Helper()
+
+	invalidLoggingConfigs := []struct {
+		envVar      string
+		value       string
+		description string
+	}{
+		{"APP_LOGGING_LEVEL", "", "empty log level"},
+		{"APP_LOGGING_LEVEL", "invalid", "invalid log level"},
+		{"APP_LOGGING_LEVEL", "INVALID", "invalid log level uppercase"},
+		{"APP_LOGGING_LEVEL", "trace", "unsupported trace level"},
+		{"APP_LOGGING_LEVEL", "0", "numeric log level"},
+		{"APP_LOGGING_FORMAT", "", "empty log format"},
+		{"APP_LOGGING_FORMAT", "invalid", "invalid log format"},
+		{"APP_LOGGING_FORMAT", "xml", "unsupported xml format"},
+		{"APP_LOGGING_FORMAT", "yaml", "unsupported yaml format"},
+		{"APP_LOGGING_OUTPUT", "", "empty log output"},
+		{"APP_LOGGING_OUTPUT", "invalid", "invalid log output"},
+		{"APP_LOGGING_OUTPUT", "/nonexistent/path/log.txt", "nonexistent directory"},
+	}
+
+	for _, tc := range invalidLoggingConfigs {
+		t.Run(tc.description, func(t *testing.T) {
+			if err := os.Setenv(tc.envVar, tc.value); err != nil {
+				t.Fatalf("Failed to set %s: %v", tc.envVar, err)
+			}
+			defer func() {
+				if err := os.Unsetenv(tc.envVar); err != nil {
+					t.Errorf("Failed to unset %s: %v", tc.envVar, err)
+				}
+			}()
+
+			_, err := LoadConfig("")
+			if err == nil {
+				t.Errorf("Should reject invalid %s: %s", tc.envVar, tc.value)
+			}
+		})
+	}
+}
+
+// testApplicationConfigValidation tests application configuration parameter validation
+func testApplicationConfigValidation(t *testing.T) {
+	t.Helper()
+
+	invalidAppConfigs := []struct {
+		envVar      string
+		value       string
+		description string
+	}{
+		{"APP_APP_NAME", "", "empty app name"},
+		{"APP_APP_NAME", "   ", "whitespace only app name"},
+		{"APP_APP_NAME", "app with spaces", "app name with spaces"},
+		{"APP_APP_NAME", "app@name", "app name with special chars"},
+		{"APP_APP_VERSION", "", "empty version"},
+		{"APP_APP_VERSION", "invalid", "invalid version format"},
+		{"APP_APP_VERSION", "v1.0.0", "version with v prefix"},
+		{"APP_APP_ENVIRONMENT", "", "empty environment"},
+		{"APP_APP_ENVIRONMENT", "invalid", "invalid environment"},
+		{"APP_APP_ENVIRONMENT", "PRODUCTION", "uppercase environment"},
+		{"APP_APP_ENVIRONMENT", "test-env", "environment with hyphen"},
+		{"APP_APP_ENVIRONMENT", "development-test", "complex invalid environment"},
+	}
+
+	for _, tc := range invalidAppConfigs {
+		t.Run(tc.description, func(t *testing.T) {
+			if err := os.Setenv(tc.envVar, tc.value); err != nil {
+				t.Fatalf("Failed to set %s: %v", tc.envVar, err)
+			}
+			defer func() {
+				if err := os.Unsetenv(tc.envVar); err != nil {
+					t.Errorf("Failed to unset %s: %v", tc.envVar, err)
+				}
+			}()
+
+			_, err := LoadConfig("")
+			if err == nil {
+				t.Errorf("Should reject invalid %s: %s", tc.envVar, tc.value)
+			}
+		})
+	}
+}
+
+// testCrossConfigurationDependencies tests validation of configuration dependencies
+func testCrossConfigurationDependencies(t *testing.T) {
+	t.Helper()
+
+	// Test that max idle connections cannot exceed max open connections
+	t.Run("database connection limits consistency", func(t *testing.T) {
+		envVars := map[string]string{
+			"APP_DATABASE_MAX_OPEN_CONNS": "5",
+			"APP_DATABASE_MAX_IDLE_CONNS": "10", // Higher than max open
+		}
+
+		for key, value := range envVars {
+			if err := os.Setenv(key, value); err != nil {
+				t.Fatalf("Failed to set %s: %v", key, err)
+			}
+		}
+		defer func() {
+			for key := range envVars {
+				if err := os.Unsetenv(key); err != nil {
+					t.Errorf("Failed to unset %s: %v", key, err)
+				}
+			}
+		}()
+
+		_, err := LoadConfig("")
+		if err == nil {
+			t.Error("Should reject max idle connections > max open connections")
+		}
+	})
+
+	// Test production environment requires secure settings
+	t.Run("production environment security requirements", func(t *testing.T) {
+		envVars := map[string]string{
+			"APP_APP_ENVIRONMENT": "production",
+			"APP_LOGGING_LEVEL":   "debug", // Too verbose for production
+		}
+
+		for key, value := range envVars {
+			if err := os.Setenv(key, value); err != nil {
+				t.Fatalf("Failed to set %s: %v", key, err)
+			}
+		}
+		defer func() {
+			for key := range envVars {
+				if err := os.Unsetenv(key); err != nil {
+					t.Errorf("Failed to unset %s: %v", key, err)
+				}
+			}
+		}()
+
+		_, err := LoadConfig("")
+		if err == nil {
+			t.Error("Should reject debug logging in production environment")
+		}
+	})
+
+	// Test file path validation for logging output
+	t.Run("logging output path validation", func(t *testing.T) {
+		if err := os.Setenv("APP_LOGGING_OUTPUT", "/root/app.log"); err != nil {
+			t.Fatalf("Failed to set APP_LOGGING_OUTPUT: %v", err)
+		}
+		defer func() {
+			if err := os.Unsetenv("APP_LOGGING_OUTPUT"); err != nil {
+				t.Errorf("Failed to unset APP_LOGGING_OUTPUT: %v", err)
+			}
+		}()
+
+		_, err := LoadConfig("")
+		if err == nil {
+			t.Error("Should reject inaccessible log file path")
+		}
+	})
+}
+
+// TestConfigValidationErrorMessages tests that validation errors provide clear messages
+func TestConfigValidationErrorMessages(t *testing.T) {
+	testCases := []struct {
+		envVar      string
+		value       string
+		expectedMsg string
+		description string
+	}{
+		{"APP_SERVER_PORT", "99999", "port", "port validation error should mention port"},
+		{"APP_DATABASE_DRIVER", "mysql", "driver", "driver error should mention driver"},
+		{"APP_LOGGING_LEVEL", "invalid", "level", "log level error should mention level"},
+		{"APP_APP_ENVIRONMENT", "invalid", "environment", "environment error should mention environment"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			if err := os.Setenv(tc.envVar, tc.value); err != nil {
+				t.Fatalf("Failed to set %s: %v", tc.envVar, err)
+			}
+			defer func() {
+				if err := os.Unsetenv(tc.envVar); err != nil {
+					t.Errorf("Failed to unset %s: %v", tc.envVar, err)
+				}
+			}()
+
+			_, err := LoadConfig("")
+			if err == nil {
+				t.Errorf("Should return error for invalid %s", tc.envVar)
+				return
+			}
+
+			errorMsg := err.Error()
+			if !strings.Contains(strings.ToLower(errorMsg), tc.expectedMsg) {
+				t.Errorf("Error message should contain '%s', got: %s", tc.expectedMsg, errorMsg)
+			}
+		})
+	}
+}
+
+// TestConfigValidationPerformance tests that config validation is efficient
+func TestConfigValidationPerformance(t *testing.T) {
+	const iterations = 100
+
+	start := time.Now()
+
+	for i := 0; i < iterations; i++ {
+		_, err := LoadConfig("")
+		if err != nil {
+			t.Fatalf("Unexpected error during performance test: %v", err)
+		}
+	}
+
+	duration := time.Since(start)
+	avgDuration := duration / iterations
+
+	// Config loading should be very fast (< 10ms per call on average)
+	if avgDuration > 10*time.Millisecond {
+		t.Errorf("Config validation too slow: avg %v per call", avgDuration)
+	}
+
+	t.Logf("Config validation performance: %d iterations in %v (avg: %v)",
+		iterations, duration, avgDuration)
 }

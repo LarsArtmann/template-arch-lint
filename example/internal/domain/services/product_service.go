@@ -8,6 +8,7 @@ import (
 	"github.com/LarsArtmann/template-arch-lint-example/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint-example/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint-example/internal/domain/values"
+	serviceerrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 )
 
 // ProductService encapsulates business logic for products.
@@ -28,7 +29,7 @@ func (s *ProductService) CreateProduct(ctx context.Context, id values.ProductID,
 	// Check if product already exists
 	exists, err := s.productRepo.Exists(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to check product existence: %w", err)
+		return nil, serviceerrors.WrapRepoError("check existence of", "product", err)
 	}
 
 	if exists {
@@ -38,19 +39,19 @@ func (s *ProductService) CreateProduct(ctx context.Context, id values.ProductID,
 	// Create product entity (with domain validation)
 	product, err := entities.NewProduct(id, name, price)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create product entity: %w", err)
+		return nil, serviceerrors.WrapServiceError("create product entity", err)
 	}
 
 	// Business rule: Premium products (>$1000) need special validation
 	if s.isPremiumProduct(product) {
 		if err := s.validatePremiumProduct(product); err != nil {
-			return nil, fmt.Errorf("premium product validation failed: %w", err)
+			return nil, serviceerrors.WrapBusinessRuleError("premium product", err)
 		}
 	}
 
 	// Save to repository
 	if err := s.productRepo.Save(ctx, product); err != nil {
-		return nil, fmt.Errorf("failed to save product: %w", err)
+		return nil, serviceerrors.WrapRepoError("save", "product", err)
 	}
 
 	return product, nil
@@ -60,7 +61,7 @@ func (s *ProductService) CreateProduct(ctx context.Context, id values.ProductID,
 func (s *ProductService) GetProduct(ctx context.Context, id values.ProductID) (*entities.Product, error) {
 	product, err := s.productRepo.FindByID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get product: %w", err)
+		return nil, serviceerrors.WrapRepoError("get", "product", err)
 	}
 
 	return product, nil
@@ -70,7 +71,7 @@ func (s *ProductService) GetProduct(ctx context.Context, id values.ProductID) (*
 func (s *ProductService) ListProducts(ctx context.Context) ([]*entities.Product, error) {
 	products, err := s.productRepo.List(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list products: %w", err)
+		return nil, serviceerrors.WrapRepoError("list", "products", err)
 	}
 
 	return products, nil
@@ -81,28 +82,28 @@ func (s *ProductService) UpdateProduct(ctx context.Context, id values.ProductID,
 	// Get existing product
 	product, err := s.productRepo.FindByID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get product for update: %w", err)
+		return nil, serviceerrors.WrapRepoError("get for update", "product", err)
 	}
 
 	// Update fields with domain validation
 	if err := product.UpdateName(name); err != nil {
-		return nil, fmt.Errorf("failed to update product name: %w", err)
+		return nil, serviceerrors.WrapServiceError("update product name", err)
 	}
 
 	if err := product.UpdatePrice(price); err != nil {
-		return nil, fmt.Errorf("failed to update product price: %w", err)
+		return nil, serviceerrors.WrapServiceError("update product price", err)
 	}
 
 	// Business rule validation for premium products
 	if s.isPremiumProduct(product) {
 		if err := s.validatePremiumProduct(product); err != nil {
-			return nil, fmt.Errorf("premium product validation failed: %w", err)
+			return nil, serviceerrors.WrapBusinessRuleError("premium product", err)
 		}
 	}
 
 	// Save updated product
 	if err := s.productRepo.Save(ctx, product); err != nil {
-		return nil, fmt.Errorf("failed to save updated product: %w", err)
+		return nil, serviceerrors.WrapRepoError("save updated", "product", err)
 	}
 
 	return product, nil
@@ -111,7 +112,7 @@ func (s *ProductService) UpdateProduct(ctx context.Context, id values.ProductID,
 // DeleteProduct removes a product.
 func (s *ProductService) DeleteProduct(ctx context.Context, id values.ProductID) error {
 	if err := s.productRepo.Delete(ctx, id); err != nil {
-		return fmt.Errorf("failed to delete product: %w", err)
+		return serviceerrors.WrapRepoError("delete", "product", err)
 	}
 
 	return nil
@@ -122,7 +123,7 @@ func (s *ProductService) DeleteProduct(ctx context.Context, id values.ProductID)
 func (s *ProductService) GetExpensiveProducts(ctx context.Context) ([]*entities.Product, error) {
 	allProducts, err := s.productRepo.List(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get products: %w", err)
+		return nil, serviceerrors.WrapRepoError("get", "products", err)
 	}
 
 	var expensiveProducts []*entities.Product

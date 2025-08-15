@@ -7,6 +7,28 @@ import (
 	"net/http"
 )
 
+// baseError provides common error functionality to reduce duplication.
+type baseError struct {
+	code    ErrorCode
+	message string
+	details ErrorDetails
+}
+
+// Error implements the error interface.
+func (e *baseError) Error() string {
+	return e.message
+}
+
+// Code returns the error code.
+func (e *baseError) Code() ErrorCode {
+	return e.code
+}
+
+// Details returns the error details.
+func (e *baseError) Details() ErrorDetails {
+	return e.details
+}
+
 // ErrorCode represents a typed error code.
 type ErrorCode string
 
@@ -47,53 +69,41 @@ type DomainError interface {
 
 // ValidationError represents validation failures in domain entities.
 type ValidationError struct {
-	code    ErrorCode
-	message string
-	field   string
-	details ErrorDetails
+	baseError
+	field string
 }
 
 // NewValidationError creates a new validation error.
 func NewValidationError(field, message string) *ValidationError {
 	return &ValidationError{
-		code:    ValidationErrorCode,
-		message: message,
-		field:   field,
-		details: ErrorDetails{
-			Field: field,
+		baseError: baseError{
+			code:    ValidationErrorCode,
+			message: message,
+			details: ErrorDetails{
+				Field: field,
+			},
 		},
+		field: field,
 	}
 }
 
 // NewRequiredFieldError creates a validation error for required fields.
 func NewRequiredFieldError(field string) *ValidationError {
 	return &ValidationError{
-		code:    RequiredFieldCode,
-		message: fmt.Sprintf("%s cannot be empty", field),
-		field:   field,
-		details: ErrorDetails{
-			Field: field,
+		baseError: baseError{
+			code:    RequiredFieldCode,
+			message: fmt.Sprintf("%s cannot be empty", field),
+			details: ErrorDetails{
+				Field: field,
+			},
 		},
+		field: field,
 	}
-}
-
-func (e *ValidationError) Error() string {
-	return e.message
-}
-
-// Code returns the error code for the validation error.
-func (e *ValidationError) Code() ErrorCode {
-	return e.code
 }
 
 // HTTPStatus returns the HTTP status code for the validation error.
 func (e *ValidationError) HTTPStatus() int {
 	return http.StatusBadRequest
-}
-
-// Details returns the error details for the validation error.
-func (e *ValidationError) Details() ErrorDetails {
-	return e.details
 }
 
 // Field returns the field name that caused the validation error.
@@ -103,44 +113,30 @@ func (e *ValidationError) Field() string {
 
 // NotFoundError represents resources that cannot be found.
 type NotFoundError struct {
-	code     ErrorCode
-	message  string
+	baseError
 	resource string
 	id       string
-	details  ErrorDetails
 }
 
 // NewNotFoundError creates a new not found error.
 func NewNotFoundError(resource, id string) *NotFoundError {
 	return &NotFoundError{
-		code:     NotFoundErrorCode,
-		message:  fmt.Sprintf("%s with id '%s' not found", resource, id),
+		baseError: baseError{
+			code:    NotFoundErrorCode,
+			message: fmt.Sprintf("%s with id '%s' not found", resource, id),
+			details: ErrorDetails{
+				Resource: resource,
+				ID:       id,
+			},
+		},
 		resource: resource,
 		id:       id,
-		details: ErrorDetails{
-			Resource: resource,
-			ID:       id,
-		},
 	}
-}
-
-func (e *NotFoundError) Error() string {
-	return e.message
-}
-
-// Code returns the error code for the not found error.
-func (e *NotFoundError) Code() ErrorCode {
-	return e.code
 }
 
 // HTTPStatus returns the HTTP status code for the not found error.
 func (e *NotFoundError) HTTPStatus() int {
 	return http.StatusNotFound
-}
-
-// Details returns the error details for the not found error.
-func (e *NotFoundError) Details() ErrorDetails {
-	return e.details
 }
 
 // Resource returns the resource name that was not found.
@@ -155,27 +151,18 @@ func (e *NotFoundError) ID() string {
 
 // ConflictError represents business rule conflicts.
 type ConflictError struct {
-	code    ErrorCode
-	message string
-	details ErrorDetails
+	baseError
 }
 
 // NewConflictError creates a new conflict error.
 func NewConflictError(message string, details ErrorDetails) *ConflictError {
 	return &ConflictError{
-		code:    ConflictErrorCode,
-		message: message,
-		details: details,
+		baseError: baseError{
+			code:    ConflictErrorCode,
+			message: message,
+			details: details,
+		},
 	}
-}
-
-func (e *ConflictError) Error() string {
-	return e.message
-}
-
-// Code returns the error code for the conflict error.
-func (e *ConflictError) Code() ErrorCode {
-	return e.code
 }
 
 // HTTPStatus returns the HTTP status code for the conflict error.
@@ -183,26 +170,21 @@ func (e *ConflictError) HTTPStatus() int {
 	return http.StatusConflict
 }
 
-// Details returns the error details for the conflict error.
-func (e *ConflictError) Details() ErrorDetails {
-	return e.details
-}
-
 // InternalError represents system-level errors.
 type InternalError struct {
-	code    ErrorCode
-	message string
-	cause   error
-	details ErrorDetails
+	baseError
+	cause error
 }
 
 // NewInternalError creates a new internal error.
 func NewInternalError(message string, cause error) *InternalError {
 	return &InternalError{
-		code:    InternalErrorCode,
-		message: message,
-		cause:   cause,
-		details: ErrorDetails{},
+		baseError: baseError{
+			code:    InternalErrorCode,
+			message: message,
+			details: ErrorDetails{},
+		},
+		cause: cause,
 	}
 }
 
@@ -213,19 +195,9 @@ func (e *InternalError) Error() string {
 	return e.message
 }
 
-// Code returns the error code for the internal error.
-func (e *InternalError) Code() ErrorCode {
-	return e.code
-}
-
 // HTTPStatus returns the HTTP status code for the internal error.
 func (e *InternalError) HTTPStatus() int {
 	return http.StatusInternalServerError
-}
-
-// Details returns the error details for the internal error.
-func (e *InternalError) Details() ErrorDetails {
-	return e.details
 }
 
 // Cause returns the underlying cause of the internal error.

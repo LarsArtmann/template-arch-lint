@@ -3,11 +3,11 @@ package entities_test
 import (
 	"testing"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	ginkgo "github.com/onsi/ginkgo/v2"
+	gomega "github.com/onsi/gomega"
 )
 
 func TestEntities(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Entities Suite")
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	ginkgo.RunSpecs(t, "Entities Suite")
 }

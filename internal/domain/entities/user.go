@@ -84,25 +84,33 @@ func (u *User) Validate() error {
 	return nil
 }
 
-// GetEmail returns the email value object.
-func (u *User) GetEmail() values.Email {
-	// Lazy initialization if value object is not set
+// initEmailVO initializes email value object if needed.
+func (u *User) initEmailVO() {
 	if u.emailVO.IsEmpty() && u.Email != "" {
 		if emailVO, err := values.NewEmail(u.Email); err == nil {
 			u.emailVO = emailVO
 		}
 	}
-	return u.emailVO
 }
 
-// GetUserName returns the username value object.
-func (u *User) GetUserName() values.UserName {
-	// Lazy initialization if value object is not set
+// initNameVO initializes name value object if needed.
+func (u *User) initNameVO() {
 	if u.nameVO.IsEmpty() && u.Name != "" {
 		if nameVO, err := values.NewUserName(u.Name); err == nil {
 			u.nameVO = nameVO
 		}
 	}
+}
+
+// GetEmail returns the email value object.
+func (u *User) GetEmail() values.Email {
+	u.initEmailVO()
+	return u.emailVO
+}
+
+// GetUserName returns the username value object.
+func (u *User) GetUserName() values.UserName {
+	u.initNameVO()
 	return u.nameVO
 }
 

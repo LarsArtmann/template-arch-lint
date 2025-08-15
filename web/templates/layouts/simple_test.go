@@ -33,7 +33,7 @@ func TestBaseLayoutSimple(t *testing.T) {
 		t.Errorf("Expected HTML to contain 'Test Title', but it didn't")
 	}
 
-	if !strings.Contains(html, "<!DOCTYPE html>") {
+	if !strings.Contains(strings.ToLower(html), "<!doctype html>") && !strings.Contains(html, "<!DOCTYPE html>") {
 		t.Errorf("Expected HTML to contain DOCTYPE, but it didn't. Got: %s", html[:100])
 	}
 

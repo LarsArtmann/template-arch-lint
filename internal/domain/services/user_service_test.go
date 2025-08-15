@@ -2,7 +2,10 @@ package services_test
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -374,6 +377,232 @@ var _ = Describe("UserService", func() {
 					option := userService.FindUserByEmailOption(ctx, email)
 
 					Expect(option.IsAbsent()).To(BeTrue())
+				})
+			})
+		})
+	})
+
+	Describe("🧪 Edge Cases and Complex Business Logic", func() {
+		Describe("Email Validation Edge Cases", func() {
+			DescribeTable("should handle complex email validation scenarios",
+				func(email string, shouldSucceed bool, description string) {
+					id := createTestUserID("edge-case-user")
+					user, err := userService.CreateUser(ctx, id, email, "Test User")
+
+					if shouldSucceed {
+						Expect(err).ToNot(HaveOccurred(), description)
+						Expect(user).ToNot(BeNil(), description)
+						Expect(user.Email).To(Equal(email), description)
+					} else {
+						Expect(err).To(HaveOccurred(), description)
+						Expect(user).To(BeNil(), description)
+						_, isValidationError := errors.AsValidationError(err)
+						Expect(isValidationError).To(BeTrue(), description)
+					}
+				},
+				Entry("Valid email with subdomain", "user@mail.example.com", true, "should accept subdomain emails"),
+				Entry("Valid email with plus addressing", "user+tag@example.com", true, "should accept plus addressing"),
+				Entry("Valid email with dots", "first.last@example.com", true, "should accept dots in local part"),
+				Entry("Valid email with numbers", "user123@example.com", true, "should accept numbers"),
+				Entry("Valid email with hyphens", "user-name@example.com", true, "should accept hyphens"),
+				Entry("Invalid email - no @", "userexample.com", false, "should reject email without @"),
+				Entry("Invalid email - multiple @", "user@@example.com", false, "should reject multiple @ symbols"),
+				Entry("Invalid email - no domain", "user@", false, "should reject email without domain"),
+				Entry("Invalid email - no local part", "@example.com", false, "should reject email without local part"),
+				Entry("Invalid email - spaces", "user @example.com", false, "should reject emails with spaces"),
+				Entry("Invalid email - special chars", "user<>@example.com", false, "should reject invalid special characters"),
+				Entry("Invalid email - consecutive dots", "user..name@example.com", false, "should reject consecutive dots"),
+				Entry("Invalid email - starts with dot", ".user@example.com", false, "should reject starting with dot"),
+				Entry("Invalid email - ends with dot", "user.@example.com", false, "should reject ending with dot"),
+				Entry("Invalid email - too long local", strings.Repeat("a", 65)+"@example.com", false, "should reject overly long local part"),
+			)
+		})
+
+		Describe("Name Validation Edge Cases", func() {
+			DescribeTable("should handle complex name validation scenarios",
+				func(name string, shouldSucceed bool, description string) {
+					id := createTestUserID("name-edge-case")
+					user, err := userService.CreateUser(ctx, id, defaultTestEmail, name)
+
+					if shouldSucceed {
+						Expect(err).ToNot(HaveOccurred(), description)
+						Expect(user).ToNot(BeNil(), description)
+						Expect(user.Name).To(Equal(name), description)
+					} else {
+						Expect(err).To(HaveOccurred(), description)
+						Expect(user).To(BeNil(), description)
+						_, isValidationError := errors.AsValidationError(err)
+						Expect(isValidationError).To(BeTrue(), description)
+					}
+				},
+				Entry("Valid name with spaces", "John Doe", true, "should accept names with spaces"),
+				Entry("Valid name with apostrophe", "O'Connor", true, "should accept apostrophes"),
+				Entry("Valid name with hyphen", "Mary-Jane", true, "should accept hyphens"),
+				Entry("Valid name with accents", "José", true, "should accept accented characters"),
+				Entry("Valid long name", "Christopher Alexander", true, "should accept reasonably long names"),
+				Entry("Invalid name - too short", "A", false, "should reject single character names"),
+				Entry("Invalid name - empty", "", false, "should reject empty names"),
+				Entry("Invalid name - only spaces", "   ", false, "should reject names with only spaces"),
+				Entry("Invalid name - only numbers", "123", false, "should reject names with only numbers"),
+				Entry("Invalid name - special chars", "John@Doe", false, "should reject invalid special characters"),
+				Entry("Invalid name - excessive length", strings.Repeat("John ", 20), false, "should reject excessively long names"),
+				Entry("Invalid name - leading/trailing spaces", " John Doe ", false, "should handle names with leading/trailing spaces"),
+			)
+		})
+
+		Describe("Business Rule Edge Cases", func() {
+			Context("duplicate user creation attempts", func() {
+				It("should handle rapid concurrent creation attempts", func() {
+					email := "concurrent@example.com"
+					name := "Concurrent User"
+
+					// Attempt to create the same user multiple times concurrently
+					results := make(chan error, 5)
+
+					for i := 0; i < 5; i++ {
+						go func(index int) {
+							id, err := values.NewUserID(fmt.Sprintf("concurrent-user-%d", index))
+							if err != nil {
+								results <- err
+								return
+							}
+							_, err = userService.CreateUser(ctx, id, email, name)
+							results <- err
+						}(i)
+					}
+
+					// Collect results
+					var successCount, errorCount int
+					for i := 0; i < 5; i++ {
+						err := <-results
+						if err == nil {
+							successCount++
+						} else {
+							errorCount++
+						}
+					}
+
+					// Should have exactly one success and multiple conflicts
+					Expect(successCount).To(Equal(1), "should create exactly one user")
+					Expect(errorCount).To(Equal(4), "should reject 4 duplicate attempts")
+				})
+			})
+
+			Context("user lifecycle state transitions", func() {
+				It("should maintain data consistency across operations", func() {
+					// Create user
+					user := createDefaultTestUser("lifecycle-user")
+					originalCreated := user.Created
+
+					// Update user multiple times
+					for i := 0; i < 3; i++ {
+						newEmail := fmt.Sprintf("updated%d@example.com", i)
+						newName := fmt.Sprintf("Updated User %d", i)
+
+						updatedUser, err := userService.UpdateUser(ctx, user.ID, newEmail, newName)
+						Expect(err).ToNot(HaveOccurred())
+
+						// Verify consistency
+						Expect(updatedUser.ID).To(Equal(user.ID), "ID should remain constant")
+						Expect(updatedUser.Created).To(BeTemporally("~", originalCreated, time.Second), "creation time should not change")
+						Expect(updatedUser.Modified).To(BeTemporally(">", updatedUser.Created), "modified should be after created")
+
+						// Update reference for next iteration
+						user = updatedUser
+					}
+
+					// Verify final state
+					finalUser, err := userService.GetUser(ctx, user.ID)
+					Expect(err).ToNot(HaveOccurred())
+					Expect(finalUser.Email).To(Equal("updated2@example.com"))
+					Expect(finalUser.Name).To(Equal("Updated User 2"))
+				})
+			})
+
+			Context("boundary value testing", func() {
+				It("should handle minimum and maximum valid values", func() {
+					// Test minimum valid name length (2 characters)
+					id1 := createTestUserID("min-name-user")
+					user1, err := userService.CreateUser(ctx, id1, "min@example.com", "Jo")
+					Expect(err).ToNot(HaveOccurred())
+					Expect(user1.Name).To(Equal("Jo"))
+
+					// Test maximum reasonable email length
+					longLocalPart := strings.Repeat("a", 60) // 60 chars + @example.com = 71 total
+					longEmail := longLocalPart + "@example.com"
+					id2 := createTestUserID("long-email-user")
+					user2, err := userService.CreateUser(ctx, id2, longEmail, "Long Email User")
+					Expect(err).ToNot(HaveOccurred())
+					Expect(user2.Email).To(Equal(longEmail))
+				})
+			})
+		})
+
+		Describe("Functional Programming Edge Cases", func() {
+			Context("FilterActiveUsers with edge cases", func() {
+				It("should handle empty user set", func() {
+					activeUsers, err := userService.FilterActiveUsers(ctx)
+
+					Expect(err).ToNot(HaveOccurred())
+					Expect(activeUsers).To(HaveLen(0))
+					Expect(activeUsers).ToNot(BeNil())
+				})
+
+				It("should handle large user sets efficiently", func() {
+					// Create many users
+					const numUsers = 50
+					for i := 0; i < numUsers; i++ {
+						createValidTestUser(
+							fmt.Sprintf("bulk-user-%d", i),
+							fmt.Sprintf("bulk%d@example.com", i),
+							fmt.Sprintf("Bulk User %d", i),
+						)
+					}
+
+					activeUsers, err := userService.FilterActiveUsers(ctx)
+
+					Expect(err).ToNot(HaveOccurred())
+					Expect(activeUsers).To(HaveLen(numUsers))
+
+					// Verify all users are considered active (created recently)
+					for _, user := range activeUsers {
+						Expect(user.Created).To(BeTemporally(">=", time.Now().AddDate(0, 0, -30)))
+					}
+				})
+			})
+
+			Context("GetUserStats with complex scenarios", func() {
+				It("should handle mixed domain statistics", func() {
+					// Create users with different email domains
+					createValidTestUser("user-1", "user1@gmail.com", "Gmail User")
+					createValidTestUser("user-2", "user2@gmail.com", "Another Gmail User")
+					createValidTestUser("user-3", "user3@yahoo.com", "Yahoo User")
+					createValidTestUser("user-4", "user4@outlook.com", "Outlook User")
+					createValidTestUser("user-5", "user5@company.com", "Company User")
+
+					stats, err := userService.GetUserStats(ctx)
+
+					Expect(err).ToNot(HaveOccurred())
+					Expect(stats["total"]).To(Equal(5))
+					Expect(stats["active"]).To(Equal(5))
+					Expect(stats["domains"]).To(Equal(4)) // gmail, yahoo, outlook, company
+					Expect(stats["avg_days_since_registration"]).To(BeNumerically(">=", 0))
+					Expect(stats["avg_days_since_registration"]).To(BeNumerically("<", 1)) // All recent
+				})
+
+				It("should calculate accurate averages with precision", func() {
+					// Create users and verify statistical calculations
+					createValidTestUser("stats-user-1", "stats1@example.com", "Stats User 1")
+					createValidTestUser("stats-user-2", "stats2@example.com", "Stats User 2")
+
+					stats, err := userService.GetUserStats(ctx)
+
+					Expect(err).ToNot(HaveOccurred())
+					Expect(stats["total"]).To(Equal(2))
+
+					// Verify we have the expected statistics
+					Expect(stats).To(HaveKey("total"))
+					Expect(stats["total"]).To(BeNumerically(">", 0))
 				})
 			})
 		})

@@ -1,0 +1,2 @@
+\033[1m📝 CODE QUALITY LINTING\033[0m
+\033[0;36mRunning golangci-lint v2...\033[0m

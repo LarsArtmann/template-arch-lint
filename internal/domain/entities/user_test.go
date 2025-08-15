@@ -3,19 +3,19 @@ package entities
 import (
 	"time"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	ginkgo "github.com/onsi/ginkgo/v2"
+	gomega "github.com/onsi/gomega"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
-var _ = Describe("User Entity", func() {
-	Describe("NewUser", func() {
-		Context("with valid parameters", func() {
-			It("should create a new user successfully", func() {
+var _ = ginkgo.Describe("User Entity", func() {
+	ginkgo.Describe("NewUser", func() {
+		ginkgo.Context("with valid parameters", func() {
+			ginkgo.It("should create a new user successfully", func() {
 				// Given
 				id, idErr := values.NewUserID("user-123")
-				Expect(idErr).To(BeNil())
+				gomega.Expect(idErr).To(gomega.BeNil())
 				email := "test@example.com"
 				name := "TestUser"
 
@@ -23,17 +23,17 @@ var _ = Describe("User Entity", func() {
 				user, err := NewUser(id, email, name)
 
 				// Then
-				Expect(err).To(BeNil())
-				Expect(user).ToNot(BeNil())
-				Expect(user.ID.Equals(id)).To(BeTrue())
-				Expect(user.Email).To(Equal(email))
-				Expect(user.Name).To(Equal(name))
-				Expect(user.Created).To(BeTemporally("~", time.Now(), time.Second))
-				Expect(user.Modified).To(BeTemporally("~", time.Now(), time.Second))
-				Expect(user.Created).To(Equal(user.Modified))
+				gomega.Expect(err).To(gomega.BeNil())
+				gomega.Expect(user).ToNot(gomega.BeNil())
+				gomega.Expect(user.ID.Equals(id)).To(gomega.BeTrue())
+				gomega.Expect(user.Email).To(gomega.Equal(email))
+				gomega.Expect(user.Name).To(gomega.Equal(name))
+				gomega.Expect(user.Created).To(gomega.BeTemporally("~", time.Now(), time.Second))
+				gomega.Expect(user.Modified).To(gomega.BeTemporally("~", time.Now(), time.Second))
+				gomega.Expect(user.Created).To(gomega.Equal(user.Modified))
 			})
 
-			It("should set timestamps correctly", func() {
+			ginkgo.It("should set timestamps correctly", func() {
 				// Given
 				beforeCreation := time.Now()
 
@@ -42,66 +42,66 @@ var _ = Describe("User Entity", func() {
 
 				// Then
 				afterCreation := time.Now()
-				Expect(err).To(BeNil())
-				Expect(user.Created).To(BeTemporally(">=", beforeCreation))
-				Expect(user.Created).To(BeTemporally("<=", afterCreation))
-				Expect(user.Modified).To(Equal(user.Created))
+				gomega.Expect(err).To(gomega.BeNil())
+				gomega.Expect(user.Created).To(gomega.BeTemporally(">=", beforeCreation))
+				gomega.Expect(user.Created).To(gomega.BeTemporally("<=", afterCreation))
+				gomega.Expect(user.Modified).To(gomega.Equal(user.Created))
 			})
 		})
 
-		Context("with invalid parameters", func() {
-			It("should return error when ID is empty", func() {
+		ginkgo.Context("with invalid parameters", func() {
+			ginkgo.It("should return error when ID is empty", func() {
 				// When
 				user, err := NewUserFromStrings("", "test@example.com", "TestUser")
 
 				// Then
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("user ID"))
-				Expect(user).To(BeNil())
+				gomega.Expect(err).To(gomega.HaveOccurred())
+				gomega.Expect(err.Error()).To(gomega.ContainSubstring("user ID"))
+				gomega.Expect(user).To(gomega.BeNil())
 			})
 
-			It("should return error when email is empty", func() {
+			ginkgo.It("should return error when email is empty", func() {
 				// When
 				user, err := NewUserFromStrings("user-123", "", "TestUser")
 
 				// Then
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("email"))
-				Expect(user).To(BeNil())
+				gomega.Expect(err).To(gomega.HaveOccurred())
+				gomega.Expect(err.Error()).To(gomega.ContainSubstring("email"))
+				gomega.Expect(user).To(gomega.BeNil())
 			})
 
-			It("should return error when name is empty", func() {
+			ginkgo.It("should return error when name is empty", func() {
 				// When
 				user, err := NewUserFromStrings("user-123", "test@example.com", "")
 
 				// Then
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("name"))
-				Expect(user).To(BeNil())
+				gomega.Expect(err).To(gomega.HaveOccurred())
+				gomega.Expect(err.Error()).To(gomega.ContainSubstring("name"))
+				gomega.Expect(user).To(gomega.BeNil())
 			})
 
-			It("should return error when email is invalid", func() {
+			ginkgo.It("should return error when email is invalid", func() {
 				// When
 				user, err := NewUserFromStrings("user-123", "invalid-email", "TestUser")
 
 				// Then
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("email"))
-				Expect(user).To(BeNil())
+				gomega.Expect(err).To(gomega.HaveOccurred())
+				gomega.Expect(err.Error()).To(gomega.ContainSubstring("email"))
+				gomega.Expect(user).To(gomega.BeNil())
 			})
 		})
 
-		Context("edge cases", func() {
-			It("should reject whitespace-only inputs for ID", func() {
+		ginkgo.Context("edge cases", func() {
+			ginkgo.It("should reject whitespace-only inputs for ID", func() {
 				// When
 				user, err := NewUserFromStrings("   ", "test@example.com", "TestUser")
 
 				// Then - Current implementation validates and rejects whitespace
-				Expect(err).To(HaveOccurred())
-				Expect(user).To(BeNil())
+				gomega.Expect(err).To(gomega.HaveOccurred())
+				gomega.Expect(user).To(gomega.BeNil())
 			})
 
-			It("should handle very long inputs gracefully", func() {
+			ginkgo.It("should handle very long inputs gracefully", func() {
 				// Given
 				longString := make([]byte, 1000)
 				for i := range longString {
@@ -113,41 +113,41 @@ var _ = Describe("User Entity", func() {
 				user, err := NewUserFromStrings("user-123", longStringValue+"@example.com", longStringValue)
 
 				// Then - Should fail validation for overly long email/name
-				Expect(err).To(HaveOccurred())
-				Expect(user).To(BeNil())
+				gomega.Expect(err).To(gomega.HaveOccurred())
+				gomega.Expect(user).To(gomega.BeNil())
 			})
 		})
 	})
 
-	Describe("NewUserFromStrings", func() {
-		It("should create user from string ID", func() {
+	ginkgo.Describe("NewUserFromStrings", func() {
+		ginkgo.It("should create user from string ID", func() {
 			// When
 			user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
 
 			// Then
-			Expect(err).To(BeNil())
-			Expect(user).ToNot(BeNil())
-			Expect(user.ID.String()).To(Equal("user-123"))
+			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(user).ToNot(gomega.BeNil())
+			gomega.Expect(user.ID.String()).To(gomega.Equal("user-123"))
 		})
 	})
 
-	Describe("Validate", func() {
-		Context("with a valid user", func() {
-			It("should pass validation", func() {
+	ginkgo.Describe("Validate", func() {
+		ginkgo.Context("with a valid user", func() {
+			ginkgo.It("should pass validation", func() {
 				// Given
 				user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
-				Expect(err).To(BeNil())
+				gomega.Expect(err).To(gomega.BeNil())
 
 				// When
 				err = user.Validate()
 
 				// Then
-				Expect(err).To(BeNil())
+				gomega.Expect(err).To(gomega.BeNil())
 			})
 		})
 
-		Context("with invalid user state", func() {
-			It("should fail validation when ID is empty", func() {
+		ginkgo.Context("with invalid user state", func() {
+			ginkgo.It("should fail validation when ID is empty", func() {
 				// Given - Create user with empty ID using struct literal (bypassing validation)
 				user := &User{
 					ID:       values.UserID{}, // Empty UserID
@@ -161,11 +161,11 @@ var _ = Describe("User Entity", func() {
 				err := user.Validate()
 
 				// Then
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("user ID"))
+				gomega.Expect(err).To(gomega.HaveOccurred())
+				gomega.Expect(err.Error()).To(gomega.ContainSubstring("user ID"))
 			})
 
-			It("should fail validation when email is empty", func() {
+			ginkgo.It("should fail validation when email is empty", func() {
 				// Given
 				userID, _ := values.NewUserID("user-123")
 				user := &User{
@@ -180,11 +180,11 @@ var _ = Describe("User Entity", func() {
 				err := user.Validate()
 
 				// Then
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("email"))
+				gomega.Expect(err).To(gomega.HaveOccurred())
+				gomega.Expect(err.Error()).To(gomega.ContainSubstring("email"))
 			})
 
-			It("should fail validation when name is empty", func() {
+			ginkgo.It("should fail validation when name is empty", func() {
 				// Given
 				userID, _ := values.NewUserID("user-123")
 				user := &User{
@@ -199,13 +199,13 @@ var _ = Describe("User Entity", func() {
 				err := user.Validate()
 
 				// Then
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("name"))
+				gomega.Expect(err).To(gomega.HaveOccurred())
+				gomega.Expect(err.Error()).To(gomega.ContainSubstring("name"))
 			})
 		})
 
-		Context("with zero-value timestamps", func() {
-			It("should still validate successfully (timestamps not validated)", func() {
+		ginkgo.Context("with zero-value timestamps", func() {
+			ginkgo.It("should still validate successfully (timestamps not validated)", func() {
 				// Given
 				userID, _ := values.NewUserID("user-123")
 				user := &User{
@@ -220,150 +220,150 @@ var _ = Describe("User Entity", func() {
 				err := user.Validate()
 
 				// Then - Current implementation doesn't validate timestamps
-				Expect(err).To(BeNil())
+				gomega.Expect(err).To(gomega.BeNil())
 			})
 		})
 	})
 
-	Describe("User methods", func() {
+	ginkgo.Describe("User methods", func() {
 		var user *User
 
-		BeforeEach(func() {
+		ginkgo.BeforeEach(func() {
 			var err error
 			user, err = NewUserFromStrings("user-123", "test@example.com", "TestUser")
-			Expect(err).To(BeNil())
+			gomega.Expect(err).To(gomega.BeNil())
 		})
 
-		Describe("Email operations", func() {
-			It("should get email value object", func() {
+		ginkgo.Describe("Email operations", func() {
+			ginkgo.It("should get email value object", func() {
 				// When
 				email := user.GetEmail()
 
 				// Then
-				Expect(email.Value()).To(Equal("test@example.com"))
-				Expect(email.IsEmpty()).To(BeFalse())
+				gomega.Expect(email.Value()).To(gomega.Equal("test@example.com"))
+				gomega.Expect(email.IsEmpty()).To(gomega.BeFalse())
 			})
 
-			It("should set email with validation", func() {
+			ginkgo.It("should set email with validation", func() {
 				// When
 				err := user.SetEmail("new@example.com")
 
 				// Then
-				Expect(err).To(BeNil())
-				Expect(user.Email).To(Equal("new@example.com"))
+				gomega.Expect(err).To(gomega.BeNil())
+				gomega.Expect(user.Email).To(gomega.Equal("new@example.com"))
 			})
 
-			It("should reject invalid email", func() {
+			ginkgo.It("should reject invalid email", func() {
 				// When
 				err := user.SetEmail("invalid-email")
 
 				// Then
-				Expect(err).To(HaveOccurred())
+				gomega.Expect(err).To(gomega.HaveOccurred())
 			})
 
-			It("should get email domain", func() {
+			ginkgo.It("should get email domain", func() {
 				// When
 				domain := user.EmailDomain()
 
 				// Then
-				Expect(domain).To(Equal("example.com"))
+				gomega.Expect(domain).To(gomega.Equal("example.com"))
 			})
 
-			It("should check if email is valid", func() {
+			ginkgo.It("should check if email is valid", func() {
 				// Then
-				Expect(user.IsEmailValid()).To(BeTrue())
+				gomega.Expect(user.IsEmailValid()).To(gomega.BeTrue())
 			})
 		})
 
-		Describe("Name operations", func() {
-			It("should get username value object", func() {
+		ginkgo.Describe("Name operations", func() {
+			ginkgo.It("should get username value object", func() {
 				// When
 				name := user.GetUserName()
 
 				// Then
-				Expect(name.Value()).To(Equal("TestUser"))
-				Expect(name.IsEmpty()).To(BeFalse())
+				gomega.Expect(name.Value()).To(gomega.Equal("TestUser"))
+				gomega.Expect(name.IsEmpty()).To(gomega.BeFalse())
 			})
 
-			It("should set name with validation", func() {
+			ginkgo.It("should set name with validation", func() {
 				// When
 				err := user.SetName("NewName")
 
 				// Then
-				Expect(err).To(BeNil())
-				Expect(user.Name).To(Equal("NewName"))
+				gomega.Expect(err).To(gomega.BeNil())
+				gomega.Expect(user.Name).To(gomega.Equal("NewName"))
 			})
 
-			It("should check if name is reserved", func() {
+			ginkgo.It("should check if name is reserved", func() {
 				// When
 				isReserved := user.IsNameReserved()
 
 				// Then - "TestUser" should not be reserved
-				Expect(isReserved).To(BeFalse())
+				gomega.Expect(isReserved).To(gomega.BeFalse())
 			})
 		})
 	})
 
-	Describe("UserID value object", func() {
-		It("should work as a value object", func() {
+	ginkgo.Describe("UserID value object", func() {
+		ginkgo.It("should work as a value object", func() {
 			// Given
 			id, err := values.NewUserID("test-id")
 
 			// Then
-			Expect(err).To(BeNil())
-			Expect(id.String()).To(Equal("test-id"))
-			Expect(id.Value()).To(Equal("test-id"))
+			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(id.String()).To(gomega.Equal("test-id"))
+			gomega.Expect(id.Value()).To(gomega.Equal("test-id"))
 		})
 
-		It("should be comparable", func() {
+		ginkgo.It("should be comparable", func() {
 			// Given
 			id1, _ := values.NewUserID("same-id")
 			id2, _ := values.NewUserID("same-id")
 			id3, _ := values.NewUserID("different-id")
 
 			// Then
-			Expect(id1.Equals(id2)).To(BeTrue())
-			Expect(id1.Equals(id3)).To(BeFalse())
+			gomega.Expect(id1.Equals(id2)).To(gomega.BeTrue())
+			gomega.Expect(id1.Equals(id3)).To(gomega.BeFalse())
 		})
 
-		It("should validate format correctly", func() {
+		ginkgo.It("should validate format correctly", func() {
 			// Valid IDs
 			validIDs := []string{"user-123", "test_id", "UserID123", "a1b2c3"}
 			for _, validID := range validIDs {
 				id, err := values.NewUserID(validID)
-				Expect(err).To(BeNil(), "Expected %s to be valid", validID)
-				Expect(id.String()).To(Equal(validID))
+				gomega.Expect(err).To(gomega.BeNil(), "Expected %s to be valid", validID)
+				gomega.Expect(id.String()).To(gomega.Equal(validID))
 			}
 
 			// Invalid IDs
 			invalidIDs := []string{"", "   ", "id with spaces", "id@domain", "id#hash"}
 			for _, invalidID := range invalidIDs {
 				_, err := values.NewUserID(invalidID)
-				Expect(err).To(HaveOccurred(), "Expected %s to be invalid", invalidID)
+				gomega.Expect(err).To(gomega.HaveOccurred(), "Expected %s to be invalid", invalidID)
 			}
 		})
 
-		It("should generate unique IDs", func() {
+		ginkgo.It("should generate unique IDs", func() {
 			// When
 			id1, err1 := values.GenerateUserID()
 			id2, err2 := values.GenerateUserID()
 
 			// Then
-			Expect(err1).To(BeNil())
-			Expect(err2).To(BeNil())
-			Expect(id1.Equals(id2)).To(BeFalse())
-			Expect(id1.IsGenerated()).To(BeTrue())
-			Expect(id2.IsGenerated()).To(BeTrue())
+			gomega.Expect(err1).To(gomega.BeNil())
+			gomega.Expect(err2).To(gomega.BeNil())
+			gomega.Expect(id1.Equals(id2)).To(gomega.BeFalse())
+			gomega.Expect(id1.IsGenerated()).To(gomega.BeTrue())
+			gomega.Expect(id2.IsGenerated()).To(gomega.BeTrue())
 		})
 
-		It("should handle empty check", func() {
+		ginkgo.It("should handle empty check", func() {
 			// Given
 			emptyID := values.UserID{}
 			validID, _ := values.NewUserID("test")
 
 			// Then
-			Expect(emptyID.IsEmpty()).To(BeTrue())
-			Expect(validID.IsEmpty()).To(BeFalse())
+			gomega.Expect(emptyID.IsEmpty()).To(gomega.BeTrue())
+			gomega.Expect(validID.IsEmpty()).To(gomega.BeFalse())
 		})
 	})
 })
