@@ -101,7 +101,7 @@ func runServer() error {
 		db,
 		diContainer,
 	)
-	
+
 	// Always attempt graceful cleanup
 	cleanupErr := performGracefulCleanup(logger, db, diContainer)
 	if cleanupErr != nil {
@@ -205,7 +205,7 @@ func runServerWithGracefulShutdown(
 		logger.Info("Server stopped normally")
 		return nil
 	case sig := <-shutdown:
-		logger.Info("Graceful shutdown initiated", 
+		logger.Info("Graceful shutdown initiated",
 			"signal", sig.String(),
 			"timeout", cfg.Server.GracefulShutdownTimeout.String())
 		return performEnhancedGracefulShutdown(ctx, server, logger, cfg, db, diContainer)
@@ -226,7 +226,7 @@ func performEnhancedGracefulShutdown(
 	if shutdownTimeout <= 0 {
 		shutdownTimeout = DefaultShutdownTimeout
 	}
-	
+
 	// Don't exceed maximum shutdown wait time
 	if shutdownTimeout > MaxShutdownWaitTime {
 		shutdownTimeout = MaxShutdownWaitTime
@@ -248,11 +248,11 @@ func performEnhancedGracefulShutdown(
 	go func() {
 		defer wg.Done()
 		logger.Info("Shutting down HTTP server...")
-		
+
 		if err := server.Shutdown(shutdownCtx); err != nil {
 			logger.Error("Failed to shutdown HTTP server gracefully", ErrorConstant, err)
 			shutdownErrors = append(shutdownErrors, fmt.Errorf("HTTP server shutdown: %w", err))
-			
+
 			// Force close if graceful shutdown fails
 			if closeErr := server.Close(); closeErr != nil {
 				logger.Error("Failed to force close HTTP server", ErrorConstant, closeErr)
@@ -268,16 +268,16 @@ func performEnhancedGracefulShutdown(
 	go func() {
 		defer wg.Done()
 		logger.Info("Closing database connections...")
-		
+
 		dbCtx, dbCancel := context.WithTimeout(shutdownCtx, DatabaseCloseTimeout)
 		defer dbCancel()
-		
+
 		// Wait a bit for ongoing transactions to complete
 		select {
 		case <-time.After(2 * time.Second):
 		case <-dbCtx.Done():
 		}
-		
+
 		if err := db.Close(); err != nil {
 			logger.Error("Failed to close database connections", ErrorConstant, err)
 			shutdownErrors = append(shutdownErrors, fmt.Errorf("database close: %w", err))
@@ -312,7 +312,7 @@ func performEnhancedGracefulShutdown(
 
 	// Report final shutdown status
 	if len(shutdownErrors) > 0 {
-		logger.Error("Graceful shutdown completed with errors", 
+		logger.Error("Graceful shutdown completed with errors",
 			"error_count", len(shutdownErrors))
 		return fmt.Errorf("shutdown errors: %v", shutdownErrors)
 	}

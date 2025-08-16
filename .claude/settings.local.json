@@ -33,7 +33,8 @@
       "Bash(APP_SERVER_PORT=9090 APP_LOGGING_LEVEL=debug gtimeout 5s go run cmd/server/main.go)",
       "Bash(PATH=\"/usr/bin:/bin\" just graph)",
       "Bash(time git commit -m \"test: Fast hook verification\")",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(./test_graceful_shutdown.sh:*)"
     ],
     "deny": []
   }

@@ -57,24 +57,24 @@ type AppConfig struct {
 
 // JWTConfig contains JWT authentication configuration.
 type JWTConfig struct {
-	SecretKey            string        `mapstructure:"secret_key" validate:"required,min=32"`
-	AccessTokenExpiry    time.Duration `mapstructure:"access_token_expiry"`
-	RefreshTokenExpiry   time.Duration `mapstructure:"refresh_token_expiry"`
-	Issuer              string        `mapstructure:"issuer" validate:"required"`
-	Algorithm           string        `mapstructure:"algorithm" validate:"required,oneof=HS256 HS384 HS512"`
+	SecretKey          string        `mapstructure:"secret_key" validate:"required,min=32"`
+	AccessTokenExpiry  time.Duration `mapstructure:"access_token_expiry"`
+	RefreshTokenExpiry time.Duration `mapstructure:"refresh_token_expiry"`
+	Issuer             string        `mapstructure:"issuer" validate:"required"`
+	Algorithm          string        `mapstructure:"algorithm" validate:"required,oneof=HS256 HS384 HS512"`
 }
 
 // SecurityConfig contains security configuration.
 type SecurityConfig struct {
-	AllowedOrigins       []string `mapstructure:"allowed_origins"`
-	TrustedProxies       []string `mapstructure:"trusted_proxies"`
-	EnableHSTS           bool     `mapstructure:"enable_hsts"`
-	EnableCSP            bool     `mapstructure:"enable_csp"`
-	CSPReportURI         string   `mapstructure:"csp_report_uri"`
-	MaxRequestSize       int64    `mapstructure:"max_request_size"`
-	RateLimitEnabled     bool     `mapstructure:"rate_limit_enabled"`
-	RateLimitRequests    int      `mapstructure:"rate_limit_requests"`
-	RateLimitWindow      time.Duration `mapstructure:"rate_limit_window"`
+	AllowedOrigins    []string      `mapstructure:"allowed_origins"`
+	TrustedProxies    []string      `mapstructure:"trusted_proxies"`
+	EnableHSTS        bool          `mapstructure:"enable_hsts"`
+	EnableCSP         bool          `mapstructure:"enable_csp"`
+	CSPReportURI      string        `mapstructure:"csp_report_uri"`
+	MaxRequestSize    int64         `mapstructure:"max_request_size"`
+	RateLimitEnabled  bool          `mapstructure:"rate_limit_enabled"`
+	RateLimitRequests int           `mapstructure:"rate_limit_requests"`
+	RateLimitWindow   time.Duration `mapstructure:"rate_limit_window"`
 }
 
 // LoadConfig loads configuration from various sources.

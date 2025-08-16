@@ -84,9 +84,9 @@ func generateTimestampID() string {
 
 // WithCorrelationID is a convenience function to create correlation ID middleware.
 func WithCorrelationID(logger *slog.Logger) gin.HandlerFunc {
-	return CorrelationID(CorrelationIDConfig{
-		Logger: logger,
-	})
+	config := DefaultCorrelationIDConfig()
+	config.Logger = logger
+	return CorrelationID(config)
 }
 
 // GetCorrelationIDFromContext retrieves correlation ID from gin context

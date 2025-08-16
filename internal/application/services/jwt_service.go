@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/LarsArtmann/template-arch-lint/internal/config"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // JWTService handles JWT token operations.
@@ -85,7 +85,6 @@ func (j *JWTService) ValidateToken(tokenString string) (*Claims, error) {
 		}
 		return []byte(j.config.SecretKey), nil
 	})
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse token: %w", err)
 	}

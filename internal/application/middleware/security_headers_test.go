@@ -14,7 +14,7 @@ import (
 
 func TestDefaultSecurityHeadersConfig(t *testing.T) {
 	config := DefaultSecurityHeadersConfig()
-	
+
 	assert.Equal(t, []string{"*"}, config.AllowedOrigins)
 	assert.Contains(t, config.AllowedMethods, "GET")
 	assert.Contains(t, config.AllowedMethods, "POST")
@@ -33,7 +33,7 @@ func TestDefaultSecurityHeadersConfig(t *testing.T) {
 
 func TestDevelopmentSecurityHeadersConfig(t *testing.T) {
 	config := DevelopmentSecurityHeadersConfig()
-	
+
 	assert.Equal(t, []string{"*"}, config.AllowedOrigins)
 	assert.Contains(t, config.ScriptSrc, "'unsafe-eval'")
 	assert.Contains(t, config.ConnectSrc, "ws:")
@@ -44,7 +44,7 @@ func TestDevelopmentSecurityHeadersConfig(t *testing.T) {
 func TestProductionSecurityHeadersConfig(t *testing.T) {
 	allowedOrigins := []string{"https://example.com", "https://app.example.com"}
 	config := ProductionSecurityHeadersConfig(allowedOrigins)
-	
+
 	assert.Equal(t, allowedOrigins, config.AllowedOrigins)
 	assert.Equal(t, "'self'", config.ScriptSrc)
 	assert.Equal(t, "'self'", config.StyleSrc)
@@ -55,13 +55,13 @@ func TestProductionSecurityHeadersConfig(t *testing.T) {
 
 func TestProductionSecurityHeadersConfigNoOrigins(t *testing.T) {
 	config := ProductionSecurityHeadersConfig(nil)
-	
+
 	assert.Empty(t, config.AllowedOrigins)
 }
 
 func TestSecurityHeadersMiddleware(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	tests := []struct {
 		name           string
 		config         SecurityHeadersConfig
@@ -86,8 +86,8 @@ func TestSecurityHeadersMiddleware(t *testing.T) {
 			},
 		},
 		{
-			name: "production config with allowed origin",
-			config: ProductionSecurityHeadersConfig([]string{"https://example.com"}),
+			name:           "production config with allowed origin",
+			config:         ProductionSecurityHeadersConfig([]string{"https://example.com"}),
 			requestMethod:  "GET",
 			requestOrigin:  "https://example.com",
 			expectedStatus: http.StatusOK,
@@ -97,8 +97,8 @@ func TestSecurityHeadersMiddleware(t *testing.T) {
 			},
 		},
 		{
-			name: "production config with disallowed origin",
-			config: ProductionSecurityHeadersConfig([]string{"https://example.com"}),
+			name:           "production config with disallowed origin",
+			config:         ProductionSecurityHeadersConfig([]string{"https://example.com"}),
 			requestMethod:  "GET",
 			requestOrigin:  "https://malicious.com",
 			expectedStatus: http.StatusOK,
@@ -192,7 +192,7 @@ func TestSecurityHeadersMiddleware(t *testing.T) {
 			if tt.requestOrigin != "" {
 				req.Header.Set("Origin", tt.requestOrigin)
 			}
-			
+
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
 
@@ -263,7 +263,7 @@ func TestIsOriginAllowed(t *testing.T) {
 
 func TestWithSecurityHeaders(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	
+
 	tests := []struct {
 		name           string
 		environment    string
@@ -305,16 +305,16 @@ func TestWithSecurityHeaders(t *testing.T) {
 
 			req := httptest.NewRequest("GET", "/test", nil)
 			req.Header.Set("Origin", "https://example.com")
-			
+
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
 
 			assert.Equal(t, http.StatusOK, w.Code)
-			
+
 			if tt.expectedCORS {
 				assert.NotEmpty(t, w.Header().Get("Access-Control-Allow-Origin"))
 			}
-			
+
 			if tt.expectedHSTS {
 				assert.NotEmpty(t, w.Header().Get("Strict-Transport-Security"))
 			} else {
@@ -327,7 +327,7 @@ func TestWithSecurityHeaders(t *testing.T) {
 func TestWithCORSOnly(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	
+
 	router := gin.New()
 	router.Use(WithCORSOnly([]string{"https://example.com"}, logger))
 	router.GET("/test", func(c *gin.Context) {
@@ -336,7 +336,7 @@ func TestWithCORSOnly(t *testing.T) {
 
 	req := httptest.NewRequest("GET", "/test", nil)
 	req.Header.Set("Origin", "https://example.com")
-	
+
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -350,7 +350,7 @@ func TestWithCORSOnly(t *testing.T) {
 func TestWithStrictSecurity(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	
+
 	router := gin.New()
 	router.Use(WithStrictSecurity([]string{"https://example.com"}, logger))
 	router.GET("/test", func(c *gin.Context) {
@@ -359,7 +359,7 @@ func TestWithStrictSecurity(t *testing.T) {
 
 	req := httptest.NewRequest("GET", "/test", nil)
 	req.Header.Set("Origin", "https://example.com")
-	
+
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -372,32 +372,32 @@ func TestWithStrictSecurity(t *testing.T) {
 
 func TestHSTSHeaderGeneration(t *testing.T) {
 	tests := []struct {
-		name            string
-		maxAge          int
+		name              string
+		maxAge            int
 		includeSubDomains bool
-		preload         bool
-		expectedHeader  string
+		preload           bool
+		expectedHeader    string
 	}{
 		{
-			name:            "basic HSTS",
-			maxAge:          31536000,
+			name:              "basic HSTS",
+			maxAge:            31536000,
 			includeSubDomains: false,
-			preload:         false,
-			expectedHeader:  "max-age=31536000",
+			preload:           false,
+			expectedHeader:    "max-age=31536000",
 		},
 		{
-			name:            "HSTS with subdomains",
-			maxAge:          31536000,
+			name:              "HSTS with subdomains",
+			maxAge:            31536000,
 			includeSubDomains: true,
-			preload:         false,
-			expectedHeader:  "max-age=31536000; includeSubDomains",
+			preload:           false,
+			expectedHeader:    "max-age=31536000; includeSubDomains",
 		},
 		{
-			name:            "HSTS with preload",
-			maxAge:          31536000,
+			name:              "HSTS with preload",
+			maxAge:            31536000,
 			includeSubDomains: true,
-			preload:         true,
-			expectedHeader:  "max-age=31536000; includeSubDomains; preload",
+			preload:           true,
+			expectedHeader:    "max-age=31536000; includeSubDomains; preload",
 		},
 	}
 
@@ -408,7 +408,7 @@ func TestHSTSHeaderGeneration(t *testing.T) {
 			config.HSTSMaxAge = tt.maxAge
 			config.HSTSIncludeSubDomains = tt.includeSubDomains
 			config.HSTSPreload = tt.preload
-			
+
 			router := gin.New()
 			router.Use(SecurityHeaders(config))
 			router.GET("/test", func(c *gin.Context) {
@@ -431,7 +431,7 @@ func TestCSPHeaderGeneration(t *testing.T) {
 	config.ScriptSrc = "'self' 'unsafe-inline'"
 	config.StyleSrc = "'self' 'unsafe-inline'"
 	config.ImgSrc = "'self' data: https:"
-	
+
 	router := gin.New()
 	router.Use(SecurityHeaders(config))
 	router.GET("/test", func(c *gin.Context) {
@@ -452,7 +452,7 @@ func TestCSPHeaderGeneration(t *testing.T) {
 
 func TestCorrelationIDExposure(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	router := gin.New()
 	router.Use(SecurityHeaders())
 	router.GET("/test", func(c *gin.Context) {
@@ -461,7 +461,7 @@ func TestCorrelationIDExposure(t *testing.T) {
 
 	req := httptest.NewRequest("GET", "/test", nil)
 	req.Header.Set("Origin", "https://example.com")
-	
+
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -475,7 +475,7 @@ func getCSPDirective(csp, directive string) string {
 	if csp == "" {
 		return ""
 	}
-	
+
 	// This is a simplified parser for test purposes
 	// In a real implementation, you might want a more robust parser
 	directives := map[string]string{}
@@ -487,6 +487,6 @@ func getCSPDirective(csp, directive string) string {
 			directives[key] = value
 		}
 	}
-	
+
 	return directives[directive]
 }

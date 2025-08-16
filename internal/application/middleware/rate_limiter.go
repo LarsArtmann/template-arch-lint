@@ -22,22 +22,22 @@ const (
 	GeneralRateLimit RateLimitType = "general"
 	// AuthRateLimit for authentication endpoints - 10 requests per minute.
 	AuthRateLimit RateLimitType = "auth"
-	
+
 	// Rate limiting constants.
 	defaultGeneralRequestsPerMinute = 100.0
-	defaultGeneralBurst            = 10
-	defaultAuthRequestsPerMinute   = 10.0
-	defaultAuthBurst              = 3
-	defaultCleanupIntervalMinutes = 5
-	zeroValue                     = 0
-	secondsPerMinute              = 60.0
-	retryAfterSeconds             = 60
-	base10                        = 10
-	notFoundIndex                 = -1
-	
+	defaultGeneralBurst             = 10
+	defaultAuthRequestsPerMinute    = 10.0
+	defaultAuthBurst                = 3
+	defaultCleanupIntervalMinutes   = 5
+	zeroValue                       = 0
+	secondsPerMinute                = 60.0
+	retryAfterSeconds               = 60
+	base10                          = 10
+	notFoundIndex                   = -1
+
 	// Logging field constants.
-	clientIDField   = "client_id"
-	limitTypeField  = "limit_type"
+	clientIDField  = "client_id"
+	limitTypeField = "limit_type"
 )
 
 // RateLimitConfig holds configuration for rate limiting.
@@ -76,13 +76,13 @@ type clientLimiter struct {
 
 // RateLimiterStore manages rate limiters for different clients.
 type RateLimiterStore struct {
-	mu         sync.RWMutex
-	limiters   map[string]*clientLimiter
-	generalRPS float64
+	mu           sync.RWMutex
+	limiters     map[string]*clientLimiter
+	generalRPS   float64
 	generalBurst int
-	authRPS    float64
-	authBurst  int
-	logger     *slog.Logger
+	authRPS      float64
+	authBurst    int
+	logger       *slog.Logger
 }
 
 // NewRateLimiterStore creates a new rate limiter store.
@@ -112,7 +112,7 @@ func (store *RateLimiterStore) getLimiter(clientID string, limitType RateLimitTy
 	defer store.mu.Unlock()
 
 	key := fmt.Sprintf("%s:%s", clientID, limitType)
-	
+
 	limiterEntry, exists := store.limiters[key]
 	if !exists {
 		var limiter *rate.Limiter
@@ -122,16 +122,16 @@ func (store *RateLimiterStore) getLimiter(clientID string, limitType RateLimitTy
 		default:
 			limiter = rate.NewLimiter(rate.Limit(store.generalRPS), store.generalBurst)
 		}
-		
+
 		limiterEntry = &clientLimiter{
 			limiter:    limiter,
 			lastAccess: time.Now(),
 		}
 		store.limiters[key] = limiterEntry
-		
+
 		store.logger.Debug("Created new rate limiter",
-			"client_id", clientID,
-			"limit_type", limitType,
+			clientIDField, clientID,
+			limitTypeField, limitType,
 			"key", key)
 	} else {
 		limiterEntry.lastAccess = time.Now()
@@ -150,11 +150,11 @@ func (store *RateLimiterStore) cleanupExpiredLimiters(interval time.Duration) {
 	}
 }
 
-// performCleanup removes expired limiters in a separate method to reduce complexity.
+// performCleanup removes expired limiters to reduce complexity.
 func (store *RateLimiterStore) performCleanup() {
 	store.mu.Lock()
 	defer store.mu.Unlock()
-	
+
 	expiredKeys := store.findExpiredKeys()
 	store.removeExpiredKeys(expiredKeys)
 	store.logCleanupResult(expiredKeys)
@@ -164,13 +164,13 @@ func (store *RateLimiterStore) performCleanup() {
 func (store *RateLimiterStore) findExpiredKeys() []string {
 	now := time.Now()
 	expiredKeys := make([]string, zeroValue)
-	
+
 	for key, limiterEntry := range store.limiters {
 		if now.Sub(limiterEntry.lastAccess) > time.Hour {
 			expiredKeys = append(expiredKeys, key)
 		}
 	}
-	
+
 	return expiredKeys
 }
 
@@ -194,16 +194,16 @@ func getClientID(c *gin.Context) string {
 	// Try to get real IP from headers first
 	if ip := c.GetHeader("X-Forwarded-For"); ip != "" {
 		// X-Forwarded-For can contain multiple IPs, take the first one
-		if comma := strings.Index(ip, ","); comma != -1 {
+		if comma := strings.Index(ip, ","); comma != notFoundIndex {
 			ip = strings.TrimSpace(ip[:comma])
 		}
 		return ip
 	}
-	
+
 	if ip := c.GetHeader("X-Real-IP"); ip != "" {
 		return ip
 	}
-	
+
 	// Fall back to remote address
 	return c.ClientIP()
 }
@@ -219,20 +219,20 @@ func getRateLimitType(path string) RateLimitType {
 		"/reset-password",
 		"/verify-email",
 	}
-	
+
 	// Check if path matches any auth patterns
 	for _, authPath := range authPaths {
 		if strings.Contains(path, authPath) {
 			return AuthRateLimit
 		}
 	}
-	
+
 	// Also apply auth rate limits to user creation/modification endpoints
 	// These are sensitive operations that should be rate limited more strictly
 	if path == "/api/v1/users" || path == "/users" {
 		return AuthRateLimit
 	}
-	
+
 	return GeneralRateLimit
 }
 
@@ -240,7 +240,7 @@ func getRateLimitType(path string) RateLimitType {
 func setRateLimitHeaders(c *gin.Context, limiter *rate.Limiter, limitType RateLimitType, allowed bool) {
 	var limit int
 	var window string
-	
+
 	switch limitType {
 	case AuthRateLimit:
 		limit = int(defaultAuthRequestsPerMinute)
@@ -249,13 +249,13 @@ func setRateLimitHeaders(c *gin.Context, limiter *rate.Limiter, limitType RateLi
 		limit = int(defaultGeneralRequestsPerMinute)
 		window = strconv.Itoa(retryAfterSeconds)
 	}
-	
+
 	// X-RateLimit-Limit: Maximum number of requests allowed in the time window
 	c.Header("X-RateLimit-Limit", strconv.Itoa(limit))
-	
+
 	// X-RateLimit-Window: Time window in seconds
 	c.Header("X-RateLimit-Window", window)
-	
+
 	// X-RateLimit-Remaining: Number of requests remaining in current window
 	// This is an approximation based on current tokens
 	tokens := limiter.Tokens()
@@ -264,12 +264,12 @@ func setRateLimitHeaders(c *gin.Context, limiter *rate.Limiter, limitType RateLi
 		remaining = zeroValue
 	}
 	c.Header("X-RateLimit-Remaining", strconv.Itoa(remaining))
-	
+
 	// X-RateLimit-Reset: Unix timestamp when the rate limit resets
 	// For token bucket, this is an approximation
 	resetTime := time.Now().Add(time.Minute).Unix()
 	c.Header("X-RateLimit-Reset", strconv.FormatInt(resetTime, base10))
-	
+
 	// X-RateLimit-Type: Type of rate limit applied
 	c.Header("X-RateLimit-Type", string(limitType))
 }
@@ -277,8 +277,8 @@ func setRateLimitHeaders(c *gin.Context, limiter *rate.Limiter, limitType RateLi
 // RateLimiter returns a rate limiting middleware.
 func RateLimiter(config ...RateLimitConfig) gin.HandlerFunc {
 	cfg := DefaultRateLimitConfig()
-	if len(config) > 0 {
-		cfg = config[0]
+	if len(config) > zeroValue {
+		cfg = config[zeroValue]
 	}
 
 	store := NewRateLimiterStore(cfg)
@@ -291,18 +291,18 @@ func RateLimiter(config ...RateLimitConfig) gin.HandlerFunc {
 		// Check if request is allowed
 		if !limiter.Allow() {
 			cfg.Logger.Warn("Rate limit exceeded",
-				"client_id", clientID,
+				clientIDField, clientID,
 				"path", c.Request.URL.Path,
 				"method", c.Request.Method,
-				"limit_type", limitType,
+				limitTypeField, limitType,
 				"user_agent", c.GetHeader("User-Agent"))
 
 			setRateLimitHeaders(c, limiter, limitType, false)
-			
+
 			c.JSON(http.StatusTooManyRequests, gin.H{
-				"error": "Too many requests",
-				"message": fmt.Sprintf("Rate limit exceeded for %s endpoints", limitType),
-				"retry_after": 60, // seconds
+				"error":       "Too many requests",
+				"message":     fmt.Sprintf("Rate limit exceeded for %s endpoints", limitType),
+				"retry_after": retryAfterSeconds,
 			})
 			c.Abort()
 			return
@@ -312,16 +312,16 @@ func RateLimiter(config ...RateLimitConfig) gin.HandlerFunc {
 		setRateLimitHeaders(c, limiter, limitType, true)
 
 		cfg.Logger.Debug("Request allowed",
-			"client_id", clientID,
+			clientIDField, clientID,
 			"path", c.Request.URL.Path,
 			"method", c.Request.Method,
-			"limit_type", limitType)
+			limitTypeField, limitType)
 
 		c.Next()
 	}
 }
 
-// WithRateLimit is a convenience function to create rate limit middleware with logger.
+// WithRateLimit creates rate limit middleware with logger.
 func WithRateLimit(logger *slog.Logger) gin.HandlerFunc {
 	return RateLimiter(RateLimitConfig{
 		Logger: logger,
