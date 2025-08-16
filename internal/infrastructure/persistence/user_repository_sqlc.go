@@ -1,12 +1,11 @@
 // SQLC-based implementation of UserRepository
-//go:build sqlite3
-
 package persistence
 
 import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -176,7 +175,7 @@ func (r *SQLCUserRepository) Delete(ctx context.Context, id entities.UserID) err
 func (r *SQLCUserRepository) List(ctx context.Context) ([]*entities.User, error) {
 	r.logger.Debug("Listing all users")
 
-	dbUsers, err := r.queries.ListUsers(ctx)
+	dbUsers, err := r.queries.ListUsersAll(ctx)
 	if err != nil {
 		r.logger.Error("Failed to list users", "error", err)
 		return nil, err
@@ -197,6 +196,80 @@ func (r *SQLCUserRepository) List(ctx context.Context) ([]*entities.User, error)
 
 	r.logger.Info("Users listed successfully", "count", len(users))
 	return users, nil
+}
+
+// FindByUsername retrieves a user by their username (name field) using SQLC generated code
+func (r *SQLCUserRepository) FindByUsername(ctx context.Context, username string) (*entities.User, error) {
+	r.logger.Debug("Finding user by username", "username", username)
+
+	// Note: SQLC doesn't have a FindByUsername query, so we'll iterate through all users
+	// In a real implementation, you'd add a proper query to the SQL file
+	dbUsers, err := r.queries.ListUsersAll(ctx)
+	if err != nil {
+		r.logger.Error("Failed to list users for username search", "error", err)
+		return nil, err
+	}
+
+	for _, dbUser := range dbUsers {
+		if dbUser.Name == username {
+			user := &entities.User{
+				ID:       dbUser.ID,
+				Email:    dbUser.Email,
+				Name:     dbUser.Name,
+				Created:  dbUser.Created,
+				Modified: dbUser.Modified,
+			}
+			r.logger.Debug("User found successfully", "username", username, "user_id", user.ID)
+			return user, nil
+		}
+	}
+
+	r.logger.Debug("User not found", "username", username)
+	return nil, repositories.ErrUserNotFound
+}
+
+// Update updates an existing user using SQLC generated code
+func (r *SQLCUserRepository) Update(ctx context.Context, user *entities.User) error {
+	if user == nil {
+		return fmt.Errorf("user cannot be nil")
+	}
+
+	r.logger.Debug("Updating user", "user_id", user.ID, "email", user.Email)
+
+	// Use Save method which handles INSERT OR REPLACE
+	return r.Save(ctx, user)
+}
+
+// Count returns the total number of users using SQLC generated code
+func (r *SQLCUserRepository) Count(ctx context.Context) (int, error) {
+	r.logger.Debug("Counting users")
+
+	count, err := r.queries.CountUsers(ctx)
+	if err != nil {
+		r.logger.Error("Failed to count users", "error", err)
+		return 0, err
+	}
+
+	r.logger.Debug("Users counted successfully", "count", count)
+	return int(count), nil
+}
+
+// Exists checks if a user with the given ID exists using SQLC generated code
+func (r *SQLCUserRepository) Exists(ctx context.Context, id entities.UserID) (bool, error) {
+	r.logger.Debug("Checking if user exists", "user_id", id)
+
+	_, err := r.queries.FindUserByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			r.logger.Debug("User does not exist", "user_id", id)
+			return false, nil
+		}
+		r.logger.Error("Failed to check if user exists", "user_id", id, "error", err)
+		return false, err
+	}
+
+	r.logger.Debug("User exists", "user_id", id)
+	return true, nil
 }
 
 // Additional helper methods that leverage SQLC

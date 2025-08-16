@@ -61,7 +61,7 @@ var _ = Describe("🔗 Integration Testing - Cross-Layer Component Interaction",
 		db = setupInMemoryDB()
 
 		// Build the full component stack
-		userRepo = persistence.NewSQLUserRepository(db, logger)
+		userRepo = persistence.NewSQLCUserRepository(db, logger)
 		userService = services.NewUserService(userRepo)
 		_ = handlers.NewUserHandler(userService, logger)
 	})

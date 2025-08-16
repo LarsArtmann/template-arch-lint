@@ -49,7 +49,6 @@ sql:
         package: "db"
         out: "internal/db"
         sql_package: "database/sql"
-        build_tags: "sqlite3"
 
         # === CODE GENERATION OPTIONS ===
 

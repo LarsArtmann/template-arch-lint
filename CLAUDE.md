@@ -20,6 +20,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 🎯 **Core Purpose:**
 Copy the linting configurations (`.go-arch-lint.yml`, `.golangci.yml`, `justfile`) to your real projects to enforce architectural boundaries and code quality. The Go code demonstrates how to structure projects following these rules.
 
+## 🏗️ High-Level Architecture Understanding
+
+### Layer Structure (Dependency Flow: Infrastructure → Application → Domain)
+```
+web/templates/          # Templ templates for server-side rendering
+├── components/         # Reusable UI components  
+├── layouts/           # Page layouts
+└── pages/             # Full page templates
+
+internal/application/   # HTTP handlers & use case orchestration
+├── handlers/          # HTTP request handlers (user_handler.go)
+├── dto/               # Data transfer objects for HTTP
+├── http/              # HTTP response helpers
+└── middleware/        # Cross-cutting concerns
+
+internal/domain/        # Pure business logic (NO external dependencies)
+├── entities/          # Business entities (user.go with value objects)
+├── services/          # Domain services (user_service.go)  
+├── repositories/      # Repository interfaces (user_repository.go)
+├── values/            # Value objects (email.go, username.go, user_id.go)
+├── errors/            # Domain-specific errors
+└── shared/            # Result pattern implementation
+
+internal/infrastructure/ # External concerns
+├── persistence/       # Repository implementations
+└── repositories/      # Database-specific code
+
+internal/db/            # SQLC-generated type-safe SQL code
+sql/
+├── schema/            # Database schema files
+└── queries/           # SQL query files for SQLC
+```
+
+### Key Architectural Patterns Demonstrated
+- **Clean Architecture**: Strict dependency rules enforced by go-arch-lint
+- **Domain-Driven Design**: Rich domain entities with value objects
+- **Functional Programming**: Heavy use of samber/lo for Map/Filter/Reduce operations
+- **Result Pattern**: `internal/domain/shared/result.go` for error handling
+- **Value Objects**: Email, UserName, UserID with validation in domain/values
+- **Repository Pattern**: Domain interfaces implemented by infrastructure
+- **HTMX + Templ**: Server-side rendering with progressive enhancement
+
 ## Essential Commands
 
 ### Development Workflow
@@ -78,8 +120,12 @@ templ generate
 
 ### Testing & Development
 ```bash
-# Run single test file
+# Run single test file or package
 go test ./internal/domain/services/ -v
+go test ./internal/domain/entities/ -v
+
+# Run specific test function
+go test ./internal/domain/services/ -v -run TestUserService_CreateUser
 
 # Run tests with race detection
 go test ./... -v -race
@@ -87,6 +133,9 @@ go test ./... -v -race
 # Generate coverage report
 go test ./... -coverprofile=coverage.out
 go tool cover -html=coverage.out -o coverage.html
+
+# Run benchmarks
+go test ./internal/domain/services/ -bench=.
 
 # Configuration testing
 just config-test
@@ -150,3 +199,40 @@ Common violations the linters catch:
 - Cyclomatic complexity too high (max 10)
 
 **Note**: The project includes extensive Docker/K8s/monitoring setup as examples of over-engineering to avoid in templates. Focus on the core linting configurations.
+
+## 🔍 Code Understanding Guidelines
+
+### Value Objects Pattern
+Value objects enforce validation and type safety:
+- `internal/domain/values/user_id.go` - Validated user identifiers
+- `internal/domain/values/email.go` - Email validation with domain extraction
+- `internal/domain/values/username.go` - Username validation with reserved word checking
+
+### Repository Pattern Implementation
+- **Interfaces**: `internal/domain/repositories/user_repository.go` (domain layer)
+- **Implementations**: `internal/infrastructure/persistence/user_repository_sqlc.go` (infrastructure layer)
+- **In-Memory**: `internal/domain/repositories/inmemory_user_repository.go` (for testing)
+
+### SQLC Integration
+- **Schema**: `sql/schema/001_users.sql` - Database structure  
+- **Queries**: `sql/queries/users.sql` - Type-safe SQL operations
+- **Generated**: `internal/db/` - Auto-generated Go code from SQLC
+- **Config**: `sqlc.yaml` - Comprehensive SQLC configuration with custom type mappings
+
+### Functional Programming with samber/lo
+The codebase heavily uses functional programming patterns:
+- `lo.Map()` - Transform slices
+- `lo.Filter()` - Filter collections  
+- `lo.Reduce()` - Aggregate data
+- See `internal/domain/services/user_service.go` for extensive examples
+
+### Error Handling Strategy
+- **Domain Errors**: `internal/domain/errors/` - Typed error system
+- **Result Pattern**: `internal/domain/shared/result.go` - Functional error handling
+- **HTTP Responses**: `internal/application/http/response_helpers.go` - Standardized API responses
+
+### Testing Architecture
+- **Suite Pattern**: Uses Ginkgo/Gomega BDD testing framework
+- **Test Helpers**: `internal/testhelpers/` - Comprehensive testing utilities
+- **Builders**: `internal/testhelpers/domain/entities/builders.go` - Test data builders
+- **Parallel Tests**: Configured for concurrent test execution

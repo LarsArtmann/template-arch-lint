@@ -52,7 +52,7 @@ var _ = Describe("🗄️ Database Schema Validation Against Domain Model", func
 		db     *sql.DB
 		ctx    context.Context
 		logger *slog.Logger
-		repo   *persistence.SQLUserRepository
+		repo   *persistence.SQLCUserRepository
 	)
 
 	setupInMemoryDB := func() *sql.DB {
@@ -130,7 +130,7 @@ var _ = Describe("🗄️ Database Schema Validation Against Domain Model", func
 		ctx = context.Background()
 		logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
 		db = setupInMemoryDB()
-		repo = persistence.NewSQLUserRepository(db, logger)
+		repo = persistence.NewSQLCUserRepository(db, logger)
 	})
 
 	AfterEach(func() {

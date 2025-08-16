@@ -156,8 +156,8 @@ func (c *Container) registerRepositories() {
 		db := do.MustInvoke[*sql.DB](i)
 		logger := do.MustInvoke[*slog.Logger](i)
 
-		// Use SQL-based repository implementation
-		repo := persistence.NewSQLUserRepository(db, logger)
+		// Use SQLC-based repository implementation
+		repo := persistence.NewSQLCUserRepository(db, logger)
 		return repo, nil
 	})
 }
