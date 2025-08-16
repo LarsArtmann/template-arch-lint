@@ -79,6 +79,22 @@ func (r *InMemoryUserRepository) FindByEmail(_ context.Context, email string) (*
 	return nil, ErrUserNotFound
 }
 
+// FindByUsername retrieves a user by their username (name field).
+func (r *InMemoryUserRepository) FindByUsername(_ context.Context, username string) (*entities.User, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	for _, user := range r.users {
+		if user.Name == username {
+			// Return a copy to prevent external modifications
+			userCopy := *user
+			return &userCopy, nil
+		}
+	}
+
+	return nil, ErrUserNotFound
+}
+
 // Delete removes a user from the repository.
 func (r *InMemoryUserRepository) Delete(_ context.Context, id entities.UserID) error {
 	r.mu.Lock()

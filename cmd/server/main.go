@@ -3,6 +3,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"flag"
 	"fmt"
@@ -10,7 +11,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/samber/do"
@@ -44,6 +47,12 @@ const (
 		"container cleanly"
 	// HealthCheckPassedMsg represents health check success message.
 	HealthCheckPassedMsg = "Health check passed"
+	// DefaultShutdownTimeout represents the default shutdown timeout.
+	DefaultShutdownTimeout = 30 * time.Second
+	// DatabaseCloseTimeout represents the database connection close timeout.
+	DatabaseCloseTimeout = 5 * time.Second
+	// MaxShutdownWaitTime represents the maximum time to wait for graceful shutdown.
+	MaxShutdownWaitTime = 60 * time.Second
 )
 
 func main() {
@@ -77,7 +86,7 @@ func runServer() error {
 		return err
 	}
 
-	cfg, logger, router := getDependencies(diContainer)
+	cfg, logger, router, db := getEnhancedDependencies(diContainer)
 	logServerStart(logger, cfg)
 
 	server := createHTTPServer(cfg, router)
@@ -89,20 +98,17 @@ func runServer() error {
 		serverErrors,
 		logger,
 		cfg,
+		db,
+		diContainer,
 	)
-	// Handle shutdown
-	if err != nil {
-		if shutdownErr := shutdownContainer(diContainer); shutdownErr != nil {
-			slog.Error(ErrorShuttingDownContainer, ErrorConstant, shutdownErr)
-		}
-		return err
+	
+	// Always attempt graceful cleanup
+	cleanupErr := performGracefulCleanup(logger, db, diContainer)
+	if cleanupErr != nil {
+		logger.Error("Cleanup errors during shutdown", ErrorConstant, cleanupErr)
 	}
 
-	// Normal cleanup on successful shutdown
-	if shutdownErr := shutdownContainer(diContainer); shutdownErr != nil {
-		slog.Error(ErrorShuttingDownContainer, ErrorConstant, shutdownErr)
-	}
-	return nil
+	return err
 }
 
 // setupContainer creates and registers all dependencies.
@@ -131,6 +137,18 @@ func getDependencies(
 	logger := do.MustInvoke[*slog.Logger](injector)
 	router := do.MustInvoke[*gin.Engine](injector)
 	return cfg, logger, router
+}
+
+// getEnhancedDependencies extracts required dependencies including database from the container.
+func getEnhancedDependencies(
+	diContainer *container.Container,
+) (*config.Config, *slog.Logger, *gin.Engine, *sql.DB) {
+	injector := diContainer.GetInjector()
+	cfg := do.MustInvoke[*config.Config](injector)
+	logger := do.MustInvoke[*slog.Logger](injector)
+	router := do.MustInvoke[*gin.Engine](injector)
+	db := do.MustInvoke[*sql.DB](injector)
+	return cfg, logger, router, db
 }
 
 // logServerStart logs the server startup information.
@@ -172,6 +190,8 @@ func runServerWithGracefulShutdown(
 	serverErrors chan error,
 	logger *slog.Logger,
 	cfg *config.Config,
+	db *sql.DB,
+	diContainer *container.Container,
 ) error {
 	shutdown := make(chan os.Signal, ChannelBufferSize)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
@@ -182,36 +202,153 @@ func runServerWithGracefulShutdown(
 			logger.Error("Server failed to start", ErrorConstant, err)
 			return err
 		}
+		logger.Info("Server stopped normally")
+		return nil
 	case sig := <-shutdown:
-		logger.Info("Graceful shutdown initiated", "signal", sig.String())
-		return performGracefulShutdown(ctx, server, logger, cfg)
+		logger.Info("Graceful shutdown initiated", 
+			"signal", sig.String(),
+			"timeout", cfg.Server.GracefulShutdownTimeout.String())
+		return performEnhancedGracefulShutdown(ctx, server, logger, cfg, db, diContainer)
 	}
-	return nil
 }
 
-// performGracefulShutdown handles the graceful shutdown process.
-func performGracefulShutdown(
+// performEnhancedGracefulShutdown handles the comprehensive graceful shutdown process.
+func performEnhancedGracefulShutdown(
 	ctx context.Context,
 	server *http.Server,
 	logger *slog.Logger,
 	cfg *config.Config,
+	db *sql.DB,
+	diContainer *container.Container,
 ) error {
-	shutdownCtx, shutdownCancel := context.WithTimeout(
-		ctx,
-		cfg.Server.GracefulShutdownTimeout,
-	)
-	defer shutdownCancel()
-
-	if err := server.Shutdown(shutdownCtx); err != nil {
-		logger.Error("Failed to shutdown server gracefully", ErrorConstant, err)
-
-		if closeErr := server.Close(); closeErr != nil {
-			logger.Error("Failed to close server", ErrorConstant, closeErr)
-		}
-		return fmt.Errorf("server graceful shutdown failed: %w", err)
+	// Use a shorter timeout for individual operations, with overall max timeout
+	shutdownTimeout := cfg.Server.GracefulShutdownTimeout
+	if shutdownTimeout <= 0 {
+		shutdownTimeout = DefaultShutdownTimeout
+	}
+	
+	// Don't exceed maximum shutdown wait time
+	if shutdownTimeout > MaxShutdownWaitTime {
+		shutdownTimeout = MaxShutdownWaitTime
 	}
 
-	logger.Info("Server shutdown completed successfully")
+	shutdownCtx, shutdownCancel := context.WithTimeout(ctx, shutdownTimeout)
+	defer shutdownCancel()
+
+	// Track shutdown progress
+	var shutdownErrors []error
+	var wg sync.WaitGroup
+
+	logger.Info("Starting graceful shutdown sequence",
+		"timeout", shutdownTimeout.String(),
+		"steps", "http_server,database,container")
+
+	// Step 1: Shutdown HTTP server (drain connections)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		logger.Info("Shutting down HTTP server...")
+		
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			logger.Error("Failed to shutdown HTTP server gracefully", ErrorConstant, err)
+			shutdownErrors = append(shutdownErrors, fmt.Errorf("HTTP server shutdown: %w", err))
+			
+			// Force close if graceful shutdown fails
+			if closeErr := server.Close(); closeErr != nil {
+				logger.Error("Failed to force close HTTP server", ErrorConstant, closeErr)
+				shutdownErrors = append(shutdownErrors, fmt.Errorf("HTTP server force close: %w", closeErr))
+			}
+		} else {
+			logger.Info("HTTP server shutdown completed")
+		}
+	}()
+
+	// Step 2: Close database connections
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		logger.Info("Closing database connections...")
+		
+		dbCtx, dbCancel := context.WithTimeout(shutdownCtx, DatabaseCloseTimeout)
+		defer dbCancel()
+		
+		// Wait a bit for ongoing transactions to complete
+		select {
+		case <-time.After(2 * time.Second):
+		case <-dbCtx.Done():
+		}
+		
+		if err := db.Close(); err != nil {
+			logger.Error("Failed to close database connections", ErrorConstant, err)
+			shutdownErrors = append(shutdownErrors, fmt.Errorf("database close: %w", err))
+		} else {
+			logger.Info("Database connections closed successfully")
+		}
+	}()
+
+	// Wait for HTTP server and database to shutdown
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		logger.Info("Primary shutdown sequence completed")
+	case <-shutdownCtx.Done():
+		logger.Warn("Shutdown timeout reached, proceeding with forced cleanup")
+		shutdownErrors = append(shutdownErrors, fmt.Errorf("shutdown timeout exceeded: %w", shutdownCtx.Err()))
+	}
+
+	// Step 3: Shutdown DI container (always do this last)
+	logger.Info("Shutting down dependency injection container...")
+	if err := diContainer.Shutdown(); err != nil {
+		logger.Error("Failed to shutdown DI container", ErrorConstant, err)
+		shutdownErrors = append(shutdownErrors, fmt.Errorf("container shutdown: %w", err))
+	} else {
+		logger.Info("DI container shutdown completed")
+	}
+
+	// Report final shutdown status
+	if len(shutdownErrors) > 0 {
+		logger.Error("Graceful shutdown completed with errors", 
+			"error_count", len(shutdownErrors))
+		return fmt.Errorf("shutdown errors: %v", shutdownErrors)
+	}
+
+	logger.Info("Graceful shutdown completed successfully")
+	return nil
+}
+
+// performGracefulCleanup performs final cleanup operations.
+func performGracefulCleanup(
+	logger *slog.Logger,
+	db *sql.DB,
+	diContainer *container.Container,
+) error {
+	var cleanupErrors []error
+
+	// Ensure database is closed
+	if db != nil {
+		if err := db.Close(); err != nil {
+			logger.Warn("Database already closed or error closing", ErrorConstant, err)
+			cleanupErrors = append(cleanupErrors, err)
+		}
+	}
+
+	// Ensure container is shutdown
+	if diContainer != nil {
+		if err := diContainer.Shutdown(); err != nil {
+			logger.Warn("Container already shutdown or error shutting down", ErrorConstant, err)
+			cleanupErrors = append(cleanupErrors, err)
+		}
+	}
+
+	if len(cleanupErrors) > 0 {
+		return fmt.Errorf("cleanup errors: %v", cleanupErrors)
+	}
+
 	return nil
 }
 

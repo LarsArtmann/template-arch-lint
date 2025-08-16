@@ -27,6 +27,9 @@ type UserRepository interface {
 	// FindByEmail retrieves a user by their email address
 	FindByEmail(ctx context.Context, email string) (*entities.User, error)
 
+	// FindByUsername retrieves a user by their username
+	FindByUsername(ctx context.Context, username string) (*entities.User, error)
+
 	// Delete removes a user from the repository
 	Delete(ctx context.Context, id entities.UserID) error
 

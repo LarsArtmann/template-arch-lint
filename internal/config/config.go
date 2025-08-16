@@ -16,6 +16,8 @@ type Config struct {
 	Database DatabaseConfig `mapstructure:"database" validate:"required"`
 	Logging  LoggingConfig  `mapstructure:"logging" validate:"required"`
 	App      AppConfig      `mapstructure:"app" validate:"required"`
+	JWT      JWTConfig      `mapstructure:"jwt" validate:"required"`
+	Security SecurityConfig `mapstructure:"security"`
 }
 
 // ServerConfig contains HTTP server configuration.
@@ -51,6 +53,28 @@ type AppConfig struct {
 	Version     string `mapstructure:"version" validate:"required"`
 	Environment string `mapstructure:"environment" validate:"required,valid_environment"`
 	Debug       bool   `mapstructure:"debug"`
+}
+
+// JWTConfig contains JWT authentication configuration.
+type JWTConfig struct {
+	SecretKey            string        `mapstructure:"secret_key" validate:"required,min=32"`
+	AccessTokenExpiry    time.Duration `mapstructure:"access_token_expiry"`
+	RefreshTokenExpiry   time.Duration `mapstructure:"refresh_token_expiry"`
+	Issuer              string        `mapstructure:"issuer" validate:"required"`
+	Algorithm           string        `mapstructure:"algorithm" validate:"required,oneof=HS256 HS384 HS512"`
+}
+
+// SecurityConfig contains security configuration.
+type SecurityConfig struct {
+	AllowedOrigins       []string `mapstructure:"allowed_origins"`
+	TrustedProxies       []string `mapstructure:"trusted_proxies"`
+	EnableHSTS           bool     `mapstructure:"enable_hsts"`
+	EnableCSP            bool     `mapstructure:"enable_csp"`
+	CSPReportURI         string   `mapstructure:"csp_report_uri"`
+	MaxRequestSize       int64    `mapstructure:"max_request_size"`
+	RateLimitEnabled     bool     `mapstructure:"rate_limit_enabled"`
+	RateLimitRequests    int      `mapstructure:"rate_limit_requests"`
+	RateLimitWindow      time.Duration `mapstructure:"rate_limit_window"`
 }
 
 // LoadConfig loads configuration from various sources.
@@ -106,6 +130,24 @@ func setDefaults(_ *Config) {
 	viper.SetDefault("logging.level", "info")
 	viper.SetDefault("logging.format", "json")
 	viper.SetDefault("logging.output", "stdout")
+
+	// JWT defaults
+	viper.SetDefault("jwt.secret_key", "your-super-secret-jwt-key-minimum-32-characters-long-for-security")
+	viper.SetDefault("jwt.access_token_expiry", 24*time.Hour)
+	viper.SetDefault("jwt.refresh_token_expiry", 7*24*time.Hour)
+	viper.SetDefault("jwt.issuer", "template-arch-lint")
+	viper.SetDefault("jwt.algorithm", "HS256")
+
+	// Security defaults
+	viper.SetDefault("security.allowed_origins", []string{"http://localhost:3000", "http://localhost:8080"})
+	viper.SetDefault("security.trusted_proxies", []string{})
+	viper.SetDefault("security.enable_hsts", false) // Disabled by default for development
+	viper.SetDefault("security.enable_csp", true)
+	viper.SetDefault("security.csp_report_uri", "")
+	viper.SetDefault("security.max_request_size", 10*1024*1024) // 10MB
+	viper.SetDefault("security.rate_limit_enabled", false)
+	viper.SetDefault("security.rate_limit_requests", 100)
+	viper.SetDefault("security.rate_limit_window", time.Minute)
 }
 
 // configureViper sets up viper configuration.
