@@ -18,26 +18,20 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
-	utilsErrors "github.com/LarsArtmann/template-arch-lint/internal/utils/errors"
-	utilsValidation "github.com/LarsArtmann/template-arch-lint/internal/utils/validation"
 	"github.com/gin-gonic/gin"
 )
 
 // UserHandler handles user-related HTTP requests.
 type UserHandler struct {
-	userService  *services.UserService
-	logger       *slog.Logger
-	validators   *utilsValidation.PrebuiltValidators
-	errorFactory *utilsErrors.ErrorFactory
+	userService *services.UserService
+	logger      *slog.Logger
 }
 
 // NewUserHandler creates a new UserHandler with dependency injection.
 func NewUserHandler(userService *services.UserService, logger *slog.Logger) *UserHandler {
 	return &UserHandler{
-		userService:  userService,
-		logger:       logger,
-		validators:   utilsValidation.NewPrebuiltValidators(),
-		errorFactory: utilsErrors.NewErrorFactory(),
+		userService: userService,
+		logger:      logger,
 	}
 }
 
@@ -51,18 +45,13 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		"correlation_id", correlationID)
 
 	// Create context with timeout
-	ctx := context.WithValue(c.Request.Context(), utilsErrors.CorrelationIDKey, correlationID)
-	ctx = context.WithValue(ctx, utilsErrors.OperationKey, "create_user")
+	ctx := c.Request.Context()
 
 	timeoutCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	var req dto.CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		_ = h.errorFactory.Validation(err, "request_payload").
-			WithContext(timeoutCtx).
-			WithOperation("bind_json")
-
 		h.logger.Warn("Invalid request payload",
 			"error", err,
 			"correlation_id", correlationID)
@@ -73,80 +62,14 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	// Sanitize input data
-	sanitizedID := h.validators.Sanitization.TrimWhitespace(req.ID)
-	sanitizedID = h.validators.Sanitization.StripNonPrintable(sanitizedID)
+	// Basic input sanitization
+	sanitizedID := strings.TrimSpace(req.ID)
+	sanitizedEmail := strings.TrimSpace(req.Email)
+	sanitizedName := strings.TrimSpace(req.Name)
 
-	sanitizedEmail := h.validators.Sanitization.TrimWhitespace(req.Email)
-	sanitizedEmail = h.validators.Sanitization.NormalizeWhitespace(sanitizedEmail)
-
-	sanitizedName := h.validators.Sanitization.TrimWhitespace(req.Name)
-	sanitizedName = h.validators.Sanitization.EscapeHTML(sanitizedName)
-	sanitizedName = h.validators.Sanitization.NormalizeWhitespace(sanitizedName)
-
-	// Validate input using utility validators
-	validationResult := utilsValidation.ValidateWithResult(timeoutCtx, sanitizedID,
-		utilsValidation.ToValidator(h.validators.String.NotEmpty("id")),
-		utilsValidation.ToValidator(h.validators.String.LengthRange("id", 1, 100)),
-		utilsValidation.ToValidator(h.validators.String.NoSpecialChars("id", '-', '_')),
-	)
-
-	if !validationResult.IsValid() {
-		h.logger.Warn("User ID validation failed",
-			"user_id", sanitizedID,
-			"errors", validationResult.AllErrors(),
-			"correlation_id", correlationID)
-
-		httputil.RespondValidationError(c, map[string]string{
-			"id": validationResult.FirstError(),
-		})
-		return
-	}
-
-	// Validate email
-	emailValidation := utilsValidation.ValidateWithResult(timeoutCtx, sanitizedEmail,
-		utilsValidation.ToValidator(h.validators.String.NotEmpty("email")),
-		utilsValidation.ToValidator(h.validators.String.Email("email")),
-		utilsValidation.ToValidator(h.validators.String.MaxLength("email", 255)),
-	)
-
-	if !emailValidation.IsValid() {
-		h.logger.Warn("Email validation failed",
-			"email", sanitizedEmail,
-			"errors", emailValidation.AllErrors(),
-			"correlation_id", correlationID)
-
-		httputil.RespondValidationError(c, map[string]string{
-			"email": emailValidation.FirstError(),
-		})
-		return
-	}
-
-	// Validate name
-	nameValidation := utilsValidation.ValidateWithResult(timeoutCtx, sanitizedName,
-		utilsValidation.ToValidator(h.validators.String.NotEmpty("name")),
-		utilsValidation.ToValidator(h.validators.String.LengthRange("name", 1, 255)),
-	)
-
-	if !nameValidation.IsValid() {
-		h.logger.Warn("Name validation failed",
-			"name", sanitizedName,
-			"errors", nameValidation.AllErrors(),
-			"correlation_id", correlationID)
-
-		httputil.RespondValidationError(c, map[string]string{
-			"name": nameValidation.FirstError(),
-		})
-		return
-	}
-
-	// Create user ID using validated input
+	// Create user ID using domain validation
 	userID, err := values.NewUserID(sanitizedID)
 	if err != nil {
-		_ = h.errorFactory.Validation(err, "user_id").
-			WithContext(timeoutCtx).
-			WithExtra("user_id", sanitizedID)
-
 		h.logger.Warn("Invalid user ID format",
 			"error", err,
 			"user_id", sanitizedID,
@@ -161,9 +84,8 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	// Create user using service layer with sanitized data
 	user, err := h.userService.CreateUser(timeoutCtx, userID, sanitizedEmail, sanitizedName)
 	if err != nil {
-		wrappedErr := h.errorFactory.WrapWithContext(timeoutCtx, err, "failed to create user")
 		h.logger.Error("Failed to create user",
-			"error", wrappedErr,
+			"error", err,
 			"user_id", sanitizedID,
 			"correlation_id", correlationID)
 

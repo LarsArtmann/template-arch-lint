@@ -2,7 +2,6 @@
 package container
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"log/slog"
@@ -19,7 +18,6 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/infrastructure/persistence"
-	"github.com/LarsArtmann/template-arch-lint/internal/utils/database"
 )
 
 // Container represents the DI container.
@@ -118,33 +116,38 @@ func (c *Container) registerLogger() {
 	})
 }
 
-// registerDatabase registers the database connection using database utilities.
+// registerDatabase registers the database connection.
 func (c *Container) registerDatabase() {
 	do.Provide(c.injector, func(i *do.Injector) (*sql.DB, error) {
 		cfg := do.MustInvoke[*config.Config](i)
 		logger := do.MustInvoke[*slog.Logger](i)
 
-		// Create database connection configuration from app config
-		dbConfig := c.createDatabaseConfig(cfg)
+		// Open database connection
+		db, err := sql.Open(cfg.Database.Driver, cfg.Database.DSN)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open database: %w", err)
+		}
 
-		// Use database connection manager for consistent connection handling
-		connManager := database.NewConnectionManager(logger)
-		ctx := context.Background()
+		// Configure connection pool
+		db.SetMaxOpenConns(cfg.Database.MaxOpenConns)
+		db.SetMaxIdleConns(cfg.Database.MaxIdleConns)
+		db.SetConnMaxLifetime(cfg.Database.ConnMaxLifetime)
+		db.SetConnMaxIdleTime(cfg.Database.ConnMaxIdleTime)
 
-		return connManager.Connect(ctx, dbConfig)
+		// Test connection
+		if err := db.Ping(); err != nil {
+			db.Close()
+			return nil, fmt.Errorf("failed to ping database: %w", err)
+		}
+
+		logger.Info("Database connected successfully",
+			"driver", cfg.Database.Driver,
+			"max_open_conns", cfg.Database.MaxOpenConns,
+			"max_idle_conns", cfg.Database.MaxIdleConns,
+		)
+
+		return db, nil
 	})
-}
-
-// createDatabaseConfig converts app config to database connection config.
-func (c *Container) createDatabaseConfig(cfg *config.Config) *database.ConnectionConfig {
-	return &database.ConnectionConfig{
-		Driver:          cfg.Database.Driver,
-		DSN:             cfg.Database.DSN,
-		MaxOpenConns:    cfg.Database.MaxOpenConns,
-		MaxIdleConns:    cfg.Database.MaxIdleConns,
-		ConnMaxLifetime: cfg.Database.ConnMaxLifetime,
-		ConnMaxIdleTime: cfg.Database.ConnMaxIdleTime,
-	}
 }
 
 // registerRepositories registers all repositories.

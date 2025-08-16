@@ -22,18 +22,35 @@ import (
 
 // Test response types to replace interface{} usage.
 type ErrorResponse struct {
-	Error string `json:"error"`
-	Code  string `json:"code,omitempty"`
+	Success       bool         `json:"success"`
+	Error         *ErrorDetail `json:"error,omitempty"`
+	Message       string       `json:"message,omitempty"`
+	CorrelationID string       `json:"correlation_id,omitempty"`
+	Timestamp     string       `json:"timestamp"`
 }
 
-type UserResponse struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
+type ErrorDetail struct {
+	Code    string            `json:"code"`
+	Message string            `json:"message"`
+	Details map[string]string `json:"details,omitempty"`
+	Type    string            `json:"type"`
 }
 
 type SuccessResponse struct {
-	Message string `json:"message"`
+	Success       bool          `json:"success"`
+	Data          *UserResponse `json:"data,omitempty"`
+	Message       string        `json:"message,omitempty"`
+	CorrelationID string        `json:"correlation_id,omitempty"`
+	Timestamp     string        `json:"timestamp"`
+}
+
+type UserResponse struct {
+	ID          string `json:"id"`
+	Email       string `json:"email"`
+	Name        string `json:"name"`
+	EmailDomain string `json:"email_domain"`
+	Created     string `json:"created"`
+	Modified    string `json:"modified"`
 }
 
 type ListUsersResponse struct {
@@ -174,12 +191,14 @@ var _ = Describe("UserHandler", func() {
 				// Then
 				Expect(recorder.Code).To(Equal(http.StatusCreated))
 
-				var response entities.User
+				var response SuccessResponse
 				err = json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())
-				Expect(response.ID.String()).To(Equal("user-123"))
-				Expect(response.Email).To(Equal("test@example.com"))
-				Expect(response.Name).To(Equal("TestUser"))
+				Expect(response.Success).To(BeTrue())
+				Expect(response.Data).ToNot(BeNil())
+				Expect(response.Data.ID).To(Equal("user-123"))
+				Expect(response.Data.Email).To(Equal("test@example.com"))
+				Expect(response.Data.Name).To(Equal("TestUser"))
 			})
 		})
 
@@ -200,7 +219,10 @@ var _ = Describe("UserHandler", func() {
 				var response ErrorResponse
 				err := json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())
-				Expect(response.Error).To(Equal("Invalid request payload"))
+				Expect(response.Success).To(BeFalse())
+				Expect(response.Error).ToNot(BeNil())
+				Expect(response.Error.Code).To(Equal("VALIDATION_ERROR"))
+				Expect(response.Error.Message).To(Equal("Request validation failed"))
 			})
 
 			It("should return error for missing required fields", func() {
@@ -268,7 +290,10 @@ var _ = Describe("UserHandler", func() {
 				var response ErrorResponse
 				err = json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())
-				Expect(response.Error).To(Equal("Invalid user ID format"))
+				Expect(response.Success).To(BeFalse())
+				Expect(response.Error).ToNot(BeNil())
+				Expect(response.Error.Code).To(Equal("VALIDATION_ERROR"))
+				Expect(response.Error.Message).To(Equal("Request validation failed"))
 			})
 		})
 	})
@@ -293,10 +318,12 @@ var _ = Describe("UserHandler", func() {
 				// Then
 				Expect(recorder.Code).To(Equal(http.StatusOK))
 
-				var response entities.User
+				var response SuccessResponse
 				err := json.Unmarshal(recorder.Body.Bytes(), &response)
 				Expect(err).To(BeNil())
-				Expect(response.ID.String()).To(Equal("user-123"))
+				Expect(response.Success).To(BeTrue())
+				Expect(response.Data).ToNot(BeNil())
+				Expect(response.Data.ID).To(Equal("user-123"))
 			})
 		})
 

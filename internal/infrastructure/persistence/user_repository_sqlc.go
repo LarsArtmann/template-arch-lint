@@ -13,24 +13,21 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/db"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
-	utilsErrors "github.com/LarsArtmann/template-arch-lint/internal/utils/errors"
 )
 
 // SQLCUserRepository implements UserRepository using SQLC generated code
 type SQLCUserRepository struct {
-	queries      *db.Queries
-	db           *sql.DB
-	logger       *slog.Logger
-	errorFactory *utilsErrors.ErrorFactory
+	queries *db.Queries
+	db      *sql.DB
+	logger  *slog.Logger
 }
 
 // NewSQLCUserRepository creates a new SQLC-based user repository
 func NewSQLCUserRepository(database *sql.DB, logger *slog.Logger) *SQLCUserRepository {
 	repo := &SQLCUserRepository{
-		queries:      db.New(database),
-		db:           database,
-		logger:       logger,
-		errorFactory: utilsErrors.NewErrorFactory(),
+		queries: db.New(database),
+		db:      database,
+		logger:  logger,
 	}
 
 	// Initialize database schema
@@ -70,13 +67,9 @@ func (r *SQLCUserRepository) initSchema() error {
 func (r *SQLCUserRepository) Save(ctx context.Context, user *entities.User) error {
 	r.logger.Debug("Saving user", "user_id", user.ID, "email", user.Email)
 
-	// Add timeout to context if not already present
-	saveCtx := ctx
-	if deadline, ok := ctx.Deadline(); !ok || time.Until(deadline) > 30*time.Second {
-		var cancel context.CancelFunc
-		saveCtx, cancel = r.contextHelper.WithTimeout(ctx, 30*time.Second)
-		defer cancel()
-	}
+	// Add timeout to context
+	saveCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
 
 	params := &db.SaveUserParams{
 		ID:       user.ID,
@@ -88,16 +81,11 @@ func (r *SQLCUserRepository) Save(ctx context.Context, user *entities.User) erro
 
 	err := r.queries.SaveUser(saveCtx, params)
 	if err != nil {
-		wrappedErr := r.errorFactory.Database(err, "save_user").
-			WithContext(saveCtx).
-			WithExtra("user_id", user.ID).
-			WithExtra("email", user.Email)
 		r.logger.Error("Failed to save user",
 			"user_id", user.ID,
 			"email", user.Email,
-			"error", err,
-			"context_deadline_exceeded", r.contextHelper.IsContextError(err))
-		return wrappedErr
+			"error", err)
+		return err
 	}
 
 	r.logger.Info("User saved successfully", "user_id", user.ID, "email", user.Email)
@@ -109,7 +97,7 @@ func (r *SQLCUserRepository) FindByID(ctx context.Context, id entities.UserID) (
 	r.logger.Debug("Finding user by ID", "user_id", id)
 
 	// Add timeout to context
-	findCtx, cancel := r.contextHelper.WithTimeout(ctx, 10*time.Second)
+	findCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	dbUser, err := r.queries.FindUserByID(findCtx, id)
@@ -118,14 +106,10 @@ func (r *SQLCUserRepository) FindByID(ctx context.Context, id entities.UserID) (
 			r.logger.Debug("User not found", "user_id", id)
 			return nil, repositories.ErrUserNotFound
 		}
-		wrappedErr := r.errorFactory.Database(err, "find_user_by_id").
-			WithContext(findCtx).
-			WithExtra("user_id", string(id))
 		r.logger.Error("Failed to find user by ID",
 			"user_id", id,
-			"error", err,
-			"context_deadline_exceeded", r.contextHelper.IsContextError(err))
-		return nil, wrappedErr
+			"error", err)
+		return nil, err
 	}
 
 	// Convert from SQLC generated struct to domain entity
@@ -146,7 +130,7 @@ func (r *SQLCUserRepository) FindByEmail(ctx context.Context, email string) (*en
 	r.logger.Debug("Finding user by email", "email", email)
 
 	// Add timeout to context
-	findCtx, cancel := r.contextHelper.WithTimeout(ctx, 10*time.Second)
+	findCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	dbUser, err := r.queries.FindUserByEmail(findCtx, email)
@@ -155,14 +139,10 @@ func (r *SQLCUserRepository) FindByEmail(ctx context.Context, email string) (*en
 			r.logger.Debug("User not found", "email", email)
 			return nil, repositories.ErrUserNotFound
 		}
-		wrappedErr := r.errorFactory.Database(err, "find_user_by_email").
-			WithContext(findCtx).
-			WithExtra("email", email)
 		r.logger.Error("Failed to find user by email",
 			"email", email,
-			"error", err,
-			"context_deadline_exceeded", r.contextHelper.IsContextError(err))
-		return nil, wrappedErr
+			"error", err)
+		return nil, err
 	}
 
 	// Convert from SQLC generated struct to domain entity

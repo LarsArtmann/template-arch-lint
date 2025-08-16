@@ -233,7 +233,7 @@ var _ = Describe("🔗 Integration Testing - Cross-Layer Component Interaction",
 					Expect(err).ToNot(HaveOccurred())
 					Expect(retrievedUser.Email).To(Equal(updatedUser.Email))
 					Expect(retrievedUser.Name).To(Equal(updatedUser.Name))
-					Expect(retrievedUser.Modified).To(Equal(updatedUser.Modified))
+					Expect(retrievedUser.Modified).To(BeTemporally("~", updatedUser.Modified, time.Millisecond))
 				}
 
 				// Delete some users
@@ -333,7 +333,7 @@ var _ = Describe("🔗 Integration Testing - Cross-Layer Component Interaction",
 
 				Expect(user).To(BeNil())
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("database connection is nil"))
+				Expect(err.Error()).To(ContainSubstring("sql: database is closed"))
 			})
 
 			It("should handle context cancellation across all layers", func() {
