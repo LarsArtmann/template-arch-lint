@@ -172,7 +172,7 @@ func (c *Container) registerServices() {
 		return service, nil
 	})
 
-	// Register JWT service - TEMPORARILY DISABLED
+	// Register JWT service
 	do.Provide(c.injector, func(i *do.Injector) (*services.JWTService, error) {
 		cfg := do.MustInvoke[*config.Config](i)
 		service := services.NewJWTService(&cfg.JWT)
@@ -263,8 +263,11 @@ func (c *Container) createGinRouter(cfg *config.Config, logger *slog.Logger) *gi
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(middleware.WithCorrelationID(logger))
-	// router.Use(middleware.WithContextPropagation(logger)) // TEMPORARILY DISABLED
 	router.Use(middleware.WithStructuredLogging(logger))
+
+	// Add security headers middleware
+	allowedOrigins := c.getAllowedOrigins(cfg)
+	router.Use(middleware.WithSecurityHeaders(cfg.App.Environment, allowedOrigins, logger))
 
 	// Add rate limiting middleware
 	router.Use(middleware.WithRateLimit(logger))
