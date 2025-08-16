@@ -6,6 +6,11 @@
 *.dylib
 *.a
 
+# Main application binary
+server
+server-*
+api
+
 # Test binary, built with `go test -c`
 *.test
 
@@ -54,6 +59,9 @@ vendor/
 *.tmp
 *.temp
 *.log
+
+# Test scripts (often temporary)
+test_*.sh
 
 # Local configuration files (if any)
 .env
