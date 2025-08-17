@@ -62,6 +62,8 @@ components:
     in: internal/application/dto/**
   app-http:
     in: internal/application/http/**
+  app-services:
+    in: internal/application/services/**
 
   # ========================================
   # INFRASTRUCTURE LAYER - External Concerns
@@ -98,20 +100,6 @@ components:
     in: cmd/**
 
   # ========================================
-  # UTILITY LAYER - Reusable Components
-  # ========================================
-  constants:
-    in: internal/constants/**
-  utils-validation:
-    in: internal/utils/validation/**
-  utils-errors:
-    in: internal/utils/errors/**
-  utils-database:
-    in: internal/utils/database/**
-  testutils:
-    in: internal/testutils/**
-
-  # ========================================
   # TEST HELPERS - Testing Utilities
   # ========================================
   test-helpers-base:
@@ -126,6 +114,7 @@ components:
     in: internal/testhelpers/application/handlers/**
   test-helpers-infrastructure-repositories:
     in: internal/testhelpers/infrastructure/repositories/**
+
 
 # 🔒 DEPENDENCY RULES - Enforce Clean Architecture
 deps:
@@ -180,6 +169,8 @@ deps:
       - domain-errors
       - app-dto
       - app-http
+      - app-services
+      - app-middleware
       - web-templates-components
       - web-templates-layouts
       - web-templates-pages
@@ -190,6 +181,7 @@ deps:
       - domain-errors
       - app-dto
       - app-http
+      - app-services
 
   app-dto:
     anyVendorDeps: true
@@ -205,6 +197,16 @@ deps:
       - app-dto
       - domain-shared
       - domain-errors
+
+  app-services:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-repositories
+      - domain-shared
+      - domain-values
+      - domain-errors
+      - config
 
   # INFRASTRUCTURE LAYER - External integrations
   infrastructure:
@@ -289,36 +291,11 @@ deps:
     anyProjectDeps: true
     anyVendorDeps: true
 
-  # UTILITY LAYER - Shared reusable components
-  constants:
-    anyVendorDeps: true
-    mayDependOn: []
-
-  utils-validation:
-    anyVendorDeps: true
-    mayDependOn: []
-
-  utils-errors:
-    anyVendorDeps: true
-    mayDependOn:
-      - domain-errors
-
-  utils-database:
-    anyVendorDeps: true
-    mayDependOn:
-      - utils-errors
-
-  testutils:
-    anyProjectDeps: true
-    anyVendorDeps: true
 
 # 🌍 COMMON COMPONENTS - Available everywhere
 commonComponents:
   - domain-shared
   - domain-errors
-  - constants
-  - utils-validation
-  - utils-errors
 
 # 🚫 EXCLUSION PATTERNS (glob patterns)
 exclude:
