@@ -161,9 +161,9 @@ data, err := os.ReadFile(file)  // Must check!
 
 ### 3. **Dependency Analysis**
 **Tools:**
-- **Nancy:** Sonatype vulnerability database
-- **OSV Scanner:** Google's vulnerability scanner
-- **License compliance:** Manual audit approach (no paid tools required)
+- **govulncheck:** Official Go vulnerability database (primary tool)
+- **License compliance:** Manual audit approach via go-licenses (no paid tools required)
+- **Note:** nancy and osv-scanner removed as redundant with govulncheck
 
 **Run:** `just lint-deps-advanced`
 

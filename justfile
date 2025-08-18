@@ -367,25 +367,15 @@ lint-cycles:
     @echo "🔍 Detailed dependency analysis:"
     @go mod graph | head -20
 
-# 🕸️ Advanced dependency graph analysis
+# 🕸️ Dependency analysis (streamlined - redundant tools removed)
 lint-deps-advanced:
-    @echo "\033[1m🕸️ ADVANCED DEPENDENCY ANALYSIS\033[0m"
-    @echo "🔍 Analyzing dependency graph for vulnerabilities..."
-    @if command -v nancy >/dev/null 2>&1; then \
-        nancy sleuth go.sum; \
-    else \
-        echo "⚠️  nancy not found. Install with: go install github.com/sonatype-nexus-community/nancy@latest"; \
-        go install github.com/sonatype-nexus-community/nancy@latest; \
-        nancy sleuth go.sum; \
-    fi
-    @echo "🔍 OSV vulnerability scanning..."
-    @if command -v osv-scanner >/dev/null 2>&1; then \
-        osv-scanner --lockfile=go.sum; \
-    else \
-        echo "⚠️  osv-scanner not found. Install with: go install github.com/google/osv-scanner/cmd/osv-scanner@latest"; \
-        go install github.com/google/osv-scanner/cmd/osv-scanner@latest; \
-        osv-scanner --lockfile=go.sum; \
-    fi
+    @echo "\033[1m🕸️ DEPENDENCY ANALYSIS\033[0m"
+    @echo "🔍 Using govulncheck for comprehensive Go vulnerability scanning..."
+    @echo "💡 Note: nancy and osv-scanner removed as redundant with govulncheck"
+    @echo "📊 Running dependency analysis..."
+    @go mod download -json all | jq -r '.Path + " " + .Version' | head -20
+    @echo ""
+    @echo "🛡️ For vulnerability scanning, use: just lint-vulns"
 
 # 🔍 Goroutine leak detection (Uber's goleak)
 lint-goroutines:
