@@ -137,6 +137,11 @@ linters-settings:
   revive:
     severity: error
     enable-all-rules: true
+    rules:
+      # 📏 FILE LENGTH ENFORCEMENT
+      - name: file-length-limit
+        severity: error
+        arguments: [400]
 
   # Nesting complexity
   nestif:
@@ -199,6 +204,18 @@ issues:
         - gocognit
         - gocyclo
         - cyclop
+
+    # 📏 File length exemptions for generated files
+    - path: ".*_gen\\.go$|.*\\.pb\\.go$|.*_templ\\.go$|.*\\.sql\\.go$|internal/db/.*\\.go$"
+      linters:
+        - revive
+      text: "file-length-limit"
+
+    # Allow longer test files for comprehensive test suites
+    - path: "_test\\.go$"
+      linters:
+        - revive
+      text: "file-length-limit"
 
   exclude-dirs:
     - vendor
