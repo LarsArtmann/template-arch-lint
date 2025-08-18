@@ -1,0 +1,201 @@
+{
+	"Golang errors": {
+		"-": [
+			{
+				"line": 0,
+				"column": 0,
+				"error": "This application uses version go1.24 of the source-processing packages but runs version go1.25 of 'go list'. It may fail to process source files that rely on newer language features. If so, rebuild the application using a newer version of Go."
+			},
+			{
+				"line": 0,
+				"column": 0,
+				"error": "This application uses version go1.24 of the source-processing packages but runs version go1.25 of 'go list'. It may fail to process source files that rely on newer language features. If so, rebuild the application using a newer version of Go."
+			},
+			{
+				"line": 0,
+				"column": 0,
+				"error": "This application uses version go1.24 of the source-processing packages but runs version go1.25 of 'go list'. It may fail to process source files that rely on newer language features. If so, rebuild the application using a newer version of Go."
+			},
+			{
+				"line": 0,
+				"column": 0,
+				"error": "This application uses version go1.24 of the source-processing packages but runs version go1.25 of 'go list'. It may fail to process source files that rely on newer language features. If so, rebuild the application using a newer version of Go."
+			},
+			{
+				"line": 0,
+				"column": 0,
+				"error": "This application uses version go1.24 of the source-processing packages but runs version go1.25 of 'go list'. It may fail to process source files that rely on newer language features. If so, rebuild the application using a newer version of Go."
+			},
+			{
+				"line": 0,
+				"column": 0,
+				"error": "This application uses version go1.24 of the source-processing packages but runs version go1.25 of 'go list'. It may fail to process source files that rely on newer language features. If so, rebuild the application using a newer version of Go."
+			}
+		],
+		"/Users/larsartmann/projects/template-arch-lint/example/cmd/api/main.go": [
+			{
+				"line": 15,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/application/handlers (invalid package name: \"\")"
+			},
+			{
+				"line": 16,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/domain/services (invalid package name: \"\")"
+			},
+			{
+				"line": 17,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/infrastructure/persistence (invalid package name: \"\")"
+			}
+		],
+		"/Users/larsartmann/projects/template-arch-lint/example/internal/application/handlers/product_handler.go": [
+			{
+				"line": 9,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/domain/entities (invalid package name: \"\")"
+			},
+			{
+				"line": 10,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/domain/repositories (invalid package name: \"\")"
+			},
+			{
+				"line": 11,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/domain/services (invalid package name: \"\")"
+			},
+			{
+				"line": 12,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/domain/values (invalid package name: \"\")"
+			}
+		],
+		"/Users/larsartmann/projects/template-arch-lint/example/internal/domain/entities/product.go": [
+			{
+				"line": 10,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/domain/values (invalid package name: \"\")"
+			}
+		],
+		"/Users/larsartmann/projects/template-arch-lint/example/internal/domain/repositories/product_repository.go": [
+			{
+				"line": 9,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/domain/entities (invalid package name: \"\")"
+			},
+			{
+				"line": 10,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/domain/values (invalid package name: \"\")"
+			}
+		],
+		"/Users/larsartmann/projects/template-arch-lint/example/internal/domain/services/product_service.go": [
+			{
+				"line": 8,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/domain/entities (invalid package name: \"\")"
+			},
+			{
+				"line": 9,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/domain/repositories (invalid package name: \"\")"
+			},
+			{
+				"line": 10,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/domain/values (invalid package name: \"\")"
+			}
+		],
+		"/Users/larsartmann/projects/template-arch-lint/example/internal/infrastructure/persistence/memory_product_repository.go": [
+			{
+				"line": 9,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/domain/entities (invalid package name: \"\")"
+			},
+			{
+				"line": 10,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/domain/repositories (invalid package name: \"\")"
+			},
+			{
+				"line": 11,
+				"column": 2,
+				"error": "could not import github.com/LarsArtmann/template-arch-lint-example/internal/domain/values (invalid package name: \"\")"
+			}
+		]
+	},
+	"Issues": [
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion uint64 -\u003e int64",
+			"file": "/Users/larsartmann/projects/template-arch-lint/internal/application/handlers/performance_handler.go",
+			"code": "273: \t\t\t\"next_gc_mb\":      bToMb(m.NextGC),\n274: \t\t\t\"last_gc\":         time.Unix(0, int64(m.LastGC)).UTC(),\n275: \t\t\t\"pause_total_ns\":  m.PauseTotalNs,\n",
+			"line": "274",
+			"column": "41",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion uint64 -\u003e int64",
+			"file": "/Users/larsartmann/projects/template-arch-lint/internal/application/handlers/performance_handler.go",
+			"code": "62: \t\t\t\"pause_total_ns\":  m.PauseTotalNs,\n63: \t\t\t\"last_gc\":         time.Unix(0, int64(m.LastGC)).UTC(),\n64: \t\t\t\"gc_cpu_fraction\": m.GCCPUFraction,\n",
+			"line": "63",
+			"column": "41",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "LOW",
+			"cwe": {
+				"id": "798",
+				"url": "https://cwe.mitre.org/data/definitions/798.html"
+			},
+			"rule_id": "G101",
+			"details": "Potential hardcoded credentials",
+			"file": "/Users/larsartmann/projects/template-arch-lint/internal/application/middleware/security_headers.go",
+			"code": "24: \tCSPDataHTTPS        = \"'self' data: https:\"\n25: \tCSPWebSockets       = \"'self' ws: wss:\"\n26: \n",
+			"line": "25",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/larsartmann/projects/template-arch-lint/internal/container/container.go",
+			"code": "139: \t\tif err := db.Ping(); err != nil {\n140: \t\t\tdb.Close()\n141: \t\t\treturn nil, fmt.Errorf(\"failed to ping database: %w\", err)\n",
+			"line": "140",
+			"column": "4",
+			"nosec": false,
+			"suppressions": null
+		}
+	],
+	"Stats": {
+		"files": 59,
+		"lines": 9226,
+		"nosec": 0,
+		"found": 4
+	},
+	"GosecVersion": "2.22.7"
+}

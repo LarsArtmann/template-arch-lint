@@ -4,7 +4,7 @@
 # This configuration enforces the highest standards of Go code quality
 # Designed for mission-critical production systems with zero defect tolerance
 
-version: 2
+version: 1
 
 run:
   timeout: 5m
@@ -13,6 +13,8 @@ run:
   modules-download-mode: readonly
   allow-parallel-runners: true
   go: "1.23"
+  env:
+    - GODEBUG=gotypesalias=1
 
 # 🔥 LINTERS - Maximum enforcement (essential set)
 linters:
@@ -170,10 +172,11 @@ linters-settings:
   stylecheck:
     checks: ["all"]
 
-  # Go vet with struct field alignment optimization
+  # Go vet with MAXIMUM analyzers enabled
   govet:
-    enable:
-      - fieldalignment  # Modern replacement for maligned
+    # Enable ALL available analyzers for maximum coverage
+    enable-all: true
+    # Note: when using enable-all, specific enables are not needed
 
   # Go critic
   gocritic:
@@ -199,7 +202,8 @@ linters-settings:
       # 📏 FILE LENGTH ENFORCEMENT
       - name: file-length-limit
         severity: error
-        arguments: [400]
+        arguments:
+          - max: 400
 
   # Nesting complexity
   nestif:

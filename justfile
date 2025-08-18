@@ -95,7 +95,7 @@ lint: lint-files lint-arch lint-code lint-vulns lint-cycles lint-goroutines lint
     @echo "\033[0;32m\033[1m✅ All linting checks completed!\033[0m"
 
 # 🚨 Complete security audit (all security tools)
-security-audit: lint-security lint-vulns lint-semgrep lint-licenses
+security-audit: lint-security lint-vulns lint-semgrep lint-licenses lint-nilaway
     @echo ""
     @echo "\033[0;32m\033[1m🛡️ Complete security audit finished!\033[0m"
 
@@ -364,7 +364,7 @@ lint-cycles:
     @echo "🔍 Checking for import cycles in all packages..."
     @go list -json ./... | jq -r '.ImportPath' | while read pkg; do \
         echo "Checking $$pkg..."; \
-        go list -f '{{.ImportPath}}: {{join .Imports " "}}' $$pkg 2>/dev/null || true; \
+        go list -f '{{{{.ImportPath}}}}: {{{{join .Imports " "}}}}' $$pkg 2>/dev/null || true; \
     done | grep -E "(cycle|import cycle)" || echo "✅ No import cycles detected"
     @echo "🔍 Detailed dependency analysis:"
     @go mod graph | head -20
@@ -421,6 +421,18 @@ lint-semgrep:
         echo "⚠️  Semgrep not found. Install with: python -m pip install semgrep"; \
         echo "🔍 Using gosec as fallback..."; \
         gosec -fmt json -out gosec-report.json ./...; \
+    fi
+
+# 🚫 Uber's NilAway - Nil panic prevention
+lint-nilaway:
+    @echo "\033[1m🚫 NILAWAY - NIL PANIC DETECTION\033[0m"
+    @if command -v nilaway >/dev/null 2>&1; then \
+        echo "🔍 Running NilAway analysis (80% panic reduction!)..."; \
+        nilaway -include-pkgs="github.com/LarsArtmann/template-arch-lint" -json ./... 2>/dev/null || nilaway ./...; \
+    else \
+        echo "⚠️  nilaway not found. Installing Uber's NilAway..."; \
+        go install go.uber.org/nilaway/cmd/nilaway@latest; \
+        nilaway -include-pkgs="github.com/LarsArtmann/template-arch-lint" ./...; \
     fi
 
 # Format code with enhanced formatters (gofumpt + goimports)

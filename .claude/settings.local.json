@@ -34,7 +34,13 @@
       "Bash(PATH=\"/usr/bin:/bin\" just graph)",
       "Bash(time git commit -m \"test: Fast hook verification\")",
       "Bash(awk:*)",
-      "Bash(./test_graceful_shutdown.sh:*)"
+      "Bash(./test_graceful_shutdown.sh:*)",
+      "Bash(tokei:*)",
+      "WebSearch",
+      "Bash(nilaway --help)",
+      "Bash(nilaway:*)",
+      "Bash(command -v:*)",
+      "Bash(readme-generator:*)"
     ],
     "deny": []
   }
