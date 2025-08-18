@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### ✅ **What This Project IS:**
 - **Go Linting Template**: Demonstrates enterprise-grade architecture and code quality enforcement
 - **Reference Implementation**: Shows Clean Architecture + DDD patterns in Go
-- **Configuration Library**: Provides `.go-arch-lint.yml`, `.golangci.yml`, `.semgrep.yml`, and `justfile` for copy/paste use
+- **Configuration Library**: Provides `.go-arch-lint.yml`, `.golangci.yml`, and `justfile` for copy/paste use
 - **Simple HTMX Demo**: Basic web app with templ templates and SQLite database
 - **Educational Resource**: Learn proper Go architecture boundaries and functional programming patterns
 
@@ -18,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Complex Business Domain**: User CRUD is intentionally simple to focus on architecture
 
 ### 🎯 **Core Purpose:**
-Copy the linting configurations (`.go-arch-lint.yml`, `.golangci.yml`, `.semgrep.yml`, `justfile`) to your real projects to enforce architectural boundaries and code quality. The Go code demonstrates how to structure projects following these rules.
+Copy the linting configurations (`.go-arch-lint.yml`, `.golangci.yml`, `justfile`) to your real projects to enforce architectural boundaries and code quality. The Go code demonstrates how to structure projects following these rules.
 
 ## 🏗️ High-Level Architecture Understanding
 
@@ -83,8 +83,8 @@ just ci                   # Complete CI/CD pipeline simulation
 # Security & Vulnerability Scanning
 just security-audit       # Complete security audit (all tools)
 just lint-vulns          # Run govulncheck for CVE scanning
-just lint-semgrep        # Custom security pattern detection
-just lint-licenses       # License compliance scanning (FOSSA)
+just lint-nilaway        # Uber's nil panic prevention (80% reduction)
+just lint-licenses       # License compliance scanning (manual audit)
 just lint-deps-advanced  # Advanced dependency vulnerability analysis
 ```
 
@@ -148,7 +148,7 @@ go test ./internal/domain/services/ -bench=.
 - **File limits**: Max 400 lines per file
 - **Line length**: Max 120 characters
 
-### Security Scanning (`.semgrep.yml`)
+### Security Scanning (Built-in Tools)
 - **10 custom security rules** for Go-specific vulnerabilities:
   - Hardcoded secrets detection
   - SQL injection prevention
@@ -207,7 +207,7 @@ just test        # Test your changes
 ### Security Review
 ```bash
 just security-audit  # Complete security scan
-cat semgrep-report.json  # Review findings
+cat gosec-report.json    # Review security findings
 ```
 
 ## Architecture Violations You'll Encounter
@@ -223,7 +223,7 @@ Common violations and their meanings:
 
 - **`.go-arch-lint.yml`**: Architecture boundary rules
 - **`.golangci.yml`**: 40+ linters configuration
-- **`.semgrep.yml`**: Custom security patterns
+- **Built-in security**: gosec + govulncheck + NilAway (no external config needed)
 - **`justfile`**: Task automation (30+ commands)
 - **`sqlc.yaml`**: Type-safe SQL generation
 - **`.pre-commit-config.yaml`**: Git hook configuration

@@ -40,7 +40,8 @@
       "Bash(nilaway --help)",
       "Bash(nilaway:*)",
       "Bash(command -v:*)",
-      "Bash(readme-generator:*)"
+      "Bash(readme-generator:*)",
+      "Bash(time just:*)"
     ],
     "deny": []
   }

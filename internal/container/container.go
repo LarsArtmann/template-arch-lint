@@ -299,11 +299,9 @@ func (c *Container) getAllowedOrigins(cfg *config.Config) []string {
 		// In production, no default origins - must be explicitly configured
 		return []string{}
 	case "development", "debug":
-		// Development-friendly defaults
+		// Development-friendly defaults (removed ghost monitoring references)
 		return []string{
-			"http://localhost:3000",
 			"http://localhost:8080",
-			"http://127.0.0.1:3000",
 			"http://127.0.0.1:8080",
 		}
 	default:

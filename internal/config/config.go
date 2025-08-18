@@ -139,7 +139,7 @@ func setDefaults(_ *Config) {
 	viper.SetDefault("jwt.algorithm", "HS256")
 
 	// Security defaults
-	viper.SetDefault("security.allowed_origins", []string{"http://localhost:3000", "http://localhost:8080"})
+	viper.SetDefault("security.allowed_origins", []string{"http://localhost:8080"})
 	viper.SetDefault("security.trusted_proxies", []string{})
 	viper.SetDefault("security.enable_hsts", false) // Disabled by default for development
 	viper.SetDefault("security.enable_csp", true)

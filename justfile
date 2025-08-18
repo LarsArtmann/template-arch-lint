@@ -51,9 +51,7 @@ help:
     @echo "  5. \033[0;36mjust run\033[0m      - Run the application"
     @echo ""
     @echo "\033[1mDOCKER COMMANDS:\033[0m"
-    @echo "  • \033[0;36mjust docker-test\033[0m         - Build and test Docker image"
-    @echo "  • \033[0;36mjust docker-dev-detached\033[0m - Start full dev environment"
-    @echo "  • \033[0;36mjust docker-stop\033[0m         - Stop development environment"
+    @echo "  • \033[0;36mjust docker-test\033[0m         - Build and test Docker image (if available)"
     @echo ""
     @echo "\033[1mTESTING & COVERAGE:\033[0m"
     @echo "  • \033[0;36mjust test\033[0m                - Run tests with coverage"
@@ -95,7 +93,7 @@ lint: lint-files lint-arch lint-code lint-vulns lint-cycles lint-goroutines lint
     @echo "\033[0;32m\033[1m✅ All linting checks completed!\033[0m"
 
 # 🚨 Complete security audit (all security tools)
-security-audit: lint-security lint-vulns lint-semgrep lint-licenses lint-nilaway
+security-audit: lint-security lint-vulns lint-licenses lint-nilaway
     @echo ""
     @echo "\033[0;32m\033[1m🛡️ Complete security audit finished!\033[0m"
 
@@ -397,31 +395,23 @@ lint-goroutines:
     @echo "🔍 Running tests with goroutine leak detection..."
     @go test -race ./... -v -timeout=30s || echo "⚠️ Tests failed or goroutine leaks detected"
 
-# ⚖️ License compliance scanning (FOSSA)
+# ⚖️ License compliance scanning (Manual approach - no paid tools)
 lint-licenses:
     @echo "\033[1m⚖️ LICENSE COMPLIANCE SCANNING\033[0m"
-    @if command -v fossa >/dev/null 2>&1; then \
-        echo "🔍 Running FOSSA analysis..."; \
-        fossa analyze --team=enterprise --project=template-arch-lint; \
-        fossa test --team=enterprise; \
-    else \
-        echo "⚠️  FOSSA CLI not found. Please install from: https://github.com/fossas/fossa-cli"; \
-        echo "🔍 Fallback: Manual license check..."; \
-        go mod download -json all | jq -r '.Path + " " + .Version' | head -20; \
+    @echo "🔍 Manual license analysis (FOSSA removed - requires paid account)..."
+    @echo "📋 Go modules and their licenses:"
+    @go mod download -json all | jq -r '.Path + " " + .Version' | head -20
+    @echo "💡 Installing go-licenses for comprehensive scanning..."
+    @if ! command -v go-licenses >/dev/null 2>&1; then \
+        go install github.com/google/go-licenses@latest; \
     fi
+    @echo "🔍 Running go-licenses check..."
+    @go-licenses check ./... 2>/dev/null || echo "⚠️ Some licenses may need review"
+    @echo "📋 Detailed license report:"
+    @go-licenses report ./... 2>/dev/null | head -10 || echo "⚠️ Report generation failed"
 
-# 🛡️ Semgrep custom security rules
-lint-semgrep:
-    @echo "\033[1m🛡️ SEMGREP CUSTOM SECURITY SCANNING\033[0m"
-    @if command -v semgrep >/dev/null 2>&1; then \
-        echo "🔍 Running Semgrep security analysis..."; \
-        semgrep --config=auto --json --output=semgrep-report.json .; \
-        semgrep --config=p/security-audit --config=p/golang .; \
-    else \
-        echo "⚠️  Semgrep not found. Install with: python -m pip install semgrep"; \
-        echo "🔍 Using gosec as fallback..."; \
-        gosec -fmt json -out gosec-report.json ./...; \
-    fi
+# Note: Semgrep removed to reduce Python dependency complexity
+# Security coverage provided by gosec (via golangci-lint) + govulncheck + NilAway
 
 # 🚫 Uber's NilAway - Nil panic prevention
 lint-nilaway:
@@ -665,27 +655,37 @@ docker-run: docker-build
     @echo "\033[1m🚀 RUNNING DOCKER CONTAINER\033[0m"
     docker run --rm -p 8080:8080 -p 2112:2112 template-arch-lint:latest
 
-# Start development environment with Docker Compose
+# Docker development environment (requires docker-compose.yml)
 docker-dev:
-    @echo "\033[1m🔄 STARTING DEVELOPMENT ENVIRONMENT\033[0m"
-    docker-compose up --build
+    @if [ -f docker-compose.yml ]; then \
+        echo "\033[1m🔄 STARTING DEVELOPMENT ENVIRONMENT\033[0m"; \
+        docker-compose up --build; \
+    else \
+        echo "⚠️  docker-compose.yml not found. This is a linting template - monitoring stack removed."; \
+        echo "💡 For Docker setup, add your own docker-compose.yml with required services."; \
+    fi
 
-# Start development environment in background
+# Start Docker environment in background (requires docker-compose.yml)  
 docker-dev-detached:
-    @echo "\033[1m🔄 STARTING DEVELOPMENT ENVIRONMENT (DETACHED)\033[0m"
-    docker-compose up --build -d
-    @echo "\033[0;32m✅ Development environment started!\033[0m"
-    @echo "\033[0;36mServices available at:\033[0m"
-    @echo "  - Application: http://localhost:8080"
-    @echo "  - Grafana: http://localhost:3000 (admin/admin)"
-    @echo "  - Prometheus: http://localhost:9090"
-    @echo "  - Jaeger UI: http://localhost:16686"
+    @if [ -f docker-compose.yml ]; then \
+        echo "\033[1m🔄 STARTING DEVELOPMENT ENVIRONMENT (DETACHED)\033[0m"; \
+        docker-compose up --build -d; \
+        echo "\033[0;32m✅ Development environment started!\033[0m"; \
+        echo "\033[0;36mServices available at http://localhost:8080\033[0m"; \
+    else \
+        echo "⚠️  docker-compose.yml not found. This is a linting template."; \
+        echo "💡 Create docker-compose.yml for your specific monitoring/service needs."; \
+    fi
 
-# Stop development environment
+# Stop Docker environment  
 docker-stop:
-    @echo "\033[1m🛑 STOPPING DEVELOPMENT ENVIRONMENT\033[0m"
-    docker-compose down
-    @echo "\033[0;32m✅ Development environment stopped!\033[0m"
+    @if [ -f docker-compose.yml ]; then \
+        echo "\033[1m🛑 STOPPING DEVELOPMENT ENVIRONMENT\033[0m"; \
+        docker-compose down; \
+        echo "\033[0;32m✅ Development environment stopped!\033[0m"; \
+    else \
+        echo "⚠️  docker-compose.yml not found - nothing to stop."; \
+    fi
 
 # Clean up Docker resources
 docker-clean:

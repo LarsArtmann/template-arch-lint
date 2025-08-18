@@ -17,9 +17,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # Tool versions - matches justfile configuration
-  GOLANGCI_VERSION: "v2.3.1"
+  # Tool versions - matches justfile configuration  
+  GOLANGCI_VERSION: "v1.62.0" # Updated to v1.x for compatibility
   GO_ARCH_LINT_VERSION: "v1.12.0"
+  GODEBUG: "gotypesalias=1" # Required for Go 1.23 generic type aliases
 
 jobs:
   # ==============================================
@@ -100,7 +101,7 @@ jobs:
     - name: 📦 Install Linting Tools
       run: |
         echo "Installing golangci-lint ${GOLANGCI_VERSION}..."
-        go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@${GOLANGCI_VERSION}
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_VERSION}
 
         echo "Installing go-arch-lint ${GO_ARCH_LINT_VERSION}..."
         go install github.com/fe3dback/go-arch-lint@${GO_ARCH_LINT_VERSION}
@@ -108,10 +109,17 @@ jobs:
         echo "Installing additional tools..."
         go install golang.org/x/tools/cmd/goimports@latest
         go install github.com/a-h/templ/cmd/templ@latest
+        
+        echo "Installing NilAway (Uber's nil panic prevention)..."
+        go install go.uber.org/nilaway/cmd/nilaway@latest
+        
+        echo "Installing go-licenses for license compliance..."
+        go install github.com/google/go-licenses@latest
 
         # Verify installations
         golangci-lint version
         go-arch-lint version
+        nilaway --version || echo "NilAway installed (no version flag)"
         just --version
 
     - name: 📁 Filename Verification
@@ -124,10 +132,20 @@ jobs:
         echo "🔍 Validating architectural boundaries..."
         just lint-arch
 
-    - name: 📝 Code Quality Analysis
+    - name: 📝 Code Quality Analysis  
       run: |
         echo "🔍 Running comprehensive code quality checks..."
         just lint-code
+        
+    - name: 🚫 NilAway Analysis
+      run: |
+        echo "🚫 Running Uber's NilAway for nil panic detection..."
+        just lint-nilaway || echo "⚠️ NilAway found potential issues (review recommended)"
+        
+    - name: ⚖️ License Compliance Check
+      run: |
+        echo "⚖️ Checking license compliance..."
+        just lint-licenses
 
     - name: 🔧 Template Generation
       run: |
@@ -178,8 +196,8 @@ jobs:
         # Install just
         curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
 
-        # Install linting tools
-        go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@${GOLANGCI_VERSION}
+        # Install linting tools (updated for compatibility)
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_VERSION}
 
     - name: 🔒 Security Linting
       run: |

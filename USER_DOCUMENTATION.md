@@ -144,8 +144,8 @@ data, err := os.ReadFile(file)  // Must check!
 **Detects:** Known CVEs in dependencies
 **Run:** `just lint-vulns`
 
-### 2. **Custom Security Rules** (`semgrep`)
-**What:** Pattern-based security scanning with custom rules
+### 2. **Security Analysis** (`gosec` via golangci-lint)
+**What:** Go security analyzer integrated into golangci-lint
 
 **Detects:**
 - Hardcoded secrets and API keys
@@ -156,14 +156,14 @@ data, err := os.ReadFile(file)  // Must check!
 - Insecure TLS configurations
 - Sensitive data in logs
 
-**Configuration:** `.semgrep.yml`
-**Run:** `just lint-semgrep`
+**Configuration:** Enabled in `.golangci.yml`
+**Run:** `just lint-security` (or included in `just lint`)
 
 ### 3. **Dependency Analysis**
 **Tools:**
 - **Nancy:** Sonatype vulnerability database
 - **OSV Scanner:** Google's vulnerability scanner
-- **License compliance:** FOSSA integration
+- **License compliance:** Manual audit approach (no paid tools required)
 
 **Run:** `just lint-deps-advanced`
 
@@ -195,7 +195,7 @@ data, err := os.ReadFile(file)  // Must check!
 | `just lint-cycles` | Import cycles | Dependency cycles |
 | `just lint-goroutines` | Goroutine leaks | Memory leaks |
 | `just lint-deps-advanced` | Dependency analysis | Supply chain security |
-| `just lint-semgrep` | Security patterns | Custom security rules |
+| `just lint-nilaway` | Nil panic detection | Uber's nil safety analysis |
 | `just lint-licenses` | License compliance | Legal compliance |
 
 ### Security Commands
@@ -249,7 +249,7 @@ deps:
     deny: ["internal/infrastructure", "internal/application"]
 ```
 
-### `.semgrep.yml`
+### Security Tools (No External Config Required)
 **Purpose:** Custom security pattern detection
 
 **Contains:**
@@ -299,10 +299,10 @@ deps:
 - **How:** Detects abandoned goroutines
 - **Real-world:** Critical for long-running services
 
-#### **6. License Compliance (FOSSA)**
+#### **6. License Compliance (Manual Audit)**
 - **Impact:** Legal compliance for commercial software
-- **How:** Validates license compatibility
-- **Real-world:** Required for enterprise distribution
+- **How:** Manual review of dependency licenses (FOSSA removed - requires paid account)
+- **Real-world:** Required for enterprise distribution, can use go-licenses or licensed tools
 
 ---
 
@@ -330,7 +330,6 @@ just security-audit
 
 # Review reports
 cat gosec-report.json
-cat semgrep-report.json
 ```
 
 ### Adding New Code
@@ -409,7 +408,7 @@ golangci-lint run --fast
 Start with core linters, add sophisticated ones gradually:
 1. Start: `lint-arch` + `lint-code`
 2. Add: `lint-vulns` + `lint-security`
-3. Finally: `lint-goroutines` + `lint-semgrep`
+3. Finally: `lint-goroutines` + `lint-nilaway`
 
 ### 2. **CI/CD Integration**
 ```yaml
@@ -434,7 +433,7 @@ Start with core linters, add sophisticated ones gradually:
 
 ### 5. **Security Practices**
 - Run `just security-audit` before releases
-- Review semgrep findings manually
+- Review gosec findings manually
 - Keep tools updated: `just update-tools`
 - Document security exceptions in code
 
@@ -465,7 +464,7 @@ Start with core linters, add sophisticated ones gradually:
 ## 🚀 Advanced Features
 
 ### Custom Security Rules
-Add your own patterns to `.semgrep.yml`:
+Security patterns are handled by built-in tools (gosec + NilAway):
 ```yaml
 rules:
   - id: custom-api-key-pattern
@@ -504,7 +503,7 @@ go install github.com/uber-go/nilaway/cmd/nilaway@latest
 
 ### Tool Documentation
 - [golangci-lint](https://golangci-lint.run/)
-- [Semgrep](https://semgrep.dev/docs/)
+- [Gosec](https://securecodewarrior.github.io/docs-gosec/)
 - [go-arch-lint](https://github.com/fe3dback/go-arch-lint)
 - [Uber NilAway](https://github.com/uber-go/nilaway)
 
