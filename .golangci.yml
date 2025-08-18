@@ -65,6 +65,8 @@ linters:
     - gochecknoglobals # No global variables
     - lll            # Line length limits
     - maligned       # Struct alignment optimization
+    - golint         # Go style guide enforcement
+    - gomnd          # Magic number detection
 
     # 💀 DEAD CODE DETECTION
     - deadcode       # Unreachable code
@@ -74,13 +76,26 @@ linters:
 
 # 🔧 LINTER SETTINGS - Maximum strictness
 linters-settings:
-  # 🚨 TYPE SAFETY - ZERO TOLERANCE
+  # 🚨 TYPE SAFETY & STRUCTURED LOGGING - ZERO TOLERANCE
   forbidigo:
     forbid:
-      - 'interface\{\}'
-      - '\bany\b'
-      - 'panic\('
-      - 'fmt\.Print'
+      # Type safety violations
+      - p: 'interface\{\}'
+        msg: "🚨 BANNED: interface{} erases type safety. Use specific types or generics"
+      - p: '\bany\b'
+        msg: "🚨 BANNED: any erases type safety. Use specific types or generics"
+      - p: 'panic\('
+        msg: "🚨 BANNED: panic() crashes programs. Return errors instead"
+      
+      # Structured logging enforcement (inspired by Uniflow)
+      - p: '^fmt\.Print.*$'
+        msg: "🚨 BANNED: Do not commit print statements. Use github.com/charmbracelet/log for structured logging"
+      - p: '^log\..*$'
+        msg: "🚨 BANNED: Do not use standard log package. Use github.com/charmbracelet/log for structured logging"  
+      - p: '^print$|^println$'
+        msg: "🚨 BANNED: Do not commit print statements. Use structured logging instead"
+      - p: 'fmt\.Printf.*'
+        msg: "🚨 BANNED: Use structured logging instead of fmt.Printf. Prefer log.Info() with fields"
 
     analyze-types: true
 
@@ -207,6 +222,23 @@ linters-settings:
   maligned:
     suggest-new: true
 
+  # Magic number detection
+  gomnd:
+    # Ignored numbers (common constants that don't need extraction)
+    ignored-numbers:
+      - '0'
+      - '1' 
+      - '2'
+      - '10'
+      - '100'
+      - '1000'
+    # Ignored functions where numbers are acceptable
+    ignored-functions:
+      - 'strconv.ParseInt'
+      - 'strconv.ParseFloat'
+      - 'time.Sleep'
+      - 'time.Duration'
+
 # 🚨 ISSUES CONFIGURATION
 # Note: Formatters (gofumpt, goimports) should be run separately via 'just fix'
 issues:
@@ -248,6 +280,7 @@ issues:
 
   exclude-dirs:
     - vendor
+    - node_modules   # Frontend dependencies 
     - testdata
     - examples
     - docs
