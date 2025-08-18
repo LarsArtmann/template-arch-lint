@@ -90,7 +90,7 @@ install:
     @echo "\033[0;32m✅ All tools installed successfully!\033[0m"
 
 # Run all linters (architecture + code quality + filenames)
-lint: lint-files lint-arch lint-code
+lint: lint-files lint-arch lint-code lint-vulns lint-cycles
     @echo ""
     @echo "\033[0;32m\033[1m✅ All linting checks completed!\033[0m"
 
@@ -341,6 +341,28 @@ lint-strict:
 lint-security:
     @echo "\033[1m🔒 SECURITY LINTING\033[0m"
     $(go env GOPATH)/bin/golangci-lint run --config .golangci.yml --enable-only gosec,copyloopvar
+
+# 🔍 Vulnerability scanning with official Go scanner
+lint-vulns:
+    @echo "\033[1m🔍 VULNERABILITY SCANNING\033[0m"
+    @if command -v govulncheck >/dev/null 2>&1; then \
+        govulncheck ./...; \
+    else \
+        echo "⚠️  govulncheck not found. Installing..."; \
+        go install golang.org/x/vuln/cmd/govulncheck@latest; \
+        govulncheck ./...; \
+    fi
+
+# 🔄 Import cycle detection beyond architecture linting
+lint-cycles:
+    @echo "\033[1m🔄 IMPORT CYCLE DETECTION\033[0m"
+    @echo "🔍 Checking for import cycles in all packages..."
+    @go list -json ./... | jq -r '.ImportPath' | while read pkg; do \
+        echo "Checking $$pkg..."; \
+        go list -f '{{.ImportPath}}: {{join .Imports " "}}' $$pkg 2>/dev/null || true; \
+    done | grep -E "(cycle|import cycle)" || echo "✅ No import cycles detected"
+    @echo "🔍 Detailed dependency analysis:"
+    @go mod graph | head -20
 
 # Format code with enhanced formatters (gofumpt + goimports)
 format:

@@ -60,6 +60,17 @@ linters:
     - whitespace     # Trailing whitespace
     - godot          # Comment punctuation
 
+    # 🏗️ ARCHITECTURE & BEST PRACTICES
+    - gochecknoinits # No init functions (anti-pattern)
+    - gochecknoglobals # No global variables
+    - lll            # Line length limits
+    - maligned       # Struct alignment optimization
+
+    # 💀 DEAD CODE DETECTION
+    - deadcode       # Unreachable code
+    - varcheck       # Unused global variables
+    - structcheck    # Unused struct fields
+
 
 # 🔧 LINTER SETTINGS - Maximum strictness
 linters-settings:
@@ -177,6 +188,24 @@ linters-settings:
     scope: declarations
     exclude: []
     capital: false
+
+  # 🏗️ ARCHITECTURE ENFORCEMENT
+  gochecknoinits: {}
+  
+  gochecknoglobals:
+    # Allow global variables only in main packages and tests
+    exclude-files:
+      - "main\\.go$"
+      - ".*_test\\.go$"
+
+  # Line length limits
+  lll:
+    line-length: 120
+    tab-width: 4
+
+  # Struct alignment optimization
+  maligned:
+    suggest-new: true
 
 # 🚨 ISSUES CONFIGURATION
 # Note: Formatters (gofumpt, goimports) should be run separately via 'just fix'
