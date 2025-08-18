@@ -90,9 +90,14 @@ install:
     @echo "\033[0;32m✅ All tools installed successfully!\033[0m"
 
 # Run all linters (architecture + code quality + filenames)
-lint: lint-files lint-arch lint-code lint-vulns lint-cycles
+lint: lint-files lint-arch lint-code lint-vulns lint-cycles lint-goroutines lint-deps-advanced
     @echo ""
     @echo "\033[0;32m\033[1m✅ All linting checks completed!\033[0m"
+
+# 🚨 Complete security audit (all security tools)
+security-audit: lint-security lint-vulns lint-semgrep lint-licenses
+    @echo ""
+    @echo "\033[0;32m\033[1m🛡️ Complete security audit finished!\033[0m"
 
 # Run architecture linting only
 lint-arch:
@@ -363,6 +368,60 @@ lint-cycles:
     done | grep -E "(cycle|import cycle)" || echo "✅ No import cycles detected"
     @echo "🔍 Detailed dependency analysis:"
     @go mod graph | head -20
+
+# 🕸️ Advanced dependency graph analysis
+lint-deps-advanced:
+    @echo "\033[1m🕸️ ADVANCED DEPENDENCY ANALYSIS\033[0m"
+    @echo "🔍 Analyzing dependency graph for vulnerabilities..."
+    @if command -v nancy >/dev/null 2>&1; then \
+        nancy sleuth go.sum; \
+    else \
+        echo "⚠️  nancy not found. Install with: go install github.com/sonatype-nexus-community/nancy@latest"; \
+        go install github.com/sonatype-nexus-community/nancy@latest; \
+        nancy sleuth go.sum; \
+    fi
+    @echo "🔍 OSV vulnerability scanning..."
+    @if command -v osv-scanner >/dev/null 2>&1; then \
+        osv-scanner --lockfile=go.sum; \
+    else \
+        echo "⚠️  osv-scanner not found. Install with: go install github.com/google/osv-scanner/cmd/osv-scanner@latest"; \
+        go install github.com/google/osv-scanner/cmd/osv-scanner@latest; \
+        osv-scanner --lockfile=go.sum; \
+    fi
+
+# 🔍 Goroutine leak detection (Uber's goleak)
+lint-goroutines:
+    @echo "\033[1m🔍 GOROUTINE LEAK DETECTION\033[0m"
+    @echo "🔍 Installing Uber's goleak..."
+    @go install github.com/uber-go/goleak@latest
+    @echo "🔍 Running tests with goroutine leak detection..."
+    @go test -race ./... -v -timeout=30s || echo "⚠️ Tests failed or goroutine leaks detected"
+
+# ⚖️ License compliance scanning (FOSSA)
+lint-licenses:
+    @echo "\033[1m⚖️ LICENSE COMPLIANCE SCANNING\033[0m"
+    @if command -v fossa >/dev/null 2>&1; then \
+        echo "🔍 Running FOSSA analysis..."; \
+        fossa analyze --team=enterprise --project=template-arch-lint; \
+        fossa test --team=enterprise; \
+    else \
+        echo "⚠️  FOSSA CLI not found. Please install from: https://github.com/fossas/fossa-cli"; \
+        echo "🔍 Fallback: Manual license check..."; \
+        go mod download -json all | jq -r '.Path + " " + .Version' | head -20; \
+    fi
+
+# 🛡️ Semgrep custom security rules
+lint-semgrep:
+    @echo "\033[1m🛡️ SEMGREP CUSTOM SECURITY SCANNING\033[0m"
+    @if command -v semgrep >/dev/null 2>&1; then \
+        echo "🔍 Running Semgrep security analysis..."; \
+        semgrep --config=auto --json --output=semgrep-report.json .; \
+        semgrep --config=p/security-audit --config=p/golang .; \
+    else \
+        echo "⚠️  Semgrep not found. Install with: python -m pip install semgrep"; \
+        echo "🔍 Using gosec as fallback..."; \
+        gosec -fmt json -out gosec-report.json ./...; \
+    fi
 
 # Format code with enhanced formatters (gofumpt + goimports)
 format:

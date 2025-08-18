@@ -67,6 +67,10 @@ linters:
     - maligned       # Struct alignment optimization
     - golint         # Go style guide enforcement
     - gomnd          # Magic number detection
+    - godox          # TODO/FIXME/HACK detection
+
+    # 🤖 CUTTING-EDGE ANALYSIS (2024-2025)
+    - nilaway        # Uber's nil panic prevention
 
     # 💀 DEAD CODE DETECTION
     - deadcode       # Unreachable code
@@ -268,6 +272,30 @@ linters-settings:
       - 'strconv.ParseFloat'
       - 'time.Sleep'
       - 'time.Duration'
+
+  # 📝 TODO/FIXME/HACK detection (Enterprise-grade)
+  godox:
+    keywords:
+      # Standard markers
+      - TODO
+      - FIXME
+      - HACK
+      - BUG
+      - XXX
+      
+      # Enterprise-specific markers
+      - SECURITY     # Security-related todos
+      - PERFORMANCE  # Performance optimizations needed
+      - DEBT         # Technical debt markers
+      - REVIEW       # Code review follow-ups
+      - REFACTOR     # Refactoring needed
+      - TEST         # Missing tests
+      - DEPRECATED   # Deprecated code markers
+
+  # 🤖 Uber's NilAway (Cutting-edge nil panic prevention)
+  nilaway:
+    include-tests: true
+    deep-analysis: true
 
 # 🚨 ISSUES CONFIGURATION
 # Note: Formatters (gofumpt, goimports) should be run separately via 'just fix'

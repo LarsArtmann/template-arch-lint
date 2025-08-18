@@ -1,0 +1,204 @@
+# 🛡️ SEMGREP CUSTOM SECURITY RULES
+# Enterprise-grade security pattern detection for Go applications
+# 
+# This configuration provides custom security rules tailored for the 
+# template-arch-lint project's architecture and common Go vulnerabilities.
+
+rules:
+  # 🚨 Hardcoded Secrets Detection
+  - id: hardcoded-secret-patterns
+    patterns:
+      - pattern: |
+          const $VAR = "$SECRET"
+      - pattern: |
+          var $VAR = "$SECRET"
+      - metavariable-regex:
+          metavariable: $SECRET
+          regex: (?i)(password|secret|key|token|api[_-]?key|auth|credential).*[a-zA-Z0-9]{8,}
+    message: |
+      Potential hardcoded secret detected. Use environment variables or secure configuration management instead.
+      Consider: os.Getenv("$VAR") or config.Get("$VAR")
+    languages: [go]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-798: Use of Hard-coded Credentials"
+      owasp: "A02:2021 – Cryptographic Failures"
+
+  # 🔐 Weak Cryptography Detection
+  - id: weak-crypto-usage
+    patterns:
+      - pattern: crypto/md5.$_
+      - pattern: crypto/sha1.$_
+      - pattern: crypto/des.$_
+      - pattern: crypto/rc4.$_
+    message: |
+      Weak cryptographic algorithm detected. Use stronger alternatives:
+      - Replace MD5/SHA1 with SHA-256 or SHA-3
+      - Replace DES with AES
+      - Replace RC4 with ChaCha20 or AES-GCM
+    languages: [go]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-327: Use of a Broken or Risky Cryptographic Algorithm"
+
+  # 🌐 SQL Injection Prevention
+  - id: potential-sql-injection
+    patterns:
+      - pattern: |
+          $DB.Exec("... " + $VAR + " ...")
+      - pattern: |
+          $DB.Query("... " + $VAR + " ...")
+      - pattern: |
+          fmt.Sprintf("SELECT|INSERT|UPDATE|DELETE ... %s ...", $VAR)
+    message: |
+      Potential SQL injection vulnerability. Use parameterized queries instead:
+      db.Query("SELECT * FROM users WHERE id = ?", userID)
+    languages: [go]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-89: Improper Neutralization of Special Elements used in an SQL Command"
+      owasp: "A03:2021 – Injection"
+
+  # 🚫 Command Injection Prevention
+  - id: command-injection-risk
+    patterns:
+      - pattern: |
+          exec.Command($CMD, ..., $VAR, ...)
+      - pattern: |
+          exec.CommandContext($CTX, $CMD, ..., $VAR, ...)
+    message: |
+      Potential command injection risk. Validate and sanitize all user input before executing commands.
+      Consider using allowlists for acceptable commands and arguments.
+    languages: [go]
+    severity: WARNING
+    metadata:
+      category: security
+      cwe: "CWE-78: Improper Neutralization of Special Elements used in an OS Command"
+
+  # 📁 Path Traversal Prevention
+  - id: path-traversal-risk
+    patterns:
+      - pattern: |
+          os.Open($PATH)
+      - pattern: |
+          ioutil.ReadFile($PATH)
+      - pattern: |
+          os.ReadFile($PATH)
+    message: |
+      Potential path traversal vulnerability. Validate file paths:
+      - Use filepath.Clean() to normalize paths
+      - Validate against allowed directories
+      - Check for "../" patterns
+    languages: [go]
+    severity: WARNING
+    metadata:
+      category: security
+      cwe: "CWE-22: Improper Limitation of a Pathname to a Restricted Directory"
+
+  # 🔢 Insecure Random Number Generation
+  - id: weak-random-generation
+    patterns:
+      - pattern: math/rand.$_
+    message: |
+      Using math/rand for security-sensitive operations. Use crypto/rand instead:
+      - crypto/rand.Read() for generating secure random bytes
+      - crypto/rand.Int() for secure random integers
+    languages: [go]
+    severity: WARNING
+    metadata:
+      category: security
+      cwe: "CWE-338: Use of Cryptographically Weak Pseudo-Random Number Generator"
+
+  # 🌍 Unsafe HTTP Client Configuration
+  - id: insecure-http-client
+    patterns:
+      - pattern: |
+          http.Client{
+            ...,
+            Transport: &http.Transport{
+              ...,
+              TLSClientConfig: &tls.Config{
+                ...,
+                InsecureSkipVerify: true,
+                ...
+              },
+              ...
+            },
+            ...
+          }
+    message: |
+      Insecure HTTP client configuration detected. InsecureSkipVerify: true disables TLS certificate verification.
+      This should only be used in development environments, never in production.
+    languages: [go]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-295: Improper Certificate Validation"
+
+  # 📝 Information Disclosure via Logging
+  - id: sensitive-data-logging
+    patterns:
+      - pattern: |
+          log.$_("...", ..., $VAR, ...)
+      - pattern: |
+          fmt.Printf("...", ..., $VAR, ...)
+    message: |
+      Potential sensitive data logging. Ensure passwords, tokens, and personal data are not logged.
+      Use structured logging with sanitized fields.
+    languages: [go]
+    severity: INFO
+    metadata:
+      category: security
+      cwe: "CWE-532: Insertion of Sensitive Information into Log File"
+
+  # 🔒 Missing Error Handling for Security Operations
+  - id: unhandled-crypto-errors
+    patterns:
+      - pattern: |
+          $_, _ = crypto/rand.Read($BUF)
+      - pattern: |
+          $_, _ = $HASHER.Write($DATA)
+    message: |
+      Unhandled error in cryptographic operation. Always check errors from security-sensitive functions.
+    languages: [go]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-252: Unchecked Return Value"
+
+  # 🏗️ Architecture Violation Detection (Domain Layer Purity)
+  - id: domain-layer-external-dependency
+    patterns:
+      - pattern-inside: |
+          package $PKG
+          ...
+      - metavariable-regex:
+          metavariable: $PKG
+          regex: .*domain.*
+      - pattern: |
+          import "$EXTERNAL"
+      - metavariable-regex:
+          metavariable: $EXTERNAL
+          regex: ^(?!.*/(domain|shared)/).*$
+    message: |
+      Domain layer should not import external dependencies. Keep domain layer pure.
+      Move external integrations to infrastructure layer.
+    languages: [go]
+    severity: ERROR
+    metadata:
+      category: architecture
+      subcategory: clean-architecture
+
+# 📊 Semgrep Configuration
+options:
+  # Performance settings
+  max_target_bytes: 5000000  # 5MB max file size
+  timeout: 30               # 30 second timeout per file
+  
+  # Output settings
+  force_color: false
+  quiet: false
+  verbose: false
