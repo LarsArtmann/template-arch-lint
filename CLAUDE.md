@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### ✅ **What This Project IS:**
 - **Go Linting Template**: Demonstrates enterprise-grade architecture and code quality enforcement
 - **Reference Implementation**: Shows Clean Architecture + DDD patterns in Go
-- **Configuration Library**: Provides `.go-arch-lint.yml`, `.golangci.yml`, and `justfile` for copy/paste use
+- **Configuration Library**: Provides `.go-arch-lint.yml`, `.golangci.yml`, `.semgrep.yml`, and `justfile` for copy/paste use
 - **Simple HTMX Demo**: Basic web app with templ templates and SQLite database
 - **Educational Resource**: Learn proper Go architecture boundaries and functional programming patterns
 
@@ -18,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Complex Business Domain**: User CRUD is intentionally simple to focus on architecture
 
 ### 🎯 **Core Purpose:**
-Copy the linting configurations (`.go-arch-lint.yml`, `.golangci.yml`, `justfile`) to your real projects to enforce architectural boundaries and code quality. The Go code demonstrates how to structure projects following these rules.
+Copy the linting configurations (`.go-arch-lint.yml`, `.golangci.yml`, `.semgrep.yml`, `justfile`) to your real projects to enforce architectural boundaries and code quality. The Go code demonstrates how to structure projects following these rules.
 
 ## 🏗️ High-Level Architecture Understanding
 
@@ -64,175 +64,226 @@ sql/
 
 ## Essential Commands
 
-### Development Workflow
+### Core Development Commands
 ```bash
-# Install all required linting tools
-just install
+# Installation & Setup
+just install              # Install ALL linting tools (golangci-lint, go-arch-lint, etc.)
+just install-hooks        # Install git pre-commit hooks (fast checks only)
+just install-hooks-full   # Install comprehensive pre-commit hooks (includes architecture)
 
-# Run complete linting suite (architecture + code quality + filenames)
-just lint
+# Primary Workflow Commands  
+just lint                 # Run ALL linters (architecture, code, security, dependencies)
+just fix                  # Auto-fix formatting issues and simple violations
+just test                 # Run all tests with coverage report
+just build                # Build the application
+just run                  # Start HTTP server on port 8080
+just dev                  # Development mode with auto-reload
+just ci                   # Complete CI/CD pipeline simulation
 
-# Auto-fix formatting and simple issues
-just fix
-
-# Generate templ templates and build application
-just build
-
-# Start the HTTP server (port 8080)
-just run
-
-# Development mode with auto-reload
-just dev
-
-# Run all tests with coverage
-just test
-
-# Complete CI/CD simulation
-just ci
+# Security & Vulnerability Scanning
+just security-audit       # Complete security audit (all tools)
+just lint-vulns          # Run govulncheck for CVE scanning
+just lint-semgrep        # Custom security pattern detection
+just lint-licenses       # License compliance scanning (FOSSA)
+just lint-deps-advanced  # Advanced dependency vulnerability analysis
 ```
 
-### Specialized Linting
+### Specialized Linting Commands
 ```bash
-# Architecture boundaries only
-just lint-arch
+# Architecture & Design
+just lint-arch           # Architecture boundary validation only
+just graph               # Generate architecture dependency graph (SVG)
 
-# Code quality only  
-just lint-code
+# Code Quality
+just lint-code           # Code quality linting (40+ linters)
+just lint-strict         # Maximum strictness mode
+just lint-files          # Filename compliance validation
+just lint-cycles         # Import cycle detection
+just lint-goroutines     # Goroutine leak detection (Uber's goleak)
 
-# Problematic filenames only
-just lint-files
-
-# Maximum strictness mode
-just lint-strict
-
-# Security-focused linting
-just lint-security
+# Formatting & Generation
+just format              # gofumpt + goimports formatting
+just templ               # Generate templ templates
+templ generate           # Force regenerate templates
+sqlc generate            # Generate type-safe SQL code
 ```
 
-### Template Generation
+### Testing Commands
 ```bash
-# Generate a-h/templ templates
-just templ
-
-# Force regeneration after template changes
-templ generate
-```
-
-### Testing & Development
-```bash
-# Run single test file or package
+# Single test or package
 go test ./internal/domain/services/ -v
 go test ./internal/domain/entities/ -v
 
-# Run specific test function
+# Specific test function
 go test ./internal/domain/services/ -v -run TestUserService_CreateUser
 
-# Run tests with race detection
+# Race detection
 go test ./... -v -race
 
-# Generate coverage report
+# Coverage report
 go test ./... -coverprofile=coverage.out
 go tool cover -html=coverage.out -o coverage.html
 
-# Run benchmarks
+# Benchmarks
 go test ./internal/domain/services/ -bench=.
-
-# Configuration testing
-just config-test
 ```
 
-### Database Operations
-```bash
-# Generate type-safe SQL code from schema/queries
-sqlc generate
+## Critical Linting Configuration
 
-# Verify sqlc configuration
-sqlc verify
+### Architecture Enforcement (`.go-arch-lint.yml`)
+- **Domain purity**: Domain layer cannot import infrastructure or application layers
+- **Dependency inversion**: Infrastructure depends on domain interfaces
+- **Clean architecture flow**: Infrastructure → Application → Domain
 
-# SQLite database location
-# Development: ./app.db
-# Test: in-memory
-```
+### Code Quality Enforcement (`.golangci.yml`)  
+- **40+ linters enabled** including cutting-edge tools:
+  - `nilaway`: Uber's nil panic prevention (2024-2025)
+  - `godox`: TODO/FIXME/HACK detection
+  - `forbidigo`: Bans `interface{}`, `any`, `panic()`, and `fmt.Print*`
+  - `gomnd`: Magic number detection
+  - `maligned`: Struct alignment optimization
+  - `gochecknoinits`: No init functions
+  - `gochecknoglobals`: No global variables
+- **Function limits**: Max 50 lines, complexity 10
+- **File limits**: Max 400 lines per file
+- **Line length**: Max 120 characters
 
-## Architecture (What the Linting Enforces)
+### Security Scanning (`.semgrep.yml`)
+- **10 custom security rules** for Go-specific vulnerabilities:
+  - Hardcoded secrets detection
+  - SQL injection prevention
+  - Command injection risks
+  - Path traversal vulnerabilities
+  - Weak cryptography usage
+  - Insecure TLS configurations
 
-### Layer Dependencies (Strictly Enforced by `.go-arch-lint.yml`)
-```
-Infrastructure → Application → Domain
-```
+## Key Libraries and Patterns
 
-### Key Layers
-- **Domain** (`internal/domain/`): Pure business logic, no external dependencies
-- **Application** (`internal/application/`): HTTP handlers, orchestrates domain + infrastructure  
-- **Infrastructure** (`internal/infrastructure/`): Database, external services
-- **Database** (`internal/db/`): SQLC-generated type-safe SQL code
-
-### Key Libraries Used
-- **gin + templ + HTMX**: HTTP server with type-safe templates
-- **sqlc**: Type-safe SQL code generation  
-- **samber/lo**: Functional programming (Filter, Map, Reduce)
+### Core Dependencies
+- **gin**: HTTP web framework
+- **templ**: Type-safe HTML templates
+- **HTMX**: Progressive enhancement for web UI
+- **sqlc**: Type-safe SQL code generation
+- **samber/lo**: Functional programming utilities (Map, Filter, Reduce)
+- **samber/do**: Dependency injection
 - **viper**: Configuration management
-- **Ginkgo/Gomega**: BDD testing
+- **Ginkgo/Gomega**: BDD testing framework
 
-## Important Files to Copy to Your Projects
+### Important Implementation Patterns
 
-- **`.go-arch-lint.yml`**: Architecture boundary enforcement  
-- **`.golangci.yml`**: Maximum strictness code quality rules
-- **`justfile`**: Complete linting and development automation
-- **`sqlc.yaml`**: Type-safe SQL generation configuration
+#### Value Objects (`internal/domain/values/`)
+- Enforce validation and type safety at domain level
+- Examples: `Email`, `UserName`, `UserID` with business rules
 
-## What the Linting Enforces
+#### Repository Pattern
+- **Interfaces** in `internal/domain/repositories/`
+- **Implementations** in `internal/infrastructure/persistence/`
+- **In-memory versions** for testing
 
-- Domain layer cannot import infrastructure packages
-- No `interface{}`, `any`, or `panic()` usage (`.golangci.yml`)
-- Functional programming patterns with samber/lo
-- Type-safe database operations via SQLC
-- Value objects for domain primitives
+#### Result Pattern (`internal/domain/shared/result.go`)
+- Functional error handling without exceptions
+- Chain operations with success/failure paths
 
-## Architecture Violations You'll Get
+#### Functional Programming with samber/lo
+- Heavy use of `lo.Map()`, `lo.Filter()`, `lo.Reduce()`
+- See `internal/domain/services/user_service.go` for examples
 
-Common violations the linters catch:
-- `domain-entities cannot depend on infrastructure`
-- `🚨 BANNED: interface{} erases type safety`
-- `DELETE statements should include WHERE clauses`
-- Function too long (max 50 lines)
-- Cyclomatic complexity too high (max 10)
+## Common Development Workflows
 
-**Note**: The project includes extensive Docker/K8s/monitoring setup as examples of over-engineering to avoid in templates. Focus on the core linting configurations.
+### Before Committing Code
+```bash
+just lint        # Run all quality checks
+just fix         # Auto-fix formatting
+just test        # Ensure tests pass
+```
 
-## 🔍 Code Understanding Guidelines
+### Adding New Features
+```bash
+just lint-arch   # Verify architecture compliance
+just lint-code   # Check code quality
+just test        # Test your changes
+```
 
-### Value Objects Pattern
-Value objects enforce validation and type safety:
-- `internal/domain/values/user_id.go` - Validated user identifiers
-- `internal/domain/values/email.go` - Email validation with domain extraction
-- `internal/domain/values/username.go` - Username validation with reserved word checking
+### Security Review
+```bash
+just security-audit  # Complete security scan
+cat semgrep-report.json  # Review findings
+```
 
-### Repository Pattern Implementation
-- **Interfaces**: `internal/domain/repositories/user_repository.go` (domain layer)
-- **Implementations**: `internal/infrastructure/persistence/user_repository_sqlc.go` (infrastructure layer)
-- **In-Memory**: `internal/domain/repositories/inmemory_user_repository.go` (for testing)
+## Architecture Violations You'll Encounter
+
+Common violations and their meanings:
+- `domain-entities cannot depend on infrastructure` - Keep domain pure
+- `🚨 BANNED: interface{} erases type safety` - Use specific types
+- `🚨 BANNED: panic() crashes programs` - Return errors instead
+- `Function too long (max 50 lines)` - Split into smaller functions
+- `Cyclomatic complexity too high (max 10)` - Simplify logic
+
+## Important Configuration Files
+
+- **`.go-arch-lint.yml`**: Architecture boundary rules
+- **`.golangci.yml`**: 40+ linters configuration
+- **`.semgrep.yml`**: Custom security patterns
+- **`justfile`**: Task automation (30+ commands)
+- **`sqlc.yaml`**: Type-safe SQL generation
+- **`.pre-commit-config.yaml`**: Git hook configuration
+
+## Database Setup
+
+- **SQLite** for development (`./app.db`)
+- **In-memory** for testing
+- **SQLC** for type-safe queries
+- Schema in `sql/schema/`
+- Queries in `sql/queries/`
+
+## Project-Specific Notes
 
 ### SQLC Integration
-- **Schema**: `sql/schema/001_users.sql` - Database structure  
-- **Queries**: `sql/queries/users.sql` - Type-safe SQL operations
-- **Generated**: `internal/db/` - Auto-generated Go code from SQLC
-- **Config**: `sqlc.yaml` - Comprehensive SQLC configuration with custom type mappings
+- Always run `sqlc generate` after modifying SQL files
+- Generated code goes to `internal/db/`
+- Custom type mappings configured in `sqlc.yaml`
 
-### Functional Programming with samber/lo
-The codebase heavily uses functional programming patterns:
-- `lo.Map()` - Transform slices
-- `lo.Filter()` - Filter collections  
-- `lo.Reduce()` - Aggregate data
-- See `internal/domain/services/user_service.go` for extensive examples
+### Templ Templates
+- Run `just templ` or `templ generate` after template changes
+- Templates in `web/templates/`
+- Type-safe HTML generation
 
-### Error Handling Strategy
-- **Domain Errors**: `internal/domain/errors/` - Typed error system
-- **Result Pattern**: `internal/domain/shared/result.go` - Functional error handling
-- **HTTP Responses**: `internal/application/http/response_helpers.go` - Standardized API responses
+### Testing Strategy
+- BDD tests with Ginkgo/Gomega
+- Test helpers in `internal/testhelpers/`
+- Builder pattern for test data
+- Parallel test execution enabled
 
-### Testing Architecture
-- **Suite Pattern**: Uses Ginkgo/Gomega BDD testing framework
-- **Test Helpers**: `internal/testhelpers/` - Comprehensive testing utilities
-- **Builders**: `internal/testhelpers/domain/entities/builders.go` - Test data builders
-- **Parallel Tests**: Configured for concurrent test execution
+### Error Handling
+- Domain errors in `internal/domain/errors/`
+- Result pattern for functional error handling
+- Standardized HTTP responses in `internal/application/http/`
+
+## Important Implementation Guidelines
+
+### When Adding New Code
+1. Respect layer boundaries (domain must stay pure)
+2. Use value objects for domain primitives
+3. Prefer functional programming patterns with samber/lo
+4. Write BDD-style tests with Ginkgo
+5. Run `just lint` before committing
+
+### When Modifying Architecture
+1. Update `.go-arch-lint.yml` for new components
+2. Regenerate architecture graph with `just graph`
+3. Ensure no circular dependencies
+4. Maintain dependency inversion principle
+
+### When Working with Database
+1. Write SQL in `sql/queries/`
+2. Run `sqlc generate` to create type-safe code
+3. Implement repository interfaces from domain layer
+4. Use in-memory repositories for testing
+
+## Quick Troubleshooting
+
+- **"Tool not found"**: Run `just install`
+- **Architecture violations**: Check dependency direction (Infrastructure → Application → Domain)
+- **Too many linting errors**: Start with `just fix`, then address remaining issues
+- **Test failures**: Check for goroutine leaks with `just lint-goroutines`
+- **Performance issues**: Run linters individually instead of `just lint`

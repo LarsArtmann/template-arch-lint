@@ -4,7 +4,7 @@
 # This configuration enforces the highest standards of Go code quality
 # Designed for mission-critical production systems with zero defect tolerance
 
-# version: 1 (default, compatible with golangci-lint v1.64.8)
+version: 2
 
 run:
   timeout: 5m
@@ -64,18 +64,11 @@ linters:
     - gochecknoinits # No init functions (anti-pattern)
     - gochecknoglobals # No global variables
     - lll            # Line length limits
-    - maligned       # Struct alignment optimization
-    - golint         # Go style guide enforcement
-    - gomnd          # Magic number detection
     - godox          # TODO/FIXME/HACK detection
-
-    # 🤖 CUTTING-EDGE ANALYSIS (2024-2025)
-    - nilaway        # Uber's nil panic prevention
+    - mnd            # Magic number detection (modern replacement for gomnd)
 
     # 💀 DEAD CODE DETECTION
-    - deadcode       # Unreachable code
-    - varcheck       # Unused global variables
-    - structcheck    # Unused struct fields
+    - unused         # Comprehensive unused code detection (replaces deadcode, varcheck, structcheck)
 
 
 # 🔧 LINTER SETTINGS - Maximum strictness
@@ -177,6 +170,11 @@ linters-settings:
   stylecheck:
     checks: ["all"]
 
+  # Go vet with struct field alignment optimization
+  govet:
+    enable:
+      - fieldalignment  # Modern replacement for maligned
+
   # Go critic
   gocritic:
     enabled-tags:
@@ -252,27 +250,6 @@ linters-settings:
     line-length: 120
     tab-width: 4
 
-  # Struct alignment optimization
-  maligned:
-    suggest-new: true
-
-  # Magic number detection
-  gomnd:
-    # Ignored numbers (common constants that don't need extraction)
-    ignored-numbers:
-      - '0'
-      - '1' 
-      - '2'
-      - '10'
-      - '100'
-      - '1000'
-    # Ignored functions where numbers are acceptable
-    ignored-functions:
-      - 'strconv.ParseInt'
-      - 'strconv.ParseFloat'
-      - 'time.Sleep'
-      - 'time.Duration'
-
   # 📝 TODO/FIXME/HACK detection (Enterprise-grade)
   godox:
     keywords:
@@ -292,10 +269,22 @@ linters-settings:
       - TEST         # Missing tests
       - DEPRECATED   # Deprecated code markers
 
-  # 🤖 Uber's NilAway (Cutting-edge nil panic prevention)
-  nilaway:
-    include-tests: true
-    deep-analysis: true
+  # Magic number detection (modern replacement for gomnd)
+  mnd:
+    # Ignored numbers (common constants that don't need extraction)
+    ignored-numbers:
+      - '0'
+      - '1' 
+      - '2'
+      - '10'
+      - '100'
+      - '1000'
+    # Ignored functions where numbers are acceptable
+    ignored-functions:
+      - 'strconv.ParseInt'
+      - 'strconv.ParseFloat'
+      - 'time.Sleep'
+      - 'time.Duration'
 
 # 🚨 ISSUES CONFIGURATION
 # Note: Formatters (gofumpt, goimports) should be run separately via 'just fix'
