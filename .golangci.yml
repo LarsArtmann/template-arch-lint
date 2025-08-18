@@ -122,7 +122,37 @@ linters-settings:
   errcheck:
     check-type-assertions: true
     check-blank: true
-    exclude-functions: []
+    # 🆕 Function-specific exclusions (smart defaults)
+    exclude-functions:
+      # Resource cleanup - errors in defer contexts are typically non-critical
+      - (io.Closer).Close
+      - (*os.File).Close
+      - (net.Conn).Close
+      - (*net.TCPConn).Close
+      - (*net.UDPConn).Close
+      - (*sql.DB).Close
+      - (*sql.Rows).Close
+      - (*sql.Stmt).Close
+      
+      # Formatting operations - rarely fail and errors are usually non-critical
+      - fmt.Fprint
+      - fmt.Fprintf  
+      - fmt.Fprintln
+      - fmt.Print
+      - fmt.Printf
+      - fmt.Println
+      
+      # Buffer operations - bytes.Buffer operations never fail
+      - (*bytes.Buffer).Write
+      - (*bytes.Buffer).WriteByte
+      - (*bytes.Buffer).WriteRune
+      - (*bytes.Buffer).WriteString
+      
+      # String builder operations - strings.Builder operations never fail
+      - (*strings.Builder).Write
+      - (*strings.Builder).WriteByte
+      - (*strings.Builder).WriteRune  
+      - (*strings.Builder).WriteString
 
   errorlint:
     errorf: true
