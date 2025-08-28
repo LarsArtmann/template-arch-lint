@@ -44,10 +44,10 @@ help:
     @just --list --unsorted
     @echo ""
     @echo "\033[1mQUICK START:\033[0m"
-    @echo "  1. \033[0;36mjust install\033[0m  - Install required tools"
-    @echo "  2. \033[0;36mjust lint\033[0m     - Run all linters"
-    @echo "  3. \033[0;36mjust format\033[0m   - Format code (gofumpt + goimports)"
-    @echo "  4. \033[0;36mjust fix\033[0m      - Auto-fix issues"
+    @echo "  1. \033[0;32mjust bootstrap\033[0m - 🚀 Complete setup with verification"
+    @echo "  2. \033[0;36mjust lint\033[0m      - Run all linters"
+    @echo "  3. \033[0;36mjust format\033[0m    - Format code (gofumpt + goimports)"
+    @echo "  4. \033[0;36mjust fix\033[0m       - Auto-fix issues"
     @echo "  5. \033[0;36mjust run\033[0m      - Run the application"
     @echo ""
     @echo "\033[1mDOCKER COMMANDS:\033[0m"
@@ -77,6 +77,131 @@ help:
     @echo "  • \033[0;36mjust bench-cpu\033[0m           - Run CPU-focused benchmarks"
     @echo "  • \033[0;36mjust bench-memory\033[0m        - Run memory-focused benchmarks"
     @echo "  • \033[0;36mjust bench-compare\033[0m       - Compare benchmark results"
+
+# 🚀 Complete bootstrap setup with verification and error handling
+bootstrap:
+    @echo "\033[1m🚀 BOOTSTRAP SETUP - ENTERPRISE GO LINTING\033[0m"
+    @echo "\033[0;36mVerifying environment and installing everything needed...\033[0m"
+    @echo ""
+    #!/bin/bash
+    set -euo pipefail
+    
+    # Check if we're in a Go project
+    @if [ ! -f "go.mod" ]; then \
+        echo "\033[0;31m❌ No go.mod found. Please run from the root of a Go project.\033[0m"; \
+        exit 1; \
+    fi
+    @echo "\033[0;32m✅ Go project detected\033[0m"
+    
+    # Check if we're in a git repository  
+    @if [ ! -d ".git" ]; then \
+        echo "\033[0;31m❌ Not in a git repository. Please initialize git first.\033[0m"; \
+        exit 1; \
+    fi
+    @echo "\033[0;32m✅ Git repository detected\033[0m"
+    
+    # Check required commands
+    @echo "\033[1m🔍 CHECKING DEPENDENCIES\033[0m"
+    @if ! command -v go >/dev/null 2>&1; then \
+        echo "\033[0;31m❌ Missing required command: go\033[0m"; \
+        exit 1; \
+    fi
+    @if ! command -v curl >/dev/null 2>&1; then \
+        echo "\033[0;31m❌ Missing required command: curl\033[0m"; \
+        exit 1; \
+    fi
+    @if ! command -v git >/dev/null 2>&1; then \
+        echo "\033[0;31m❌ Missing required command: git\033[0m"; \
+        exit 1; \
+    fi
+    @echo "\033[0;32m✅ Required commands available: go, curl, git\033[0m"
+    
+    # Check Go version
+    @go_version=$$(go version | grep -oE 'go[0-9]+\.[0-9]+' | sed 's/go//'); \
+    min_version="1.19"; \
+    if [ "$$(printf '%s\n%s\n' "$$min_version" "$$go_version" | sort -V | head -n1)" != "$$min_version" ]; then \
+        echo "\033[0;31m❌ Go version $$go_version is too old. Minimum required: $$min_version\033[0m"; \
+        exit 1; \
+    fi
+    @echo "\033[0;32m✅ Go version compatible ($$(go version | grep -oE 'go[0-9]+\.[0-9]+'))\033[0m"
+    
+    # Check for configuration files
+    @echo "\033[1m📋 CHECKING CONFIGURATION FILES\033[0m"
+    @if [ ! -f ".go-arch-lint.yml" ]; then \
+        echo "\033[0;33m⚠️  Missing .go-arch-lint.yml, downloading...\033[0m"; \
+        if ! curl -fsSL "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/.go-arch-lint.yml" -o ".go-arch-lint.yml"; then \
+            echo "\033[0;31m❌ Failed to download .go-arch-lint.yml\033[0m"; \
+            exit 1; \
+        fi; \
+    fi
+    @if [ ! -f ".golangci.yml" ]; then \
+        echo "\033[0;33m⚠️  Missing .golangci.yml, downloading...\033[0m"; \
+        if ! curl -fsSL "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/.golangci.yml" -o ".golangci.yml"; then \
+            echo "\033[0;31m❌ Failed to download .golangci.yml\033[0m"; \
+            exit 1; \
+        fi; \
+    fi
+    @if [ ! -f "justfile" ]; then \
+        echo "\033[0;33m⚠️  Missing justfile, downloading...\033[0m"; \
+        if ! curl -fsSL "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/justfile" -o "justfile"; then \
+            echo "\033[0;31m❌ Failed to download justfile\033[0m"; \
+            exit 1; \
+        fi; \
+    fi
+    @echo "\033[0;32m✅ All configuration files present\033[0m"
+    
+    # Install linting tools
+    @echo "\033[1m🛠️  INSTALLING LINTING TOOLS\033[0m"
+    @just install
+    
+    # Verify tool installation
+    @echo "\033[1m🧪 VERIFYING TOOL INSTALLATION\033[0m"
+    @if command -v golangci-lint >/dev/null 2>&1; then \
+        echo "\033[0;32m✅ golangci-lint available ($$(golangci-lint version --format short))\033[0m"; \
+    else \
+        echo "\033[0;31m❌ golangci-lint not found in PATH\033[0m"; \
+        echo "\033[0;36m💡 Try adding ~/go/bin to your PATH\033[0m"; \
+    fi
+    @if command -v go-arch-lint >/dev/null 2>&1; then \
+        echo "\033[0;32m✅ go-arch-lint available\033[0m"; \
+    else \
+        echo "\033[0;31m❌ go-arch-lint not found in PATH\033[0m"; \
+        echo "\033[0;36m💡 Try adding ~/go/bin to your PATH\033[0m"; \
+    fi
+    
+    # Test basic functionality
+    @echo "\033[1m🔬 TESTING BASIC FUNCTIONALITY\033[0m"
+    @if ls *.go >/dev/null 2>&1 || find . -name "*.go" -not -path "./vendor/*" | head -1 | grep -q "."; then \
+        echo "\033[0;36mRunning quick architecture validation...\033[0m"; \
+        if timeout 30s just lint-arch >/dev/null 2>&1; then \
+            echo "\033[0;32m✅ Architecture validation passed\033[0m"; \
+        else \
+            echo "\033[0;33m⚠️  Architecture validation had issues (may be normal for new projects)\033[0m"; \
+        fi; \
+    else \
+        echo "\033[0;36mℹ️  No Go files found, skipping architecture validation\033[0m"; \
+    fi
+    
+    # Success message
+    @echo ""
+    @echo "\033[1m\033[0;32m🎉 BOOTSTRAP COMPLETE!\033[0m"
+    @echo "\033[0;32m=====================================\033[0m"
+    @echo ""
+    @echo "\033[1m🚀 Ready to use:\033[0m"
+    @echo "  \033[0;36mjust lint\033[0m           # Run ALL quality checks"
+    @echo "  \033[0;36mjust lint-arch\033[0m      # Architecture boundaries only"
+    @echo "  \033[0;36mjust security-audit\033[0m # Complete security scan"
+    @echo "  \033[0;36mjust format\033[0m         # Format code automatically"
+    @echo "  \033[0;36mjust help\033[0m           # Show all available commands"
+    @echo ""
+    @echo "\033[1m📚 What you got:\033[0m"
+    @echo "  \033[0;32m•\033[0m Clean Architecture enforcement (domain boundaries)"
+    @echo "  \033[0;32m•\033[0m 40+ code quality linters (complexity, naming, etc.)"
+    @echo "  \033[0;32m•\033[0m Security scanning (gosec + govulncheck + NilAway)"
+    @echo "  \033[0;32m•\033[0m Magic number/string detection"
+    @echo "  \033[0;32m•\033[0m Zero tolerance for \`interface{}\`, \`any\`, \`panic()\`"
+    @echo ""
+    @echo "\033[0;33m💡 Pro tip:\033[0m Run \033[0;36mjust install-hooks\033[0m to enable pre-commit linting!"
 
 # Install all required linting tools
 install:
