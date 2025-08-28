@@ -42,7 +42,7 @@ linters:
     - funlen         # Function length
     - gocognit       # Cognitive complexity
     - gocyclo        # Cyclomatic complexity
-    - goconst        # Repeated constants
+    - goconst        # Magic string detection (repeated constants)
     - gocritic       # Opinionated checks
     - gomoddirectives # go.mod validation
     - goprintffuncname # Printf function naming

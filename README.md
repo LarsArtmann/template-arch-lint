@@ -33,6 +33,39 @@ Enterprise-Grade Go Architecture & Code Quality Enforcement Template
 
 This project creates professional README templates by analyzing patterns from real-world projects and implementing best practices for documentation. It provides a Go-based generator that creates hierarchical templates for different project types and complexity levels.
 
+## 🚨 **THE REAL VALUE: COPY THESE CONFIGS TO YOUR PROJECT!** 🚨
+
+**This is NOT a library to install - it's a template to copy from!**
+
+### **THESE 3 FILES ARE WHAT YOU NEED:**
+
+1. **`.go-arch-lint.yml`** - Enforces Clean Architecture boundaries (Domain → Application → Infrastructure)
+2. **`.golangci.yml`** - 40+ linters with maximum strictness (magic numbers, strings, security, complexity)  
+3. **`justfile`** - 30+ commands for `just lint`, `just test`, `just security-audit`, etc.
+
+### **COPY-PASTE READY:**
+```bash
+# Get the configs that matter:
+curl -fsSL -o .go-arch-lint.yml https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/.go-arch-lint.yml
+curl -fsSL -o .golangci.yml https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/.golangci.yml  
+curl -fsSL -o justfile https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/justfile
+
+# Install the linters:
+just install
+
+# Start using immediately:
+just lint        # Run ALL quality checks
+just lint-arch   # Architecture boundaries only
+just security-audit  # Complete security scan
+```
+
+**These configs enforce:**
+- ✅ **Architecture boundaries** - Domain stays pure, no circular dependencies
+- ✅ **Magic number/string detection** - goconst + mnd linters
+- ✅ **Security scanning** - gosec + govulncheck + NilAway (80% panic reduction)
+- ✅ **Code quality** - 40+ linters, max 50 lines per function, complexity limits
+- ✅ **Zero tolerance** - forbidigo bans `interface{}`, `any`, `panic()`, print statements
+
 ## Features
 
 - **🏗️ Architecture Enforcement**
@@ -135,26 +168,37 @@ go mod download
 
 ### Available Commands
 
-#### Build
+#### 🔥 **ESSENTIAL COMMANDS** (Copy these to your workflow!)
 ```bash
+just install         # Install ALL linting tools (one-time setup)
+just lint            # Run EVERYTHING: architecture + code + security (40+ linters)
+just fix             # Auto-fix all fixable issues
+just test            # Run tests with coverage
 just build           # Build the application
 ```
 
-#### Quality
+#### 🏗️ **Architecture & Quality**
 ```bash
-just lint            # Run complete linting suite
-just lint-arch       # Architecture validation only
-just fix             # Auto-fix formatting issues
+just lint-arch       # Clean Architecture boundary validation
+just lint-code       # Code quality linting (complexity, naming, etc.)
+just lint-strict     # Maximum strictness mode
+just graph           # Generate architecture dependency graph (SVG)
 ```
 
-#### Security
+#### 🔒 **Security & Safety** 
 ```bash
-just lint-nilaway    # Nil panic detection
+just security-audit  # Complete security scan (gosec + govulncheck + licenses)
+just lint-nilaway    # NilAway: 80% panic reduction
+just lint-vulns      # CVE vulnerability scanning
+just lint-deps-advanced  # Advanced dependency analysis
 ```
 
-#### Test
+#### 🧹 **Formatting & Generation**
 ```bash
-just test            # Run tests with coverage
+just format          # gofumpt + goimports formatting
+just templ           # Generate templ templates  
+just lint-cycles     # Import cycle detection
+just lint-goroutines # Goroutine leak detection
 ```
 
 ## Contributing
