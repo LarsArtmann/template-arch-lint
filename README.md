@@ -43,9 +43,31 @@ This project creates professional README templates by analyzing patterns from re
 2. **`.golangci.yml`** - 40+ linters with maximum strictness (magic numbers, strings, security, complexity)  
 3. **`justfile`** - 30+ commands for `just lint`, `just test`, `just security-audit`, etc.
 
-### **COPY-PASTE READY:**
+### **🚀 ULTRA-SIMPLE: ONE COMMAND SETUP**
 ```bash
-# Get the configs that matter:
+# 🎯 RECOMMENDED: One command that does EVERYTHING
+curl -fsSL https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/bootstrap.sh | bash
+
+# ✨ Or safer two-step (for paranoid users):
+curl -fsSL https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/bootstrap.sh -o bootstrap.sh
+chmod +x bootstrap.sh && ./bootstrap.sh
+
+# 🔧 Or if you already have the config files:
+just bootstrap
+```
+
+**What the bootstrap does FOR YOU:**
+- ✅ Verifies your Go project + git repository
+- ✅ Checks/installs required tools (go, curl, git, just)
+- ✅ Downloads all 3 config files (.go-arch-lint.yml, .golangci.yml, justfile)
+- ✅ Installs all linting tools (golangci-lint, go-arch-lint)
+- ✅ Verifies everything works correctly
+- ✅ Provides clear next steps
+- ✅ **Rolls back on any error** - completely safe!
+
+### **MANUAL COPY-PASTE (If you prefer):**
+```bash
+# Get the configs manually:
 curl -fsSL -o .go-arch-lint.yml https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/.go-arch-lint.yml
 curl -fsSL -o .golangci.yml https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/.golangci.yml  
 curl -fsSL -o justfile https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/justfile
@@ -83,88 +105,67 @@ just security-audit  # Complete security scan
 - **📊 Production Ready**
   Docker containerization, monitoring, and enterprise deployment patterns
 
-## Installation
+## 🚀 **INSTANT SETUP** - Zero-Friction Installation
 
-### Prerequisites
+### **ONE COMMAND SETUP** (Recommended)
 
-- Go 1.23+
-- Just command runner
-- Git (for cloning repository)
-
-### Installation Options
-
-<details>
-<summary><b>Option 1: One-Liner Script (Recommended)</b></summary>
-
-Automated installation using git subtree
+**🎯 Get from zero to enterprise-grade linting in under 2 minutes:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/scripts/install-lint-config.sh | bash
-just install
+curl -fsSL https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/bootstrap.sh | bash
 ```
 
-</details>
+**That's it!** The bootstrap script:
+- ✅ Verifies you're in a Go project with git
+- ✅ Installs missing tools (including `just` command runner)
+- ✅ Downloads all configuration files
+- ✅ Installs all linting tools
+- ✅ Verifies everything works
+- ✅ **Rolls back if anything fails** 
 
-<details>
-<summary><b>Option 2: Manual Git Subtree</b></summary>
-
-Pull only essential files via subtree, then clean up
-
+**🛡️ Safety First?** Download and inspect before running:
 ```bash
-git subtree add --prefix=.lint-config https://github.com/LarsArtmann/template-arch-lint.git master --squash
-cp .lint-config/.go-arch-lint.yml .lint-config/.golangci.yml .
-cp .lint-config/justfile linting.just
-rm -rf .lint-config
-just install
+curl -fsSL https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/bootstrap.sh -o bootstrap.sh
+chmod +x bootstrap.sh && ./bootstrap.sh
 ```
 
-</details>
-
-<details>
-<summary><b>Option 3: Sparse Checkout</b></summary>
-
-Advanced git method for precise file extraction
-
+**🔧 Already have config files?** Just run:
 ```bash
-git clone --filter=blob:none --sparse https://github.com/LarsArtmann/template-arch-lint.git /tmp/template-lint
-cd /tmp/template-lint && git sparse-checkout set .go-arch-lint.yml .golangci.yml justfile
-cp .go-arch-lint.yml .golangci.yml justfile /path/to/your/project/
-cd /path/to/your/project && rm -rf /tmp/template-lint
-just install
+just bootstrap  # Verifies and installs everything needed
 ```
 
-</details>
+### **Prerequisites (Auto-detected & installed)**
 
-<details>
-<summary><b>Option 4: Direct Download</b></summary>
+- ✅ **Go 1.19+** (will check version compatibility)
+- ✅ **Git repository** (will verify you're in one)  
+- ✅ **curl** (for downloading files)
+- ✅ **`just` command runner** (will install automatically if missing)
 
-Simple curl-based file download
-
-```bash
-for file in .go-arch-lint.yml .golangci.yml justfile; do curl -fsSL -o "$file" "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/$file"; done
-just install
-```
-
-</details>
+*The bootstrap script handles all of this automatically!*
 
 ## Usage
 
 ## Development
 
-### Prerequisites
+### Quick Development Setup
 
-- Go 1.23+
-- Just command runner
-- Git
-
-### Setup
+**🚀 Get the complete development environment running instantly:**
 
 ```bash
-Clone the repository
+git clone https://github.com/LarsArtmann/template-arch-lint.git
 cd template-arch-lint
-just install
-go mod download
+just bootstrap  # Installs everything needed + verifies setup
+go mod download  # Download Go dependencies
 ```
+
+**That's it!** The `just bootstrap` command handles all tool installation and verification.
+
+### Prerequisites (Auto-detected)
+
+- ✅ **Go 1.19+** (bootstrap will verify version)
+- ✅ **Git** (for cloning repository)
+- ✅ **`just` command runner** (bootstrap will install if missing)
+- ✅ **All linting tools** (bootstrap installs automatically)
 
 ### Available Commands
 
