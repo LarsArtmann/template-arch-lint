@@ -47,7 +47,10 @@
       "Bash(./test-simple-bootstrap.sh:*)",
       "Bash(./test-path-verification.sh:*)",
       "Bash(./test-complete-workflow.sh:*)",
-      "Bash(./bootstrap.sh:*)"
+      "Bash(./bootstrap.sh:*)",
+      "Bash(./test-bootstrap-bdd.sh:*)",
+      "Bash(bash:*)",
+      "Bash(./test-bootstrap-simple-bdd.sh:*)"
     ],
     "deny": []
   }
