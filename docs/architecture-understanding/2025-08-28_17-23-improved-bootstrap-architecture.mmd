@@ -1,0 +1,63 @@
+graph TD
+    A[User runs bootstrap.sh] --> B{Parse flags}
+    B -->|--diagnose| C[Comprehensive diagnostics]
+    B -->|--fix| D[Auto-repair mode]
+    B -->|--retry| E[Retry with fallbacks]
+    B -->|default| F[Standard bootstrap]
+    
+    C --> G[Environment analysis]
+    G --> H[Network connectivity test]
+    H --> I[Tool availability check]
+    I --> J[Generate diagnostic report]
+    J --> K[Suggest specific fixes]
+    
+    D --> L[Smart environment check]
+    L -->|Issues found| M[Auto-repair attempts]
+    M --> N[Progressive fallback chains]
+    N --> O[Retry with alternatives]
+    O -->|Success| P[Continue bootstrap]
+    O -->|Still failing| Q[Detailed error with manual steps]
+    
+    F --> R{Environment Check}
+    R -->|Pass| S[Install just with fallbacks]
+    R -->|Fail| T[Auto-diagnosis & repair attempt]
+    T --> U[Retry environment check]
+    U -->|Fixed| S
+    U -->|Still failing| V[Detailed error with solutions]
+    
+    S -->|Primary method fails| W[Try fallback method]
+    W -->|All methods fail| X[Auto-diagnosis & suggested fixes]
+    S -->|Success| Y[Download configs with retries]
+    
+    Y -->|Network issues| Z[Try alternative mirrors]
+    Y -->|Success| AA[Install tools with progressive fallbacks]
+    Z --> AA
+    
+    AA -->|go install fails| BB[Try direct download]
+    BB -->|Still fails| CC[Suggest manual installation]
+    AA -->|Success| DD[Setup PATH with persistence]
+    
+    DD --> EE[Comprehensive verification]
+    EE -->|Issues| FF[Auto-fix common problems]
+    FF --> GG[Re-verify]
+    EE -->|Success| HH[Bootstrap complete with summary]
+    
+    %% Integration with justfile
+    II[just bootstrap] --> A
+    JJ[just bootstrap-fix] --> |--fix flag| D
+    KK[just bootstrap-diagnose] --> |--diagnose flag| C
+    
+    %% Smart error handling
+    LL[Any step fails] --> MM{Auto-repair possible?}
+    MM -->|Yes| NN[Attempt automatic fix]
+    MM -->|No| OO[Provide specific solution]
+    NN -->|Success| PP[Continue workflow]
+    NN -->|Fail| OO
+    
+    classDef enhanced fill:#e8f5e8,stroke:#4caf50
+    classDef integration fill:#e3f2fd,stroke:#2196f3
+    classDef smart fill:#f3e5f5,stroke:#9c27b0
+    
+    class C,D,E,M,N,T,U,W,X,Z,BB,FF enhanced
+    class II,JJ,KK,A integration
+    class MM,NN,OO,PP smart

@@ -41,7 +41,13 @@
       "Bash(nilaway:*)",
       "Bash(command -v:*)",
       "Bash(readme-generator:*)",
-      "Bash(time just:*)"
+      "Bash(time just:*)",
+      "Bash(./test-bootstrap-ubuntu.sh:*)",
+      "Bash(./test-bootstrap-local.sh:*)",
+      "Bash(./test-simple-bootstrap.sh:*)",
+      "Bash(./test-path-verification.sh:*)",
+      "Bash(./test-complete-workflow.sh:*)",
+      "Bash(./bootstrap.sh:*)"
     ],
     "deny": []
   }

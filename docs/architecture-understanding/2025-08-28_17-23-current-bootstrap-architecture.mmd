@@ -1,0 +1,40 @@
+graph TD
+    A[User runs bootstrap.sh] --> B{Environment Check}
+    B -->|Pass| C[Install just]
+    B -->|Fail| Z[Exit with error]
+    
+    C -->|Success| D[Download config files]
+    C -->|Fail| Z
+    
+    D -->|Success| E[Install linting tools via 'just install']
+    D -->|Fail| Z
+    
+    E -->|Success| F[Setup Go PATH]
+    E -->|Fail| Z
+    
+    F --> G[Verify installation]
+    G -->|Success| H[Bootstrap complete]
+    G -->|Issues| I[Warning but continue]
+    
+    %% Separate troubleshooting tools (GHOST SYSTEMS)
+    J[diagnose-environment.sh] -.->|Duplicates logic| B
+    K[fix-tool-installation.sh] -.->|Duplicates logic| C
+    K -.->|Duplicates logic| E
+    
+    %% Error handling
+    Z --> L[cleanup_on_error]
+    L --> M[Remove installed files]
+    L --> N[Show troubleshooting options]
+    N --> O[Manual steps required]
+    
+    %% Current issues
+    P[User hits error] --> Q{Know about separate tools?}
+    Q -->|No| R[Stuck - manual fixes needed]
+    Q -->|Yes| S[Run separate diagnostic scripts]
+    S --> T[Manual intervention required]
+    
+    classDef problem fill:#ffebee,stroke:#f44336
+    classDef ghost fill:#fff3e0,stroke:#ff9800,stroke-dasharray: 5 5
+    
+    class Z,R,T problem
+    class J,K ghost
