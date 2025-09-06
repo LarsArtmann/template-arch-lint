@@ -72,10 +72,9 @@ components:
     in: internal/infrastructure/**
 
   # ========================================
-  # DATA ACCESS & PERSISTENCE
+  # DATA ACCESS & PERSISTENCE - REMOVED (Using in-memory patterns)
   # ========================================
-  database:
-    in: internal/db/**
+  # database: - ELIMINATED in commit 049f475 for template simplification
 
   # ========================================
   # WEB LAYER - Templates & Static Assets
@@ -216,16 +215,9 @@ deps:
       - domain-shared
       - domain-values
       - domain-errors
-      - database
 
-  # DATA ACCESS & PERSISTENCE
-  database:
-    anyVendorDeps: true
-    mayDependOn:
-      - domain-entities
-      - domain-shared
-      - domain-values
-      - domain-errors
+  # DATA ACCESS & PERSISTENCE - ELIMINATED (commit 049f475)
+  # database: - Replaced with in-memory repository patterns for template simplification
 
   # WEB LAYER - Templates & Static Assets
   web-templates-components:
