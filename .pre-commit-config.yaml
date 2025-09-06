@@ -254,6 +254,31 @@ repos:
         pass_filenames: false
         require_serial: true
 
+  # ==============================================
+  # ARCHITECTURAL CONSTRAINTS
+  # ==============================================
+  - repo: local
+    hooks:
+      - id: cmd-single-main
+        name: "🎯 CMD Single Main Enforcement"
+        description: "Enforces exactly one main.go file in cmd/ directory for clean architecture"
+        entry: bash
+        language: system
+        args:
+          - -c
+          - |
+            echo "🎯 Checking CMD single main constraint..."
+            if [ -x "./scripts/check-cmd-single.sh" ]; then
+              ./scripts/check-cmd-single.sh
+            else
+              echo "❌ scripts/check-cmd-single.sh not found or not executable"
+              echo "   This hook requires the CMD single main enforcement script"
+              exit 1
+            fi
+        files: '^(cmd/|scripts/check-cmd-single\.sh)'
+        pass_filenames: false
+        require_serial: true
+
 # ==============================================
 # PERFORMANCE & RELIABILITY SETTINGS
 # ==============================================
@@ -276,6 +301,7 @@ ci:
 # Performance Optimizations:
 # - golangci-lint runs only on changed Go files (not full project scan)
 # - Architecture validation runs on full project (required for boundary checks)
+# - CMD single main runs only when cmd/ or script changes (targeted validation)
 # - File checks run on all relevant files but are lightweight
 #
 # Error Handling:

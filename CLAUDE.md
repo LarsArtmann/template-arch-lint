@@ -92,6 +92,7 @@ just lint-deps-advanced  # Advanced dependency vulnerability analysis
 ```bash
 # Architecture & Design
 just lint-arch           # Architecture boundary validation only
+just lint-cmd-single     # CMD single main.go enforcement only
 just graph               # Generate architecture dependency graph (SVG)
 
 # Code Quality
@@ -134,6 +135,30 @@ go test ./internal/domain/services/ -bench=.
 - **Domain purity**: Domain layer cannot import infrastructure or application layers
 - **Dependency inversion**: Infrastructure depends on domain interfaces
 - **Clean architecture flow**: Infrastructure → Application → Domain
+
+### CMD Single Main Enforcement (`lint-cmd-single`)
+- **Single Entry Point**: Enforces exactly one `main.go` file in `cmd/` directory
+- **Clean Architecture**: Prevents command proliferation and maintains single responsibility
+- **Actionable Errors**: Provides specific consolidation suggestions when violations are found
+- **Automated Validation**: Integrated into `just lint` pipeline for continuous enforcement
+
+**Examples:**
+```bash
+just lint-cmd-single      # Check cmd/ single main constraint only
+just lint                 # Includes cmd/ validation in full linting pipeline
+```
+
+**Violation Examples:**
+- ❌ Multiple main files: `cmd/server/main.go` + `cmd/cli/main.go`
+- ❌ No main files: Empty `cmd/` directory
+- ✅ Single main file: `cmd/server/main.go` only
+
+**Consolidation Suggestions:**
+- Use CLI frameworks like [Cobra](https://pkg.go.dev/github.com/spf13/cobra) for subcommands
+- Create single main with multiple modes: `server start`, `server migrate`
+- Move additional tools to separate packages/repositories
+
+**Future Enhancement**: This constraint will be available as a native golangci-lint plugin, providing deeper IDE integration and more sophisticated analysis. See `docs/planning/` for the plugin roadmap.
 
 ### Code Quality Enforcement (`.golangci.yml`)  
 - **40+ linters enabled** including cutting-edge tools:
