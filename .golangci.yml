@@ -4,7 +4,7 @@
 # This configuration enforces the highest standards of Go code quality
 # Designed for mission-critical production systems with zero defect tolerance
 
-version: 1
+version: 2
 
 run:
   timeout: 5m
@@ -34,6 +34,7 @@ linters:
     - copyloopvar    # Loop variable copies
     - noctx          # HTTP context validation
     - wrapcheck      # Error wrapping enforcement
+    - nilnesserr     # Advanced nil error checking
 
     # 📊 CODE QUALITY
     - bodyclose      # HTTP body closure
@@ -61,6 +62,14 @@ linters:
     - unused         # Unused code
     - whitespace     # Trailing whitespace
     - godot          # Comment punctuation
+    
+    # 🚀 MODERN GO FEATURES
+    - fatcontext     # Nested context detection
+    - intrange       # Modern range loop opportunities
+    - perfsprint     # Performance-focused sprintf replacements
+    - sloglint       # Standard slog usage validation
+    - spancheck      # OpenTelemetry span validation
+    - usestdlibvars  # Standard library constant usage
 
     # 🏗️ ARCHITECTURE & BEST PRACTICES
     - gochecknoinits # No init functions (anti-pattern)
@@ -289,6 +298,56 @@ linters-settings:
       - 'strconv.ParseFloat'
       - 'time.Sleep'
       - 'time.Duration'
+  
+  # 🚀 MODERN GO LINTER SETTINGS
+  
+  # Nested context detection
+  fatcontext:
+    ignore-len: 3
+  
+  # Modern range loop opportunities  
+  intrange:
+    skip-generated-code: true
+    
+  # Performance sprintf replacements
+  perfsprint:
+    int-conversion: true
+    err-error: true
+    sprintf1: true
+    strconcat: true
+    
+  # Standard slog usage validation
+  sloglint:
+    no-mixed-args: true
+    kv-check: true
+    attr-check: true
+    context-only: true
+    static-msg: true
+    
+  # OpenTelemetry span validation
+  spancheck:
+    checks:
+      - end
+      - record-error
+      - set-status
+    ignore-check-signatures:
+      - "telemetry.Record"
+      - "telemetry.RecordError"
+      
+  # Standard library constant usage
+  usestdlibvars:
+    http-method: true
+    http-status-code: true
+    time-weekday: true
+    time-month: true
+    time-layout: true
+    crypto-hash: true
+    default-rpc-path: true
+    
+  # Advanced nil error checking  
+  nilnesserr:
+    check-len: true
+    check-cap: true
 
 # 🚨 ISSUES CONFIGURATION
 # Note: Formatters (gofumpt, goimports) should be run separately via 'just fix'

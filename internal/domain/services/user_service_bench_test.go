@@ -43,6 +43,15 @@ func (m *mockRepositoryForBench) FindByEmail(_ context.Context, email string) (*
 	return nil, repositories.ErrUserNotFound
 }
 
+func (m *mockRepositoryForBench) FindByUsername(_ context.Context, username string) (*entities.User, error) {
+	for _, user := range m.users {
+		if user.Name == username {
+			return user, nil
+		}
+	}
+	return nil, repositories.ErrUserNotFound
+}
+
 func (m *mockRepositoryForBench) List(_ context.Context) ([]*entities.User, error) {
 	users := make([]*entities.User, 0, len(m.users))
 	for _, user := range m.users {
