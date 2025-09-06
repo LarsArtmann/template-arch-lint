@@ -75,3 +75,4 @@ app.db
 # Generated files (NEVER commit these!)
 *_templ.go
 *.sql.go
+.claude/settings.local.json

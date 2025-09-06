@@ -2,8 +2,6 @@
 package handlers
 
 import (
-	"context"
-	"database/sql"
 	"log/slog"
 	"time"
 
@@ -22,14 +20,12 @@ const (
 
 // HealthHandler provides health check endpoints.
 type HealthHandler struct {
-	db     *sql.DB
 	logger *slog.Logger
 }
 
 // NewHealthHandler creates a new health handler.
-func NewHealthHandler(db *sql.DB, logger *slog.Logger) *HealthHandler {
+func NewHealthHandler(logger *slog.Logger) *HealthHandler {
 	return &HealthHandler{
-		db:     db,
 		logger: logger,
 	}
 }
@@ -65,8 +61,12 @@ func (h *HealthHandler) Health(c *gin.Context) {
 	}
 
 	// Perform database health check
-	dbCheck := h.checkDatabase()
-	response.Checks["database"] = dbCheck
+	// Database removed - using in-memory for linting template
+	response.Checks["memory"] = Check{
+		Status:    StatusHealthy,
+		Timestamp: time.Now(),
+		Duration:  "0ms",
+	}
 
 	// Determine overall status based on individual checks
 	overallStatus := StatusHealthy
@@ -104,8 +104,12 @@ func (h *HealthHandler) Ready(c *gin.Context) {
 	}
 
 	// Perform readiness checks (similar to health but more strict)
-	dbCheck := h.checkDatabase()
-	response.Checks["database"] = dbCheck
+	// Database removed - using in-memory for linting template
+	response.Checks["memory"] = Check{
+		Status:    StatusHealthy,
+		Timestamp: time.Now(),
+		Duration:  "0ms",
+	}
 
 	// Add more readiness checks here (e.g., external dependencies)
 
@@ -157,23 +161,9 @@ func (h *HealthHandler) checkDatabase() Check {
 		Timestamp: time.Now(),
 	}
 
-	if h.db == nil {
-		check.Status = StatusUnhealthy
-		check.Error = "Database connection is nil"
-		check.Duration = time.Since(start).String()
-		return check
-	}
-
-	// Use a short timeout for health checks
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-
-	// Simple ping to check database connectivity
-	if err := h.db.PingContext(ctx); err != nil {
-		check.Status = StatusUnhealthy
-		check.Error = err.Error()
-		h.logger.Error("Database health check failed", "error", err)
-	}
+	// Database removed - using in-memory for linting template
+	// Health check always passes for in-memory storage
+	check.Status = StatusHealthy
 
 	check.Duration = time.Since(start).String()
 	return check

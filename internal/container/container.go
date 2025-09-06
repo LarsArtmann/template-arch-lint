@@ -2,14 +2,12 @@
 package container
 
 import (
-	"database/sql"
 	"fmt"
 	"log/slog"
 	"net/http/pprof"
 	"os"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/mattn/go-sqlite3" // Import sqlite3 driver for database/sql
 	"github.com/samber/do"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/application/handlers"
@@ -42,10 +40,7 @@ func (c *Container) RegisterAll() error {
 	// Register logger
 	c.registerLogger()
 
-	// Register database
-	c.registerDatabase()
-
-	// Register repositories
+	// Register repositories (in-memory for linting template)
 	c.registerRepositories()
 
 	// Register services
@@ -117,48 +112,24 @@ func (c *Container) registerLogger() {
 	})
 }
 
-// registerDatabase registers the database connection.
-func (c *Container) registerDatabase() {
-	do.Provide(c.injector, func(i *do.Injector) (*sql.DB, error) {
-		cfg := do.MustInvoke[*config.Config](i)
-		logger := do.MustInvoke[*slog.Logger](i)
-
-		// Open database connection
-		db, err := sql.Open(cfg.Database.Driver, cfg.Database.DSN)
-		if err != nil {
-			return nil, fmt.Errorf("failed to open database: %w", err)
-		}
-
-		// Configure connection pool
-		db.SetMaxOpenConns(cfg.Database.MaxOpenConns)
-		db.SetMaxIdleConns(cfg.Database.MaxIdleConns)
-		db.SetConnMaxLifetime(cfg.Database.ConnMaxLifetime)
-		db.SetConnMaxIdleTime(cfg.Database.ConnMaxIdleTime)
-
-		// Test connection
-		if err := db.Ping(); err != nil {
-			db.Close()
-			return nil, fmt.Errorf("failed to ping database: %w", err)
-		}
-
-		logger.Info("Database connected successfully",
-			"driver", cfg.Database.Driver,
-			"max_open_conns", cfg.Database.MaxOpenConns,
-			"max_idle_conns", cfg.Database.MaxIdleConns,
-		)
-
-		return db, nil
-	})
-}
-
-// registerRepositories registers all repositories.
+// registerRepositories registers all repositories using in-memory implementations.
+// Perfect for a linting template - demonstrates patterns without database complexity.
 func (c *Container) registerRepositories() {
 	do.Provide(c.injector, func(i *do.Injector) (repositories.UserRepository, error) {
-		db := do.MustInvoke[*sql.DB](i)
 		logger := do.MustInvoke[*slog.Logger](i)
 
-		// Use SQLC-based repository implementation
-		repo := persistence.NewSQLCUserRepository(db, logger)
+		// Use in-memory repository - ideal for linting template
+		repo := persistence.NewUserRepositoryMemory()
+
+		// Seed with test data for demonstration
+		if memRepo, ok := repo.(*persistence.UserRepositoryMemory); ok {
+			if err := memRepo.SeedTestData(); err != nil {
+				logger.Warn("Failed to seed test data", "error", err)
+			} else {
+				logger.Info("Seeded repository with test data for demonstration")
+			}
+		}
+
 		return repo, nil
 	})
 }
@@ -211,10 +182,9 @@ func (c *Container) registerHandlers() {
 
 	// Register health handler
 	do.Provide(c.injector, func(i *do.Injector) (*handlers.HealthHandler, error) {
-		db := do.MustInvoke[*sql.DB](i)
 		logger := do.MustInvoke[*slog.Logger](i)
 
-		handler := handlers.NewHealthHandler(db, logger)
+		handler := handlers.NewHealthHandler(logger)
 		return handler, nil
 	})
 

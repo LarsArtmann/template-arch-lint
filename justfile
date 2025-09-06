@@ -695,6 +695,8 @@ dev:
         air; \
     fi
 
+# Template configuration system - copy linting configs to other projects
+
 # Run simple filename verification
 verify-filenames: lint-files
 
