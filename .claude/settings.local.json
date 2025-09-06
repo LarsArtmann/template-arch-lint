@@ -50,7 +50,15 @@
       "Bash(./bootstrap.sh:*)",
       "Bash(./test-bootstrap-bdd.sh:*)",
       "Bash(bash:*)",
-      "Bash(./test-bootstrap-simple-bdd.sh:*)"
+      "Bash(./test-bootstrap-simple-bdd.sh:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(just lint-cmd-single:*)",
+      "Bash(chmod:*)",
+      "Bash(./scripts/check-cmd-single.sh:*)",
+      "Bash(git restore:*)",
+      "WebFetch(domain:context7.com)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }
