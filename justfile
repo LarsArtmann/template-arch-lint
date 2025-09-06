@@ -44,11 +44,12 @@ help:
     @just --list --unsorted
     @echo ""
     @echo "\033[1mQUICK START:\033[0m"
-    @echo "  1. \033[0;32mjust bootstrap\033[0m - 🚀 Complete setup with verification"
-    @echo "  2. \033[0;36mjust lint\033[0m      - Run all linters"
-    @echo "  3. \033[0;36mjust format\033[0m    - Format code (gofumpt + goimports)"
-    @echo "  4. \033[0;36mjust fix\033[0m       - Auto-fix issues"
-    @echo "  5. \033[0;36mjust run\033[0m      - Run the application"
+    @echo "  1. \033[0;32mjust bootstrap\033[0m        - 🚀 Complete setup with enhanced error handling"
+    @echo "  2. \033[0;36mjust bootstrap-diagnose\033[0m - 🔍 Environment diagnostics only"
+    @echo "  3. \033[0;36mjust bootstrap-fix\033[0m     - 🔧 Auto-repair common issues"
+    @echo "  4. \033[0;36mjust lint\033[0m             - Run all linters"
+    @echo "  5. \033[0;36mjust format\033[0m           - Format code (gofumpt + goimports)"
+    @echo "  6. \033[0;36mjust fix\033[0m              - Auto-fix issues"
     @echo ""
     @echo "\033[1mDOCKER COMMANDS:\033[0m"
     @echo "  • \033[0;36mjust docker-test\033[0m         - Build and test Docker image (if available)"
@@ -78,129 +79,149 @@ help:
     @echo "  • \033[0;36mjust bench-memory\033[0m        - Run memory-focused benchmarks"
     @echo "  • \033[0;36mjust bench-compare\033[0m       - Compare benchmark results"
 
-# 🚀 Complete bootstrap setup with verification and error handling
+# 🚀 Complete bootstrap setup using enhanced bootstrap.sh script
 bootstrap:
     @echo "\033[1m🚀 BOOTSTRAP SETUP - ENTERPRISE GO LINTING\033[0m"
-    @echo "\033[0;36mVerifying environment and installing everything needed...\033[0m"
+    @echo "\033[0;36mUsing enhanced bootstrap script with comprehensive error handling...\033[0m"
     @echo ""
     #!/bin/bash
     set -euo pipefail
     
-    # Check if we're in a Go project
-    @if [ ! -f "go.mod" ]; then \
-        echo "\033[0;31m❌ No go.mod found. Please run from the root of a Go project.\033[0m"; \
-        exit 1; \
-    fi
-    @echo "\033[0;32m✅ Go project detected\033[0m"
-    
-    # Check if we're in a git repository  
-    @if [ ! -d ".git" ]; then \
-        echo "\033[0;31m❌ Not in a git repository. Please initialize git first.\033[0m"; \
-        exit 1; \
-    fi
-    @echo "\033[0;32m✅ Git repository detected\033[0m"
-    
-    # Check required commands
-    @echo "\033[1m🔍 CHECKING DEPENDENCIES\033[0m"
-    @if ! command -v go >/dev/null 2>&1; then \
-        echo "\033[0;31m❌ Missing required command: go\033[0m"; \
-        exit 1; \
-    fi
-    @if ! command -v curl >/dev/null 2>&1; then \
-        echo "\033[0;31m❌ Missing required command: curl\033[0m"; \
-        exit 1; \
-    fi
-    @if ! command -v git >/dev/null 2>&1; then \
-        echo "\033[0;31m❌ Missing required command: git\033[0m"; \
-        exit 1; \
-    fi
-    @echo "\033[0;32m✅ Required commands available: go, curl, git\033[0m"
-    
-    # Check Go version
-    @go_version=$$(go version | grep -oE 'go[0-9]+\.[0-9]+' | sed 's/go//'); \
-    min_version="1.19"; \
-    if [ "$$(printf '%s\n%s\n' "$$min_version" "$$go_version" | sort -V | head -n1)" != "$$min_version" ]; then \
-        echo "\033[0;31m❌ Go version $$go_version is too old. Minimum required: $$min_version\033[0m"; \
-        exit 1; \
-    fi
-    @echo "\033[0;32m✅ Go version compatible ($$(go version | grep -oE 'go[0-9]+\.[0-9]+'))\033[0m"
-    
-    # Check for configuration files
-    @echo "\033[1m📋 CHECKING CONFIGURATION FILES\033[0m"
-    @if [ ! -f ".go-arch-lint.yml" ]; then \
-        echo "\033[0;33m⚠️  Missing .go-arch-lint.yml, downloading...\033[0m"; \
-        if ! curl -fsSL "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/.go-arch-lint.yml" -o ".go-arch-lint.yml"; then \
-            echo "\033[0;31m❌ Failed to download .go-arch-lint.yml\033[0m"; \
+    # Check if bootstrap.sh exists, if not download it
+    @if [ ! -f "bootstrap.sh" ]; then \
+        echo "\033[0;33m⚠️  Downloading enhanced bootstrap.sh...\033[0m"; \
+        if ! curl -fsSL "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/bootstrap.sh" -o "bootstrap.sh"; then \
+            echo "\033[0;31m❌ Failed to download bootstrap.sh\033[0m"; \
             exit 1; \
         fi; \
+        chmod +x bootstrap.sh; \
+        echo "\033[0;32m✅ Downloaded enhanced bootstrap.sh\033[0m"; \
     fi
-    @if [ ! -f ".golangci.yml" ]; then \
-        echo "\033[0;33m⚠️  Missing .golangci.yml, downloading...\033[0m"; \
-        if ! curl -fsSL "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/.golangci.yml" -o ".golangci.yml"; then \
-            echo "\033[0;31m❌ Failed to download .golangci.yml\033[0m"; \
+    
+    # Run enhanced bootstrap with default mode
+    ./bootstrap.sh
+
+# 🔍 Run comprehensive environment diagnostics only
+bootstrap-diagnose:
+    @echo "\033[1m🔍 BOOTSTRAP DIAGNOSTICS\033[0m"
+    @echo "\033[0;36mAnalyzing environment and requirements...\033[0m"
+    @echo ""
+    #!/bin/bash
+    set -euo pipefail
+    
+    # Ensure bootstrap.sh exists
+    @if [ ! -f "bootstrap.sh" ]; then \
+        echo "\033[0;33m⚠️  Downloading bootstrap.sh for diagnostics...\033[0m"; \
+        if ! curl -fsSL "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/bootstrap.sh" -o "bootstrap.sh"; then \
+            echo "\033[0;31m❌ Failed to download bootstrap.sh\033[0m"; \
             exit 1; \
         fi; \
+        chmod +x bootstrap.sh; \
     fi
-    @if [ ! -f "justfile" ]; then \
-        echo "\033[0;33m⚠️  Missing justfile, downloading...\033[0m"; \
-        if ! curl -fsSL "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/justfile" -o "justfile"; then \
-            echo "\033[0;31m❌ Failed to download justfile\033[0m"; \
+    
+    # Run diagnostic mode only
+    ./bootstrap.sh --diagnose
+
+# 🔧 Bootstrap with automatic repair of common issues
+bootstrap-fix:
+    @echo "\033[1m🔧 BOOTSTRAP WITH AUTO-REPAIR\033[0m"
+    @echo "\033[0;36mRunning diagnostics and automatically fixing issues...\033[0m"
+    @echo ""
+    #!/bin/bash
+    set -euo pipefail
+    
+    # Ensure bootstrap.sh exists
+    @if [ ! -f "bootstrap.sh" ]; then \
+        echo "\033[0;33m⚠️  Downloading bootstrap.sh for auto-repair...\033[0m"; \
+        if ! curl -fsSL "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/bootstrap.sh" -o "bootstrap.sh"; then \
+            echo "\033[0;31m❌ Failed to download bootstrap.sh\033[0m"; \
             exit 1; \
         fi; \
-    fi
-    @echo "\033[0;32m✅ All configuration files present\033[0m"
-    
-    # Install linting tools
-    @echo "\033[1m🛠️  INSTALLING LINTING TOOLS\033[0m"
-    @just install
-    
-    # Verify tool installation
-    @echo "\033[1m🧪 VERIFYING TOOL INSTALLATION\033[0m"
-    @if command -v golangci-lint >/dev/null 2>&1; then \
-        echo "\033[0;32m✅ golangci-lint available ($$(golangci-lint version --format short))\033[0m"; \
-    else \
-        echo "\033[0;31m❌ golangci-lint not found in PATH\033[0m"; \
-        echo "\033[0;36m💡 Try adding ~/go/bin to your PATH\033[0m"; \
-    fi
-    @if command -v go-arch-lint >/dev/null 2>&1; then \
-        echo "\033[0;32m✅ go-arch-lint available\033[0m"; \
-    else \
-        echo "\033[0;31m❌ go-arch-lint not found in PATH\033[0m"; \
-        echo "\033[0;36m💡 Try adding ~/go/bin to your PATH\033[0m"; \
+        chmod +x bootstrap.sh; \
     fi
     
-    # Test basic functionality
-    @echo "\033[1m🔬 TESTING BASIC FUNCTIONALITY\033[0m"
-    @if ls *.go >/dev/null 2>&1 || find . -name "*.go" -not -path "./vendor/*" | head -1 | grep -q "."; then \
-        echo "\033[0;36mRunning quick architecture validation...\033[0m"; \
-        if timeout 30s just lint-arch >/dev/null 2>&1; then \
-            echo "\033[0;32m✅ Architecture validation passed\033[0m"; \
-        else \
-            echo "\033[0;33m⚠️  Architecture validation had issues (may be normal for new projects)\033[0m"; \
+    # Run auto-repair mode
+    ./bootstrap.sh --fix --verbose
+
+# 🗣️ Bootstrap with verbose debug output
+bootstrap-verbose:
+    @echo "\033[1m🗣️  BOOTSTRAP WITH VERBOSE OUTPUT\033[0m"
+    @echo "\033[0;36mRunning bootstrap with detailed debug information...\033[0m"
+    @echo ""
+    #!/bin/bash
+    set -euo pipefail
+    
+    # Ensure bootstrap.sh exists
+    @if [ ! -f "bootstrap.sh" ]; then \
+        echo "\033[0;33m⚠️  Downloading bootstrap.sh...\033[0m"; \
+        if ! curl -fsSL "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/bootstrap.sh" -o "bootstrap.sh"; then \
+            echo "\033[0;31m❌ Failed to download bootstrap.sh\033[0m"; \
+            exit 1; \
         fi; \
-    else \
-        echo "\033[0;36mℹ️  No Go files found, skipping architecture validation\033[0m"; \
+        chmod +x bootstrap.sh; \
     fi
     
-    # Success message
+    # Run with verbose output
+    ./bootstrap.sh --verbose
+
+# 🧪 Run BDD tests for bootstrap functionality
+bootstrap-test:
+    @echo "\033[1m🧪 BOOTSTRAP BDD TESTING\033[0m"
+    @echo "\033[0;36mRunning behavior-driven tests for bootstrap script...\033[0m"
     @echo ""
-    @echo "\033[1m\033[0;32m🎉 BOOTSTRAP COMPLETE!\033[0m"
-    @echo "\033[0;32m=====================================\033[0m"
+    #!/bin/bash
+    set -euo pipefail
+    
+    # Download test script if not present
+    @if [ ! -f "test-bootstrap-simple-bdd.sh" ]; then \
+        echo "\033[0;33m⚠️  Downloading BDD test script...\033[0m"; \
+        if ! curl -fsSL "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/test-bootstrap-simple-bdd.sh" -o "test-bootstrap-simple-bdd.sh"; then \
+            echo "\033[0;31m❌ Failed to download BDD test script\033[0m"; \
+            exit 1; \
+        fi; \
+        chmod +x test-bootstrap-simple-bdd.sh; \
+    fi
+    
+    # Ensure bootstrap.sh exists for testing
+    @if [ ! -f "bootstrap.sh" ]; then \
+        echo "\033[0;33m⚠️  Downloading bootstrap.sh for testing...\033[0m"; \
+        if ! curl -fsSL "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/bootstrap.sh" -o "bootstrap.sh"; then \
+            echo "\033[0;31m❌ Failed to download bootstrap.sh\033[0m"; \
+            exit 1; \
+        fi; \
+        chmod +x bootstrap.sh; \
+    fi
+    
+    # Run BDD tests
+    ./test-bootstrap-simple-bdd.sh
+
+# 🚀 Quick bootstrap check - diagnose then fix if needed
+bootstrap-quick:
+    @echo "\033[1m⚡ QUICK BOOTSTRAP CHECK & FIX\033[0m"
+    @echo "\033[0;36mRunning quick diagnostic and repair cycle...\033[0m"
     @echo ""
-    @echo "\033[1m🚀 Ready to use:\033[0m"
-    @echo "  \033[0;36mjust lint\033[0m           # Run ALL quality checks"
-    @echo "  \033[0;36mjust lint-arch\033[0m      # Architecture boundaries only"
-    @echo "  \033[0;36mjust security-audit\033[0m # Complete security scan"
-    @echo "  \033[0;36mjust format\033[0m         # Format code automatically"
-    @echo "  \033[0;36mjust help\033[0m           # Show all available commands"
-    @echo ""
-    @echo "\033[1m📚 What you got:\033[0m"
-    @echo "  \033[0;32m•\033[0m Clean Architecture enforcement (domain boundaries)"
-    @echo "  \033[0;32m•\033[0m 40+ code quality linters (complexity, naming, etc.)"
-    @echo "  \033[0;32m•\033[0m Security scanning (gosec + govulncheck + NilAway)"
-    @echo "  \033[0;32m•\033[0m Magic number/string detection"
-    @echo "  \033[0;32m•\033[0m Zero tolerance for \`interface{}\`, \`any\`, \`panic()\`"
-    @echo ""
+    #!/bin/bash
+    set -euo pipefail
+    
+    # Ensure bootstrap.sh exists
+    @if [ ! -f "bootstrap.sh" ]; then \
+        echo "\033[0;33m⚠️  Downloading bootstrap.sh...\033[0m"; \
+        if ! curl -fsSL "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/bootstrap.sh" -o "bootstrap.sh"; then \
+            echo "\033[0;31m❌ Failed to download bootstrap.sh\033[0m"; \
+            exit 1; \
+        fi; \
+        chmod +x bootstrap.sh; \
+    fi
+    
+    # Run diagnose first, then fix if issues found
+    echo "\033[1m🔍 Step 1: Diagnostics\033[0m"
+    if ! ./bootstrap.sh --diagnose; then \
+        echo "\033[1m🔧 Step 2: Auto-repair\033[0m"; \
+        ./bootstrap.sh --fix; \
+    else \
+        echo "\033[0;32m✅ Environment looks good, running standard bootstrap\033[0m"; \
+        ./bootstrap.sh; \
+    fi
     @echo "\033[0;33m💡 Pro tip:\033[0m Run \033[0;36mjust install-hooks\033[0m to enable pre-commit linting!"
 
 # Install all required linting tools
@@ -213,7 +234,7 @@ install:
     @echo "\033[0;32m✅ All tools installed successfully!\033[0m"
 
 # Run all linters (architecture + code quality + filenames)
-lint: lint-files lint-arch lint-code lint-vulns lint-cycles lint-goroutines lint-deps-advanced
+lint: lint-files lint-cmd-single lint-arch lint-code lint-vulns lint-cycles lint-goroutines lint-deps-advanced
     @echo ""
     @echo "\033[0;32m\033[1m✅ All linting checks completed!\033[0m"
 
@@ -265,6 +286,10 @@ lint-files:
     else \
         echo "\033[0;32m✅ No problematic filenames found!\033[0m"; \
     fi
+
+# Enforce single main file in cmd/ directory
+lint-cmd-single:
+    @./scripts/check-cmd-single.sh
 
 # Auto-fix issues where possible
 fix:
