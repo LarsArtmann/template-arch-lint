@@ -7,18 +7,21 @@ import (
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
 // InMemoryUserRepository implements UserRepository interface with in-memory storage.
+// TODO: SCALABILITY - Consider implementing LRU cache eviction for production use
+// TODO: PERSISTENCE - Add optional backup/restore functionality
 type InMemoryUserRepository struct {
 	mu    sync.RWMutex
-	users map[entities.UserID]*entities.User
+	users map[values.UserID]*entities.User
 }
 
 // NewInMemoryUserRepository creates a new in-memory user repository.
 func NewInMemoryUserRepository() UserRepository {
 	return &InMemoryUserRepository{
-		users: make(map[entities.UserID]*entities.User),
+		users: make(map[values.UserID]*entities.User),
 	}
 }
 
@@ -49,7 +52,7 @@ func (r *InMemoryUserRepository) Save(_ context.Context, user *entities.User) er
 }
 
 // FindByID retrieves a user by their unique identifier.
-func (r *InMemoryUserRepository) FindByID(_ context.Context, id entities.UserID) (*entities.User, error) {
+func (r *InMemoryUserRepository) FindByID(_ context.Context, id values.UserID) (*entities.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -96,7 +99,7 @@ func (r *InMemoryUserRepository) FindByUsername(_ context.Context, username stri
 }
 
 // Delete removes a user from the repository.
-func (r *InMemoryUserRepository) Delete(_ context.Context, id entities.UserID) error {
+func (r *InMemoryUserRepository) Delete(_ context.Context, id values.UserID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

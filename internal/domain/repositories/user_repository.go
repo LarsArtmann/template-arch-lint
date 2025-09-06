@@ -6,6 +6,7 @@ import (
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
 // ErrUserNotFound is returned when a user is not found.
@@ -22,17 +23,23 @@ type UserRepository interface {
 	Save(ctx context.Context, user *entities.User) error
 
 	// FindByID retrieves a user by their unique identifier
-	FindByID(ctx context.Context, id entities.UserID) (*entities.User, error)
+	// TODO: QUERY OPTIMIZATION - Consider implementing query hints for performance
+	FindByID(ctx context.Context, id values.UserID) (*entities.User, error)
 
 	// FindByEmail retrieves a user by their email address
+	// TODO: TYPE SAFETY - Replace string with values.Email for validation
 	FindByEmail(ctx context.Context, email string) (*entities.User, error)
 
 	// FindByUsername retrieves a user by their username
+	// TODO: TYPE SAFETY - Replace string with values.UserName for validation
 	FindByUsername(ctx context.Context, username string) (*entities.User, error)
 
 	// Delete removes a user from the repository
-	Delete(ctx context.Context, id entities.UserID) error
+	// TODO: SOFT DELETE - Consider adding soft delete support with deleted_at timestamp
+	Delete(ctx context.Context, id values.UserID) error
 
 	// List retrieves all users (useful for testing and admin operations)
+	// TODO: PAGINATION - Add pagination support for large datasets
+	// TODO: FILTERING - Add filtering capabilities (active/inactive, by domain, etc.)
 	List(ctx context.Context) ([]*entities.User, error)
 }
