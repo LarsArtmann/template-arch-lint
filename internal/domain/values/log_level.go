@@ -44,7 +44,7 @@ var validLogLevels = []LogLevel{
 func NewLogLevel(value string) (LogLevel, error) {
 	// Normalize input - convert to lowercase and trim whitespace
 	normalized := LogLevel(strings.ToLower(strings.TrimSpace(value)))
-	
+
 	if err := normalized.Validate(); err != nil {
 		return "", err
 	}
@@ -56,15 +56,15 @@ func (l LogLevel) Validate() error {
 	if l == "" {
 		return domainerrors.NewValidationError("log_level", "log level cannot be empty")
 	}
-	
+
 	for _, validLevel := range validLogLevels {
 		if l == validLevel {
 			return nil
 		}
 	}
-	
-	return domainerrors.NewValidationError("log_level", 
-		fmt.Sprintf("invalid log level '%s', must be one of: %s", 
+
+	return domainerrors.NewValidationError("log_level",
+		fmt.Sprintf("invalid log level '%s', must be one of: %s",
 			l, strings.Join(l.ValidLevels(), ", ")))
 }
 

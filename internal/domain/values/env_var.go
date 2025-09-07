@@ -5,19 +5,19 @@ type EnvVar string
 
 // Server configuration environment variables
 const (
-	EnvServerPort        EnvVar = "APP_SERVER_PORT"
-	EnvServerHost        EnvVar = "APP_SERVER_HOST"
-	EnvServerReadTimeout EnvVar = "APP_SERVER_READ_TIMEOUT"
+	EnvServerPort         EnvVar = "APP_SERVER_PORT"
+	EnvServerHost         EnvVar = "APP_SERVER_HOST"
+	EnvServerReadTimeout  EnvVar = "APP_SERVER_READ_TIMEOUT"
 	EnvServerWriteTimeout EnvVar = "APP_SERVER_WRITE_TIMEOUT"
-	EnvServerIdleTimeout EnvVar = "APP_SERVER_IDLE_TIMEOUT"
+	EnvServerIdleTimeout  EnvVar = "APP_SERVER_IDLE_TIMEOUT"
 )
 
 // Database configuration environment variables
 const (
-	EnvDatabaseDriver         EnvVar = "APP_DATABASE_DRIVER"
-	EnvDatabaseDSN           EnvVar = "APP_DATABASE_DSN"
-	EnvDatabaseMaxOpenConns  EnvVar = "APP_DATABASE_MAX_OPEN_CONNS"
-	EnvDatabaseMaxIdleConns  EnvVar = "APP_DATABASE_MAX_IDLE_CONNS"
+	EnvDatabaseDriver          EnvVar = "APP_DATABASE_DRIVER"
+	EnvDatabaseDSN             EnvVar = "APP_DATABASE_DSN"
+	EnvDatabaseMaxOpenConns    EnvVar = "APP_DATABASE_MAX_OPEN_CONNS"
+	EnvDatabaseMaxIdleConns    EnvVar = "APP_DATABASE_MAX_IDLE_CONNS"
 	EnvDatabaseConnMaxLifetime EnvVar = "APP_DATABASE_CONN_MAX_LIFETIME"
 )
 
@@ -56,24 +56,24 @@ func AllEnvVars() []EnvVar {
 		EnvServerReadTimeout,
 		EnvServerWriteTimeout,
 		EnvServerIdleTimeout,
-		
+
 		// Database
 		EnvDatabaseDriver,
 		EnvDatabaseDSN,
 		EnvDatabaseMaxOpenConns,
 		EnvDatabaseMaxIdleConns,
 		EnvDatabaseConnMaxLifetime,
-		
+
 		// Logging
 		EnvLoggingLevel,
 		EnvLoggingFormat,
 		EnvLoggingOutput,
-		
+
 		// Application
 		EnvApplicationName,
 		EnvApplicationVersion,
 		EnvApplicationEnvironment,
-		
+
 		// JWT
 		EnvJWTSecretKey,
 		EnvJWTIssuer,
@@ -109,7 +109,7 @@ func (e EnvVar) IsRequired() bool {
 		EnvJWTIssuer,
 		EnvJWTAlgorithm,
 	}
-	
+
 	for _, required := range requiredVars {
 		if e == required {
 			return true
@@ -124,7 +124,7 @@ func (e EnvVar) IsSensitive() bool {
 		EnvJWTSecretKey,
 		EnvDatabaseDSN, // May contain passwords
 	}
-	
+
 	for _, sensitive := range sensitiveVars {
 		if e == sensitive {
 			return true

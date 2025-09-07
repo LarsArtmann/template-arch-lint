@@ -37,12 +37,12 @@ func NewPortFromString(value string) (Port, error) {
 	if value == "" {
 		return 0, domainerrors.NewValidationError("port", "port cannot be empty")
 	}
-	
+
 	intValue, err := strconv.Atoi(value)
 	if err != nil {
 		return 0, domainerrors.NewValidationError("port", fmt.Sprintf("invalid port format: %s", value))
 	}
-	
+
 	return NewPort(intValue)
 }
 
