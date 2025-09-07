@@ -1,0 +1,423 @@
+# 🔥 ENTERPRISE-GRADE GO ARCHITECTURE ENFORCEMENT TEMPLATE
+# MAXIMUM STRICTNESS - Domain-Driven Design & Clean Architecture
+#
+# This configuration demonstrates strict architectural boundaries
+# Customize components and dependencies for your specific project structure
+#
+# Features:
+# - ✅ Domain isolation (zero infrastructure dependencies)
+# - ✅ Application layer mediates between domain and infrastructure
+# - ✅ Infrastructure abstractions via interfaces
+# - ✅ Clear dependency flow: Infrastructure → Application → Domain
+
+version: 3
+workdir: .
+
+# 🚨 VENDOR DEPENDENCY CONFIGURATION
+allow:
+  depOnAnyVendor: true  # Allow vendor dependencies (set to false for stricter control)
+
+  # ARCHITECTURAL DECISION: Disable Deep Scanning
+  #
+  # Deep scanning enables advanced AST analysis for method calls and dependency
+  # injection patterns, but can cause internal errors in go-arch-lint v1.12.0
+  # when encountering certain Go package structures.
+  #
+  # Trade-off Analysis:
+  # - Enabled:  More comprehensive dependency analysis, but tool instability
+  # - Disabled: Stable operation with basic import-level validation
+  #
+  # For production templates, stability is prioritized over exhaustive analysis.
+  # Basic import validation still catches most architectural violations.
+  # Re-evaluate when go-arch-lint stability improves in future versions.
+  deepScan: false
+
+# 📦 ARCHITECTURAL COMPONENTS
+# Define your project's architectural layers and boundaries
+components:
+  # ========================================
+  # DOMAIN LAYER - Pure Business Logic
+  # ========================================
+  domain-entities:
+    in: internal/domain/entities/**
+  domain-shared:
+    in: internal/domain/shared/**
+  domain-values:
+    in: internal/domain/values/**
+  domain-errors:
+    in: internal/domain/errors/**
+  domain-repositories:
+    in: internal/domain/repositories/**
+  domain-services:
+    in: internal/domain/services/**
+
+  # ========================================
+  # APPLICATION LAYER - Use Cases & Coordination
+  # ========================================
+  app-handlers:
+    in: internal/application/handlers/**
+  app-middleware:
+    in: internal/application/middleware/**
+  app-dto:
+    in: internal/application/dto/**
+  app-http:
+    in: internal/application/http/**
+  app-services:
+    in: internal/application/services/**
+
+  # ========================================
+  # INFRASTRUCTURE LAYER - External Concerns
+  # ========================================
+  infrastructure:
+    in: internal/infrastructure/**
+
+  # ========================================
+  # DATA ACCESS & PERSISTENCE - REMOVED (Using in-memory patterns)
+  # ========================================
+  # database: - ELIMINATED in commit 049f475 for template simplification
+
+  # ========================================
+  # WEB LAYER - Templates & Static Assets
+  # ========================================
+  web-templates-components:
+    in: web/templates/components/**
+  web-templates-layouts:
+    in: web/templates/layouts/**
+  web-templates-pages:
+    in: web/templates/pages/**
+  web-static:
+    in: web/static/**
+
+  # ========================================
+  # CONFIGURATION & STARTUP
+  # ========================================
+  config:
+    in: internal/config/**
+  container:
+    in: internal/container/**
+  main:
+    in: cmd/**
+
+  # ========================================
+  # TEST HELPERS - Testing Utilities
+  # ========================================
+  test-helpers-base:
+    in: internal/testhelpers/base/**
+  test-helpers-domain-entities:
+    in: internal/testhelpers/domain/entities/**
+  test-helpers-domain-values:
+    in: internal/testhelpers/domain/values/**
+  test-helpers-domain-validation:
+    in: internal/testhelpers/domain/validation/**
+  test-helpers-application-handlers:
+    in: internal/testhelpers/application/handlers/**
+  test-helpers-infrastructure-repositories:
+    in: internal/testhelpers/infrastructure/repositories/**
+
+
+# 🔒 DEPENDENCY RULES - Enforce Clean Architecture
+deps:
+  # DOMAIN LAYER - Zero infrastructure dependencies
+  domain-entities:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-shared
+      - domain-values
+      - domain-errors
+
+  domain-shared:
+    anyVendorDeps: true
+    mayDependOn: []
+
+  domain-values:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-shared
+      - domain-errors
+
+  domain-errors:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-shared
+
+  domain-repositories:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-shared
+      - domain-values
+      - domain-errors
+
+  domain-services:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-repositories
+      - domain-shared
+      - domain-values
+      - domain-errors
+
+  # APPLICATION LAYER - Orchestrates domain and infrastructure
+  app-handlers:
+    mayDependOn:
+      - domain-entities
+      - domain-services
+      - domain-repositories
+      - domain-shared
+      - domain-values
+      - domain-errors
+      - app-dto
+      - app-http
+      - app-services
+      - app-middleware
+      - web-templates-components
+      - web-templates-layouts
+      - web-templates-pages
+
+  app-middleware:
+    mayDependOn:
+      - domain-shared
+      - domain-errors
+      - app-dto
+      - app-http
+      - app-services
+
+  app-dto:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-shared
+      - domain-values
+      - domain-errors
+
+  app-http:
+    anyVendorDeps: true
+    mayDependOn:
+      - app-dto
+      - domain-shared
+      - domain-errors
+
+  app-services:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-repositories
+      - domain-shared
+      - domain-values
+      - domain-errors
+      - config
+
+  # INFRASTRUCTURE LAYER - External integrations
+  infrastructure:
+    mayDependOn:
+      - domain-entities
+      - domain-repositories
+      - domain-shared
+      - domain-values
+      - domain-errors
+
+  # DATA ACCESS & PERSISTENCE - ELIMINATED (commit 049f475)
+  # database: - Replaced with in-memory repository patterns for template simplification
+
+  # WEB LAYER - Templates & Static Assets
+  web-templates-components:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-shared
+      - domain-values
+
+  web-templates-layouts:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-shared
+      - domain-values
+
+  web-templates-pages:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-shared
+      - domain-values
+      - web-templates-components
+      - web-templates-layouts
+
+  web-static:
+    anyVendorDeps: true
+    mayDependOn: []
+
+  # CONFIGURATION & STARTUP
+  config:
+    anyVendorDeps: true
+    mayDependOn: []
+
+  container:
+    anyProjectDeps: true
+
+  main:
+    anyProjectDeps: true
+
+  # TEST HELPERS - Allow broad dependencies for testing utilities
+  test-helpers-base:
+    anyProjectDeps: true
+    anyVendorDeps: true
+
+  test-helpers-domain-entities:
+    anyProjectDeps: true
+    anyVendorDeps: true
+
+  test-helpers-domain-values:
+    anyProjectDeps: true
+    anyVendorDeps: true
+
+  test-helpers-domain-validation:
+    anyProjectDeps: true
+    anyVendorDeps: true
+
+  test-helpers-application-handlers:
+    anyProjectDeps: true
+    anyVendorDeps: true
+
+  test-helpers-infrastructure-repositories:
+    anyProjectDeps: true
+    anyVendorDeps: true
+
+
+# 🌍 COMMON COMPONENTS - Available everywhere
+commonComponents:
+  - domain-shared
+  - domain-errors
+
+# 🚫 EXCLUSION PATTERNS (glob patterns)
+exclude:
+  # Generated and temporary files
+  - "**/*.pb.go"
+  - "**/*_generated.go"
+  - "**/*_gen.go"
+  - "**/*_templ.go"
+  - "**/mock_*.go"
+
+  # Test directories and testdata
+  - "**/testdata/**"
+  - "**/test/**"
+  - "**/tests/**"
+  - "test/**"
+  - "integration-test/**"
+  - "**/integration-test/**"
+
+  # Build and vendor
+  - "**/vendor/**"
+  - "**/bin/**"
+  - "**/build/**"
+  - "**/dist/**"
+  - "**/node_modules/**"
+
+  # Documentation and configuration
+  - "**/docs/**"
+  - "**/examples/**"
+  - "example/**"
+  - "**/*.md"
+  - "**/.git/**"
+  - "**/.github/**"
+
+  # IDE and editor files
+  - "**/.vscode/**"
+  - "**/.idea/**"
+  - "**/*.swp"
+  - "**/.DS_Store"
+
+# 🚫 EXCLUSION FILES (regex patterns)
+#
+# ARCHITECTURAL DECISION: Exclude Test Files from Import Validation
+#
+# Test files in Go commonly use the `package_test` naming convention and import
+# their corresponding implementation packages. This is the standard Go testing
+# pattern and should NOT be considered an architecture violation.
+#
+# Examples of normal Go test patterns:
+# - package services_test imports "myapp/services"
+# - package entities_test imports "myapp/entities"
+# - package values_test imports "myapp/values"
+#
+# These imports are necessary for:
+# 1. Black-box testing (testing public APIs)
+# 2. Testing exported functions and types
+# 3. Verifying package boundaries from consumer perspective
+#
+# Why we exclude test files:
+# - Test files don't affect production architecture
+# - Self-imports in tests are a Go idiom, not a design flaw
+# - Architecture rules should focus on production code dependencies
+# - Tests verify behavior, not enforce architectural constraints
+#
+# Note: Integration tests and end-to-end tests may have different
+# import patterns and are also excluded from architecture validation.
+excludeFiles:
+  - ".*_test\\.go$"         # All test files (_test.go suffix)
+  - "integration_test\\.go$" # Integration test files
+  - ".*_integration_test\\.go$" # Integration test variations
+
+# 📋 ARCHITECTURE VALIDATION RULES & DECISIONS
+#
+# This configuration implements Clean Architecture with Domain-Driven Design:
+#
+# ARCHITECTURAL LAYERS (from inner to outer):
+# 1. DOMAIN LAYER (Core Business Logic)
+#    - entities/     : Core business entities with identity
+#    - values/       : Value objects (immutable, validated data)
+#    - repositories/ : Interfaces for data access (ports)
+#    - services/     : Domain services and business rules
+#    - errors/       : Domain-specific error types
+#    - shared/       : Common domain utilities
+#
+# 2. APPLICATION LAYER (Use Cases & Orchestration)
+#    - handlers/     : HTTP handlers (adapters)
+#    - middleware/   : Cross-cutting concerns
+#
+# 3. INFRASTRUCTURE LAYER (External Dependencies)
+#    - infrastructure/ : External service implementations
+#    - db/           : Database access and queries
+#
+# 4. CONFIGURATION & ENTRY POINTS
+#    - config/       : Application configuration
+#    - container/    : Dependency injection setup
+#    - cmd/          : Main application entry points
+#
+# 5. PRESENTATION LAYER
+#    - web/templates/ : Server-side templates (Templ)
+#    - web/static/   : Static assets (CSS, JS, images)
+#
+# DEPENDENCY RULES ENFORCED:
+# ✅ Domain entities can only depend on domain layer components
+# ✅ Application layer can orchestrate domain and infrastructure
+# ✅ Infrastructure implements domain interfaces (dependency inversion)
+# ✅ No circular dependencies between components
+# ✅ Test files excluded from architecture validation
+#
+# This configuration enforces:
+#
+# 1. DOMAIN ISOLATION
+#    - Domain entities cannot import infrastructure
+#    - Domain shared cannot import anything from project
+#    - Business logic stays pure and testable
+#
+# 2. DEPENDENCY INVERSION
+#    - Application layer defines interfaces
+#    - Infrastructure implements those interfaces
+#    - Domain depends on abstractions, not concretions
+#
+# 3. CLEAN ARCHITECTURE FLOW
+#    - Infrastructure → Application → Domain
+#    - Each layer can only depend on inner layers
+#    - No circular dependencies allowed
+#
+# 4. SHARED KERNEL
+#    - Common types and utilities available everywhere
+#    - Keeps shared concepts consistent across layers
+#
+# To customize for your project:
+# 1. Update component paths to match your directory structure
+# 2. Add/remove components as needed
+# 3. Adjust dependency rules for your architecture
+# 4. Set depOnAnyVendor to false for stricter vendor control

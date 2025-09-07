@@ -3,47 +3,42 @@
 # providing filename validation, CMD single main enforcement, 
 # import cycle detection, and code duplication analysis.
 
-version: 2
+version: "2"
 
-# Plugin configuration
-plugins:
-  - module: 'template-arch-lint'
-    import: 'github.com/LarsArtmann/template-arch-lint/plugins/template-arch-lint'
-    version: v1.0.0
-    settings:
-      path: ./plugins/template-arch-lint/template-arch-lint.so
-      description: "Unified enterprise Go architecture and code quality enforcement plugin"
-      
-      # Plugin-specific settings (these would be passed to the New() function)
-      filename-validator:
-        enable: true
-        strict-naming: true
-        check-package-alignment: true
-        
-      cmd-single-main:
-        enable: true
-        enforce-main-function: true
-        validate-package-name: true
-        
-      import-cycle-detector:
-        enable: true
-        check-indirect-cycles: true
-        max-cycle-length: 10
-        
-      code-duplication-detector:
-        enable: true
-        min-tokens: 15
-        similarity-threshold: 0.8
-        max-duplicates-per-file: 5
-
-# Linter settings to enable the custom analyzers
 linters:
+  settings:
+    custom:
+      # Template Arch Lint Plugin
+      template-arch-lint:
+        path: ./plugins/template-arch-lint/template-arch-lint.so
+        description: "Unified enterprise Go architecture and code quality enforcement plugin"
+        original-url: github.com/LarsArtmann/template-arch-lint
+        settings:
+          # Plugin-specific settings (passed to the New() function)
+          filename-validator:
+            enable: true
+            strict-naming: true
+            check-package-alignment: true
+            
+          cmd-single-main:
+            enable: true
+            enforce-main-function: true
+            validate-package-name: true
+            
+          import-cycle-detector:
+            enable: true
+            check-indirect-cycles: true
+            max-cycle-length: 10
+            
+          code-duplication-detector:
+            enable: true
+            min-tokens: 15
+            similarity-threshold: 0.8
+            max-duplicates-per-file: 5
+
   enable:
-    # Enable our custom analyzers
-    - filename-validator
-    - cmd-single-main  
-    - import-cycle-detector
-    - code-duplication-detector
+    # Enable our custom plugin (custom linters are enabled by default but being explicit)
+    - template-arch-lint
   
   disable:
     # Disable built-in linters that might conflict

@@ -8,6 +8,8 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
+
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
 // Config represents the application configuration.
@@ -23,7 +25,7 @@ type Config struct {
 // ServerConfig contains HTTP server configuration.
 type ServerConfig struct {
 	Host                    string        `mapstructure:"host" validate:"required"`
-	Port                    int           `mapstructure:"port" validate:"required,min=1,max=65535"`
+	Port                    values.Port   `mapstructure:"port" validate:"required"`
 	ReadTimeout             time.Duration `mapstructure:"read_timeout"`
 	WriteTimeout            time.Duration `mapstructure:"write_timeout"`
 	IdleTimeout             time.Duration `mapstructure:"idle_timeout"`
@@ -42,9 +44,9 @@ type DatabaseConfig struct {
 
 // LoggingConfig contains logging configuration.
 type LoggingConfig struct {
-	Level  string `mapstructure:"level" validate:"required,valid_log_level"`
-	Format string `mapstructure:"format" validate:"required,oneof=json text"`
-	Output string `mapstructure:"output" validate:"required"`
+	Level  values.LogLevel `mapstructure:"level" validate:"required"`
+	Format string          `mapstructure:"format" validate:"required,oneof=json text"`
+	Output string          `mapstructure:"output" validate:"required"`
 }
 
 // AppConfig contains application-specific configuration.
@@ -112,7 +114,7 @@ func setDefaults(_ *Config) {
 
 	// Server defaults
 	viper.SetDefault("server.host", "localhost")
-	viper.SetDefault("server.port", 8080)
+	viper.SetDefault("server.port", values.DefaultHTTPPort)
 	viper.SetDefault("server.read_timeout", 5*time.Second)
 	viper.SetDefault("server.write_timeout", 10*time.Second)
 	viper.SetDefault("server.idle_timeout", 120*time.Second)
@@ -127,7 +129,7 @@ func setDefaults(_ *Config) {
 	viper.SetDefault("database.conn_max_idle_time", 5*time.Minute)
 
 	// Logging defaults
-	viper.SetDefault("logging.level", "info")
+	viper.SetDefault("logging.level", values.DefaultLogLevel())
 	viper.SetDefault("logging.format", "json")
 	viper.SetDefault("logging.output", "stdout")
 
@@ -173,26 +175,25 @@ func validateConfig(config *Config) error {
 	validate := validator.New()
 
 	// Register custom validators
-	if err := validate.RegisterValidation("valid_log_level", validateLogLevel); err != nil {
-		return fmt.Errorf("failed to register log level validator: %w", err)
-	}
-
 	if err := validate.RegisterValidation("valid_environment", validateEnvironment); err != nil {
 		return fmt.Errorf("failed to register environment validator: %w", err)
 	}
 
-	return validate.Struct(config)
-}
-
-// validateLogLevel validates log level values.
-func validateLogLevel(fl validator.FieldLevel) bool {
-	level := fl.Field().String()
-	switch level {
-	case "debug", "info", "warn", "error":
-		return true
-	default:
-		return false
+	// Validate struct with validator tags
+	if err := validate.Struct(config); err != nil {
+		return err
 	}
+
+	// Additional domain-specific validation
+	if err := config.Server.Port.Validate(); err != nil {
+		return fmt.Errorf("server port validation failed: %w", err)
+	}
+
+	if err := config.Logging.Level.Validate(); err != nil {
+		return fmt.Errorf("logging level validation failed: %w", err)
+	}
+
+	return nil
 }
 
 // validateEnvironment validates environment values.

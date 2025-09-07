@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -115,11 +117,20 @@ func runLoadConfigTest(t *testing.T, tt struct {
 func validateLoadConfigResult(t *testing.T, config *Config, expectPort int, expectLevel string) {
 	t.Helper()
 
-	if config.Server.Port != expectPort {
-		t.Errorf("LoadConfig() port = %v, want %v", config.Server.Port, expectPort)
+	expectedPort, err := values.NewPort(expectPort)
+	if err != nil {
+		t.Fatalf("Invalid expected port %d: %v", expectPort, err)
 	}
-	if config.Logging.Level != expectLevel {
-		t.Errorf("LoadConfig() level = %v, want %v", config.Logging.Level, expectLevel)
+	if config.Server.Port != expectedPort {
+		t.Errorf("LoadConfig() port = %v, want %v", config.Server.Port, expectedPort)
+	}
+
+	expectedLevel, err := values.NewLogLevel(expectLevel)
+	if err != nil {
+		t.Fatalf("Invalid expected log level '%s': %v", expectLevel, err)
+	}
+	if config.Logging.Level != expectedLevel {
+		t.Errorf("LoadConfig() level = %v, want %v", config.Logging.Level, expectedLevel)
 	}
 }
 
