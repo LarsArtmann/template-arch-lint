@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 )
 
 // UserID represents a unique user identifier value object.
@@ -86,28 +88,28 @@ func validateUserIDFormat(id string) error {
 
 func validateUserIDNotEmpty(id string) error {
 	if id == "" {
-		return fmt.Errorf("user ID cannot be empty")
+		return errors.NewRequiredFieldError("userID")
 	}
 	return nil
 }
 
 func validateUserIDWhitespace(original, normalized string) error {
 	if original != normalized {
-		return fmt.Errorf("user ID cannot have leading or trailing spaces")
+		return errors.NewValidationError("userID", "user ID cannot have leading or trailing spaces")
 	}
 
 	if strings.ContainsAny(normalized, " \t\n\r") {
-		return fmt.Errorf("user ID cannot contain whitespace")
+		return errors.NewValidationError("userID", "user ID cannot contain whitespace")
 	}
 	return nil
 }
 
 func validateUserIDLength(id string) error {
 	if len(id) < 1 {
-		return fmt.Errorf("user ID too short")
+		return errors.NewValidationError("userID", "user ID too short")
 	}
 	if len(id) > 100 {
-		return fmt.Errorf("user ID too long (maximum 100 characters)")
+		return errors.NewValidationError("userID", "user ID too long (maximum 100 characters)")
 	}
 	return nil
 }
@@ -115,7 +117,7 @@ func validateUserIDLength(id string) error {
 func validateUserIDCharacters(id string) error {
 	for _, char := range id {
 		if !isValidUserIDChar(char) {
-			return fmt.Errorf("user ID can only contain letters, numbers, hyphens, and underscores")
+			return errors.NewValidationError("userID", "user ID can only contain letters, numbers, hyphens, and underscores")
 		}
 	}
 	return nil

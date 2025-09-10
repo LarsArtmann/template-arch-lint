@@ -2,9 +2,10 @@
 package values
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 )
 
 // Email represents a validated email address value object.
@@ -85,36 +86,36 @@ func validateEmailFormat(email string) error {
 
 func validateEmailNotEmpty(email string) error {
 	if email == "" {
-		return fmt.Errorf("email cannot be empty")
+		return errors.NewRequiredFieldError("email")
 	}
 	return nil
 }
 
 func validateEmailLength(email string) error {
 	if len(email) > 254 {
-		return fmt.Errorf("email too long (max 254 characters)")
+		return errors.NewValidationError("email", "email too long (max 254 characters)")
 	}
 	if len(email) < 5 {
-		return fmt.Errorf("email too short (min 5 characters)")
+		return errors.NewValidationError("email", "email too short (min 5 characters)")
 	}
 	return nil
 }
 
 func validateEmailBasicFormat(email string) error {
 	if strings.Contains(email, " ") {
-		return fmt.Errorf("email cannot contain spaces")
+		return errors.NewValidationError("email", "email cannot contain spaces")
 	}
 
 	if !emailRegex.MatchString(email) {
-		return fmt.Errorf("invalid email format")
+		return errors.NewValidationError("email", "invalid email format")
 	}
 
 	if strings.Contains(email, "..") {
-		return fmt.Errorf("email cannot contain consecutive dots")
+		return errors.NewValidationError("email", "email cannot contain consecutive dots")
 	}
 
 	if strings.HasPrefix(email, ".") || strings.HasSuffix(email, ".") {
-		return fmt.Errorf("email cannot start or end with dot")
+		return errors.NewValidationError("email", "email cannot start or end with dot")
 	}
 	return nil
 }
@@ -122,7 +123,7 @@ func validateEmailBasicFormat(email string) error {
 func validateEmailParts(email string) error {
 	parts := strings.Split(email, "@")
 	if len(parts) != 2 {
-		return fmt.Errorf("email must contain exactly one @ symbol")
+		return errors.NewValidationError("email", "email must contain exactly one @ symbol")
 	}
 
 	localPart, domain := parts[0], parts[1]
@@ -136,23 +137,23 @@ func validateEmailParts(email string) error {
 
 func validateEmailLocalPart(localPart string) error {
 	if len(localPart) == 0 {
-		return fmt.Errorf("email local part cannot be empty")
+		return errors.NewValidationError("email", "email local part cannot be empty")
 	}
 	if len(localPart) > 64 {
-		return fmt.Errorf("email local part too long (max 64 characters)")
+		return errors.NewValidationError("email", "email local part too long (max 64 characters)")
 	}
 	return nil
 }
 
 func validateEmailDomain(domain string) error {
 	if len(domain) == 0 {
-		return fmt.Errorf("email domain cannot be empty")
+		return errors.NewValidationError("email", "email domain cannot be empty")
 	}
 	if len(domain) > 253 {
-		return fmt.Errorf("email domain too long (max 253 characters)")
+		return errors.NewValidationError("email", "email domain too long (max 253 characters)")
 	}
 	if !strings.Contains(domain, ".") {
-		return fmt.Errorf("email domain must contain at least one dot")
+		return errors.NewValidationError("email", "email domain must contain at least one dot")
 	}
 	return nil
 }

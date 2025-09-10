@@ -1,4 +1,18 @@
 // Package services provides domain service implementations for business logic.
+//
+// TODO: CRITICAL ARCHITECTURE VIOLATION - This file is 526 lines, violates SRP, needs breaking into smaller services
+// TODO: EXTRACT SERVICES - Break into: UserQueryService, UserCommandService, UserValidationService, UserFilterService  
+// TODO: TYPE SAFETY EMERGENCY - Replace ALL string parameters with value objects (Email, UserName)
+// TODO: SPLIT BRAIN RISK - Inconsistent error handling patterns (some use Result[T], others don't)
+// TODO: VALIDATION CONSISTENCY - Extract validation logic to dedicated validator following DDD patterns
+// TODO: TRANSACTION SAFETY - Add proper transaction boundaries for data consistency
+// TODO: PERFORMANCE - Add caching layer, pagination, query optimization
+// TODO: DOMAIN MODELING - Create proper domain events for user lifecycle changes
+// TODO: FUNCTIONAL PROGRAMMING - Standardize on Result[T] pattern for all operations
+// TODO: PRIMITIVE OBSESSION - Remove all string primitives, use value objects everywhere
+// TODO: CONCURRENCY SAFETY - Add optimistic locking to prevent concurrent update issues
+// TODO: BUSINESS RULES EXTRACTION - Extract business rules to specification pattern
+// TODO: OBSERVABILITY - Add comprehensive logging, metrics, and tracing
 package services
 
 import (
@@ -17,19 +31,32 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
+// TODO: TYPE SAFETY - Replace *string with proper value objects (DomainName value object)
+// TODO: SPECIFICATION PATTERN - Replace with UserSpecification interface for complex filtering
+// TODO: BUILDER PATTERN - Add UserFiltersBuilder for better API design
 // UserFilters represents the available filters for user queries.
 type UserFilters struct {
-	Domain *string
-	Active *bool
+	Domain *string // TODO: PRIMITIVE OBSESSION - Should be values.DomainName
+	Active *bool   // TODO: DOMAIN MODELING - Could be values.UserStatus enum
 }
 
+// TODO: DEPENDENCY INJECTION - Add interfaces for all dependencies (logger, cache, event publisher)
+// TODO: SINGLE RESPONSIBILITY - This should be split into multiple focused services
+// TODO: CONCURRENCY SAFETY - Add sync.RWMutex for thread-safe operations if needed
+// TODO: CACHING - Add cache layer dependency injection
+// TODO: OBSERVABILITY - Add logger, metrics, and tracer dependencies
 // UserService handles business logic for user operations.
 type UserService struct {
 	userRepo repositories.UserRepository
+	// TODO: MISSING DEPENDENCIES - Should inject: logger, cache, eventPublisher, validator
 }
 
+// TODO: INCOMPLETE DEPENDENCY INJECTION - Should accept logger, cache, eventPublisher, validator
+// TODO: VALIDATION - Add parameter validation to ensure userRepo is not nil
+// TODO: BUILDER PATTERN - Consider using builder pattern for complex service construction
 // NewUserService creates a new user service with dependency injection.
 func NewUserService(userRepo repositories.UserRepository) *UserService {
+	// TODO: NIL SAFETY - Add validation: if userRepo == nil { panic("userRepo cannot be nil") }
 	return &UserService{
 		userRepo: userRepo,
 	}

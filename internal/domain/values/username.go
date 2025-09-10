@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
+
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 )
 
 // UserName represents a validated username value object.
@@ -97,7 +99,7 @@ func (u UserName) HasValidCharacters() bool {
 // validateUserNameFormat enforces business rules for username validation.
 func validateUserNameFormat(username string) error {
 	if username == "" {
-		return fmt.Errorf("username cannot be empty")
+		return errors.NewRequiredFieldError("username")
 	}
 
 	normalized := strings.TrimSpace(username)
@@ -128,10 +130,10 @@ func validateUserNameFormat(username string) error {
 // validateUsernameLength checks length constraints.
 func validateUsernameLength(normalized string) error {
 	if len(normalized) < 2 {
-		return fmt.Errorf("username too short (minimum 2 characters)")
+		return errors.NewValidationError("username", "username too short (minimum 2 characters)")
 	}
 	if len(normalized) > 50 {
-		return fmt.Errorf("username too long (maximum 50 characters)")
+		return errors.NewValidationError("username", "username too long (maximum 50 characters)")
 	}
 	return nil
 }
@@ -139,7 +141,7 @@ func validateUsernameLength(normalized string) error {
 // validateUsernameWhitespace checks for leading/trailing whitespace.
 func validateUsernameWhitespace(username, normalized string) error {
 	if username != normalized {
-		return fmt.Errorf("username cannot have leading or trailing spaces")
+		return errors.NewValidationError("username", "username cannot have leading or trailing spaces")
 	}
 	return nil
 }
@@ -148,7 +150,7 @@ func validateUsernameWhitespace(username, normalized string) error {
 func validateUsernameCharacters(normalized string) error {
 	for _, char := range normalized {
 		if !isValidUsernameChar(char) {
-			return fmt.Errorf("name can only contain letters, numbers, dots, hyphens, underscores, and spaces")
+			return errors.NewValidationError("username", "name can only contain letters, numbers, dots, hyphens, underscores, and spaces")
 		}
 	}
 	return nil
@@ -168,16 +170,16 @@ func validateUsernameEdges(normalized string) error {
 	lastChar := normalized[len(normalized)-1]
 
 	if firstChar == '.' || firstChar == '-' || firstChar == '_' {
-		return fmt.Errorf("name cannot start with dot, hyphen, or underscore")
+		return errors.NewValidationError("username", "name cannot start with dot, hyphen, or underscore")
 	}
 
 	if lastChar == '.' || lastChar == '-' || lastChar == '_' {
-		return fmt.Errorf("name cannot end with dot, hyphen, or underscore")
+		return errors.NewValidationError("username", "name cannot end with dot, hyphen, or underscore")
 	}
 
 	if strings.Contains(normalized, "..") || strings.Contains(normalized, "--") ||
 		strings.Contains(normalized, "__") {
-		return fmt.Errorf("name cannot contain consecutive dots, hyphens, or underscores")
+		return errors.NewValidationError("username", "name cannot contain consecutive dots, hyphens, or underscores")
 	}
 
 	return nil
@@ -207,14 +209,14 @@ func validateHasLetter(normalized string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("username must contain at least one letter")
+	return errors.NewValidationError("username", "username must contain at least one letter")
 }
 
 // validateNotReserved checks against reserved usernames.
 func validateNotReserved(normalized string) error {
 	lowercased := strings.ToLower(strings.ReplaceAll(normalized, " ", ""))
 	if reservedUsernames[lowercased] {
-		return fmt.Errorf("name '%s' is reserved and cannot be used", normalized)
+		return errors.NewValidationError("username", fmt.Sprintf("name '%s' is reserved and cannot be used", normalized))
 	}
 	return nil
 }
@@ -226,5 +228,5 @@ func validateNotAllNumbers(normalized string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("username cannot be all numbers")
+	return errors.NewValidationError("username", "username cannot be all numbers")
 }
