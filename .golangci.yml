@@ -23,6 +23,7 @@ linters:
     - forbidigo      # Custom forbidden patterns
     - govet          # Suspicious constructs
     - staticcheck    # Advanced static analysis
+    - asasalint      # Pass []any as any in variadic funcs (type safety)
 
     # 🛡️ ERROR HANDLING
     - errcheck       # Unchecked errors
@@ -32,7 +33,10 @@ linters:
     # 🔒 SECURITY
     - gosec          # Security audit
     - copyloopvar    # Loop variable copies
+    - bidichk        # Dangerous unicode character sequences (security)
     - noctx          # HTTP context validation
+    - contextcheck   # Non-inherited context usage detection
+    - containedctx   # Context.Context field in struct detection
     - wrapcheck      # Error wrapping enforcement
     - nilnesserr     # Advanced nil error checking
 
@@ -40,6 +44,7 @@ linters:
     - bodyclose      # HTTP body closure
     - cyclop         # Cyclomatic complexity
     - exhaustive     # Switch statement completeness
+    - gochecksumtype # Exhaustiveness checks on Go sum types
     - funlen         # Function length
     - gocognit       # Cognitive complexity
     - gocyclo        # Cyclomatic complexity
@@ -57,6 +62,9 @@ linters:
     - rowserrcheck   # SQL rows error handling
     - sqlclosecheck  # SQL resource closure
     - tparallel      # Test parallelism
+    - testpackage    # Separate _test package enforcement
+    - thelper        # Test helpers must use t.Helper()
+    - testifylint    # Testify usage validation
     - unconvert      # Unnecessary conversions
     - unparam        # Unused parameters
     - unused         # Unused code
@@ -348,6 +356,59 @@ linters-settings:
   nilnesserr:
     check-len: true
     check-cap: true
+
+  # 🆕 NEW ENTERPRISE LINTERS (v2.4.0)
+  
+  # Unicode security - dangerous character sequences
+  bidichk:
+    left-to-right-embedding: true
+    right-to-left-embedding: true
+    pop-directional-formatting: true
+    left-to-right-override: true
+    right-to-left-override: true
+    left-to-right-isolate: true
+    right-to-left-isolate: true
+    first-strong-isolate: true
+    pop-directional-isolate: true
+    
+  # Type safety - variadic function []any misuse
+  asasalint:
+    exclude:
+      - ".*\\.pb\\.go$"    # Exclude protobuf generated files
+      - ".*_gen\\.go$"     # Exclude generated files
+      
+  # Sum type exhaustiveness (modern type pattern enforcement)  
+  gochecksumtype:
+    exhaustive: true
+    default-signifies-exhaustive: false
+    
+  # Context handling improvements
+  contextcheck:
+    check-all: true
+    
+  containedctx:
+    check-all: true
+    
+  # Testing quality enforcement  
+  testpackage:
+    skip-regexp: ".*_internal_test\\.go$"
+    
+  thelper:
+    test:
+      first: true
+      name: true
+      begin: true
+    benchmark:
+      first: true
+      name: true
+      begin: true
+    tb:
+      first: true
+      name: true
+      begin: true
+      
+  testifylint:
+    enable-all: true
 
 # 🚨 ISSUES CONFIGURATION
 # Note: Formatters (gofumpt, goimports) should be run separately via 'just fix'
