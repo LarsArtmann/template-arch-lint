@@ -1,0 +1,130 @@
+graph TB
+    %% Current Architecture - Template-Arch-Lint Project
+    %% Date: 2025-09-10_22:34:25+02:00
+    %% Status: Partially Refactored (Phase 1 Complete)
+
+    %% External Layer
+    CLI[🖥️ CLI Entry Point<br/>cmd/linter/main.go<br/>526 lines - SRP violation]
+    
+    %% Application Layer
+    subgraph "Application Layer"
+        HTTP[🌐 HTTP Handlers<br/>gin-gonic routes]
+        DTO[📄 Data Transfer Objects<br/>HTTP request/response]
+        MIDDLEWARE[🔒 Middleware<br/>logging, auth, CORS]
+    end
+
+    %% Domain Layer - Current State
+    subgraph "Domain Layer (Partially Refactored)"
+        %% Services (Mixed State)
+        USERSERVICE[👤 UserService<br/>526 lines - VIOLATED SRP<br/>Query + Command + Validation]
+        QUERYSERVICE[🔍 UserQueryService<br/>NEW - CQRS Read Operations<br/>8 query methods]
+        
+        %% Entities with Value Objects
+        subgraph "Entities"
+            USER[👤 User Entity<br/>Split brain: string + value objects]
+        end
+        
+        %% Value Objects (Fixed)
+        subgraph "Value Objects - ✅ FIXED"
+            USERID[🆔 UserID<br/>✅ ValidationError fixed]
+            EMAIL[📧 Email<br/>✅ ValidationError fixed]  
+            USERNAME[👤 UserName<br/>✅ ValidationError fixed]
+            LOGLEVEL[📊 LogLevel]
+            PORT[🔌 Port]
+        end
+        
+        %% Domain Errors (Working)
+        subgraph "Domain Errors - ✅ WORKING"
+            VALIDATION_ERROR[⚠️ ValidationError]
+            NOTFOUND_ERROR[❌ NotFoundError]
+            CONFLICT_ERROR[⚡ ConflictError]
+            INTERNAL_ERROR[💥 InternalError]
+        end
+        
+        %% Repositories (Interfaces)
+        subgraph "Repository Interfaces"
+            USERREPO[📚 UserRepository<br/>Interface - Clean]
+        end
+        
+        %% Shared Patterns
+        subgraph "Shared Patterns"
+            RESULT[🚂 Result[T]<br/>Railway Oriented Programming]
+            OPTION[❓ Option[T]<br/>Null safety]
+        end
+    end
+
+    %% Infrastructure Layer
+    subgraph "Infrastructure Layer"
+        INMEMREPO[💾 InMemoryUserRepository<br/>Implementation]
+        CONFIG[⚙️ Configuration<br/>Viper + Environment]
+        LOGGER[📝 Logging<br/>✅ Structured - charmbracelet/log]
+    end
+
+    %% Database/Persistence
+    subgraph "Persistence"
+        SQLITE[🗄️ SQLite Database<br/>app.db]
+        SQLC[🔧 SQLC Generated<br/>Type-safe queries]
+    end
+
+    %% Template/Frontend
+    subgraph "Frontend"
+        TEMPL[🎨 Templ Templates<br/>Type-safe HTML]
+        HTMX[⚡ HTMX<br/>Progressive enhancement]
+        TAILWIND[🎪 TailwindCSS<br/>Utility-first styling]
+    end
+
+    %% Dependencies/Flow
+    CLI --> CONFIG
+    CLI --> USERSERVICE
+    CLI --> QUERYSERVICE
+    CLI --> LOGGER
+    
+    HTTP --> DTO
+    HTTP --> MIDDLEWARE
+    HTTP --> USERSERVICE
+    
+    USERSERVICE --> USER
+    USERSERVICE --> USERREPO
+    USERSERVICE --> VALIDATION_ERROR
+    USERSERVICE --> RESULT
+    
+    QUERYSERVICE --> USER
+    QUERYSERVICE --> USERREPO
+    QUERYSERVICE --> VALIDATION_ERROR
+    QUERYSERVICE --> RESULT
+    QUERYSERVICE --> OPTION
+    
+    USER --> USERID
+    USER --> EMAIL
+    USER --> USERNAME
+    
+    USERID --> VALIDATION_ERROR
+    EMAIL --> VALIDATION_ERROR
+    USERNAME --> VALIDATION_ERROR
+    
+    USERREPO --> INMEMREPO
+    INMEMREPO --> SQLITE
+    INMEMREPO --> SQLC
+    
+    CONFIG --> PORT
+    CONFIG --> LOGLEVEL
+    
+    HTTP --> TEMPL
+    TEMPL --> HTMX
+    TEMPL --> TAILWIND
+
+    %% Problem Areas - Red
+    classDef problem fill:#ff6b6b,stroke:#d63031,color:#fff
+    class CLI,USERSERVICE problem
+    
+    %% Fixed Areas - Green  
+    classDef fixed fill:#00b894,stroke:#00a085,color:#fff
+    class USERID,EMAIL,USERNAME,VALIDATION_ERROR,NOTFOUND_ERROR,CONFLICT_ERROR,INTERNAL_ERROR,LOGGER,QUERYSERVICE fixed
+    
+    %% Infrastructure - Blue
+    classDef infra fill:#74b9ff,stroke:#0984e3,color:#fff  
+    class CONFIG,INMEMREPO,SQLITE,SQLC,TEMPL,HTMX,TAILWIND infra
+    
+    %% Domain - Purple
+    classDef domain fill:#a29bfe,stroke:#6c5ce7,color:#fff
+    class USER,USERREPO,RESULT,OPTION domain

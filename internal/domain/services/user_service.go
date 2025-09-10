@@ -1,7 +1,7 @@
 // Package services provides domain service implementations for business logic.
 //
 // TODO: CRITICAL ARCHITECTURE VIOLATION - This file is 526 lines, violates SRP, needs breaking into smaller services
-// TODO: EXTRACT SERVICES - Break into: UserQueryService, UserCommandService, UserValidationService, UserFilterService  
+// TODO: EXTRACT SERVICES - Break into: UserQueryService, UserCommandService, UserValidationService, UserFilterService
 // TODO: TYPE SAFETY EMERGENCY - Replace ALL string parameters with value objects (Email, UserName)
 // TODO: SPLIT BRAIN RISK - Inconsistent error handling patterns (some use Result[T], others don't)
 // TODO: VALIDATION CONSISTENCY - Extract validation logic to dedicated validator following DDD patterns

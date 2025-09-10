@@ -5,12 +5,12 @@ import (
 	"context"
 	"strings"
 
-	"github.com/samber/lo"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	domainerrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/shared"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	"github.com/samber/lo"
 )
 
 // UserQueryService defines the interface for user query operations.
@@ -18,25 +18,25 @@ import (
 type UserQueryService interface {
 	// GetUser retrieves a user by their unique identifier.
 	GetUser(ctx context.Context, id values.UserID) (*entities.User, error)
-	
+
 	// GetUserByEmail retrieves a user by their email address.
 	GetUserByEmail(ctx context.Context, email string) (*entities.User, error)
-	
+
 	// ListUsers retrieves all users in the system.
 	ListUsers(ctx context.Context) ([]*entities.User, error)
-	
+
 	// GetUserEmailsWithResult retrieves all user emails using Result pattern.
 	GetUserEmailsWithResult(ctx context.Context) shared.Result[[]string]
-	
+
 	// FindUserByEmailOption finds a user by email using Option pattern.
 	FindUserByEmailOption(ctx context.Context, email string) shared.Option[*entities.User]
-	
+
 	// GetUserStats retrieves user statistics and metrics.
 	GetUserStats(ctx context.Context) (map[string]int, error)
-	
+
 	// GetUsersWithFilters retrieves users based on provided filters.
 	GetUsersWithFilters(ctx context.Context, filters UserFilters) ([]*entities.User, error)
-	
+
 	// GetUsersByEmailDomains retrieves users grouped by their email domains.
 	GetUsersByEmailDomains(ctx context.Context, domains []string) (map[string][]*entities.User, error)
 }
@@ -59,7 +59,7 @@ func (s *userQueryServiceImpl) GetUser(ctx context.Context, id values.UserID) (*
 	// TODO: Add metrics tracking for query performance
 	// TODO: Add validation for user ID format
 	// TODO: Consider adding authorization checks
-	
+
 	if id.IsEmpty() {
 		return nil, domainerrors.NewValidationError("userID", "user ID cannot be empty")
 	}
@@ -78,7 +78,7 @@ func (s *userQueryServiceImpl) GetUserByEmail(ctx context.Context, email string)
 	// TODO: Add caching by email for performance
 	// TODO: Add rate limiting for email lookups
 	// TODO: Consider case-insensitive email matching
-	
+
 	if email == "" {
 		return nil, domainerrors.NewValidationError("email", "email cannot be empty")
 	}
@@ -98,7 +98,7 @@ func (s *userQueryServiceImpl) ListUsers(ctx context.Context) ([]*entities.User,
 	// TODO: Add filtering capabilities
 	// TODO: Add caching for frequently accessed lists
 	// TODO: Consider streaming for very large result sets
-	
+
 	return s.userRepo.List(ctx)
 }
 
@@ -107,7 +107,7 @@ func (s *userQueryServiceImpl) GetUserEmailsWithResult(ctx context.Context) shar
 	// TODO: Optimize with direct email query instead of fetching full users
 	// TODO: Add email deduplication logic
 	// TODO: Add email format validation
-	
+
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
 		return shared.Err[[]string](domainerrors.WrapRepoError("list for emails", "user", err))
@@ -125,7 +125,7 @@ func (s *userQueryServiceImpl) FindUserByEmailOption(ctx context.Context, email 
 	// TODO: Add email validation using Email value object
 	// TODO: Add caching support
 	// TODO: Add audit logging for security compliance
-	
+
 	if email == "" {
 		return shared.None[*entities.User]()
 	}
@@ -145,7 +145,7 @@ func (s *userQueryServiceImpl) GetUserStats(ctx context.Context) (map[string]int
 	// TODO: Add caching for expensive statistics calculations
 	// TODO: Add real-time vs cached statistics options
 	// TODO: Add date range filtering for statistics
-	
+
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
 		return nil, domainerrors.WrapRepoError("list for stats", "user", err)
@@ -175,7 +175,7 @@ func (s *userQueryServiceImpl) GetUsersWithFilters(ctx context.Context, filters 
 	// TODO: Add validation for filter parameters
 	// TODO: Add support for complex filter combinations
 	// TODO: Add filter result caching
-	
+
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
 		return nil, domainerrors.WrapRepoError("list for filtering", "user", err)
@@ -191,7 +191,7 @@ func (s *userQueryServiceImpl) GetUsersWithFilters(ctx context.Context, filters 
 				}
 			}
 		}
-		
+
 		if filters.Active != nil {
 			// TODO: Implement user.IsActive() method when UserStatus value object exists
 			// For now, assume all users are active
@@ -199,7 +199,7 @@ func (s *userQueryServiceImpl) GetUsersWithFilters(ctx context.Context, filters 
 				return false
 			}
 		}
-		
+
 		return true
 	})
 
@@ -212,7 +212,7 @@ func (s *userQueryServiceImpl) GetUsersByEmailDomains(ctx context.Context, domai
 	// TODO: Add domain validation
 	// TODO: Add support for wildcard domain matching
 	// TODO: Add result caching by domain combinations
-	
+
 	if len(domains) == 0 {
 		return map[string][]*entities.User{}, nil
 	}

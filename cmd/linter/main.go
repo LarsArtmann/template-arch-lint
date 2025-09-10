@@ -3,7 +3,7 @@
 //
 // TODO: CRITICAL TYPE SAFETY - Replace fmt.Printf/Println with structured logging (violates forbidigo linter)
 // TODO: ENTERPRISE ARCHITECTURE - Add CLI framework (cobra) for proper command structure
-// TODO: TYPE SAFETY - Create typed ValidationResult instead of returning generic errors  
+// TODO: TYPE SAFETY - Create typed ValidationResult instead of returning generic errors
 // TODO: DEPENDENCY INJECTION - Make validators injectable for better testability
 // TODO: DOMAIN MODELING - Create proper domain types for validation operations
 // TODO: ERROR CONSISTENCY - Standardize error handling patterns across validators
@@ -17,9 +17,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/charmbracelet/log"
 	"github.com/LarsArtmann/template-arch-lint/internal/config"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	"github.com/charmbracelet/log"
 )
 
 // TODO: CLI FRAMEWORK - Replace hardcoded behavior with cobra CLI with subcommands

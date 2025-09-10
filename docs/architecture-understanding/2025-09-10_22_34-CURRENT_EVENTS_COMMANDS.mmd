@@ -1,0 +1,95 @@
+graph TB
+    %% Current Events & Commands Architecture - Template-Arch-Lint
+    %% Date: 2025-09-10_22:34:25+02:00  
+    %% Status: NO EVENT SOURCING - Traditional CRUD Pattern
+
+    %% HTTP Requests (No Command Pattern)
+    subgraph "HTTP Layer - Traditional CRUD"
+        GET_REQUEST[📥 GET /users/{id}<br/>Direct read request]
+        POST_REQUEST[📤 POST /users<br/>Direct create request]  
+        PUT_REQUEST[📝 PUT /users/{id}<br/>Direct update request]
+        DELETE_REQUEST[🗑️ DELETE /users/{id}<br/>Direct delete request]
+    end
+
+    %% Application Layer (No Command Handlers)
+    subgraph "Application Layer - Direct Method Calls"
+        HTTP_HANDLER[🎯 HTTP Handler<br/>Direct service method calls<br/>No command abstraction]
+    end
+
+    %% Service Layer (Mixed Responsibilities)
+    subgraph "Domain Services - CRUD Operations"
+        USER_SERVICE[👤 UserService<br/>526 lines - Mixed responsibilities<br/>Query + Command + Validation]
+        QUERY_SERVICE[🔍 UserQueryService<br/>✅ NEW - Read operations only]
+    end
+
+    %% Repository Layer (Direct CRUD)
+    subgraph "Repository Layer - Traditional Pattern"  
+        USER_REPO[📚 UserRepository Interface<br/>FindByID, Save, Delete<br/>No event storage]
+        INMEM_REPO[💾 InMemoryUserRepository<br/>Direct state mutation<br/>No audit trail]
+    end
+
+    %% Data Storage (No Event Store)
+    subgraph "Data Layer - State-based Storage"
+        CURRENT_STATE[🗄️ SQLite Database<br/>Current state only<br/>No event history<br/>No audit trail]
+    end
+
+    %% No Event System
+    subgraph "❌ Missing Event System"
+        NO_EVENTS[❌ No Domain Events<br/>No UserCreatedEvent<br/>No UserUpdatedEvent<br/>No UserDeletedEvent]
+        
+        NO_EVENT_STORE[❌ No Event Store<br/>No event persistence<br/>No event replay capability<br/>No audit trail]
+        
+        NO_PROJECTIONS[❌ No Event Projections<br/>No read models<br/>No event-driven queries<br/>No materialized views]
+    end
+
+    %% No Command Pattern
+    subgraph "❌ Missing Command Pattern"
+        NO_COMMANDS[❌ No Command Objects<br/>No CreateUserCommand<br/>No UpdateUserCommand<br/>No DeleteUserCommand]
+        
+        NO_COMMAND_BUS[❌ No Command Bus<br/>No command routing<br/>No command validation<br/>No command middleware]
+        
+        NO_COMMAND_HANDLERS[❌ No Command Handlers<br/>No separation of concerns<br/>No command-specific logic<br/>No validation pipeline]
+    end
+
+    %% Request Flow (Traditional CRUD)
+    GET_REQUEST --> HTTP_HANDLER
+    POST_REQUEST --> HTTP_HANDLER  
+    PUT_REQUEST --> HTTP_HANDLER
+    DELETE_REQUEST --> HTTP_HANDLER
+    
+    HTTP_HANDLER --> USER_SERVICE
+    HTTP_HANDLER --> QUERY_SERVICE
+    
+    USER_SERVICE --> USER_REPO
+    QUERY_SERVICE --> USER_REPO
+    
+    USER_REPO --> INMEM_REPO
+    INMEM_REPO --> CURRENT_STATE
+
+    %% Problem Indicators
+    classDef problem fill:#ff6b6b,stroke:#d63031,color:#fff
+    class USER_SERVICE,HTTP_HANDLER,NO_EVENTS,NO_EVENT_STORE,NO_PROJECTIONS,NO_COMMANDS,NO_COMMAND_BUS,NO_COMMAND_HANDLERS problem
+    
+    %% Traditional CRUD - Orange  
+    classDef traditional fill:#fdcb6e,stroke:#e17055,color:#333
+    class GET_REQUEST,POST_REQUEST,PUT_REQUEST,DELETE_REQUEST,USER_REPO,INMEM_REPO,CURRENT_STATE traditional
+    
+    %% Partial Progress - Yellow
+    classDef partial fill:#ffeaa7,stroke:#fdcb6e,color:#333  
+    class QUERY_SERVICE partial
+
+    %% Key Issues Highlighted
+    NO_EVENTS -.->|"Missing audit trail"| CURRENT_STATE
+    NO_COMMANDS -.->|"No validation pipeline"| HTTP_HANDLER  
+    USER_SERVICE -.->|"Direct state mutation"| INMEM_REPO
+    
+    %% Missing Capabilities
+    subgraph "❌ Missing Capabilities"
+        MISSING_AUDIT[❌ No Audit Trail<br/>Can't track who changed what when]
+        MISSING_REPLAY[❌ No Event Replay<br/>Can't reconstruct state from events]
+        MISSING_PROJECTIONS[❌ No Read Models<br/>Can't optimize queries independently]
+        MISSING_VALIDATION[❌ No Command Validation<br/>Validation mixed with business logic]
+    end
+
+    classDef missing fill:#636e72,stroke:#2d3436,color:#fff
+    class MISSING_AUDIT,MISSING_REPLAY,MISSING_PROJECTIONS,MISSING_VALIDATION missing

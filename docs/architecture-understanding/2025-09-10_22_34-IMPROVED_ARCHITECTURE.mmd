@@ -1,0 +1,212 @@
+graph TB
+    %% IMPROVED Architecture - Template-Arch-Lint Project  
+    %% Vision: Post-Refactoring Target Architecture
+    %% Date: 2025-09-10_22:34:25+02:00
+
+    %% External Layer - CLI with Cobra
+    subgraph "CLI Layer - ✨ IMPROVED"
+        COBRA[🐍 Cobra CLI Framework<br/>Subcommands: validate, analyze, report<br/>Structured args & flags]
+        GRACEFUL[🛑 Graceful Shutdown<br/>Signal handling]
+        CONFIG_LOADER[⚙️ Config Loader<br/>File + ENV + Flags]
+    end
+
+    %% Application Layer - Clean Architecture
+    subgraph "Application Layer - ✨ ENHANCED"
+        subgraph "HTTP Layer"
+            GINROUTER[🌐 Gin Router<br/>RESTful endpoints]
+            HANDLERS[🎯 HTTP Handlers<br/>Thin, focused handlers]
+            MIDDLEWARE[🔒 Middleware Stack<br/>Auth, CORS, Rate Limiting]
+        end
+        
+        subgraph "Use Cases"
+            USER_USECASE[👤 User Use Cases<br/>Orchestrates domain services]
+            VALIDATION_USECASE[✅ Validation Use Cases<br/>Coordinates validators]
+        end
+    end
+
+    %% Domain Layer - CQRS + DDD
+    subgraph "Domain Layer - 🏗️ FULLY REFACTORED"
+        %% Command/Query Separation
+        subgraph "CQRS Services"
+            QUERYSERVICE[🔍 UserQueryService<br/>Read operations only<br/>8 methods + caching]
+            COMMANDSERVICE[✏️ UserCommandService<br/>Write operations only<br/>Create, Update, Delete]
+            VALIDATIONSERVICE[✅ UserValidationService<br/>Business rule validation<br/>Domain constraints]
+            FILTERSERVICE[🔽 UserFilterService<br/>Complex filtering logic<br/>Query optimization]
+        end
+        
+        %% Rich Domain Entities
+        subgraph "Rich Domain Model"
+            USER_ENTITY[👤 User Entity<br/>Rich behavior, no primitives<br/>Domain methods only]
+            USER_AGGREGATE[👥 User Aggregate<br/>Consistency boundary<br/>Business invariants]
+        end
+        
+        %% Complete Value Objects
+        subgraph "Value Objects - 💎 COMPLETE"
+            USERID[🆔 UserID<br/>Generation + Validation]
+            EMAIL[📧 Email<br/>Domain + LocalPart methods]  
+            USERNAME[👤 UserName<br/>Reserved names + Rules]
+            USERSTATUS[🟢 UserStatus<br/>Active/Inactive/Suspended]
+            DOMAIN_NAME[🌐 DomainName<br/>Email domain validation]
+        end
+        
+        %% Domain Events
+        subgraph "Domain Events - 🎪 NEW"
+            USER_CREATED[🎉 UserCreatedEvent]
+            USER_UPDATED[📝 UserUpdatedEvent]
+            USER_DELETED[🗑️ UserDeletedEvent]
+            EMAIL_CHANGED[📧 EmailChangedEvent]
+        end
+        
+        %% Domain Services
+        subgraph "Domain Services"
+            EMAIL_SERVICE[📧 EmailDomainService<br/>Business logic for emails]
+            USERNAME_SERVICE[👤 UserNameService<br/>Uniqueness + Rules]
+            AUDIT_SERVICE[📋 AuditService<br/>Change tracking]
+        end
+        
+        %% Repositories - Clean Interfaces
+        subgraph "Repository Abstractions"
+            USER_REPOSITORY[📚 UserRepository<br/>Clean interface]
+            EVENT_REPOSITORY[🎪 EventRepository<br/>Event sourcing ready]
+            CACHE_REPOSITORY[⚡ CacheRepository<br/>Performance layer]
+        end
+        
+        %% Functional Patterns
+        subgraph "Functional Patterns - 🚂 RAILWAY"
+            RESULT[🚂 Result[T]<br/>Railway Oriented Programming]
+            OPTION[❓ Option[T]<br/>Null safety everywhere]
+            EITHER[🔀 Either[L,R]<br/>Two-path computations]
+        end
+        
+        %% Error Handling
+        subgraph "Domain Errors - ⚠️ COMPREHENSIVE"
+            VALIDATION_ERROR[⚠️ ValidationError]
+            BUSINESS_ERROR[💼 BusinessRuleError]
+            NOTFOUND_ERROR[❌ NotFoundError]
+            CONFLICT_ERROR[⚡ ConflictError]
+            AUTHORIZATION_ERROR[🔒 AuthorizationError]
+        end
+    end
+
+    %% Infrastructure Layer - Enterprise Ready
+    subgraph "Infrastructure Layer - 🏢 ENTERPRISE"
+        %% Repository Implementations
+        subgraph "Persistence"
+            SQLITE_REPO[🗄️ SQLiteUserRepository<br/>Production implementation]
+            INMEM_REPO[💾 InMemoryUserRepository<br/>Testing implementation]
+            CACHE_IMPL[⚡ RedisCache<br/>Distributed caching]
+        end
+        
+        %% External Services
+        subgraph "External Integrations"
+            EMAIL_PROVIDER[📧 Email Service<br/>SendGrid/SES integration]
+            AUDIT_LOGGER[📋 Audit Logger<br/>Compliance logging]
+            METRICS[📊 Metrics Collection<br/>Prometheus/OTEL]
+        end
+        
+        %% Configuration
+        subgraph "Configuration Management"
+            ENV_CONFIG[🌍 Environment Config<br/>12-factor app ready]
+            FILE_CONFIG[📄 File Config<br/>YAML/JSON support]
+            SECRETS[🔐 Secret Management<br/>Vault integration]
+        end
+    end
+
+    %% Persistence Layer
+    subgraph "Data Layer"
+        SQLITE[🗄️ SQLite Database<br/>Primary storage]
+        REDIS[🔴 Redis<br/>Caching + Sessions]
+        SQLC[🔧 SQLC Generated<br/>Type-safe queries]
+        MIGRATIONS[🔄 Database Migrations<br/>Version controlled]
+    end
+
+    %% Frontend Layer
+    subgraph "Presentation Layer"
+        TEMPL[🎨 Templ Templates<br/>Type-safe, compiled]
+        HTMX[⚡ HTMX<br/>Progressive enhancement]
+        CSS[🎪 TailwindCSS<br/>Design system ready]
+        COMPONENTS[🧩 Component Library<br/>Reusable UI elements]
+    end
+
+    %% Observability Stack
+    subgraph "Observability - 👁️ MONITORING"
+        LOGGING[📝 Structured Logging<br/>JSON + Context]
+        TRACING[🔍 Distributed Tracing<br/>OpenTelemetry]
+        MONITORING[📊 Metrics Dashboard<br/>Business + Technical]
+        ALERTING[🚨 Alert Manager<br/>Proactive notifications]
+    end
+
+    %% Dependencies - Clean Flow
+    COBRA --> CONFIG_LOADER
+    COBRA --> USER_USECASE
+    COBRA --> GRACEFUL
+    
+    GINROUTER --> HANDLERS
+    HANDLERS --> MIDDLEWARE
+    HANDLERS --> USER_USECASE
+    
+    USER_USECASE --> QUERYSERVICE
+    USER_USECASE --> COMMANDSERVICE
+    USER_USECASE --> VALIDATIONSERVICE
+    
+    COMMANDSERVICE --> USER_AGGREGATE
+    COMMANDSERVICE --> USER_CREATED
+    COMMANDSERVICE --> USER_UPDATED
+    COMMANDSERVICE --> USER_DELETED
+    
+    QUERYSERVICE --> FILTERSERVICE
+    QUERYSERVICE --> CACHE_IMPL
+    QUERYSERVICE --> USER_REPOSITORY
+    
+    USER_AGGREGATE --> USERID
+    USER_AGGREGATE --> EMAIL
+    USER_AGGREGATE --> USERNAME
+    USER_AGGREGATE --> USERSTATUS
+    
+    VALIDATIONSERVICE --> EMAIL_SERVICE
+    VALIDATIONSERVICE --> USERNAME_SERVICE
+    VALIDATIONSERVICE --> BUSINESS_ERROR
+    
+    EMAIL --> DOMAIN_NAME
+    EMAIL --> EMAIL_SERVICE
+    USERNAME --> USERNAME_SERVICE
+    
+    USER_REPOSITORY --> SQLITE_REPO
+    USER_REPOSITORY --> INMEM_REPO
+    EVENT_REPOSITORY --> SQLITE
+    
+    SQLITE_REPO --> SQLC
+    SQLITE_REPO --> MIGRATIONS
+    CACHE_IMPL --> REDIS
+    
+    HANDLERS --> TEMPL
+    TEMPL --> COMPONENTS
+    TEMPL --> HTMX
+    TEMPL --> CSS
+    
+    %% Observability Integration
+    COMMANDSERVICE --> LOGGING
+    QUERYSERVICE --> METRICS
+    USER_USECASE --> TRACING
+    GINROUTER --> MONITORING
+    
+    LOGGING --> ALERTING
+    METRICS --> MONITORING
+    TRACING --> MONITORING
+
+    %% Color Classes
+    %% New/Improved - Green
+    classDef improved fill:#00b894,stroke:#00a085,color:#fff
+    class COBRA,QUERYSERVICE,COMMANDSERVICE,VALIDATIONSERVICE,FILTERSERVICE,USER_AGGREGATE,USERSTATUS,DOMAIN_NAME,USER_CREATED,USER_UPDATED,USER_DELETED,EMAIL_CHANGED improved
+    
+    %% Enterprise - Blue
+    classDef enterprise fill:#74b9ff,stroke:#0984e3,color:#fff  
+    class CACHE_IMPL,EMAIL_PROVIDER,AUDIT_LOGGER,METRICS,SECRETS,REDIS,TRACING,MONITORING,ALERTING enterprise
+    
+    %% Domain Core - Purple
+    classDef domain fill:#a29bfe,stroke:#6c5ce7,color:#fff
+    class USER_ENTITY,EMAIL_SERVICE,USERNAME_SERVICE,AUDIT_SERVICE,RESULT,OPTION,EITHER domain
+    
+    %% Infrastructure - Gray
+    classDef infra fill:#636e72,stroke:#2d3436,color:#fff
+    class SQLITE_REPO,INMEM_REPO,SQLITE,SQLC,MIGRATIONS,LOGGING infra

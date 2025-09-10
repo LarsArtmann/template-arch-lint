@@ -1,0 +1,196 @@
+graph TB
+    %% IMPROVED Events & Commands Architecture - Template-Arch-Lint
+    %% Vision: Event Sourcing + CQRS + Command Pattern
+    %% Date: 2025-09-10_22:34:25+02:00
+
+    %% HTTP Layer with Command Abstraction
+    subgraph "HTTP Layer - Command Abstraction"
+        HTTP_POST[📤 POST /users<br/>→ CreateUserCommand]
+        HTTP_PUT[📝 PUT /users/{id}<br/>→ UpdateUserCommand]  
+        HTTP_DELETE[🗑️ DELETE /users/{id}<br/>→ DeleteUserCommand]
+        HTTP_GET[📥 GET /users/{id}<br/>→ Query Service]
+    end
+
+    %% Command Processing Pipeline
+    subgraph "Command Processing - 🎯 CQRS Write Side"
+        COMMAND_BUS[🚌 Command Bus<br/>Route commands to handlers<br/>Validation middleware<br/>Authorization middleware]
+        
+        subgraph "Command Objects"
+            CREATE_CMD[📝 CreateUserCommand<br/>UserID, Email, UserName<br/>Immutable command data]
+            UPDATE_CMD[🔄 UpdateUserCommand<br/>UserID, Email, UserName<br/>Version for optimistic locking]
+            DELETE_CMD[🗑️ DeleteUserCommand<br/>UserID, Reason<br/>Audit information]
+        end
+        
+        subgraph "Command Handlers"  
+            CREATE_HANDLER[👤 CreateUserHandler<br/>Business rule validation<br/>Aggregate loading<br/>Event generation]
+            UPDATE_HANDLER[🔄 UpdateUserHandler<br/>Optimistic locking<br/>Change detection<br/>Event generation] 
+            DELETE_HANDLER[🗑️ DeleteUserHandler<br/>Cascade validation<br/>Soft delete support<br/>Event generation]
+        end
+    end
+
+    %% Domain Aggregates
+    subgraph "Domain Aggregates - 🏛️ Business Logic"
+        USER_AGGREGATE[👤 User Aggregate<br/>Business invariants<br/>Event generation<br/>State protection]
+        
+        subgraph "Aggregate Behavior"
+            HANDLE_CREATE[➕ HandleCreateUser()<br/>Validate business rules<br/>Generate UserCreatedEvent]
+            HANDLE_UPDATE[🔄 HandleUpdateUser()<br/>Validate changes<br/>Generate UserUpdatedEvent]
+            HANDLE_DELETE[➖ HandleDeleteUser()<br/>Check constraints<br/>Generate UserDeletedEvent]
+        end
+    end
+
+    %% Event System
+    subgraph "Event System - 🎪 Domain Events"
+        subgraph "Domain Events"
+            USER_CREATED[🎉 UserCreatedEvent<br/>UserID, Email, UserName<br/>Timestamp, Version]
+            USER_UPDATED[📝 UserUpdatedEvent<br/>UserID, Changes<br/>PreviousVersion, NewVersion]
+            USER_DELETED[🗑️ UserDeletedEvent<br/>UserID, DeletedBy<br/>Reason, Timestamp]
+            EMAIL_CHANGED[📧 EmailChangedEvent<br/>UserID, OldEmail, NewEmail<br/>Verification requirements]
+        end
+        
+        EVENT_BUS[🎪 Event Bus<br/>Event routing<br/>Async processing<br/>Error handling]
+    end
+
+    %% Event Store
+    subgraph "Event Store - 📚 Event Persistence"
+        EVENT_STORE[📚 Event Store<br/>Append-only event log<br/>Event versioning<br/>Snapshot support]
+        
+        EVENT_STREAM[📜 Event Streams<br/>Per-aggregate streams<br/>Global event log<br/>Event ordering]
+        
+        SNAPSHOTS[📸 Aggregate Snapshots<br/>Performance optimization<br/>Periodic snapshots<br/>Replay from snapshot]
+    end
+
+    %% Query Side (CQRS)
+    subgraph "Query Side - 🔍 CQRS Read Side"
+        QUERY_SERVICE[🔍 UserQueryService<br/>Optimized read operations<br/>Denormalized views]
+        
+        subgraph "Projections & Read Models"
+            USER_PROJECTION[👤 User Projection<br/>Current user state<br/>Event-driven updates]
+            STATS_PROJECTION[📊 User Statistics<br/>Aggregated metrics<br/>Real-time updates]
+            AUDIT_PROJECTION[📋 Audit Trail<br/>Full change history<br/>Compliance reporting]
+        end
+        
+        PROJECTION_MANAGER[🎭 Projection Manager<br/>Event subscription<br/>Projection rebuilding<br/>Error handling]
+    end
+
+    %% Read Storage
+    subgraph "Read Storage - 🗄️ Optimized Queries"
+        READ_DB[🗄️ Read Database<br/>Denormalized tables<br/>Query optimization<br/>Indexes for performance]
+        
+        CACHE_LAYER[⚡ Cache Layer<br/>Redis/In-memory<br/>Query result caching<br/>Invalidation strategy]
+    end
+
+    %% Event Processing Pipeline
+    subgraph "Event Processing - ⚙️ Async Processing"
+        EVENT_HANDLERS[🎯 Event Handlers<br/>Projection updates<br/>Integration events<br/>Notification dispatch]
+        
+        SAGA_MANAGER[🎭 Saga Manager<br/>Long-running processes<br/>Compensation logic<br/>State management]
+        
+        EXTERNAL_INTEGRATION[🌐 External Integration<br/>Email notifications<br/>Audit logging<br/>Analytics events]
+    end
+
+    %% Command Flow
+    HTTP_POST --> COMMAND_BUS
+    HTTP_PUT --> COMMAND_BUS  
+    HTTP_DELETE --> COMMAND_BUS
+    
+    COMMAND_BUS --> CREATE_CMD
+    COMMAND_BUS --> UPDATE_CMD
+    COMMAND_BUS --> DELETE_CMD
+    
+    CREATE_CMD --> CREATE_HANDLER
+    UPDATE_CMD --> UPDATE_HANDLER
+    DELETE_CMD --> DELETE_HANDLER
+    
+    CREATE_HANDLER --> USER_AGGREGATE
+    UPDATE_HANDLER --> USER_AGGREGATE
+    DELETE_HANDLER --> USER_AGGREGATE
+    
+    USER_AGGREGATE --> HANDLE_CREATE
+    USER_AGGREGATE --> HANDLE_UPDATE
+    USER_AGGREGATE --> HANDLE_DELETE
+
+    %% Event Flow
+    HANDLE_CREATE --> USER_CREATED
+    HANDLE_UPDATE --> USER_UPDATED
+    HANDLE_UPDATE --> EMAIL_CHANGED
+    HANDLE_DELETE --> USER_DELETED
+    
+    USER_CREATED --> EVENT_BUS
+    USER_UPDATED --> EVENT_BUS
+    USER_DELETED --> EVENT_BUS
+    EMAIL_CHANGED --> EVENT_BUS
+    
+    EVENT_BUS --> EVENT_STORE
+    EVENT_STORE --> EVENT_STREAM
+    EVENT_STORE --> SNAPSHOTS
+
+    %% Projection Flow
+    EVENT_BUS --> PROJECTION_MANAGER
+    PROJECTION_MANAGER --> USER_PROJECTION
+    PROJECTION_MANAGER --> STATS_PROJECTION
+    PROJECTION_MANAGER --> AUDIT_PROJECTION
+    
+    USER_PROJECTION --> READ_DB
+    STATS_PROJECTION --> READ_DB
+    AUDIT_PROJECTION --> READ_DB
+    
+    READ_DB --> CACHE_LAYER
+
+    %% Query Flow
+    HTTP_GET --> QUERY_SERVICE
+    QUERY_SERVICE --> CACHE_LAYER
+    QUERY_SERVICE --> READ_DB
+
+    %% Event Processing Flow
+    EVENT_BUS --> EVENT_HANDLERS
+    EVENT_HANDLERS --> SAGA_MANAGER
+    EVENT_HANDLERS --> EXTERNAL_INTEGRATION
+
+    %% Aggregate Reconstruction
+    EVENT_STREAM -.->|"Event Replay"| USER_AGGREGATE
+    SNAPSHOTS -.->|"Fast Loading"| USER_AGGREGATE
+
+    %% Color Classes
+
+    %% Command Side - Blue
+    classDef command fill:#74b9ff,stroke:#0984e3,color:#fff
+    class COMMAND_BUS,CREATE_CMD,UPDATE_CMD,DELETE_CMD,CREATE_HANDLER,UPDATE_HANDLER,DELETE_HANDLER command
+    
+    %% Domain - Purple
+    classDef domain fill:#a29bfe,stroke:#6c5ce7,color:#fff  
+    class USER_AGGREGATE,HANDLE_CREATE,HANDLE_UPDATE,HANDLE_DELETE domain
+    
+    %% Events - Green
+    classDef events fill:#00b894,stroke:#00a085,color:#fff
+    class USER_CREATED,USER_UPDATED,USER_DELETED,EMAIL_CHANGED,EVENT_BUS,EVENT_HANDLERS,SAGA_MANAGER events
+    
+    %% Storage - Gray
+    classDef storage fill:#636e72,stroke:#2d3436,color:#fff
+    class EVENT_STORE,EVENT_STREAM,SNAPSHOTS,READ_DB storage
+    
+    %% Query Side - Orange
+    classDef query fill:#fdcb6e,stroke:#e17055,color:#333
+    class QUERY_SERVICE,USER_PROJECTION,STATS_PROJECTION,AUDIT_PROJECTION,PROJECTION_MANAGER query
+    
+    %% Performance - Red
+    classDef performance fill:#ff7675,stroke:#d63031,color:#fff
+    class CACHE_LAYER performance
+    
+    %% Integration - Cyan
+    classDef integration fill:#00cec9,stroke:#00b894,color:#fff
+    class EXTERNAL_INTEGRATION integration
+
+    %% Key Benefits Annotations
+    EVENT_STORE -.->|"Complete audit trail<br/>Time-travel queries"| AUDIT_PROJECTION
+    SNAPSHOTS -.->|"Performance optimization<br/>Fast aggregate loading"| USER_AGGREGATE
+    CACHE_LAYER -.->|"Sub-millisecond queries<br/>Scalable reads"| QUERY_SERVICE
+    SAGA_MANAGER -.->|"Complex workflows<br/>Distributed transactions"| EXTERNAL_INTEGRATION
+
+    %% Architecture Benefits
+    subgraph "✨ Architecture Benefits"
+        BENEFITS[🎯 Complete Audit Trail<br/>📈 Scalable Reads<br/>🔄 Event Replay<br/>⚡ Performance<br/>🔒 Data Consistency<br/>🎪 Event-Driven Integration]
+    end
+    
+    classDef benefits fill:#55a3ff,stroke:#2d3436,color:#fff
+    class BENEFITS benefits
