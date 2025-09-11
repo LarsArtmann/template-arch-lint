@@ -88,7 +88,7 @@ func validateUserIDFormat(id string) error {
 
 func validateUserIDNotEmpty(id string) error {
 	if id == "" {
-		return errors.NewRequiredFieldError("userID")
+		return errors.NewRequiredFieldError("user ID")
 	}
 	return nil
 }
@@ -105,8 +105,8 @@ func validateUserIDWhitespace(original, normalized string) error {
 }
 
 func validateUserIDLength(id string) error {
-	if len(id) < 1 {
-		return errors.NewValidationError("userID", "user ID too short")
+	if len(id) < 2 {
+		return errors.NewValidationError("userID", "user ID too short (minimum 2 characters)")
 	}
 	if len(id) > 100 {
 		return errors.NewValidationError("userID", "user ID too long (maximum 100 characters)")

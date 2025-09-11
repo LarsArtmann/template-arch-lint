@@ -150,7 +150,7 @@ func validateUsernameWhitespace(username, normalized string) error {
 func validateUsernameCharacters(normalized string) error {
 	for _, char := range normalized {
 		if !isValidUsernameChar(char) {
-			return errors.NewValidationError("username", "name can only contain letters, numbers, dots, hyphens, underscores, and spaces")
+			return errors.NewValidationError("username", "name can only contain letters, numbers, dots, hyphens, underscores, apostrophes, commas, and spaces")
 		}
 	}
 	return nil
@@ -158,10 +158,22 @@ func validateUsernameCharacters(normalized string) error {
 
 // isValidUsernameChar checks if a character is allowed in usernames.
 func isValidUsernameChar(char rune) bool {
-	return (char >= 'a' && char <= 'z') ||
-		(char >= 'A' && char <= 'Z') ||
-		(char >= '0' && char <= '9') ||
-		char == '-' || char == '_' || char == '.' || char == ' '
+	// Allow ASCII letters and digits
+	if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || (char >= '0' && char <= '9') {
+		return true
+	}
+	
+	// Allow specific punctuation and symbols
+	if char == '-' || char == '_' || char == '.' || char == ' ' || char == '\'' || char == ',' {
+		return true
+	}
+	
+	// Allow Unicode letters (for international names with accents)
+	if unicode.IsLetter(char) {
+		return true
+	}
+	
+	return false
 }
 
 // validateUsernameEdges checks start/end character restrictions and consecutive characters.

@@ -14,7 +14,8 @@ type Email struct {
 }
 
 // emailRegex provides basic email validation pattern.
-var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+// Updated to support numeric domains like IP addresses
+var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9]{2,}$`)
 
 // NewEmail creates a new Email value object with validation.
 func NewEmail(email string) (Email, error) {
@@ -22,8 +23,9 @@ func NewEmail(email string) (Email, error) {
 		return Email{}, err
 	}
 
+	// Preserve original case as per validation_test.go specification
 	return Email{
-		value: strings.ToLower(strings.TrimSpace(email)),
+		value: email,
 	}, nil
 }
 
@@ -55,9 +57,9 @@ func (e Email) LocalPart() string {
 	return parts[0]
 }
 
-// Equals compares two Email value objects.
+// Equals compares two Email value objects (case-insensitive).
 func (e Email) Equals(other Email) bool {
-	return e.value == other.value
+	return strings.ToLower(e.value) == strings.ToLower(other.value)
 }
 
 // IsEmpty checks if the email is empty.
@@ -71,7 +73,12 @@ func validateEmailFormat(email string) error {
 		return err
 	}
 
-	normalized := strings.ToLower(strings.TrimSpace(email))
+	// Reject leading/trailing whitespace as per validation_test.go specification
+	if email != strings.TrimSpace(email) {
+		return errors.NewValidationError("email", "email cannot have leading or trailing spaces")
+	}
+
+	normalized := strings.ToLower(email)
 
 	if err := validateEmailLength(normalized); err != nil {
 		return err
@@ -114,9 +121,6 @@ func validateEmailBasicFormat(email string) error {
 		return errors.NewValidationError("email", "email cannot contain consecutive dots")
 	}
 
-	if strings.HasPrefix(email, ".") || strings.HasSuffix(email, ".") {
-		return errors.NewValidationError("email", "email cannot start or end with dot")
-	}
 	return nil
 }
 
@@ -142,6 +146,15 @@ func validateEmailLocalPart(localPart string) error {
 	if len(localPart) > 64 {
 		return errors.NewValidationError("email", "email local part too long (max 64 characters)")
 	}
+	
+	// Check for invalid dots at start/end of local part
+	if strings.HasPrefix(localPart, ".") {
+		return errors.NewValidationError("email", "email local part cannot start with dot")
+	}
+	if strings.HasSuffix(localPart, ".") {
+		return errors.NewValidationError("email", "email local part cannot end with dot")
+	}
+	
 	return nil
 }
 
@@ -155,5 +168,14 @@ func validateEmailDomain(domain string) error {
 	if !strings.Contains(domain, ".") {
 		return errors.NewValidationError("email", "email domain must contain at least one dot")
 	}
+	
+	// Check for invalid dots at start/end of domain
+	if strings.HasPrefix(domain, ".") {
+		return errors.NewValidationError("email", "email domain cannot start with dot")
+	}
+	if strings.HasSuffix(domain, ".") {
+		return errors.NewValidationError("email", "email domain cannot end with dot")
+	}
+	
 	return nil
 }
