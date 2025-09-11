@@ -79,8 +79,8 @@ var _ = Describe("UserService", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(user).ToNot(BeNil())
 		Expect(user.ID).To(Equal(expectedID))
-		Expect(user.Email).To(Equal(expectedEmail))
-		Expect(user.Name).To(Equal(expectedName))
+		Expect(user.GetEmail().String()).To(Equal(expectedEmail))
+		Expect(user.GetUserName().String()).To(Equal(expectedName))
 	}
 
 	Describe("CreateUser", func() {
@@ -148,8 +148,8 @@ var _ = Describe("UserService", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(user).ToNot(BeNil())
 				Expect(user.ID).To(Equal(createdUser.ID))
-				Expect(user.Email).To(Equal(createdUser.Email))
-				Expect(user.Name).To(Equal(createdUser.Name))
+				Expect(user.GetEmail().String()).To(Equal(createdUser.GetEmail().String()))
+				Expect(user.GetUserName().String()).To(Equal(createdUser.GetUserName().String()))
 			})
 		})
 
@@ -181,8 +181,8 @@ var _ = Describe("UserService", func() {
 
 				Expect(err).ToNot(HaveOccurred())
 				Expect(user).ToNot(BeNil())
-				Expect(user.Email).To(Equal(newEmail))
-				Expect(user.Name).To(Equal(newName))
+				Expect(user.GetEmail().String()).To(Equal(newEmail))
+				Expect(user.GetUserName().String()).To(Equal(newName))
 			})
 		})
 
@@ -328,8 +328,8 @@ var _ = Describe("UserService", func() {
 					Expect(result.IsOk()).To(BeTrue())
 					user, _ := result.Get()
 					Expect(user.ID).To(Equal(id))
-					Expect(user.Email).To(Equal(email))
-					Expect(user.Name).To(Equal(name))
+					Expect(user.GetEmail().String()).To(Equal(email))
+					Expect(user.GetUserName().String()).To(Equal(name))
 				})
 			})
 
@@ -356,7 +356,7 @@ var _ = Describe("UserService", func() {
 
 					Expect(option.IsPresent()).To(BeTrue())
 					user, _ := option.Get()
-					Expect(user.Email).To(Equal(defaultTestEmail))
+					Expect(user.GetEmail().String()).To(Equal(defaultTestEmail))
 				})
 			})
 
@@ -392,7 +392,7 @@ var _ = Describe("UserService", func() {
 					if shouldSucceed {
 						Expect(err).ToNot(HaveOccurred(), description)
 						Expect(user).ToNot(BeNil(), description)
-						Expect(user.Email).To(Equal(email), description)
+						Expect(user.GetEmail().String()).To(Equal(email), description)
 					} else {
 						Expect(err).To(HaveOccurred(), description)
 						Expect(user).To(BeNil(), description)
@@ -427,7 +427,7 @@ var _ = Describe("UserService", func() {
 					if shouldSucceed {
 						Expect(err).ToNot(HaveOccurred(), description)
 						Expect(user).ToNot(BeNil(), description)
-						Expect(user.Name).To(Equal(name), description)
+						Expect(user.GetUserName().String()).To(Equal(name), description)
 					} else {
 						Expect(err).To(HaveOccurred(), description)
 						Expect(user).To(BeNil(), description)
@@ -514,8 +514,8 @@ var _ = Describe("UserService", func() {
 					// Verify final state
 					finalUser, err := userService.GetUser(ctx, user.ID)
 					Expect(err).ToNot(HaveOccurred())
-					Expect(finalUser.Email).To(Equal("updated2@example.com"))
-					Expect(finalUser.Name).To(Equal("Updated User 2"))
+					Expect(finalUser.GetEmail().String()).To(Equal("updated2@example.com"))
+					Expect(finalUser.GetUserName().String()).To(Equal("Updated User 2"))
 				})
 			})
 
@@ -525,7 +525,7 @@ var _ = Describe("UserService", func() {
 					id1 := createTestUserID("min-name-user")
 					user1, err := userService.CreateUser(ctx, id1, "min@example.com", "Jo")
 					Expect(err).ToNot(HaveOccurred())
-					Expect(user1.Name).To(Equal("Jo"))
+					Expect(user1.GetUserName().String()).To(Equal("Jo"))
 
 					// Test maximum reasonable email length
 					longLocalPart := strings.Repeat("a", 60) // 60 chars + @example.com = 71 total
@@ -533,7 +533,7 @@ var _ = Describe("UserService", func() {
 					id2 := createTestUserID("long-email-user")
 					user2, err := userService.CreateUser(ctx, id2, longEmail, "Long Email User")
 					Expect(err).ToNot(HaveOccurred())
-					Expect(user2.Email).To(Equal(longEmail))
+					Expect(user2.GetEmail().String()).To(Equal(longEmail))
 				})
 			})
 		})

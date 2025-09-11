@@ -72,7 +72,7 @@ func (r *InMemoryUserRepository) FindByEmail(_ context.Context, email string) (*
 	defer r.mu.RUnlock()
 
 	for _, user := range r.users {
-		if user.Email == email {
+		if user.GetEmail().String() == email {
 			// Return a copy to prevent external modifications
 			userCopy := *user
 			return &userCopy, nil
@@ -88,7 +88,7 @@ func (r *InMemoryUserRepository) FindByUsername(_ context.Context, username stri
 	defer r.mu.RUnlock()
 
 	for _, user := range r.users {
-		if user.Name == username {
+		if user.GetUserName().String() == username {
 			// Return a copy to prevent external modifications
 			userCopy := *user
 			return &userCopy, nil

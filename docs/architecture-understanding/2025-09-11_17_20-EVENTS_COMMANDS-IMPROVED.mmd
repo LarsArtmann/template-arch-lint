@@ -1,0 +1,225 @@
+%% IMPROVED EVENTS & COMMANDS - Template-Arch-Lint Complete CQRS + Event Sourcing
+%% Analysis Date: 2025-09-11 17:20  
+%% Status: TARGET ARCHITECTURE with full Event Sourcing and CQRS implementation
+graph TD
+    subgraph "Command Side - COMPLETE CQRS"
+        subgraph "Commands - TYPED & VALIDATED"
+            CreateUserCmd[CreateUserCommand]
+            UpdateUserCmd[UpdateUserCommand]
+            DeleteUserCmd[DeleteUserCommand]
+            CmdProps["Properties:<br/>- ID: UserID<br/>- Email: Email (value object)<br/>- Name: UserName (value object)<br/>- Validation built-in"]
+        end
+        
+        subgraph "Command Handlers - SINGLE RESPONSIBILITY"
+            CreateHandler[CreateUserCommandHandler]
+            UpdateHandler[UpdateUserCommandHandler] 
+            DeleteHandler[DeleteUserCommandHandler]
+            HandlerProps["Responsibilities:<br/>- Command validation<br/>- Business rules<br/>- Event generation<br/>- Aggregate persistence"]
+        end
+        
+        subgraph "Command Bus - ROUTING"
+            CommandBus[CommandBus]
+            CommandRouter[CommandRouter]
+            Middleware[Command Middleware]
+            BusProps["Features:<br/>- Handler routing<br/>- Validation pipeline<br/>- Authorization checks<br/>- Audit logging"]
+        end
+    end
+    
+    subgraph "Event Sourcing - COMPLETE IMPLEMENTATION"
+        subgraph "Domain Events - RICH EVENTS"
+            UserCreatedEvent[UserCreated]
+            UserUpdatedEvent[UserUpdated] 
+            UserDeletedEvent[UserDeleted]
+            EventProps["Event Data:<br/>- AggregateID<br/>- Version<br/>- Timestamp<br/>- User data snapshot<br/>- Causation/Correlation IDs"]
+        end
+        
+        subgraph "Event Store - PERSISTENCE"
+            EventStore[(Event Store)]
+            EventStream[Event Stream]
+            Snapshots[Aggregate Snapshots]
+            StoreProps["Features:<br/>- Append-only writes<br/>- Stream per aggregate<br/>- Optimistic concurrency<br/>- Snapshot optimization"]
+        end
+        
+        subgraph "Aggregates - DOMAIN BOUNDARIES"
+            UserAggregate[User Aggregate]
+            AggregateRoot[Aggregate Root]
+            AggregateProps["Capabilities:<br/>- Event sourcing<br/>- Business invariants<br/>- State reconstruction<br/>- Version tracking"]
+        end
+    end
+    
+    subgraph "Query Side - OPTIMIZED READS"
+        subgraph "Query Models - DENORMALIZED"
+            UserReadModel[UserReadModel]
+            UserListModel[UserListModel]
+            UserStatsModel[UserStatsModel]
+            UserFilterModel[UserFilterModel]
+            ReadModelProps["Optimized for queries:<br/>- Denormalized data<br/>- Query-specific views<br/>- Fast lookups<br/>- Cached projections"]
+        end
+        
+        subgraph "Queries - TYPED REQUESTS"
+            GetUserQuery[GetUserQuery]
+            ListUsersQuery[ListUsersQuery]
+            GetUserStatsQuery[GetUserStatsQuery]
+            FilterUsersQuery[FilterUsersQuery]
+            QueryProps["Query Parameters:<br/>- Type safe<br/>- Validation<br/>- Pagination<br/>- Filtering/Sorting"]
+        end
+        
+        subgraph "Query Handlers - READ OPTIMIZATION"
+            GetUserHandler[GetUserQueryHandler]
+            ListUsersHandler[ListUsersQueryHandler]
+            StatsHandler[GetUserStatsQueryHandler]
+            FilterHandler[FilterUsersQueryHandler]
+            QueryHandlerProps["Optimized for reads:<br/>- Cache integration<br/>- Materialized views<br/>- Projection queries<br/>- Performance monitoring"]
+        end
+        
+        subgraph "Query Bus - ROUTING"
+            QueryBus[QueryBus]
+            QueryRouter[QueryRouter]
+            QueryMiddleware[Query Middleware]
+            QueryBusProps["Features:<br/>- Handler routing<br/>- Caching layer<br/>- Performance tracking<br/>- Result formatting"]
+        end
+    end
+    
+    subgraph "Event Processing - REACTIVE SYSTEM"
+        subgraph "Event Handlers - PROJECTIONS"
+            UserProjectionHandler[UserProjectionHandler]
+            StatsProjectionHandler[StatsProjectionHandler]
+            NotificationHandler[NotificationHandler]
+            HandlerProps["Event Processing:<br/>- Projection updates<br/>- Notification dispatch<br/>- Integration events<br/>- Error handling"]
+        end
+        
+        subgraph "Event Bus - MESSAGING"
+            EventBus[Event Bus]
+            EventDispatcher[Event Dispatcher]
+            EventMiddleware[Event Middleware]
+            EventBusProps["Features:<br/>- Async processing<br/>- Dead letter queue<br/>- Retry policies<br/>- Event ordering"]
+        end
+        
+        subgraph "Projections - MATERIALIZED VIEWS"
+            UserProjections[User Projections]
+            StatsProjections[Stats Projections]
+            SearchProjections[Search Projections]
+            ProjectionProps["Projection Types:<br/>- Real-time updates<br/>- Eventually consistent<br/>- Rebuild capability<br/>- Multiple read models"]
+        end
+    end
+    
+    subgraph "Data Layer - SEPARATED CONCERNS"
+        subgraph "Write Side - EVENT STORAGE"
+            WriteDatabase[(Write DB - Events)]
+            EventAppender[Event Appender]
+            SnapshotStore[Snapshot Store]
+            WriteProps["Write Optimized:<br/>- Append-only events<br/>- ACID transactions<br/>- Optimistic locking<br/>- Stream consistency"]
+        end
+        
+        subgraph "Read Side - QUERY OPTIMIZATION"
+            ReadDatabase[(Read DB - Projections)]
+            ViewMaterializer[View Materializer]
+            QueryCache[Query Cache]
+            ReadProps["Read Optimized:<br/>- Denormalized views<br/>- Query indexes<br/>- Caching layers<br/>- Read replicas"]
+        end
+    end
+    
+    %% Command Flow
+    CreateUserCmd --> CommandBus
+    UpdateUserCmd --> CommandBus  
+    DeleteUserCmd --> CommandBus
+    CommandBus --> CommandRouter
+    CommandRouter --> Middleware
+    Middleware --> CreateHandler
+    Middleware --> UpdateHandler
+    Middleware --> DeleteHandler
+    
+    %% Command to Domain
+    CreateHandler --> UserAggregate
+    UpdateHandler --> UserAggregate
+    DeleteHandler --> UserAggregate
+    UserAggregate --> AggregateRoot
+    
+    %% Event Generation
+    CreateHandler --> UserCreatedEvent
+    UpdateHandler --> UserUpdatedEvent
+    DeleteHandler --> UserDeletedEvent
+    
+    %% Event Persistence
+    UserCreatedEvent --> EventStore
+    UserUpdatedEvent --> EventStore
+    UserDeletedEvent --> EventStore
+    EventStore --> EventStream
+    EventStore --> Snapshots
+    EventStore --> WriteDatabase
+    EventStream --> EventAppender
+    
+    %% Event Processing
+    UserCreatedEvent --> EventBus
+    UserUpdatedEvent --> EventBus
+    UserDeletedEvent --> EventBus
+    EventBus --> EventDispatcher
+    EventDispatcher --> EventMiddleware
+    EventMiddleware --> UserProjectionHandler
+    EventMiddleware --> StatsProjectionHandler
+    EventMiddleware --> NotificationHandler
+    
+    %% Projection Updates
+    UserProjectionHandler --> UserProjections
+    StatsProjectionHandler --> StatsProjections
+    NotificationHandler --> SearchProjections
+    UserProjections --> ViewMaterializer
+    ViewMaterializer --> ReadDatabase
+    
+    %% Query Flow
+    GetUserQuery --> QueryBus
+    ListUsersQuery --> QueryBus
+    GetUserStatsQuery --> QueryBus
+    FilterUsersQuery --> QueryBus
+    QueryBus --> QueryRouter
+    QueryRouter --> QueryMiddleware
+    QueryMiddleware --> GetUserHandler
+    QueryMiddleware --> ListUsersHandler
+    QueryMiddleware --> StatsHandler
+    QueryMiddleware --> FilterHandler
+    
+    %% Query to Read Models
+    GetUserHandler --> UserReadModel
+    ListUsersHandler --> UserListModel
+    StatsHandler --> UserStatsModel
+    FilterHandler --> UserFilterModel
+    
+    %% Read Model Access
+    UserReadModel --> ReadDatabase
+    UserListModel --> ReadDatabase
+    UserStatsModel --> ReadDatabase
+    UserFilterModel --> QueryCache
+    
+    %% Notes positioning
+    CmdProps -.-> CreateUserCmd
+    HandlerProps -.-> CreateHandler
+    BusProps -.-> CommandBus
+    EventProps -.-> UserCreatedEvent
+    StoreProps -.-> EventStore
+    AggregateProps -.-> UserAggregate
+    ReadModelProps -.-> UserReadModel
+    QueryProps -.-> GetUserQuery
+    QueryHandlerProps -.-> GetUserHandler
+    QueryBusProps -.-> QueryBus
+    HandlerProps -.-> UserProjectionHandler
+    EventBusProps -.-> EventBus
+    ProjectionProps -.-> UserProjections
+    WriteProps -.-> WriteDatabase
+    ReadProps -.-> ReadDatabase
+    
+    %% Styling
+    classDef commandSide fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef eventSourcing fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px  
+    classDef querySide fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef eventProcessing fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef dataLayer fill:#fafafa,stroke:#616161,stroke-width:2px
+    
+    class CreateUserCmd,UpdateUserCmd,DeleteUserCmd,CreateHandler,UpdateHandler,DeleteHandler,CommandBus,CommandRouter,Middleware commandSide
+    
+    class UserCreatedEvent,UserUpdatedEvent,UserDeletedEvent,EventStore,EventStream,Snapshots,UserAggregate,AggregateRoot eventSourcing
+    
+    class UserReadModel,UserListModel,UserStatsModel,UserFilterModel,GetUserQuery,ListUsersQuery,GetUserStatsQuery,FilterUsersQuery,GetUserHandler,ListUsersHandler,StatsHandler,FilterHandler,QueryBus,QueryRouter,QueryMiddleware querySide
+    
+    class UserProjectionHandler,StatsProjectionHandler,NotificationHandler,EventBus,EventDispatcher,EventMiddleware,UserProjections,StatsProjections,SearchProjections eventProcessing
+    
+    class WriteDatabase,EventAppender,SnapshotStore,ReadDatabase,ViewMaterializer,QueryCache dataLayer

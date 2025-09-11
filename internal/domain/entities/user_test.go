@@ -26,8 +26,8 @@ var _ = ginkgo.Describe("User Entity", func() {
 				gomega.Expect(err).To(gomega.BeNil())
 				gomega.Expect(user).ToNot(gomega.BeNil())
 				gomega.Expect(user.ID.Equals(id)).To(gomega.BeTrue())
-				gomega.Expect(user.Email).To(gomega.Equal(email))
-				gomega.Expect(user.Name).To(gomega.Equal(name))
+				gomega.Expect(user.GetEmail().String()).To(gomega.Equal(email))
+				gomega.Expect(user.GetUserName().String()).To(gomega.Equal(name))
 				gomega.Expect(user.Created).To(gomega.BeTemporally("~", time.Now(), time.Second))
 				gomega.Expect(user.Modified).To(gomega.BeTemporally("~", time.Now(), time.Second))
 				gomega.Expect(user.Created).To(gomega.Equal(user.Modified))
@@ -148,13 +148,12 @@ var _ = ginkgo.Describe("User Entity", func() {
 
 		ginkgo.Context("with invalid user state", func() {
 			ginkgo.It("should fail validation when ID is empty", func() {
-				// Given - Create user with empty ID using struct literal (bypassing validation)
+				// Given - Create user with empty ID and zero value objects
 				user := &User{
 					ID:       values.UserID{}, // Empty UserID
-					Email:    "test@example.com",
-					Name:     "TestUser",
 					Created:  time.Now(),
 					Modified: time.Now(),
+					// email and name are zero values (empty) - will fail validation
 				}
 
 				// When
@@ -166,14 +165,14 @@ var _ = ginkgo.Describe("User Entity", func() {
 			})
 
 			ginkgo.It("should fail validation when email is empty", func() {
-				// Given
+				// Given - Create user with valid ID but zero value email
 				userID, _ := values.NewUserID("user-123")
 				user := &User{
 					ID:       userID,
-					Email:    "", // Empty email
-					Name:     "TestUser",
 					Created:  time.Now(),
 					Modified: time.Now(),
+					// email is zero value (empty) - will fail validation
+					// name would need to be set, but we'll test email validation first
 				}
 
 				// When
@@ -185,14 +184,15 @@ var _ = ginkgo.Describe("User Entity", func() {
 			})
 
 			ginkgo.It("should fail validation when name is empty", func() {
-				// Given
+				// Given - Create user with valid ID and email but zero value name
 				userID, _ := values.NewUserID("user-123")
+				email, _ := values.NewEmail("test@example.com")
 				user := &User{
 					ID:       userID,
-					Email:    "test@example.com",
-					Name:     "", // Empty name
 					Created:  time.Now(),
 					Modified: time.Now(),
+					email:    email, // Valid email
+					// name is zero value (empty) - will fail validation
 				}
 
 				// When
@@ -206,14 +206,16 @@ var _ = ginkgo.Describe("User Entity", func() {
 
 		ginkgo.Context("with zero-value timestamps", func() {
 			ginkgo.It("should still validate successfully (timestamps not validated)", func() {
-				// Given
+				// Given - Create user with valid fields but zero timestamps
 				userID, _ := values.NewUserID("user-123")
+				email, _ := values.NewEmail("test@example.com")
+				name, _ := values.NewUserName("TestUser")
 				user := &User{
 					ID:       userID,
-					Email:    "test@example.com",
-					Name:     "TestUser",
 					Created:  time.Time{}, // zero value
 					Modified: time.Time{}, // zero value
+					email:    email,       // Valid email
+					name:     name,        // Valid name
 				}
 
 				// When
@@ -250,7 +252,7 @@ var _ = ginkgo.Describe("User Entity", func() {
 
 				// Then
 				gomega.Expect(err).To(gomega.BeNil())
-				gomega.Expect(user.Email).To(gomega.Equal("new@example.com"))
+				gomega.Expect(user.GetEmail().String()).To(gomega.Equal("new@example.com"))
 			})
 
 			ginkgo.It("should reject invalid email", func() {
@@ -291,7 +293,7 @@ var _ = ginkgo.Describe("User Entity", func() {
 
 				// Then
 				gomega.Expect(err).To(gomega.BeNil())
-				gomega.Expect(user.Name).To(gomega.Equal("NewName"))
+				gomega.Expect(user.GetUserName().String()).To(gomega.Equal("NewName"))
 			})
 
 			ginkgo.It("should check if name is reserved", func() {

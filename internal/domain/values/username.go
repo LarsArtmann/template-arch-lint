@@ -162,17 +162,17 @@ func isValidUsernameChar(char rune) bool {
 	if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || (char >= '0' && char <= '9') {
 		return true
 	}
-	
+
 	// Allow specific punctuation and symbols
 	if char == '-' || char == '_' || char == '.' || char == ' ' || char == '\'' || char == ',' {
 		return true
 	}
-	
+
 	// Allow Unicode letters (for international names with accents)
 	if unicode.IsLetter(char) {
 		return true
 	}
-	
+
 	return false
 }
 

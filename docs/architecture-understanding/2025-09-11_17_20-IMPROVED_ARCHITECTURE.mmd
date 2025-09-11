@@ -1,0 +1,178 @@
+%% IMPROVED ARCHITECTURE - Template-Arch-Lint with Complete Layers
+%% Analysis Date: 2025-09-11 17:20
+%% Status: TARGET ARCHITECTURE with Application & Infrastructure layers
+graph TD
+    subgraph "Frontend Layer - HTMX + TEMPL"
+        WebUI[Web Interface]
+        Templates[web/templates/**]
+        Components[templ Components]
+        HTMX[HTMX Interactions]
+        TailwindCSS[TailwindCSS Styling]
+    end
+    
+    subgraph "Application Layer - HTTP & USE CASES"
+        subgraph "HTTP Handlers"
+            UserHandler[handlers.UserHandler]
+            ApiRouter[gin.Router]
+            Middleware[middleware.Auth/CORS/Logging]
+        end
+        
+        subgraph "DTOs & HTTP Support"
+            UserDTO[dto.UserRequest/Response]
+            HTTPHelpers[http.ResponseHelpers]
+            Validation[http.RequestValidation]
+        end
+        
+        subgraph "Use Cases / Application Services"
+            CreateUserUC[usecases.CreateUserUseCase]
+            GetUserUC[usecases.GetUserUseCase]
+            UpdateUserUC[usecases.UpdateUserUseCase]
+            ListUsersUC[usecases.ListUsersUseCase]
+        end
+    end
+    
+    subgraph "Domain Layer - BUSINESS LOGIC (Current Implementation)"
+        subgraph "Entities"
+            User[entities.User]
+        end
+        
+        subgraph "Value Objects"
+            UserID[values.UserID]
+            Email[values.Email]
+            UserName[values.UserName]
+            Port[values.Port]
+            LogLevel[values.LogLevel]
+        end
+        
+        subgraph "Domain Services - SPLIT & FOCUSED"
+            UserCreationService[services.UserCreationService]
+            UserValidationService[services.UserValidationService]
+            UserQueryService[services.UserQueryService]
+            UserFilterService[services.UserFilterService]
+        end
+        
+        subgraph "Repository Interfaces"
+            UserRepo[repositories.UserRepository]
+            UserQueryRepo[repositories.UserQueryRepository]
+        end
+        
+        subgraph "Domain Events"
+            UserCreated[events.UserCreated]
+            UserUpdated[events.UserUpdated]
+            EventDispatcher[events.EventDispatcher]
+        end
+        
+        subgraph "Domain Support"
+            DomainErrors[errors.*]
+            SharedResult[shared.Result[T]]
+            SharedOption[shared.Option[T]]
+        end
+    end
+    
+    subgraph "Infrastructure Layer - EXTERNAL CONCERNS"
+        subgraph "Persistence"
+            SQLiteRepo[persistence.SQLiteUserRepository]
+            SQLCQueries[sqlc.Queries]
+            Database[(SQLite Database)]
+        end
+        
+        subgraph "External Services"
+            EmailService[email.SMTPService]
+            LoggingService[logging.StructuredLogger]
+            MetricsService[metrics.PrometheusCollector]
+        end
+        
+        subgraph "Configuration"
+            ConfigLoader[config.Loader]
+            EnvConfig[config.Environment]
+            DatabaseConfig[config.Database]
+        end
+    end
+    
+    subgraph "Testing Infrastructure"
+        TestHelpers[testhelpers/**]
+        IntegrationTests[tests/integration/**]
+        E2ETests[tests/e2e/**]
+    end
+    
+    %% Frontend Flow
+    WebUI --> Templates
+    Templates --> Components
+    Components --> HTMX
+    HTMX --> ApiRouter
+    
+    %% Application Layer Flow
+    ApiRouter --> Middleware
+    Middleware --> UserHandler
+    UserHandler --> UserDTO
+    UserHandler --> CreateUserUC
+    UserHandler --> GetUserUC
+    UserHandler --> UpdateUserUC
+    UserHandler --> ListUsersUC
+    
+    UserDTO --> HTTPHelpers
+    Validation --> UserDTO
+    
+    %% Use Cases to Domain
+    CreateUserUC --> UserCreationService
+    GetUserUC --> UserQueryService
+    UpdateUserUC --> UserCreationService
+    ListUsersUC --> UserQueryService
+    
+    %% Domain Internal Dependencies
+    User --> UserID
+    User --> Email
+    User --> UserName
+    
+    UserCreationService --> User
+    UserCreationService --> UserRepo
+    UserCreationService --> EventDispatcher
+    UserCreationService --> DomainErrors
+    
+    UserQueryService --> User
+    UserQueryService --> UserQueryRepo
+    UserQueryService --> SharedResult
+    UserQueryService --> SharedOption
+    
+    UserValidationService --> Email
+    UserValidationService --> UserName
+    UserValidationService --> DomainErrors
+    
+    EventDispatcher --> UserCreated
+    EventDispatcher --> UserUpdated
+    
+    %% Infrastructure Dependencies
+    SQLiteRepo --> UserRepo
+    SQLiteRepo --> SQLCQueries
+    SQLCQueries --> Database
+    
+    EmailService --> UserCreated
+    LoggingService --> UserUpdated
+    MetricsService --> EventDispatcher
+    
+    ConfigLoader --> EnvConfig
+    ConfigLoader --> DatabaseConfig
+    
+    %% Testing Dependencies
+    TestHelpers --> User
+    TestHelpers --> UserCreationService
+    IntegrationTests --> SQLiteRepo
+    E2ETests --> WebUI
+    
+    %% Layer Dependency Rules (Clean Architecture)
+    CreateUserUC -.->|"depends on"| UserCreationService
+    GetUserUC -.->|"depends on"| UserQueryService
+    SQLiteRepo -.->|"implements"| UserRepo
+    
+    %% Styling
+    classDef frontendLayer fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    classDef applicationLayer fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef domainLayer fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef infrastructureLayer fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef testingLayer fill:#fafafa,stroke:#616161,stroke-width:2px
+    
+    class WebUI,Templates,Components,HTMX,TailwindCSS frontendLayer
+    class UserHandler,ApiRouter,Middleware,UserDTO,HTTPHelpers,Validation,CreateUserUC,GetUserUC,UpdateUserUC,ListUsersUC applicationLayer
+    class User,UserID,Email,UserName,Port,LogLevel,UserCreationService,UserValidationService,UserQueryService,UserFilterService,UserRepo,UserQueryRepo,UserCreated,UserUpdated,EventDispatcher,DomainErrors,SharedResult,SharedOption domainLayer
+    class SQLiteRepo,SQLCQueries,Database,EmailService,LoggingService,MetricsService,ConfigLoader,EnvConfig,DatabaseConfig infrastructureLayer
+    class TestHelpers,IntegrationTests,E2ETests testingLayer

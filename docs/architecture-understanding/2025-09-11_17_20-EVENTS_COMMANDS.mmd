@@ -1,0 +1,125 @@
+%% CURRENT EVENTS & COMMANDS - Template-Arch-Lint CQRS Analysis
+%% Analysis Date: 2025-09-11 17:20
+%% Status: PARTIAL CQRS - Query Service exists but NO events, NO commands, NO event sourcing
+graph TD
+    subgraph "Current Command Side - INCOMPLETE"
+        subgraph "Commands - MISSING"
+            CreateUserCmd["❌ CreateUserCommand"]
+            UpdateUserCmd["❌ UpdateUserCommand"]
+            DeleteUserCmd["❌ DeleteUserCommand"]
+            CmdNote["No command objects defined<br/>Services accept primitives directly<br/>No command validation pipeline"]
+        end
+        
+        subgraph "Command Handlers - MISSING" 
+            CreateHandler["❌ CreateUserCommandHandler"]
+            UpdateHandler["❌ UpdateUserCommandHandler"]
+            DeleteHandler["❌ DeleteUserCommandHandler"]
+            HandlerNote["No command handlers<br/>Business logic in services directly<br/>No command/query separation"]
+        end
+        
+        subgraph "Event Sourcing - MISSING"
+            EventStore["❌ Event Store"]
+            Events["❌ Domain Events"]
+            Aggregates["❌ Aggregates"]
+            EventNote["No event sourcing<br/>No domain events<br/>No event store<br/>State stored directly"]
+        end
+    end
+    
+    subgraph "Current Query Side - GHOST IMPLEMENTATION"
+        subgraph "Query Services - IMPLEMENTED BUT UNUSED"
+            UserQueryService[services.UserQueryService ✅]
+            UQSMethods["GetUser()<br/>GetUserByEmail()<br/>ListUsers()<br/>GetUserStats()<br/>FindUserByEmailOption()<br/>GetUsersWithFilters()"]
+            QueryNote["COMPLETE CQRS query service<br/>Result/Option patterns<br/>Functional programming<br/>BUT ZERO CALLERS"]
+        end
+        
+        subgraph "Read Models - MISSING"
+            UserReadModel["❌ User Read Model"]
+            UserStatsModel["❌ User Stats Model"]
+            UserFilterModel["❌ User Filter Model"]
+            ReadModelNote["No dedicated read models<br/>Uses domain entities directly<br/>No query optimization"]
+        end
+        
+        subgraph "Query Handlers - MISSING"
+            GetUserQuery["❌ GetUserQuery"]
+            GetUserHandler["❌ GetUserQueryHandler"]
+            ListUsersQuery["❌ ListUsersQuery"]
+            QHandlerNote["No query objects<br/>No query handlers<br/>Services called directly"]
+        end
+    end
+    
+    subgraph "Current Data Layer - SIMPLE CRUD"
+        subgraph "Repository Pattern - BASIC"
+            UserRepo[repositories.UserRepository]
+            InMemoryImpl[repositories.InMemoryUserRepository]
+            RepoMethods["FindByID()<br/>FindByEmail()<br/>Save()<br/>Delete()<br/>List()"]
+            RepoNote["Simple CRUD operations<br/>No event sourcing<br/>No read/write separation"]
+        end
+        
+        subgraph "Data Storage - IN-MEMORY ONLY"
+            Memory[(In-Memory Map)]
+            NoDatabase["❌ No Real Database"]
+            StorageNote["Testing only<br/>No persistence<br/>No transactions<br/>No consistency"]
+        end
+    end
+    
+    subgraph "Current Service Layer - MIXED PATTERNS"
+        subgraph "UserService - COMMAND-STYLE"
+            UserService[services.UserService]
+            ServiceMethods["CreateUser()<br/>UpdateUser()<br/>DeleteUser()<br/>GetUser() - MIXED!"]
+            ServiceNote["550+ line service<br/>Mixed command/query operations<br/>No CQRS separation<br/>Result/Error patterns mixed"]
+        end
+        
+        subgraph "Functional Patterns - PRESENT"
+            ResultPattern[shared.Result[T]]
+            OptionPattern[shared.Option[T]]
+            EitherPattern[shared.Either[L,R]]
+            FuncNote["Railway oriented programming<br/>Functional error handling<br/>Good foundation for CQRS"]
+        end
+    end
+    
+    %% Current Flow (What exists)
+    UserService --> UserRepo
+    UserService --> InMemoryImpl
+    UserService --> ResultPattern
+    UserService --> OptionPattern
+    
+    UserQueryService --> UserRepo
+    UserQueryService --> InMemoryImpl
+    UserQueryService --> ResultPattern
+    UserQueryService --> OptionPattern
+    
+    InMemoryImpl --> Memory
+    
+    %% Missing Connections (What should exist but doesn't)
+    CreateUserCmd -.->|"MISSING"| CreateHandler
+    CreateHandler -.->|"MISSING"| EventStore
+    EventStore -.->|"MISSING"| Events
+    
+    GetUserQuery -.->|"MISSING"| GetUserHandler
+    GetUserHandler -.->|"MISSING"| UserReadModel
+    
+    %% Notes positioning
+    CmdNote -.-> CreateUserCmd
+    HandlerNote -.-> CreateHandler
+    EventNote -.-> EventStore
+    QueryNote -.-> UserQueryService
+    ReadModelNote -.-> UserReadModel
+    QHandlerNote -.-> GetUserQuery
+    RepoNote -.-> UserRepo
+    StorageNote -.-> Memory
+    ServiceNote -.-> UserService
+    FuncNote -.-> ResultPattern
+    
+    %% Styling
+    classDef missing fill:#ffcdd2,stroke:#d32f2f,stroke-width:2px,stroke-dasharray: 5 5
+    classDef ghost fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef implemented fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    classDef mixed fill:#e1bee7,stroke:#8e24aa,stroke-width:2px
+    
+    class CreateUserCmd,UpdateUserCmd,DeleteUserCmd,CreateHandler,UpdateHandler,DeleteHandler,EventStore,Events,Aggregates,UserReadModel,UserStatsModel,UserFilterModel,GetUserQuery,GetUserHandler,ListUsersQuery,NoDatabase missing
+    
+    class UserQueryService ghost
+    
+    class UserRepo,InMemoryImpl,Memory,ResultPattern,OptionPattern,EitherPattern implemented
+    
+    class UserService mixed

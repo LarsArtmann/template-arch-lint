@@ -1,0 +1,112 @@
+%% CURRENT ARCHITECTURE - Template-Arch-Lint Go Linting Template
+%% Analysis Date: 2025-09-11 17:20
+%% Status: MINIMAL DOMAIN-ONLY IMPLEMENTATION (No Application/Infrastructure layers)
+graph TD
+    subgraph "Command Layer"
+        CLI[cmd/linter/main.go]
+        CLI_Note["Demo CLI that validates domain works<br/>No real CLI framework<br/>Just validates value objects"]
+    end
+    
+    subgraph "Domain Layer - CORE IMPLEMENTATION"
+        subgraph "Entities"
+            User[entities.User]
+            UserNote["Post-refactor: Split brain eliminated<br/>Uses value objects internally<br/>JSON serialization custom handled"]
+        end
+        
+        subgraph "Value Objects - TYPE SAFETY FOUNDATION"
+            UserID[values.UserID]
+            Email[values.Email] 
+            UserName[values.UserName]
+            Port[values.Port]
+            LogLevel[values.LogLevel]
+            EnvVar[values.EnvVar]
+        end
+        
+        subgraph "Services - BUSINESS LOGIC"
+            UserService[services.UserService]
+            UserQueryService[services.UserQueryService]
+            USNote["550+ lines - MASSIVE SERVICE<br/>Needs splitting into smaller services<br/>Mixed Result/Error patterns"]
+            UQSNote["GHOST SYSTEM - Complete service<br/>but ZERO usage in codebase<br/>Pure CQRS demonstration"]
+        end
+        
+        subgraph "Repositories - INTERFACES"
+            UserRepo[repositories.UserRepository]
+            InMemoryRepo[repositories.InMemoryUserRepository]
+            RepoNote["Interface in domain<br/>In-memory impl for testing only<br/>No real persistence"]
+        end
+        
+        subgraph "Domain Support"
+            DomainErrors[errors.*]
+            SharedResult[shared.Result[T]]
+            SharedOption[shared.Option[T]]
+            SharedEither[shared.Either[L,R]]
+        end
+    end
+    
+    subgraph "Configuration"
+        Config[config.Config]
+        ConfigNote["Basic viper-based config<br/>Used only in main.go demo"]
+    end
+    
+    subgraph "Testing Infrastructure"
+        TestHelpers[testhelpers/**]
+        TestBuilders[testhelpers.domain.entities.builders]
+        TestAssertions[testhelpers.base.assertions]
+        THNote["Comprehensive test helpers<br/>Builder patterns<br/>BDD-style test support"]
+    end
+    
+    subgraph "Plugin System (Separate)"
+        Plugins[plugins/template-arch-lint/**]
+        PluginNote["Custom golangci-lint plugins<br/>Filename validation<br/>CMD single main enforcement<br/>Code duplication detection"]
+    end
+    
+    %% Dependencies and Flows
+    CLI --> Config
+    CLI --> UserID
+    CLI --> Email
+    CLI --> UserName
+    CLI_Note -.-> CLI
+    
+    User --> UserID
+    User --> Email  
+    User --> UserName
+    UserNote -.-> User
+    
+    UserService --> User
+    UserService --> UserRepo
+    UserService --> DomainErrors
+    UserService --> SharedResult
+    USNote -.-> UserService
+    
+    UserQueryService --> User
+    UserQueryService --> UserRepo
+    UserQueryService --> DomainErrors
+    UserQueryService --> SharedResult
+    UserQueryService --> SharedOption
+    UQSNote -.-> UserQueryService
+    
+    InMemoryRepo --> UserRepo
+    InMemoryRepo --> User
+    RepoNote -.-> InMemoryRepo
+    
+    TestBuilders --> User
+    TestBuilders --> UserID
+    TestHelpers --> TestBuilders
+    THNote -.-> TestHelpers
+    
+    ConfigNote -.-> Config
+    PluginNote -.-> Plugins
+    
+    %% GHOST CONNECTIONS (No actual usage found)
+    UserQueryService -.->|"GHOST: No callers found"| CLI
+    
+    %% Styling
+    classDef ghostSystem fill:#ff9999,stroke:#cc0000,stroke-width:3px
+    classDef coreSystem fill:#99ff99,stroke:#00cc00,stroke-width:2px
+    classDef testSystem fill:#ffff99,stroke:#cccc00,stroke-width:2px
+    classDef configSystem fill:#99ccff,stroke:#0066cc,stroke-width:2px
+    
+    class UserQueryService ghostSystem
+    class User,UserService,UserRepo coreSystem
+    class TestHelpers,TestBuilders testSystem
+    class Config,CLI configSystem

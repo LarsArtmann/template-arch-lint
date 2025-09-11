@@ -145,7 +145,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				users, err := userService.ListUsers(ctx)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(users).To(HaveLen(1))
-				Expect(users[0].Email).To(Equal(sameEmail))
+				Expect(users[0].GetEmail().String()).To(Equal(sameEmail))
 			})
 		})
 	})
@@ -193,8 +193,8 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				for user := range userResults {
 					Expect(user).ToNot(BeNil())
 					Expect(user.ID).To(Equal(testUser.ID))
-					Expect(user.Email).To(Equal(testUser.Email))
-					Expect(user.Name).To(Equal(testUser.Name))
+					Expect(user.GetEmail().String()).To(Equal(testUser.GetEmail().String()))
+					Expect(user.GetUserName().String()).To(Equal(testUser.GetUserName().String()))
 				}
 			})
 		})
@@ -266,7 +266,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 						user, err := userService.UpdateUser(ctx, testUser.ID, newEmail, newName)
 						results <- err
 						if err == nil {
-							updateResults <- user.Email
+							updateResults <- user.GetEmail().String()
 						}
 					}(i)
 				}
@@ -289,8 +289,8 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				// Verify final state is consistent
 				finalUser, err := userService.GetUser(ctx, testUser.ID)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(finalUser.Email).To(MatchRegexp(`updated\d+@example\.com`))
-				Expect(finalUser.Name).To(MatchRegexp(`Updated User \d+`))
+				Expect(finalUser.GetEmail().String()).To(MatchRegexp(`updated\d+@example\.com`))
+				Expect(finalUser.GetUserName().String()).To(MatchRegexp(`Updated User \d+`))
 			})
 		})
 
@@ -338,8 +338,8 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				for i := 0; i < numUsers; i++ {
 					user, err := userService.GetUser(ctx, userIDs[i])
 					Expect(err).ToNot(HaveOccurred())
-					Expect(user.Email).To(Equal(fmt.Sprintf("updated-multi%d@example.com", i)))
-					Expect(user.Name).To(Equal(fmt.Sprintf("Updated Multi User %d", i)))
+					Expect(user.GetEmail().String()).To(Equal(fmt.Sprintf("updated-multi%d@example.com", i)))
+					Expect(user.GetUserName().String()).To(Equal(fmt.Sprintf("Updated Multi User %d", i)))
 				}
 			})
 		})
@@ -536,8 +536,8 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				// All remaining users should have valid data
 				for _, user := range finalUsers {
 					Expect(user.ID.IsEmpty()).To(BeFalse())
-					Expect(user.Email).ToNot(BeEmpty())
-					Expect(user.Name).ToNot(BeEmpty())
+					Expect(user.GetEmail().String()).ToNot(BeEmpty())
+					Expect(user.GetUserName().String()).ToNot(BeEmpty())
 					Expect(user.Created.IsZero()).To(BeFalse())
 					Expect(user.Modified.IsZero()).To(BeFalse())
 				}

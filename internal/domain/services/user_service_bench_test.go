@@ -36,7 +36,7 @@ func (m *mockRepositoryForBench) FindByID(_ context.Context, id values.UserID) (
 
 func (m *mockRepositoryForBench) FindByEmail(_ context.Context, email string) (*entities.User, error) {
 	for _, user := range m.users {
-		if user.Email == email {
+		if user.GetEmail().String() == email {
 			return user, nil
 		}
 	}
@@ -45,7 +45,7 @@ func (m *mockRepositoryForBench) FindByEmail(_ context.Context, email string) (*
 
 func (m *mockRepositoryForBench) FindByUsername(_ context.Context, username string) (*entities.User, error) {
 	for _, user := range m.users {
-		if user.Name == username {
+		if user.GetUserName().String() == username {
 			return user, nil
 		}
 	}
@@ -314,8 +314,8 @@ func BenchmarkMemoryAllocation(b *testing.B) {
 
 		// Immediately access the user to ensure it's not optimized away
 		_ = user.ID.String()
-		_ = user.Email
-		_ = user.Name
+		_ = user.GetEmail().String()
+		_ = user.GetUserName().String()
 	}
 }
 
@@ -352,8 +352,8 @@ func BenchmarkEntityCreation(b *testing.B) {
 
 		// Access fields to ensure the entity is not optimized away
 		_ = user.ID.String()
-		_ = user.Email
-		_ = user.Name
+		_ = user.GetEmail().String()
+		_ = user.GetUserName().String()
 		_ = user.Created
 	}
 }

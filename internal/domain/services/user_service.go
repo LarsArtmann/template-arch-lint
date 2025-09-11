@@ -160,7 +160,7 @@ func (s *UserService) validateUserUpdates(ctx context.Context, user *entities.Us
 }
 
 func (s *UserService) validateEmailUpdate(ctx context.Context, user *entities.User, email string) error {
-	if email == user.Email {
+	if email == user.GetEmail().String() {
 		return nil
 	}
 
@@ -183,7 +183,7 @@ func (s *UserService) checkEmailAvailability(ctx context.Context, email string) 
 }
 
 func (s *UserService) validateNameUpdate(user *entities.User, name string) error {
-	if name != user.Name {
+	if name != user.GetUserName().String() {
 		if err := s.validateUserName(name); err != nil {
 			return fmt.Errorf("invalid username: %w", err)
 		}
@@ -262,7 +262,7 @@ func (s *UserService) GetUserEmailsWithResult(ctx context.Context) shared.Result
 
 	// Functional operation: extract emails
 	emails := lo.Map(users, func(user *entities.User, _ int) string {
-		return user.Email
+		return user.GetEmail().String()
 	})
 
 	return shared.Ok(emails)
@@ -375,7 +375,7 @@ func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) 
 
 	// Extract email domains using functional operations with lo.Ternary
 	domains := lo.Map(users, func(user *entities.User, _ int) string {
-		parts := strings.Split(user.Email, "@")
+		parts := strings.Split(user.GetEmail().String(), "@")
 		return lo.Ternary(len(parts) > 1, parts[1], "unknown")
 	})
 
@@ -416,7 +416,7 @@ func (s *UserService) GetUsersWithFilters(ctx context.Context, filters UserFilte
 	if filters.Domain != nil {
 		domainStr := *filters.Domain
 		filteredUsers = lo.Filter(filteredUsers, func(user *entities.User, _ int) bool {
-			parts := strings.Split(user.Email, "@")
+			parts := strings.Split(user.GetEmail().String(), "@")
 			return len(parts) > 1 && parts[1] == domainStr
 		})
 	}
@@ -462,7 +462,7 @@ func (s *UserService) GetUsersByEmailDomains(ctx context.Context, domains []stri
 
 	// Group users by email domain using lo.GroupBy
 	usersByDomain := lo.GroupBy(users, func(user *entities.User) string {
-		parts := strings.Split(user.Email, "@")
+		parts := strings.Split(user.GetEmail().String(), "@")
 		return lo.Ternary(len(parts) > 1, parts[1], "unknown")
 	})
 
