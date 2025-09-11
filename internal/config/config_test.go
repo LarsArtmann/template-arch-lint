@@ -257,6 +257,13 @@ func createValidTestConfig() Config {
 			Version:     "1.0.0",
 			Environment: "development",
 		},
+		JWT: JWTConfig{
+			SecretKey:          "test-secret-key-that-is-at-least-32-characters-long",
+			AccessTokenExpiry:  time.Hour,
+			RefreshTokenExpiry: time.Hour * 24 * 7,
+			Issuer:             "test-issuer",
+			Algorithm:          "HS256",
+		},
 	}
 }
 
