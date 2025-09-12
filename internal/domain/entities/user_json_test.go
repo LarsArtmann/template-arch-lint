@@ -16,7 +16,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 		var err error
 		user, err = NewUserFromStrings("user-123", "test@example.com", "TestUser")
 		gomega.Expect(err).To(gomega.BeNil())
-		
+
 		// Set specific timestamps for predictable testing
 		user.Created = time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC)
 		user.Modified = time.Date(2023, 1, 2, 12, 0, 0, 0, time.UTC)
@@ -69,7 +69,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 
 			// Then
 			gomega.Expect(err).To(gomega.BeNil())
-			
+
 			var jsonMap map[string]interface{}
 			err = json.Unmarshal(jsonBytes, &jsonMap)
 			gomega.Expect(err).To(gomega.BeNil())
@@ -226,11 +226,11 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 			// When - Use domain methods
 			domain := unmarshaledUser.EmailDomain()
 			isValid := unmarshaledUser.IsEmailValid()
-			
+
 			// Then - All functionality should work
 			gomega.Expect(domain).To(gomega.Equal("example.com"))
 			gomega.Expect(isValid).To(gomega.BeTrue())
-			
+
 			// Validation should also work
 			err = unmarshaledUser.Validate()
 			gomega.Expect(err).To(gomega.BeNil())

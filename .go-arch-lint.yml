@@ -53,49 +53,10 @@ components:
     in: internal/domain/services/**
 
   # ========================================
-  # APPLICATION LAYER - Use Cases & Coordination
-  # ========================================
-  app-handlers:
-    in: internal/application/handlers/**
-  app-middleware:
-    in: internal/application/middleware/**
-  app-dto:
-    in: internal/application/dto/**
-  app-http:
-    in: internal/application/http/**
-  app-services:
-    in: internal/application/services/**
-
-  # ========================================
-  # INFRASTRUCTURE LAYER - External Concerns
-  # ========================================
-  infrastructure:
-    in: internal/infrastructure/**
-
-  # ========================================
-  # DATA ACCESS & PERSISTENCE - REMOVED (Using in-memory patterns)
-  # ========================================
-  # database: - ELIMINATED in commit 049f475 for template simplification
-
-  # ========================================
-  # WEB LAYER - Templates & Static Assets
-  # ========================================
-  web-templates-components:
-    in: web/templates/components/**
-  web-templates-layouts:
-    in: web/templates/layouts/**
-  web-templates-pages:
-    in: web/templates/pages/**
-  web-static:
-    in: web/static/**
-
-  # ========================================
   # CONFIGURATION & STARTUP
   # ========================================
   config:
     in: internal/config/**
-  container:
-    in: internal/container/**
   main:
     in: cmd/**
 
@@ -110,10 +71,6 @@ components:
     in: internal/testhelpers/domain/values/**
   test-helpers-domain-validation:
     in: internal/testhelpers/domain/validation/**
-  test-helpers-application-handlers:
-    in: internal/testhelpers/application/handlers/**
-  test-helpers-infrastructure-repositories:
-    in: internal/testhelpers/infrastructure/repositories/**
 
 
 # 🔒 DEPENDENCY RULES - Enforce Clean Architecture
@@ -158,103 +115,11 @@ deps:
       - domain-values
       - domain-errors
 
-  # APPLICATION LAYER - Orchestrates domain and infrastructure
-  app-handlers:
-    mayDependOn:
-      - domain-entities
-      - domain-services
-      - domain-repositories
-      - domain-shared
-      - domain-values
-      - domain-errors
-      - app-dto
-      - app-http
-      - app-services
-      - app-middleware
-      - web-templates-components
-      - web-templates-layouts
-      - web-templates-pages
-
-  app-middleware:
-    mayDependOn:
-      - domain-shared
-      - domain-errors
-      - app-dto
-      - app-http
-      - app-services
-
-  app-dto:
-    anyVendorDeps: true
-    mayDependOn:
-      - domain-entities
-      - domain-shared
-      - domain-values
-      - domain-errors
-
-  app-http:
-    anyVendorDeps: true
-    mayDependOn:
-      - app-dto
-      - domain-shared
-      - domain-errors
-
-  app-services:
-    anyVendorDeps: true
-    mayDependOn:
-      - domain-entities
-      - domain-repositories
-      - domain-shared
-      - domain-values
-      - domain-errors
-      - config
-
-  # INFRASTRUCTURE LAYER - External integrations
-  infrastructure:
-    mayDependOn:
-      - domain-entities
-      - domain-repositories
-      - domain-shared
-      - domain-values
-      - domain-errors
-
-  # DATA ACCESS & PERSISTENCE - ELIMINATED (commit 049f475)
-  # database: - Replaced with in-memory repository patterns for template simplification
-
-  # WEB LAYER - Templates & Static Assets
-  web-templates-components:
-    anyVendorDeps: true
-    mayDependOn:
-      - domain-entities
-      - domain-shared
-      - domain-values
-
-  web-templates-layouts:
-    anyVendorDeps: true
-    mayDependOn:
-      - domain-entities
-      - domain-shared
-      - domain-values
-
-  web-templates-pages:
-    anyVendorDeps: true
-    mayDependOn:
-      - domain-entities
-      - domain-shared
-      - domain-values
-      - web-templates-components
-      - web-templates-layouts
-
-  web-static:
-    anyVendorDeps: true
-    mayDependOn: []
-
   # CONFIGURATION & STARTUP
   config:
     anyVendorDeps: true
-    mayDependOn: []
-
-  container:
-    anyProjectDeps: true
+    mayDependOn:
+      - domain-values  # Allow config to use domain value objects for validation
 
   main:
     anyProjectDeps: true
@@ -273,14 +138,6 @@ deps:
     anyVendorDeps: true
 
   test-helpers-domain-validation:
-    anyProjectDeps: true
-    anyVendorDeps: true
-
-  test-helpers-application-handlers:
-    anyProjectDeps: true
-    anyVendorDeps: true
-
-  test-helpers-infrastructure-repositories:
     anyProjectDeps: true
     anyVendorDeps: true
 
@@ -313,6 +170,10 @@ exclude:
   - "**/build/**"
   - "**/dist/**"
   - "**/node_modules/**"
+
+  # Plugins (separate Go plugin modules)
+  - "**/plugins/**"
+  - "plugins/**"
 
   # Documentation and configuration
   - "**/docs/**"
