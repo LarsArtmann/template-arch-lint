@@ -2,6 +2,7 @@ package services_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"testing"
@@ -129,7 +130,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				for err := range results {
 					if err == nil {
 						successCount++
-					} else if err == repositories.ErrUserAlreadyExists {
+					} else if errors.Is(err, repositories.ErrUserAlreadyExists) {
 						conflictCount++
 					} else {
 						otherErrorCount++
@@ -378,7 +379,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				for err := range results {
 					if err == nil {
 						successCount++
-					} else if err == repositories.ErrUserNotFound {
+					} else if errors.Is(err, repositories.ErrUserNotFound) {
 						notFoundCount++
 					} else {
 						otherErrorCount++

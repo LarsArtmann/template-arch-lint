@@ -581,75 +581,78 @@ func testApplicationConfigValidation(t *testing.T) {
 // testCrossConfigurationDependencies tests validation of configuration dependencies
 func testCrossConfigurationDependencies(t *testing.T) {
 	t.Helper()
+	t.Run("database connection limits consistency", testDatabaseConnectionLimits)
+	t.Run("production environment security requirements", testProductionSecurityRequirements)
+	t.Run("logging output path validation", testLoggingPathValidation)
+}
 
-	// Test that max idle connections cannot exceed max open connections
-	t.Run("database connection limits consistency", func(t *testing.T) {
-		envVars := map[string]string{
-			"APP_DATABASE_MAX_OPEN_CONNS": "5",
-			"APP_DATABASE_MAX_IDLE_CONNS": "10", // Higher than max open
+// testDatabaseConnectionLimits validates database connection pool limits.
+func testDatabaseConnectionLimits(t *testing.T) {
+	envVars := map[string]string{
+		"APP_DATABASE_MAX_OPEN_CONNS": "5",
+		"APP_DATABASE_MAX_IDLE_CONNS": "10", // Higher than max open
+	}
+
+	for key, value := range envVars {
+		if err := os.Setenv(key, value); err != nil {
+			t.Fatalf("Failed to set %s: %v", key, err)
 		}
-
-		for key, value := range envVars {
-			if err := os.Setenv(key, value); err != nil {
-				t.Fatalf("Failed to set %s: %v", key, err)
+	}
+	defer func() {
+		for key := range envVars {
+			if err := os.Unsetenv(key); err != nil {
+				t.Errorf("Failed to unset %s: %v", key, err)
 			}
 		}
-		defer func() {
-			for key := range envVars {
-				if err := os.Unsetenv(key); err != nil {
-					t.Errorf("Failed to unset %s: %v", key, err)
-				}
+	}()
+
+	_, err := LoadConfig("")
+	if err == nil {
+		t.Error("Should reject max idle connections > max open connections")
+	}
+}
+
+// testProductionSecurityRequirements validates production environment security settings.
+func testProductionSecurityRequirements(t *testing.T) {
+	envVars := map[string]string{
+		"APP_APP_ENVIRONMENT": "production",
+		"APP_LOGGING_LEVEL":   "debug", // Too verbose for production
+	}
+
+	for key, value := range envVars {
+		if err := os.Setenv(key, value); err != nil {
+			t.Fatalf("Failed to set %s: %v", key, err)
+		}
+	}
+	defer func() {
+		for key := range envVars {
+			if err := os.Unsetenv(key); err != nil {
+				t.Errorf("Failed to unset %s: %v", key, err)
 			}
-		}()
-
-		_, err := LoadConfig("")
-		if err == nil {
-			t.Error("Should reject max idle connections > max open connections")
 		}
-	})
+	}()
 
-	// Test production environment requires secure settings
-	t.Run("production environment security requirements", func(t *testing.T) {
-		envVars := map[string]string{
-			"APP_APP_ENVIRONMENT": "production",
-			"APP_LOGGING_LEVEL":   "debug", // Too verbose for production
-		}
+	_, err := LoadConfig("")
+	if err == nil {
+		t.Error("Should reject debug logging in production environment")
+	}
+}
 
-		for key, value := range envVars {
-			if err := os.Setenv(key, value); err != nil {
-				t.Fatalf("Failed to set %s: %v", key, err)
-			}
+// testLoggingPathValidation validates logging output path accessibility.
+func testLoggingPathValidation(t *testing.T) {
+	if err := os.Setenv("APP_LOGGING_OUTPUT", "/root/app.log"); err != nil {
+		t.Fatalf("Failed to set APP_LOGGING_OUTPUT: %v", err)
+	}
+	defer func() {
+		if err := os.Unsetenv("APP_LOGGING_OUTPUT"); err != nil {
+			t.Errorf("Failed to unset APP_LOGGING_OUTPUT: %v", err)
 		}
-		defer func() {
-			for key := range envVars {
-				if err := os.Unsetenv(key); err != nil {
-					t.Errorf("Failed to unset %s: %v", key, err)
-				}
-			}
-		}()
+	}()
 
-		_, err := LoadConfig("")
-		if err == nil {
-			t.Error("Should reject debug logging in production environment")
-		}
-	})
-
-	// Test file path validation for logging output
-	t.Run("logging output path validation", func(t *testing.T) {
-		if err := os.Setenv("APP_LOGGING_OUTPUT", "/root/app.log"); err != nil {
-			t.Fatalf("Failed to set APP_LOGGING_OUTPUT: %v", err)
-		}
-		defer func() {
-			if err := os.Unsetenv("APP_LOGGING_OUTPUT"); err != nil {
-				t.Errorf("Failed to unset APP_LOGGING_OUTPUT: %v", err)
-			}
-		}()
-
-		_, err := LoadConfig("")
-		if err == nil {
-			t.Error("Should reject inaccessible log file path")
-		}
-	})
+	_, err := LoadConfig("")
+	if err == nil {
+		t.Error("Should reject inaccessible log file path")
+	}
 }
 
 // TestConfigValidationErrorMessages tests that validation errors provide clear messages

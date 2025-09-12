@@ -37,7 +37,7 @@ const (
 
 // JWT configuration environment variables
 const (
-	EnvJWTSecretKey EnvVar = "APP_JWT_SECRET_KEY"
+	EnvJWTSecretKey EnvVar = "APP_JWT_SECRET_KEY" // #nosec G101 -- This is just the environment variable name, not a hardcoded secret
 	EnvJWTIssuer    EnvVar = "APP_JWT_ISSUER"
 	EnvJWTAlgorithm EnvVar = "APP_JWT_ALGORITHM"
 )

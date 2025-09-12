@@ -158,22 +158,22 @@ func validateUsernameCharacters(normalized string) error {
 
 // isValidUsernameChar checks if a character is allowed in usernames.
 func isValidUsernameChar(char rune) bool {
-	// Allow ASCII letters and digits
-	if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || (char >= '0' && char <= '9') {
-		return true
-	}
+	return isASCIIAlphanumeric(char) || isAllowedPunctuation(char) || unicode.IsLetter(char)
+}
 
-	// Allow specific punctuation and symbols
-	if char == '-' || char == '_' || char == '.' || char == ' ' || char == '\'' || char == ',' {
-		return true
-	}
+// isASCIIAlphanumeric checks if character is ASCII letter or digit.
+func isASCIIAlphanumeric(char rune) bool {
+	return (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || (char >= '0' && char <= '9')
+}
 
-	// Allow Unicode letters (for international names with accents)
-	if unicode.IsLetter(char) {
+// isAllowedPunctuation checks if character is allowed punctuation.
+func isAllowedPunctuation(char rune) bool {
+	switch char {
+	case '-', '_', '.', ' ', '\'', ',':
 		return true
+	default:
+		return false
 	}
-
-	return false
 }
 
 // validateUsernameEdges checks start/end character restrictions and consecutive characters.

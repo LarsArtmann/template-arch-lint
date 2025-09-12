@@ -29,9 +29,9 @@ allow:
   # - Constructor pattern enforcement (validates DI frameworks)
   # - Advanced architectural boundary verification
   #
-  # VERIFIED STABLE: No crashes or internal errors in v1.12.0 testing
+  # TEMPORARILY DISABLED: Internal Go packages error - investigating
   # Provides superior violation detection over basic import-level validation.
-  deepScan: true
+  deepScan: false
 
 # 📦 ARCHITECTURAL COMPONENTS
 # Define your project's architectural layers and boundaries

@@ -20,24 +20,28 @@ const (
 	LogLevelPanic LogLevel = "panic" // Only for critical system failures
 )
 
-// LogLevel hierarchy for level comparison
-var logLevelHierarchy = map[LogLevel]int{
-	LogLevelDebug: 0,
-	LogLevelInfo:  1,
-	LogLevelWarn:  2,
-	LogLevelError: 3,
-	LogLevelFatal: 4,
-	LogLevelPanic: 5,
+// getLogLevelHierarchy returns the log level hierarchy for comparison.
+func getLogLevelHierarchy() map[LogLevel]int {
+	return map[LogLevel]int{
+		LogLevelDebug: 0,
+		LogLevelInfo:  1,
+		LogLevelWarn:  2,
+		LogLevelError: 3,
+		LogLevelFatal: 4,
+		LogLevelPanic: 5,
+	}
 }
 
-// Valid log levels slice for validation
-var validLogLevels = []LogLevel{
-	LogLevelDebug,
-	LogLevelInfo,
-	LogLevelWarn,
-	LogLevelError,
-	LogLevelFatal,
-	LogLevelPanic,
+// getValidLogLevels returns all valid log levels for validation.
+func getValidLogLevels() []LogLevel {
+	return []LogLevel{
+		LogLevelDebug,
+		LogLevelInfo,
+		LogLevelWarn,
+		LogLevelError,
+		LogLevelFatal,
+		LogLevelPanic,
+	}
 }
 
 // NewLogLevel creates a new LogLevel with validation
@@ -57,7 +61,7 @@ func (l LogLevel) Validate() error {
 		return domainerrors.NewValidationError("log_level", "log level cannot be empty")
 	}
 
-	for _, validLevel := range validLogLevels {
+	for _, validLevel := range getValidLogLevels() {
 		if l == validLevel {
 			return nil
 		}
@@ -80,8 +84,9 @@ func (l LogLevel) String() string {
 
 // ValidLevels returns a slice of all valid log level strings
 func (l LogLevel) ValidLevels() []string {
-	levels := make([]string, len(validLogLevels))
-	for i, level := range validLogLevels {
+	validLevels := getValidLogLevels()
+	levels := make([]string, len(validLevels))
+	for i, level := range validLevels {
 		levels[i] = string(level)
 	}
 	return levels
@@ -104,7 +109,7 @@ func (l LogLevel) IsError() bool {
 
 // Priority returns the priority level (higher number = more severe)
 func (l LogLevel) Priority() int {
-	if priority, exists := logLevelHierarchy[l]; exists {
+	if priority, exists := getLogLevelHierarchy()[l]; exists {
 		return priority
 	}
 	return -1 // Invalid level
