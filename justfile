@@ -5,7 +5,7 @@
 # https://github.com/casey/just
 
 # Tool versions
-GOLANGCI_VERSION := "v2.4.0"
+GOLANGCI_VERSION := "v2.6.0"
 GO_ARCH_LINT_VERSION := "v1.12.0"
 
 # Directories
