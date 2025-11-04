@@ -17,10 +17,10 @@ workdir: .
 allow:
   depOnAnyVendor: true  # Allow vendor dependencies (set to false for stricter control)
 
-  # ARCHITECTURAL DECISION: Enable Deep Scanning (STABLE in v1.12.0)
+  # ARCHITECTURAL DECISION: Enable Deep Scanning (STABLE in v1.13.0)
   #
   # Deep scanning enables advanced AST analysis for method calls and dependency
-  # injection patterns. Verified stable operation with go-arch-lint v1.12.0
+  # injection patterns. Verified stable operation with go-arch-lint v1.13.0
   # providing comprehensive architectural violation detection capabilities.
   #
   # Enhanced Analysis Features:
