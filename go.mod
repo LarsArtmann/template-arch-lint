@@ -1,8 +1,6 @@
 module github.com/LarsArtmann/template-arch-lint
 
-go 1.24.2
-
-toolchain go1.24.6
+go 1.25.4
 
 require (
 	github.com/charmbracelet/log v0.4.2
