@@ -76,3 +76,16 @@ app.db
 *_templ.go
 *.sql.go
 .claude/settings.local.json
+
+# Integration test output
+integration-test-output.txt
+
+# Backup files
+*.backup
+*.backup-*
+
+# Test directories (if not meant to be committed)
+tests/
+
+# Architecture graphs (can be regenerated)
+*-arch-lint-graph.svg
