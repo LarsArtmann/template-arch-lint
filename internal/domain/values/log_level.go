@@ -2,6 +2,7 @@ package values
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	domainerrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
@@ -61,10 +62,8 @@ func (l LogLevel) Validate() error {
 		return domainerrors.NewValidationError("log_level", "log level cannot be empty")
 	}
 
-	for _, validLevel := range getValidLogLevels() {
-		if l == validLevel {
-			return nil
-		}
+	if slices.Contains(getValidLogLevels(), l) {
+		return nil
 	}
 
 	return domainerrors.NewValidationError("log_level",

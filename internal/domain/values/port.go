@@ -2,6 +2,7 @@ package values
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 
 	domainerrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
@@ -85,12 +86,7 @@ func (p Port) IsEphemeral() bool {
 // IsDevelopment returns true if this is a common development port
 func (p Port) IsDevelopment() bool {
 	developmentPorts := []Port{3000, 3001, 4200, 5000, 8000, 8080, 8443, 9000}
-	for _, devPort := range developmentPorts {
-		if p == devPort {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(developmentPorts, p)
 }
 
 // MarshalText implements encoding.TextMarshaler

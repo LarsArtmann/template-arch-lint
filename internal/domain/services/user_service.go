@@ -386,11 +386,9 @@ func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) 
 	// Calculate average days since registration using lo.Reduce
 	now := time.Now()
 	totalDays := lo.Reduce(users, func(acc int, user *entities.User, _ int) int {
-		days := int(now.Sub(user.Created).Hours() / 24)
-		// Ensure non-negative days
-		if days < 0 {
-			days = 0
-		}
+		days := max(
+			// Ensure non-negative days
+			int(now.Sub(user.Created).Hours()/24), 0)
 		return acc + days
 	}, 0)
 

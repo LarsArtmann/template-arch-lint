@@ -28,7 +28,7 @@ jobs:
   # ==============================================
   pre-checks:
     name: 🚦 Pre-flight Checks
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 5
 
     steps:
@@ -57,7 +57,7 @@ jobs:
   # ==============================================
   lint:
     name: 🔍 Lint (Go ${{ matrix.go-version }})
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     needs: pre-checks
     timeout-minutes: 15
 
@@ -176,7 +176,7 @@ jobs:
   # ==============================================
   security-scan:
     name: 🔒 Security Analysis
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     needs: pre-checks
     timeout-minutes: 10
 
@@ -215,7 +215,7 @@ jobs:
   # ==============================================
   lint-success:
     name: ✅ Linting Complete
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     needs: [pre-checks, lint, security-scan]
     timeout-minutes: 2
 

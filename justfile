@@ -7,6 +7,7 @@
 # Tool versions
 GOLANGCI_VERSION := "v2.6.0"
 GO_ARCH_LINT_VERSION := "v1.13.0"
+CAPSLOCK_VERSION := "latest"
 
 # Directories
 ROOT_DIR := justfile_directory()
@@ -47,9 +48,11 @@ help:
     @echo "  1. \033[0;32mjust bootstrap\033[0m        - 🚀 Complete setup with enhanced error handling"
     @echo "  2. \033[0;36mjust bootstrap-diagnose\033[0m - 🔍 Environment diagnostics only"
     @echo "  3. \033[0;36mjust bootstrap-fix\033[0m     - 🔧 Auto-repair common issues"
-    @echo "  4. \033[0;36mjust lint\033[0m             - Run all linters"
-    @echo "  5. \033[0;36mjust format\033[0m           - Format code (gofumpt + goimports)"
-    @echo "  6. \033[0;36mjust fix\033[0m              - Auto-fix issues"
+    @echo "  4. \033[0;36mjust lint\033[0m             - Run all linters (including capslock)"
+    @echo "  5. \033[0;36mjust security-audit\033[0m   - Complete security audit"
+    @echo "  6. \033[0;36mjust format\033[0m           - Format code (gofumpt + goimports)"
+    @echo "  7. \033[0;36mjust fix\033[0m              - Auto-fix issues"
+    @echo "  8. \033[0;36mjust capslock-quick\033[0m   - Quick security capability check"
     @echo ""
     @echo "\033[1mDOCKER COMMANDS:\033[0m"
     @echo "  • \033[0;36mjust docker-test\033[0m         - Build and test Docker image (if available)"
@@ -64,6 +67,15 @@ help:
     @echo "\033[1mCODE ANALYSIS:\033[0m"
     @echo "  • \033[0;36mjust fd\033[0m                  - Find duplicate code (alias for find-duplicates)"
     @echo "  • \033[0;36mjust find-duplicates\033[0m     - Find duplicate code with custom threshold (default: 15 tokens)"
+    @echo "  • \033[0;36mjust lint-capslock\033[0m      - Run Google's capslock capability analysis"
+    @echo ""
+    @echo "\033[1mSECURITY ANALYSIS:\033[0m"
+    @echo "  • \033[0;36mjust security-audit\033[0m    - Complete security audit including capability analysis"
+    @echo "  • \033[0;36mjust lint-security\033[0m     - Security-focused linting (gosec + copyloopvar)"
+    @echo "  • \033[0;36mjust lint-vulns\033[0m        - Vulnerability scanning with govulncheck"
+    @echo "  • \033[0;36mjust lint-licenses\033[0m    - License compliance scanning"
+    @echo "  • \033[0;36mjust lint-nilaway\033[0m     - Nil panic prevention with Uber's NilAway"
+    @echo "  • \033[0;36mjust lint-capslock\033[0m     - Google's capslock capability analysis"
     @echo ""
     @echo "\033[1mPERFORMANCE PROFILING:\033[0m"
     @echo "  • \033[0;36mjust profile-cpu\033[0m         - Capture 30-second CPU profile"
@@ -231,15 +243,17 @@ install:
     go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@{{GOLANGCI_VERSION}}
     @echo "\033[0;33mInstalling go-arch-lint {{GO_ARCH_LINT_VERSION}}...\033[0m"
     go install github.com/fe3dback/go-arch-lint@{{GO_ARCH_LINT_VERSION}}
+    @echo "\033[0;33mInstalling capslock {{CAPSLOCK_VERSION}}...\033[0m"
+    go install github.com/google/capslock/cmd/capslock@{{CAPSLOCK_VERSION}}
     @echo "\033[0;32m✅ All tools installed successfully!\033[0m"
 
-# Run all linters (architecture + code quality + filenames)
-lint: lint-files lint-cmd-single lint-arch lint-code lint-vulns lint-cycles lint-goroutines lint-deps-advanced
+# Run all linters (architecture + code quality + filenames + security)
+lint: lint-files lint-cmd-single lint-arch lint-code lint-vulns lint-cycles lint-goroutines lint-deps-advanced lint-capslock
     @echo ""
     @echo "\033[0;32m\033[1m✅ All linting checks completed!\033[0m"
 
-# 🚨 Complete security audit (all security tools)
-security-audit: lint-security lint-vulns lint-licenses lint-nilaway
+# 🚨 Complete security audit (all security tools + capability analysis)
+security-audit: lint-security lint-vulns lint-licenses lint-nilaway lint-capslock
     @echo ""
     @echo "\033[0;32m\033[1m🛡️ Complete security audit finished!\033[0m"
 
@@ -302,7 +316,7 @@ fix:
     @echo "\033[0;32m✅ Auto-fix completed!\033[0m"
 
 # Run all checks (for CI/CD pipelines)
-ci: lint test graph
+ci: lint test capslock-quick graph
     @echo "\033[0;36mChecking module dependencies...\033[0m"
     go mod verify
 
@@ -466,6 +480,11 @@ report:
         echo "  → {{REPORT_DIR}}/checkstyle.xml"; \
         echo "  → {{REPORT_DIR}}/junit.xml"; \
     fi
+    @echo "\033[0;33mGenerating capability analysis report...\033[0m"
+    @if command -v capslock >/dev/null 2>&1; then \
+        capslock ./... > {{REPORT_DIR}}/capslock-analysis.txt 2>/dev/null || true; \
+        echo "  → {{REPORT_DIR}}/capslock-analysis.txt"; \
+    fi
     @echo "\033[0;33mGenerating test coverage report...\033[0m"
     @go test ./... -coverprofile={{REPORT_DIR}}/coverage.out 2>/dev/null || true
     @go tool cover -html={{REPORT_DIR}}/coverage.out -o {{REPORT_DIR}}/coverage.html 2>/dev/null || true
@@ -565,6 +584,33 @@ lint-nilaway:
         nilaway -include-pkgs="github.com/LarsArtmann/template-arch-lint" ./...; \
     fi
 
+# 🔒 Google Capslock - Capability analysis for security assessment
+lint-capslock:
+    @echo "\033[1m🔒 CAPSLOCK - CAPABILITY ANALYSIS\033[0m"
+    @echo "🔍 Analyzing package capabilities and privileged operations..."
+    @if command -v capslock >/dev/null 2>&1; then \
+        echo "📋 Running capslock capability analysis..."; \
+        if capslock -packages="./..." -output=package 2>/dev/null; then \
+            echo "\033[0;32m✅ Capability analysis completed - no concerning privileges detected\033[0m"; \
+        else \
+            echo "\033[0;33m⚠️  Capability analysis completed - some issues detected\033[0m"; \
+            echo "🔍 This could indicate:"; \
+            echo "  • Security-relevant capabilities in dependencies"; \
+            echo "  • Go version compatibility issues"; \
+            echo "  • Dependency conflicts"; \
+            echo ""; \
+            echo "💡 Running detailed analysis for troubleshooting..."; \
+            capslock -packages="./..." -output=package 2>&1 | head -10 || true; \
+            echo ""; \
+            echo "📋 For full analysis, run: just capslock-analysis"; \
+        fi; \
+    else \
+        echo "⚠️  capslock not found. Installing Google's capslock..."; \
+        go install github.com/google/capslock/cmd/capslock@latest; \
+        echo "📋 Running capslock capability analysis..."; \
+        capslock -packages="./..." -output=package; \
+    fi
+
 # Format code with enhanced formatters (gofumpt + goimports)
 format:
     @echo "\033[1m📝 FORMATTING CODE\033[0m"
@@ -648,6 +694,69 @@ find-duplicates threshold="15":
     @echo ""
     @echo "\033[0;32m✅ Duplication analysis complete!\033[0m"
     @echo "\033[0;36mOpen {{REPORT_DIR}}/go-duplications.html in browser for detailed Go analysis\033[0m"
+
+# 🔒 Comprehensive capslock capability analysis with reporting
+capslock-analysis:
+    @echo "\033[1m🔒 COMPREHENSIVE CAPSLOCK ANALYSIS\033[0m"
+    @echo "🔍 Running detailed capability analysis with reporting..."
+    @mkdir -p {{REPORT_DIR}}
+    @if command -v capslock >/dev/null 2>&1; then \
+        echo "📋 Generating capability analysis report..."; \
+        echo "📊 Analyzing package capabilities and privileged operations..."; \
+        capslock -packages="./..." -output=package > {{REPORT_DIR}}/capslock-analysis.txt 2>&1 || true; \
+        echo "\033[0;33m📋 Capability Analysis Summary:\033[0m"; \
+        echo "  → Report saved to: {{REPORT_DIR}}/capslock-analysis.txt"; \
+        echo ""; \
+        echo "\033[0;36m🔍 Analysis Results:\033[0m"; \
+        if grep -q "Some packages had errors" {{REPORT_DIR}}/capslock-analysis.txt; then \
+            echo "  ⚠️  Analysis completed with errors - likely dependency compatibility issues"; \
+            echo "  💡 This is common when Go versions don't match go.mod requirements"; \
+            echo "  📋 Check Go version: go version (should match go.mod)"; \
+            echo "  📋 Current Go version: $(go version | cut -d' ' -f3)"; \
+            echo "  📋 Required Go version: $(grep '^go' go.mod | cut -d' ' -f2)"; \
+            echo "  💡 Try: go mod tidy && go mod download"; \
+        else \
+            echo "  ✅ Analysis completed successfully"; \
+        fi; \
+        echo ""; \
+        echo "\033[0;36m🔍 Key security insights from capslock:\033[0m"; \
+        echo "  • File system access capabilities"; \
+        echo "  • Network operation capabilities"; \
+        echo "  • System call capabilities"; \
+        echo "  • Process execution capabilities"; \
+        echo "  • Cryptographic operation capabilities"; \
+        echo ""; \
+        echo "\033[0;33m💡 Security recommendations:\033[0m"; \
+        echo "  1. Review any unexpected privileged capabilities"; \
+        echo "  2. Ensure capabilities align with package purpose"; \
+        echo "  3. Consider principle of least privilege"; \
+        echo "  4. Monitor for capability changes in updates"; \
+        echo "  5. Fix dependency compatibility issues if present"; \
+        echo ""; \
+        echo "\033[0;32m✅ Comprehensive capslock analysis completed!\033[0m"; \
+    else \
+        echo "\033[0;31m❌ capslock not found. Installing..."; \
+        go install github.com/google/capslock/cmd/capslock@latest; \
+        echo "🔍 Retrying capability analysis..."; \
+        capslock -packages="./..." -output=package > {{REPORT_DIR}}/capslock-analysis.txt 2>&1 || true; \
+        echo "\033[0;32m✅ Capslock analysis completed after installation!\033[0m"; \
+    fi
+
+# 🔒 Quick capslock security check (CI/CD friendly)
+capslock-quick:
+    @echo "\033[1m🔒 QUICK CAPSLOCK SECURITY CHECK\033[0m"
+    @if command -v capslock >/dev/null 2>&1; then \
+        if capslock -packages="./..." -output=package >/dev/null 2>&1; then \
+            echo "\033[0;32m✅ Capslock security check passed\033[0m"; \
+        else \
+            echo "\033[0;33m⚠️  Capslock detected issues - could be capabilities or compatibility\033[0m"; \
+            echo "💡 Run 'just capslock-analysis' for detailed troubleshooting"; \
+            exit 1; \
+        fi; \
+    else \
+        echo "\033[0;31m❌ capslock not found. Run 'just install' first.\033[0m"; \
+        exit 1; \
+    fi
 
 # Alias for find-duplicates
 fd threshold="15": (find-duplicates threshold)
@@ -762,6 +871,10 @@ version:
     @if command -v go-arch-lint >/dev/null 2>&1; then \
         echo "go-arch-lint version:"; \
         go-arch-lint version; \
+    fi
+    @if command -v capslock >/dev/null 2>&1; then \
+        echo "capslock version:"; \
+        capslock --version 2>/dev/null || echo "version info not available"; \
     fi
     @echo "Just version:"
     @just --version

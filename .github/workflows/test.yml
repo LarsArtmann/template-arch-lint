@@ -27,7 +27,7 @@ jobs:
   # ==============================================
   unit-tests:
     name: 🧪 Unit Tests (Go ${{ matrix.go-version }})
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 10
 
     strategy:
@@ -89,7 +89,7 @@ jobs:
   # ==============================================
   race-tests:
     name: 🏃 Race Detection Tests
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 15
 
     steps:
@@ -140,7 +140,7 @@ jobs:
   # ==============================================
   integration-tests:
     name: 🔗 Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 20
 
     steps:
@@ -209,7 +209,7 @@ jobs:
   # ==============================================
   benchmark-tests:
     name: ⚡ Benchmark Tests
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 10
 
     steps:
@@ -259,7 +259,7 @@ jobs:
   # ==============================================
   coverage-analysis:
     name: 📊 Coverage Analysis
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 15
     needs: [unit-tests]
 
@@ -342,7 +342,7 @@ jobs:
   # ==============================================
   config-tests:
     name: ⚙️ Configuration Tests
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 5
 
     steps:
@@ -389,7 +389,7 @@ jobs:
   # ==============================================
   test-success:
     name: ✅ Testing Complete
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     needs: [unit-tests, race-tests, integration-tests, benchmark-tests, coverage-analysis, config-tests]
     timeout-minutes: 2
 

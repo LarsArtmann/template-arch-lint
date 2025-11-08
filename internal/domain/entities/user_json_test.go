@@ -32,7 +32,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 			gomega.Expect(jsonBytes).ToNot(gomega.BeEmpty())
 
 			// Parse back to verify structure
-			var jsonMap map[string]interface{}
+			var jsonMap map[string]any
 			err = json.Unmarshal(jsonBytes, &jsonMap)
 			gomega.Expect(err).To(gomega.BeNil())
 
@@ -70,7 +70,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 			// Then
 			gomega.Expect(err).To(gomega.BeNil())
 
-			var jsonMap map[string]interface{}
+			var jsonMap map[string]any
 			err = json.Unmarshal(jsonBytes, &jsonMap)
 			gomega.Expect(err).To(gomega.BeNil())
 

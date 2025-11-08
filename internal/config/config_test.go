@@ -700,7 +700,7 @@ func TestConfigValidationPerformance(t *testing.T) {
 
 	start := time.Now()
 
-	for i := 0; i < iterations; i++ {
+	for range iterations {
 		_, err := LoadConfig("")
 		if err != nil {
 			t.Fatalf("Unexpected error during performance test: %v", err)

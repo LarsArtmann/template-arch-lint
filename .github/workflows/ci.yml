@@ -22,7 +22,7 @@ jobs:
   # ==============================================
   lint-and-test:
     name: 🔍 Quality Gates
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 5
 
     steps:
@@ -142,7 +142,7 @@ jobs:
   # ==============================================
   dependencies:
     name: 📦 Dependency Analysis
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 5
 
     steps:
@@ -188,7 +188,7 @@ jobs:
   # ==============================================
   docker-build:
     name: 🐳 Docker Build
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 15
 
     steps:
@@ -235,7 +235,7 @@ jobs:
   # ==============================================
   performance:
     name: ⚡ Performance Baseline
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 10
 
     steps:
@@ -279,7 +279,7 @@ jobs:
   # ==============================================
   ci-success:
     name: ✅ CI Pipeline Complete
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     needs: [lint-and-test, build-verification, dependencies, docker-build, performance]
     timeout-minutes: 2
 

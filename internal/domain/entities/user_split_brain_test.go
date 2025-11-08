@@ -94,7 +94,7 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 			jsonBytes, err := json.Marshal(user)
 			gomega.Expect(err).To(gomega.BeNil())
 
-			var jsonMap map[string]interface{}
+			var jsonMap map[string]any
 			err = json.Unmarshal(jsonBytes, &jsonMap)
 			gomega.Expect(err).To(gomega.BeNil())
 

@@ -459,7 +459,7 @@ var _ = Describe("UserService", func() {
 					// Attempt to create the same user multiple times concurrently
 					results := make(chan error, 5)
 
-					for i := 0; i < 5; i++ {
+					for i := range 5 {
 						go func(index int) {
 							id, err := values.NewUserID(fmt.Sprintf("concurrent-user-%d", index))
 							if err != nil {
@@ -473,7 +473,7 @@ var _ = Describe("UserService", func() {
 
 					// Collect results
 					var successCount, errorCount int
-					for i := 0; i < 5; i++ {
+					for range 5 {
 						err := <-results
 						if err == nil {
 							successCount++
@@ -495,7 +495,7 @@ var _ = Describe("UserService", func() {
 					originalCreated := user.Created
 
 					// Update user multiple times
-					for i := 0; i < 3; i++ {
+					for i := range 3 {
 						newEmail := fmt.Sprintf("updated%d@example.com", i)
 						newName := fmt.Sprintf("Updated User %d", i)
 
@@ -551,7 +551,7 @@ var _ = Describe("UserService", func() {
 				It("should handle large user sets efficiently", func() {
 					// Create many users
 					const numUsers = 50
-					for i := 0; i < numUsers; i++ {
+					for i := range numUsers {
 						createValidTestUser(
 							fmt.Sprintf("bulk-user-%d", i),
 							fmt.Sprintf("bulk%d@example.com", i),

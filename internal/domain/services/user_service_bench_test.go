@@ -74,7 +74,7 @@ func setupBenchmarkService(b *testing.B, userCount int) (*UserService, context.C
 	ctx := context.Background()
 
 	// Pre-populate with test users for realistic benchmarks
-	for i := 0; i < userCount; i++ {
+	for i := range userCount {
 		userID, _ := values.NewUserID(fmt.Sprintf("user-%d", i))
 		email := fmt.Sprintf("user%d@example.com", i)
 		name := fmt.Sprintf("User %d", i)
@@ -97,10 +97,9 @@ func setupBenchmarkService(b *testing.B, userCount int) (*UserService, context.C
 func BenchmarkCreateUser(b *testing.B) {
 	service, ctx := setupBenchmarkService(b, 0)
 
-	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for i := 0; b.Loop(); i++ {
 		userID, _ := values.NewUserID(fmt.Sprintf("bench-user-%d", i))
 		email := fmt.Sprintf("benchuser%d@example.com", i)
 		name := fmt.Sprintf("Bench User %d", i)
@@ -117,10 +116,9 @@ func BenchmarkGetUser(b *testing.B) {
 	const userCount = 1000
 	service, ctx := setupBenchmarkService(b, userCount)
 
-	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for i := 0; b.Loop(); i++ {
 		userID, _ := values.NewUserID(fmt.Sprintf("user-%d", i%userCount))
 
 		_, err := service.GetUser(ctx, userID)
@@ -148,7 +146,7 @@ func BenchmarkListUsers(b *testing.B) {
 			b.ResetTimer()
 			b.ReportAllocs()
 
-			for i := 0; i < b.N; i++ {
+			for b.Loop() {
 				_, err := service.ListUsers(ctx)
 				if err != nil {
 					b.Fatalf("ListUsers failed: %v", err)
@@ -163,10 +161,9 @@ func BenchmarkUpdateUser(b *testing.B) {
 	const userCount = 1000
 	service, ctx := setupBenchmarkService(b, userCount)
 
-	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for i := 0; b.Loop(); i++ {
 		userID, _ := values.NewUserID(fmt.Sprintf("user-%d", i%userCount))
 		newEmail := fmt.Sprintf("updated%d@example.com", i)
 		newName := fmt.Sprintf("Updated User %d", i)
@@ -183,10 +180,9 @@ func BenchmarkDeleteUser(b *testing.B) {
 	// Create fresh users for each benchmark run
 	service, ctx := setupBenchmarkService(b, b.N)
 
-	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for i := 0; b.Loop(); i++ {
 		userID, _ := values.NewUserID(fmt.Sprintf("user-%d", i))
 
 		err := service.DeleteUser(ctx, userID)
@@ -201,10 +197,9 @@ func BenchmarkFilterActiveUsers(b *testing.B) {
 	const userCount = 10000
 	service, ctx := setupBenchmarkService(b, userCount)
 
-	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := service.FilterActiveUsers(ctx)
 		if err != nil {
 			b.Fatalf("FilterActiveUsers failed: %v", err)
@@ -230,7 +225,7 @@ func BenchmarkGetUserStats(b *testing.B) {
 			b.ResetTimer()
 			b.ReportAllocs()
 
-			for i := 0; i < b.N; i++ {
+			for b.Loop() {
 				_, err := service.GetUserStats(ctx)
 				if err != nil {
 					b.Fatalf("GetUserStats failed: %v", err)
@@ -247,10 +242,9 @@ func BenchmarkGetUsersByEmailDomains(b *testing.B) {
 
 	domains := []string{"example.com", "test.com", "demo.com"}
 
-	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := service.GetUsersByEmailDomains(ctx, domains)
 		if err != nil {
 			b.Fatalf("GetUsersByEmailDomains failed: %v", err)
@@ -297,11 +291,10 @@ func BenchmarkConcurrentOperations(b *testing.B) {
 func BenchmarkMemoryAllocation(b *testing.B) {
 	service, ctx := setupBenchmarkService(b, 0)
 
-	b.ResetTimer()
 	b.ReportAllocs()
 
 	// Force memory allocations to measure GC impact
-	for i := 0; i < b.N; i++ {
+	for i := 0; b.Loop(); i++ {
 		// Create temporary data structures
 		userID, _ := values.NewUserID(fmt.Sprintf("memory-test-%d", i))
 		email := fmt.Sprintf("memtest%d@example.com", i)
@@ -321,10 +314,9 @@ func BenchmarkMemoryAllocation(b *testing.B) {
 
 // BenchmarkValueObjectCreation measures the performance of value object creation.
 func BenchmarkValueObjectCreation(b *testing.B) {
-	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for i := 0; b.Loop(); i++ {
 		userID, err := values.NewUserID(fmt.Sprintf("value-test-%d", i))
 		if err != nil {
 			b.Fatalf("NewUserID failed: %v", err)
@@ -337,10 +329,9 @@ func BenchmarkValueObjectCreation(b *testing.B) {
 
 // BenchmarkEntityCreation measures the performance of entity creation.
 func BenchmarkEntityCreation(b *testing.B) {
-	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for i := 0; b.Loop(); i++ {
 		userID, _ := values.NewUserID(fmt.Sprintf("entity-test-%d", i))
 		email := fmt.Sprintf("entitytest%d@example.com", i)
 		name := fmt.Sprintf("Entity Test User %d", i)

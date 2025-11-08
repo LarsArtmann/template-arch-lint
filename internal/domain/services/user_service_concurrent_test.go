@@ -53,13 +53,13 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				userCounts := make(chan int, numGoroutines)
 
 				// Create multiple goroutines creating users concurrently
-				for g := 0; g < numGoroutines; g++ {
+				for g := range numGoroutines {
 					wg.Add(1)
 					go func(goroutineID int) {
 						defer wg.Done()
 						localSuccessCount := 0
 
-						for u := 0; u < numUsersPerGoroutine; u++ {
+						for u := range numUsersPerGoroutine {
 							id := createTestUserID(fmt.Sprintf("concurrent-user-g%d-u%d", goroutineID, u))
 							email := fmt.Sprintf("user-g%d-u%d@example.com", goroutineID, u)
 							name := fmt.Sprintf("User G%d U%d", goroutineID, u)
@@ -109,7 +109,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				results := make(chan error, numGoroutines)
 
 				// Multiple goroutines trying to create users with same email
-				for i := 0; i < numGoroutines; i++ {
+				for i := range numGoroutines {
 					wg.Add(1)
 					go func(index int) {
 						defer wg.Done()
@@ -171,7 +171,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				userResults := make(chan *entities.User, numReaders)
 
 				// Multiple goroutines reading the same user
-				for i := 0; i < numReaders; i++ {
+				for range numReaders {
 					wg.Add(1)
 					go func() {
 						defer wg.Done()
@@ -208,7 +208,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				results := make(chan error, numListers)
 				listResults := make(chan int, numListers) // Store count of users
 
-				for i := 0; i < numListers; i++ {
+				for range numListers {
 					wg.Add(1)
 					go func() {
 						defer wg.Done()
@@ -257,7 +257,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				updateResults := make(chan string, numUpdaters) // Store final email
 
 				// Multiple goroutines updating the same user
-				for i := 0; i < numUpdaters; i++ {
+				for i := range numUpdaters {
 					wg.Add(1)
 					go func(index int) {
 						defer wg.Done()
@@ -301,7 +301,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 
 				// Create multiple users
 				userIDs := make([]values.UserID, numUsers)
-				for i := 0; i < numUsers; i++ {
+				for i := range numUsers {
 					id := createTestUserID(fmt.Sprintf("multi-update-user-%d", i))
 					email := fmt.Sprintf("multi%d@example.com", i)
 					name := fmt.Sprintf("Multi User %d", i)
@@ -315,7 +315,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				results := make(chan error, numUsers)
 
 				// Update each user concurrently
-				for i := 0; i < numUsers; i++ {
+				for i := range numUsers {
 					wg.Add(1)
 					go func(index int) {
 						defer wg.Done()
@@ -336,7 +336,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				}
 
 				// Verify all users were updated correctly
-				for i := 0; i < numUsers; i++ {
+				for i := range numUsers {
 					user, err := userService.GetUser(ctx, userIDs[i])
 					Expect(err).ToNot(HaveOccurred())
 					Expect(user.GetEmail().String()).To(Equal(fmt.Sprintf("updated-multi%d@example.com", i)))
@@ -359,7 +359,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				results := make(chan error, numDeleters)
 
 				// Multiple goroutines trying to delete the same user
-				for i := 0; i < numDeleters; i++ {
+				for range numDeleters {
 					wg.Add(1)
 					go func() {
 						defer wg.Done()
@@ -404,7 +404,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 
 				// Create multiple users
 				userIDs := make([]values.UserID, numUsers)
-				for i := 0; i < numUsers; i++ {
+				for i := range numUsers {
 					id := createTestUserID(fmt.Sprintf("multi-delete-user-%d", i))
 					email := fmt.Sprintf("multidelete%d@example.com", i)
 					name := fmt.Sprintf("Multi Delete User %d", i)
@@ -418,7 +418,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				results := make(chan error, numUsers)
 
 				// Delete each user concurrently
-				for i := 0; i < numUsers; i++ {
+				for i := range numUsers {
 					wg.Add(1)
 					go func(index int) {
 						defer wg.Done()
@@ -451,7 +451,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 
 				// Pre-create some users for update/delete operations
 				existingUserIDs := make([]values.UserID, 5)
-				for i := 0; i < 5; i++ {
+				for i := range 5 {
 					id := createTestUserID(fmt.Sprintf("existing-user-%d", i))
 					email := fmt.Sprintf("existing%d@example.com", i)
 					name := fmt.Sprintf("Existing User %d", i)
@@ -470,7 +470,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				deleteCount := 0
 
 				// Launch mixed operations
-				for i := 0; i < numOperations; i++ {
+				for i := range numOperations {
 					wg.Add(1)
 					go func(index int) {
 						defer wg.Done()
@@ -558,12 +558,12 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				results := make(chan error, numGoroutines*operationsPerGoroutine)
 
 				// High concurrency load test
-				for g := 0; g < numGoroutines; g++ {
+				for g := range numGoroutines {
 					wg.Add(1)
 					go func(goroutineID int) {
 						defer wg.Done()
 
-						for op := 0; op < operationsPerGoroutine; op++ {
+						for op := range operationsPerGoroutine {
 							id := createTestUserID(fmt.Sprintf("load-test-g%d-op%d", goroutineID, op))
 							email := fmt.Sprintf("load%d-%d@example.com", goroutineID, op)
 							name := fmt.Sprintf("Load Test User %d-%d", goroutineID, op)

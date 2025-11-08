@@ -29,7 +29,7 @@ jobs:
   # 🔍 Basic validation and setup
   validate:
     name: 🔍 Validate
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 5
     steps:
       - name: 📥 Checkout code
@@ -62,7 +62,7 @@ jobs:
   # 🔒 Security scanning
   security:
     name: 🔒 Security Scan
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 10
     needs: validate
     steps:
@@ -112,7 +112,7 @@ jobs:
   # 🏗️ Build validation
   build:
     name: 🏗️ Build
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 10
     needs: validate
     steps:
@@ -149,7 +149,7 @@ jobs:
   # 📊 Code quality and linting (with architecture validation)
   quality:
     name: 📊 Code Quality & Architecture
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 15
     needs: validate
     steps:
@@ -199,7 +199,7 @@ jobs:
   # 🧪 Testing with coverage
   test:
     name: 🧪 Test & Coverage
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 15
     needs: validate
     strategy:
@@ -260,7 +260,7 @@ jobs:
   # 🔧 Integration testing
   integration:
     name: 🔧 Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 10
     needs: [build, test]
     steps:
@@ -299,7 +299,7 @@ jobs:
   # 🐳 Container image preparation and scanning
   prepare-metadata:
     name: 🐳 Prepare Container Metadata
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 5
     needs: [build, test, quality]
     outputs:
@@ -359,7 +359,7 @@ jobs:
   # 🔒 Container vulnerability scanning
   container-security:
     name: 🔒 Container Security Scan
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 15
     needs: prepare-metadata
     steps:
@@ -416,7 +416,7 @@ jobs:
   # 🏗️ Multi-architecture container build and push
   build-and-push:
     name: 🏗️ Build & Push Container Images
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 30
     needs: [prepare-metadata, container-security, integration]
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
@@ -482,7 +482,7 @@ jobs:
   # 🧪 Test published container images
   test-container:
     name: 🧪 Test Container Images
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 10
     needs: [build-and-push, prepare-metadata]
     if: needs.prepare-metadata.outputs.is-main-branch == 'true'
@@ -548,7 +548,7 @@ jobs:
   # 📊 Final validation and reporting
   validate-complete:
     name: 📊 Final Validation
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 5
     needs: [security, build, quality, test, integration, prepare-metadata, container-security, build-and-push]
     if: always()

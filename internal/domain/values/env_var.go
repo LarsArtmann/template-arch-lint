@@ -1,5 +1,7 @@
 package values
 
+import "slices"
+
 // EnvVar represents a typed environment variable name for type-safe configuration
 type EnvVar string
 
@@ -110,12 +112,7 @@ func (e EnvVar) IsRequired() bool {
 		EnvJWTAlgorithm,
 	}
 
-	for _, required := range requiredVars {
-		if e == required {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(requiredVars, e)
 }
 
 // IsSensitive returns true if this environment variable contains sensitive information
@@ -125,10 +122,5 @@ func (e EnvVar) IsSensitive() bool {
 		EnvDatabaseDSN, // May contain passwords
 	}
 
-	for _, sensitive := range sensitiveVars {
-		if e == sensitive {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(sensitiveVars, e)
 }

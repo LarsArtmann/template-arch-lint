@@ -44,7 +44,7 @@ jobs:
   # ==============================================
   setup-baseline:
     name: 📊 Setup Benchmark Baseline
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 15
     outputs:
       baseline-ref: ${{ steps.baseline.outputs.ref }}
@@ -82,7 +82,7 @@ jobs:
   # ==============================================
   cpu-benchmarks:
     name: 🖥️ CPU Performance Benchmarks
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 20
     if: ${{ inputs.benchmark_type == 'all' || inputs.benchmark_type == 'cpu' || inputs.benchmark_type == '' }}
 
@@ -141,7 +141,7 @@ jobs:
   # ==============================================
   memory-benchmarks:
     name: 🧠 Memory Performance Benchmarks
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 20
     if: ${{ inputs.benchmark_type == 'all' || inputs.benchmark_type == 'memory' || inputs.benchmark_type == '' }}
 
@@ -201,7 +201,7 @@ jobs:
   # ==============================================
   concurrent-benchmarks:
     name: 🔄 Concurrent Performance Benchmarks
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 25
     if: ${{ inputs.benchmark_type == 'all' || inputs.benchmark_type == 'concurrent' || inputs.benchmark_type == '' }}
 
@@ -262,7 +262,7 @@ jobs:
   # ==============================================
   stress-benchmarks:
     name: 💪 Stress Testing Benchmarks
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 30
     if: ${{ inputs.benchmark_type == 'all' || inputs.benchmark_type == 'stress' || inputs.benchmark_type == '' }}
 
@@ -322,7 +322,7 @@ jobs:
   # ==============================================
   baseline-comparison:
     name: 📈 Baseline Performance Comparison
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 25
     needs: [setup-baseline, cpu-benchmarks, memory-benchmarks]
     if: ${{ github.event_name == 'pull_request' && needs.setup-baseline.outputs.baseline-available == 'true' }}
@@ -537,7 +537,7 @@ jobs:
   # ==============================================
   performance-tracking:
     name: 📈 Performance Tracking
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 10
     if: ${{ github.event_name == 'schedule' || github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     needs: [cpu-benchmarks, memory-benchmarks]
@@ -570,7 +570,7 @@ jobs:
   # ==============================================
   benchmark-success:
     name: ✅ Benchmarks Complete
-    runs-on: ubuntu-latest
+    runs-on: ["self-hosted", "linux", "x64"]
     needs: [cpu-benchmarks, memory-benchmarks, concurrent-benchmarks, stress-benchmarks]
     timeout-minutes: 2
     if: always()
