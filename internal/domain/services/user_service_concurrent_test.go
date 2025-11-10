@@ -172,13 +172,11 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 
 				// Multiple goroutines reading the same user
 				for range numReaders {
-					wg.Add(1)
-					go func() {
-						defer wg.Done()
+					wg.Go(func() {
 						user, err := userService.GetUser(ctx, testUser.ID)
 						results <- err
 						userResults <- user
-					}()
+					})
 				}
 
 				wg.Wait()
@@ -209,15 +207,13 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				listResults := make(chan int, numListers) // Store count of users
 
 				for range numListers {
-					wg.Add(1)
-					go func() {
-						defer wg.Done()
+					wg.Go(func() {
 						users, err := userService.ListUsers(ctx)
 						results <- err
 						if err == nil {
 							listResults <- len(users)
 						}
-					}()
+					})
 				}
 
 				wg.Wait()
@@ -360,12 +356,10 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 
 				// Multiple goroutines trying to delete the same user
 				for range numDeleters {
-					wg.Add(1)
-					go func() {
-						defer wg.Done()
+					wg.Go(func() {
 						err := userService.DeleteUser(ctx, id)
 						results <- err
-					}()
+					})
 				}
 
 				wg.Wait()
