@@ -11,10 +11,10 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
-	domainErrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	domainErrors "github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
 func TestUserServiceErrorPaths(t *testing.T) {

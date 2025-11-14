@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
-	domainerrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/shared"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	domainerrors "github.com/LarsArtmann/template-arch-lint/pkg/errors"
 	"github.com/samber/lo"
 )
 

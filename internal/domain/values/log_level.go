@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	domainerrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
+	domainerrors "github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
 // LogLevel represents a valid logging level with business rules validation

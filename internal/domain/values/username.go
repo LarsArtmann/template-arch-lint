@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
+	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
 // UserName represents a validated username value object.

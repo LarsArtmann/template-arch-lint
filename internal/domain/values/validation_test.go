@@ -7,8 +7,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
 func TestValidation(t *testing.T) {

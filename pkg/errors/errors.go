@@ -1,4 +1,5 @@
-// Package errors provides typed error definitions for domain operations
+// Package errors provides centralized error definitions for the entire project
+// ALL error definitions MUST be in this package - no exceptions
 package errors
 
 import (

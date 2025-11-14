@@ -25,10 +25,10 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
-	domainerrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/shared"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	domainerrors "github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
 // TODO: TYPE SAFETY - Replace *string with proper value objects (DomainName value object)

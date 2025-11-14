@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
+	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
 // UserID represents a unique user identifier value object.

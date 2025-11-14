@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
+	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
 // Email represents a validated email address value object.

@@ -37,6 +37,14 @@ allow:
 # Define your project's architectural layers and boundaries
 components:
   # ========================================
+  # CENTRALIZED ERROR MANAGEMENT
+  # ========================================
+  # ALL projects (libs and apps) MUST use pkg/errors for ALL error definitions
+  # No exceptions - this enforces consistent error handling across the entire codebase
+  pkg-errors:
+    in: pkg/errors/**
+
+  # ========================================
   # DOMAIN LAYER - Pure Business Logic
   # ========================================
   domain-entities:
@@ -45,8 +53,6 @@ components:
     in: internal/domain/shared/**
   domain-values:
     in: internal/domain/values/**
-  domain-errors:
-    in: internal/domain/errors/**
   domain-repositories:
     in: internal/domain/repositories/**
   domain-services:
@@ -75,28 +81,30 @@ components:
 
 # 🔒 DEPENDENCY RULES - Enforce Clean Architecture
 deps:
+  # CENTRALIZED ERROR MANAGEMENT - Available to ALL components
+  pkg-errors:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-shared  # Only allowed dependency
+
   # DOMAIN LAYER - Zero infrastructure dependencies
   domain-entities:
     anyVendorDeps: true
     mayDependOn:
       - domain-shared
       - domain-values
-      - domain-errors
+      - pkg-errors  # MUST use centralized errors
 
   domain-shared:
     anyVendorDeps: true
-    mayDependOn: []
+    mayDependOn:
+      - pkg-errors  # MUST use centralized errors
 
   domain-values:
     anyVendorDeps: true
     mayDependOn:
       - domain-shared
-      - domain-errors
-
-  domain-errors:
-    anyVendorDeps: true
-    mayDependOn:
-      - domain-shared
+      - pkg-errors  # MUST use centralized errors
 
   domain-repositories:
     anyVendorDeps: true
@@ -104,7 +112,7 @@ deps:
       - domain-entities
       - domain-shared
       - domain-values
-      - domain-errors
+      - pkg-errors  # MUST use centralized errors
 
   domain-services:
     anyVendorDeps: true
@@ -113,13 +121,14 @@ deps:
       - domain-repositories
       - domain-shared
       - domain-values
-      - domain-errors
+      - pkg-errors  # MUST use centralized errors
 
   # CONFIGURATION & STARTUP
   config:
     anyVendorDeps: true
     mayDependOn:
       - domain-values  # Allow config to use domain value objects for validation
+      - pkg-errors    # MUST use centralized errors
 
   main:
     anyProjectDeps: true
@@ -145,7 +154,7 @@ deps:
 # 🌍 COMMON COMPONENTS - Available everywhere
 commonComponents:
   - domain-shared
-  - domain-errors
+  - pkg-errors  # CENTRALIZED ERROR MANAGEMENT - MANDATORY
 
 # 🚫 EXCLUSION PATTERNS (glob patterns)
 exclude:
@@ -278,8 +287,22 @@ excludeFiles:
 #    - Common types and utilities available everywhere
 #    - Keeps shared concepts consistent across layers
 #
+# 5. CENTRALIZED ERROR MANAGEMENT
+#    - ALL error definitions MUST be in pkg/errors/
+#    - Enforces consistent error handling across libs and apps
+#    - NO direct errors.New() or fmt.Errorf() outside pkg/errors
+#    - Only error checking (errors.Is, errors.As) allowed elsewhere
+#
+# ENFORCEMENT RULES FOR ERROR CENTRALIZATION:
+# ✅ pkg/errors/ is the ONLY place allowed to import "errors" and "fmt" for error creation
+# ✅ All other components MUST use pkg/errors predefined error types
+# ✅ Only error checking functions (Is, As, Unwrap) allowed outside pkg/errors
+# ❌ Direct error creation banned: errors.New(), fmt.Errorf()
+# ❌ No domain/errors/ - consolidate to pkg/errors for all projects
+#
 # To customize for your project:
 # 1. Update component paths to match your directory structure
 # 2. Add/remove components as needed
 # 3. Adjust dependency rules for your architecture
 # 4. Set depOnAnyVendor to false for stricter vendor control
+# 5. NEVER remove pkg-errors dependency - centralized errors are mandatory

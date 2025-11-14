@@ -11,10 +11,10 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
 func TestUserService(t *testing.T) {

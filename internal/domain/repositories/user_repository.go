@@ -5,8 +5,8 @@ import (
 	"context"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
 // ErrUserNotFound is returned when a user is not found.

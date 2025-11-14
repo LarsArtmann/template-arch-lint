@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strconv"
 
-	domainerrors "github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
+	domainerrors "github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
 // Port represents a valid network port number with business rules validation

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/errors"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
 // InMemoryUserRepository implements UserRepository interface with in-memory storage.
