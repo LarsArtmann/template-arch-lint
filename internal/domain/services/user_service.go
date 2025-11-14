@@ -18,7 +18,6 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -115,7 +114,7 @@ func (s *UserService) GetUser(ctx context.Context, id values.UserID) (*entities.
 // GetUserByEmail retrieves a user by email.
 func (s *UserService) GetUserByEmail(ctx context.Context, email string) (*entities.User, error) {
 	if err := s.validateEmail(email); err != nil {
-		return nil, fmt.Errorf("invalid email: %w", err)
+		return nil, err
 	}
 
 	user, err := s.userRepo.FindByEmail(ctx, email)
@@ -165,7 +164,7 @@ func (s *UserService) validateEmailUpdate(ctx context.Context, user *entities.Us
 	}
 
 	if err := s.validateEmail(email); err != nil {
-		return fmt.Errorf("invalid email: %w", err)
+		return err
 	}
 
 	return s.checkEmailAvailability(ctx, email)
@@ -185,7 +184,7 @@ func (s *UserService) checkEmailAvailability(ctx context.Context, email string) 
 func (s *UserService) validateNameUpdate(user *entities.User, name string) error {
 	if name != user.GetUserName().String() {
 		if err := s.validateUserName(name); err != nil {
-			return fmt.Errorf("invalid username: %w", err)
+			return err
 		}
 	}
 	return nil

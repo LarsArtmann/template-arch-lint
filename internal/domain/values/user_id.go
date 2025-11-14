@@ -32,7 +32,7 @@ func GenerateUserID() (UserID, error) {
 	// Generate a random ID using crypto/rand for security
 	bytes := make([]byte, 16)
 	if _, err := rand.Read(bytes); err != nil {
-		return UserID{}, fmt.Errorf("failed to generate random ID: %w", err)
+		return UserID{}, errors.NewInternalError("failed to generate random ID", err)
 	}
 
 	// Convert to hex string with user prefix
@@ -179,6 +179,6 @@ func (u *UserID) Scan(value any) error {
 		*u = userID
 		return nil
 	default:
-		return fmt.Errorf("cannot scan %T into UserID", value)
+		return errors.NewValidationError("user_id", fmt.Sprintf("cannot scan %T into UserID", value))
 	}
 }
