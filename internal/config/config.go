@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 
@@ -88,17 +89,17 @@ func LoadConfig(configPath string) (*Config, error) {
 
 	// Configure viper
 	if err := configureViper(configPath); err != nil {
-		return nil, fmt.Errorf("failed to configure viper: %w", err)
+		return nil, errors.NewInternalError("failed to configure viper", err)
 	}
 
 	// Unmarshal configuration
 	if err := viper.Unmarshal(config); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal configuration: %w", err)
+		return nil, errors.NewInternalError("failed to unmarshal configuration", err)
 	}
 
 	// Validate configuration
 	if err := validateConfig(config); err != nil {
-		return nil, fmt.Errorf("validation errors: %w", err)
+		return nil, errors.NewValidationError("config", fmt.Sprintf("validation errors: %v", err))
 	}
 
 	return config, nil
@@ -163,7 +164,7 @@ func configureViper(configPath string) error {
 	if configPath != "" {
 		viper.SetConfigFile(configPath)
 		if err := viper.ReadInConfig(); err != nil {
-			return fmt.Errorf("failed to read config file: %w", err)
+			return errors.NewInternalError("failed to read config file", err)
 		}
 	}
 
@@ -176,7 +177,7 @@ func validateConfig(config *Config) error {
 
 	// Register custom validators
 	if err := validate.RegisterValidation("valid_environment", validateEnvironment); err != nil {
-		return fmt.Errorf("failed to register environment validator: %w", err)
+		return errors.NewInternalError("failed to register environment validator", err)
 	}
 
 	// Validate struct with validator tags
@@ -186,11 +187,11 @@ func validateConfig(config *Config) error {
 
 	// Additional domain-specific validation
 	if err := config.Server.Port.Validate(); err != nil {
-		return fmt.Errorf("server port validation failed: %w", err)
+		return errors.NewValidationError("server_port", fmt.Sprintf("validation failed: %v", err))
 	}
 
 	if err := config.Logging.Level.Validate(); err != nil {
-		return fmt.Errorf("logging level validation failed: %w", err)
+		return errors.NewValidationError("logging_level", fmt.Sprintf("validation failed: %v", err))
 	}
 
 	return nil

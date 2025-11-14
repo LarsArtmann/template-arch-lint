@@ -3,13 +3,13 @@ package errors
 
 import "fmt"
 
-// WrapServiceError wraps an error with a service operation context.
-// This reduces duplication of fmt.Errorf("failed to %s: %w", operation, err) patterns.
+// WrapServiceError wraps an error with service operation context.
+// This uses centralized error types for consistency.
 func WrapServiceError(operation string, err error) error {
 	if err == nil {
 		return nil
 	}
-	return fmt.Errorf("failed to %s: %w", operation, err)
+	return NewInternalError("failed to "+operation, err)
 }
 
 // WrapRepoError wraps repository errors with consistent messaging.
@@ -17,7 +17,7 @@ func WrapRepoError(operation, entity string, err error) error {
 	if err == nil {
 		return nil
 	}
-	return fmt.Errorf("failed to %s %s: %w", operation, entity, err)
+	return NewInternalError(fmt.Sprintf("failed to %s %s", operation, entity), err)
 }
 
 // WrapValidationError wraps validation errors with consistent messaging.
@@ -25,7 +25,7 @@ func WrapValidationError(entity string, err error) error {
 	if err == nil {
 		return nil
 	}
-	return fmt.Errorf("%s validation failed: %w", entity, err)
+	return NewValidationError(entity, fmt.Sprintf("validation failed: %v", err))
 }
 
 // WrapBusinessRuleError wraps business rule validation errors.
@@ -33,5 +33,5 @@ func WrapBusinessRuleError(rule string, err error) error {
 	if err == nil {
 		return nil
 	}
-	return fmt.Errorf("%s validation failed: %w", rule, err)
+	return NewValidationError(rule, fmt.Sprintf("business rule validation failed: %v", err))
 }
