@@ -21,7 +21,7 @@ var _ = Describe("Email", func() {
 	Describe("NewEmail", func() {
 		Context("with valid email addresses", func() {
 			DescribeTable("should create email successfully",
-				func(emailStr string, expectedNormalized string) {
+				func(emailStr, expectedNormalized string) {
 					email, err := values.NewEmail(emailStr)
 					Expect(err).ToNot(HaveOccurred())
 					Expect(email.String()).To(Equal(expectedNormalized))
@@ -149,7 +149,7 @@ var _ = Describe("UserID", func() {
 	Describe("NewUserID", func() {
 		Context("with valid user IDs", func() {
 			DescribeTable("should create user ID successfully",
-				func(idStr string, expected string) {
+				func(idStr, expected string) {
 					userID, err := values.NewUserID(idStr)
 					Expect(err).ToNot(HaveOccurred())
 					Expect(userID.String()).To(Equal(expected))

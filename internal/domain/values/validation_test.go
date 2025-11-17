@@ -20,7 +20,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 	Describe("📧 Email Validation", func() {
 		Context("with valid email addresses", func() {
 			DescribeTable("should accept valid email formats",
-				func(emailStr string, description string) {
+				func(emailStr, description string) {
 					email, err := values.NewEmail(emailStr)
 					Expect(err).ToNot(HaveOccurred(), description)
 					Expect(email.String()).To(Equal(emailStr), description)
@@ -42,7 +42,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 
 		Context("with invalid email addresses", func() {
 			DescribeTable("should reject invalid email formats",
-				func(emailStr string, description string) {
+				func(emailStr, description string) {
 					email, err := values.NewEmail(emailStr)
 					Expect(email.String()).To(BeEmpty(), description)
 					Expect(err).To(HaveOccurred(), description)
@@ -116,7 +116,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 	Describe("👤 UserName Validation", func() {
 		Context("with valid user names", func() {
 			DescribeTable("should accept valid name formats",
-				func(nameStr string, description string) {
+				func(nameStr, description string) {
 					userName, err := values.NewUserName(nameStr)
 					Expect(err).ToNot(HaveOccurred(), description)
 					Expect(userName.String()).To(Equal(nameStr), description)
@@ -138,7 +138,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 
 		Context("with invalid user names", func() {
 			DescribeTable("should reject invalid name formats",
-				func(nameStr string, description string) {
+				func(nameStr, description string) {
 					userName, err := values.NewUserName(nameStr)
 					Expect(userName.String()).To(BeEmpty(), description)
 					Expect(err).To(HaveOccurred(), description)
@@ -211,7 +211,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 	Describe("🆔 UserID Validation", func() {
 		Context("with valid user IDs", func() {
 			DescribeTable("should accept valid ID formats",
-				func(idStr string, description string) {
+				func(idStr, description string) {
 					userID, err := values.NewUserID(idStr)
 					Expect(err).ToNot(HaveOccurred(), description)
 					Expect(userID.String()).To(Equal(idStr), description)
@@ -230,7 +230,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 
 		Context("with invalid user IDs", func() {
 			DescribeTable("should reject invalid ID formats",
-				func(idStr string, description string) {
+				func(idStr, description string) {
 					userID, err := values.NewUserID(idStr)
 					Expect(userID.String()).To(BeEmpty(), description)
 					Expect(err).To(HaveOccurred(), description)
