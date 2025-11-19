@@ -67,6 +67,14 @@ components:
     in: cmd/**
 
   # ========================================
+  # APPLICATION LAYER - HTTP Handlers & DTOs
+  # ========================================
+  application-handlers:
+    in: internal/application/handlers/**
+  application-dto:
+    in: internal/application/dto/**
+
+  # ========================================
   # INFRASTRUCTURE LAYER - Adapters for External Systems
   # ========================================
   internalinfrastructure:
@@ -126,6 +134,24 @@ deps:
       - domain-entities
       - domain-repositories
       - domain-shared
+      - domain-values
+      - pkg-errors  # MUST use centralized errors
+
+  # APPLICATION LAYER - HTTP handlers and DTOs
+  application-handlers:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-services
+      - domain-repositories
+      - domain-shared
+      - domain-values
+      - application-dto
+      - pkg-errors  # MUST use centralized errors
+
+  application-dto:
+    anyVendorDeps: true
+    mayDependOn:
       - domain-values
       - pkg-errors  # MUST use centralized errors
 
