@@ -67,6 +67,12 @@ components:
     in: cmd/**
 
   # ========================================
+  # INFRASTRUCTURE LAYER - Adapters for External Systems
+  # ========================================
+  internalinfrastructure:
+    in: internal/infrastructure/**
+
+  # ========================================
   # TEST HELPERS - Testing Utilities
   # ========================================
   test-helpers-base:
@@ -129,6 +135,16 @@ deps:
     mayDependOn:
       - domain-values  # Allow config to use domain value objects for validation
       - pkg-errors    # MUST use centralized errors
+
+  # INFRASTRUCTURE LAYER - Adapters for external systems
+  internalinfrastructure:
+    anyVendorDeps: true
+    mayDependOn:
+      - domain-entities
+      - domain-repositories
+      - domain-shared
+      - domain-values
+      - pkg-errors  # MUST use centralized errors
 
   main:
     anyProjectDeps: true

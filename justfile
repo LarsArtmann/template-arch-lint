@@ -277,8 +277,8 @@ lint-arch:
 lint-code:
     @echo "\033[1m📝 CODE QUALITY LINTING\033[0m"
     @echo "\033[0;36mRunning golangci-lint v2...\033[0m"
-    @if command -v $(go env GOPATH)/bin/golangci-lint >/dev/null 2>&1; then \
-        if $(go env GOPATH)/bin/golangci-lint run --config .golangci.yml; then \
+    @if command -v golangci-lint >/dev/null 2>&1; then \
+        if golangci-lint run --config .golangci.yml; then \
             echo "\033[0;32m✅ Code quality validation passed!\033[0m"; \
         else \
             echo "\033[0;31m❌ Code quality issues found!\033[0m" >&2; \

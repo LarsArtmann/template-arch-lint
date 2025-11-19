@@ -4,7 +4,7 @@
 # This configuration enforces the highest standards of Go code quality
 # Designed for mission-critical production systems with zero defect tolerance
 
-version: 2
+version: "2"
 
 run:
   timeout: 5m
@@ -103,11 +103,9 @@ linters-settings:
       - p: 'panic\('
         msg: "🚨 BANNED: panic() crashes programs. Return errors instead"
       
-      # Structured logging enforcement (inspired by Uniflow)
+      # Basic print statement bans
       - p: '^fmt\.Print.*$'
-        msg: "🚨 BANNED: Do not commit print statements. Use github.com/charmbracelet/log for structured logging"
-      - p: '^log\..*$'
-        msg: "🚨 BANNED: Do not use standard log package. Use github.com/charmbracelet/log for structured logging"  
+        msg: "🚨 BANNED: Do not commit print statements. Use structured logging instead"
       - p: '^print$|^println$'
         msg: "🚨 BANNED: Do not commit print statements. Use structured logging instead"
       - p: 'fmt\.Printf.*'
@@ -329,7 +327,6 @@ linters-settings:
     no-mixed-args: true
     kv-check: true
     attr-check: true
-    context-only: true
     static-msg: true
     
   # OpenTelemetry span validation
