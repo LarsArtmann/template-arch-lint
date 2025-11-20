@@ -194,13 +194,8 @@ exclude:
   - "**/*_templ.go"
   - "**/mock_*.go"
 
-  # Test directories and testdata
+  # Test data files only (exclude test helpers from directory exclusion)
   - "**/testdata/**"
-  - "**/test/**"
-  - "**/tests/**"
-  - "test/**"
-  - "integration-test/**"
-  - "**/integration-test/**"
 
   # Build and vendor
   - "**/vendor/**"
@@ -209,7 +204,11 @@ exclude:
   - "**/dist/**"
   - "**/node_modules/**"
 
-  # Plugins (separate Go plugin modules)
+  # Plugins (separate Go plugin modules with independent arch-lint configs)
+  # Each plugin is a separate Go module with its own go.mod and .go-arch-lint.yml
+  # Plugins have independent architectural rules tailored to their specific purpose
+  # Examples: auth-plugin, logging-plugin, metrics-plugin, database-plugin
+  # Exclusion prevents parent project architecture from constraining plugin design
   - "**/plugins/**"
   - "plugins/**"
 
@@ -235,24 +234,36 @@ exclude:
 # their corresponding implementation packages. This is the standard Go testing
 # pattern and should NOT be considered an architecture violation.
 #
-# Examples of normal Go test patterns:
-# - package services_test imports "myapp/services"
-# - package entities_test imports "myapp/entities"
-# - package values_test imports "myapp/values"
 #
-# These imports are necessary for:
-# 1. Black-box testing (testing public APIs)
-# 2. Testing exported functions and types
-# 3. Verifying package boundaries from consumer perspective
+# SMART BALANCE TESTING STRATEGY:
 #
-# Why we exclude test files:
-# - Test files don't affect production architecture
-# - Self-imports in tests are a Go idiom, not a design flaw
-# - Architecture rules should focus on production code dependencies
-# - Tests verify behavior, not enforce architectural constraints
+# This configuration implements a "Smart Balance" approach to testing:
 #
-# Note: Integration tests and end-to-end tests may have different
-# import patterns and are also excluded from architecture validation.
+# 1. BLACK-BOX TESTING (PREFERRED)
+#    Use package_name_test for external testing of public APIs
+#    Example: package services_test imports "myapp/services"
+#
+# 2. WHITE-BOX TESTING (ALLOWED)
+#    Same-package testing for internal implementation details
+#    Example: package services testing private functions
+#
+# 3. TEST HELPERS VALIDATION
+#    Test helper packages ARE validated for architecture compliance
+#    They must follow proper dependency rules despite being testing utilities
+#
+# 4. EXCLUSION RATIONALE
+#    - Test files don't affect production architecture
+#    - Self-imports in tests are standard Go practice, not design flaws
+#    - Architecture rules focus on production code dependencies
+#    - Tests verify behavior, not enforce architectural constraints
+#
+# Note: Integration tests and end-to-end tests have different import patterns
+# and are also excluded from architecture validation.
+#
+# CURRENT ISSUES TO ADDRESS:
+# - Mixed testing strategies: Some tests use package entities (white-box)
+#   while others use package entities_test (black-box)
+# - Standardize on black-box testing for consistency where possible
 excludeFiles:
   - ".*_test\\.go$"         # All test files (_test.go suffix)
   - "integration_test\\.go$" # Integration test files
