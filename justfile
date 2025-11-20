@@ -504,7 +504,6 @@ report:
 clean:
     @echo "\033[1m🧹 CLEANING\033[0m"
     rm -rf {{REPORT_DIR}}
-    rm -f coverage.out
     @echo "\033[0;32m✅ Cleaned successfully!\033[0m"
 
 # Run minimal essential linters only
