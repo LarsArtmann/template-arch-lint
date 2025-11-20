@@ -1,6 +1,9 @@
 # Library Error Centralization Rules
 # STRICT enforcement for library projects - ALL errors in one place
 
+version: 3
+workdir: .
+
 rules:
   # Rule: ABSOLUTE error centralization for libraries
   - name: lib-error-centralization

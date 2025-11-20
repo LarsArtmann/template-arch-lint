@@ -103,6 +103,17 @@ linters-settings:
       - p: 'panic\('
         msg: "🚨 BANNED: panic() crashes programs. Return errors instead"
       
+      # 🚫 ERROR CENTRALIZATION - Direct error creation outside pkg/errors
+      - p: 'errors\.New\('
+        msg: "🚨 BANNED: Direct error creation. Use pkg/errors predefined types instead"
+        # Allow in pkg/errors only
+      - p: 'fmt\.Errorf\('
+        msg: "🚨 BANNED: Direct error formatting. Use pkg/errors predefined types instead"
+        # Allow in pkg/errors only
+      - p: 'error\(\s*{'
+        msg: "🚨 BANNED: Anonymous error structs. Use pkg/errors Error type instead"
+        # Allow in pkg/errors only
+      
       # Basic print statement bans
       - p: '^fmt\.Print.*$'
         msg: "🚨 BANNED: Do not commit print statements. Use structured logging instead"

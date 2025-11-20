@@ -4,6 +4,9 @@
 # This file validates that NO direct error creation happens outside pkg/errors/
 # Only error checking (Is, As, Unwrap) is allowed elsewhere
 
+version: 3
+workdir: .
+
 name: error-centralization-validation
 description: "Enforce centralized error management in pkg/errors/"
 

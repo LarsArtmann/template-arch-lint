@@ -4,6 +4,13 @@
 # Just is a handy way to save and run project-specific commands.
 # https://github.com/casey/just
 
+# ===== PROFESSIONAL COLOR CONSTANTS =====
+# Using justfile built-in color constants for maintainable color management
+# These replace hardcoded ANSI escape sequences throughout the file
+# Available built-in constants: CLEAR, NORMAL, BOLD, ITALIC, UNDERLINE, INVERT, HIDE, STRIKETHROUGH
+# Available built-in colors: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE
+# Available built-in backgrounds: BG_BLACK, BG_RED, BG_GREEN, BG_YELLOW, BG_BLUE, BG_MAGENTA, BG_CYAN, BG_WHITE
+
 # Tool versions
 GOLANGCI_VERSION := "v2.6.0"
 GO_ARCH_LINT_VERSION := "v1.14.0"
@@ -50,47 +57,47 @@ install-hooks:
     @echo "just check-pre-commit-fast" >> .git/hooks/pre-commit
     @chmod +x .git/hooks/pre-commit
     @echo "\033[0;32m✅ Git pre-commit hook installed!\033[0m"
-    @echo "\033[0;36mThe hook will do fast formatting checks only.\033[0m"
-    @echo "\033[0;36mFor full checks including architecture: just check-pre-commit\033[0m"
+    @echo "{{CYAN}}The hook will do fast formatting checks only.{{NORMAL}}"
+    @echo "{{CYAN}}For full checks including architecture: just check-pre-commit{{NORMAL}}"
 
 # Install comprehensive git hooks (includes architecture validation)
 install-hooks-full:
-    @echo "\033[1m🪝 INSTALLING COMPREHENSIVE GIT HOOKS\033[0m"
+    @echo "{{BOLD}}🪝 INSTALLING COMPREHENSIVE GIT HOOKS{{NORMAL}}"
     @echo "#!/bin/sh" > .git/hooks/pre-commit
     @echo "# Auto-generated pre-commit hook - comprehensive checks" >> .git/hooks/pre-commit
     @echo "just check-pre-commit" >> .git/hooks/pre-commit
     @chmod +x .git/hooks/pre-commit
-    @echo "\033[0;32m✅ Comprehensive git pre-commit hook installed!\033[0m"
-    @echo "\033[0;33m⚠️  This includes architecture graph validation - commits will be slower.\033[0m"
+    @echo "{{GREEN}}✅ Comprehensive git pre-commit hook installed!{{NORMAL}}"
+    @echo "{{YELLOW}}⚠️  This includes architecture graph validation - commits will be slower.{{NORMAL}}"
 
 # Show this help message
 # ===== 🚀 PROFESSIONAL HELP SYSTEM =====
 
 # Enterprise-grade help with categorization
 help:
-    @echo "\033[1m🚀 HYPER-ENTERPRISE GO LINTING JUSTFILE\033[0m"
+    @echo "{{BOLD}}🚀 HYPER-ENTERPRISE GO LINTING JUSTFILE{{NORMAL}}"
     @echo ""
-    @echo "\033[1m🎯 CORE WORKFLOWS:\033[0m"
-    @echo "  \033[0;32mjust test\033[0m        - Run tests with coverage"
-    @echo "  \033[0;32mjust report\033[0m      - 🚀 PARALLEL report generation (3x speedup!)"
-    @echo "  \033[0;32mjust lint\033[0m        - Complete linting pipeline"
+    @echo "{{BOLD}}🎯 CORE WORKFLOWS:{{NORMAL}}"
+    @echo "  {{GREEN}}just test{{NORMAL}}        - Run tests with coverage"
+    @echo "  {{GREEN}}just report{{NORMAL}}      - 🚀 PARALLEL report generation (3x speedup!)"
+    @echo "  {{GREEN}}just lint{{NORMAL}}        - Complete linting pipeline"
     @echo ""
-    @echo "\033[1m🔧 MAINTENANCE:\033[0m"
-    @echo "  \033[0;34mjust clean\033[0m       - Smart cleaning with confirmation"
-    @echo "  \033[0;34mjust install\033[0m     - Install all linting tools"
+    @echo "{{BOLD}}🔧 MAINTENANCE:{{NORMAL}}"
+    @echo "  {{BLUE}}just clean{{NORMAL}}       - Smart cleaning with confirmation"
+    @echo "  {{BLUE}}just install{{NORMAL}}     - Install all linting tools"
     @echo ""
-    @echo "\033[1m🚨 SECURITY:\033[0m"
-    @echo "  \033[0;31mjust check-pre-commit\033[0m - Pre-commit validation"
-    @echo "  \033[0;31mjust security-scan\033[0m    - Full security analysis"
+    @echo "{{BOLD}}🚨 SECURITY:{{NORMAL}}"
+    @echo "  {{RED}}just check-pre-commit{{NORMAL}} - Pre-commit validation"
+    @echo "  {{RED}}just security-scan{{NORMAL}}    - Full security analysis"
     @echo ""
-    @echo "\033[1m⚡ PERFORMANCE:\033[0m"
-    @echo "  \033[0;33mjust bench\033[0m       - Benchmark suite"
-    @echo "  \033[0;33mjust profile-cpu\033[0m  - CPU profiling"
+    @echo "{{BOLD}}⚡ PERFORMANCE:{{NORMAL}}"
+    @echo "  {{YELLOW}}just bench{{NORMAL}}       - Benchmark suite"
+    @echo "  {{YELLOW}}just profile-cpu{{NORMAL}}  - CPU profiling"
     @echo ""
-    @echo "\033[1m📋 ALL AVAILABLE COMMANDS:\033[0m"
+    @echo "{{BOLD}}📋 ALL AVAILABLE COMMANDS:{{NORMAL}}"
     @just --list --unsorted
     @echo ""
-    @echo "\033[1mQUICK START:\033[0m"
+    @echo "{{BOLD}}QUICK START:{{NORMAL}}"
     @echo "  1. \033[0;32mjust bootstrap\033[0m        - 🚀 Complete setup with enhanced error handling"
     @echo "  2. \033[0;36mjust bootstrap-diagnose\033[0m - 🔍 Environment diagnostics only"
     @echo "  3. \033[0;36mjust bootstrap-fix\033[0m     - 🔧 Auto-repair common issues"
@@ -449,54 +456,54 @@ check-pre-commit-fast:
         echo "\033[0;32m✅ Code formatting is clean\033[0m"; \
     fi
     go mod tidy -diff
-    @echo "\033[0;32m\033[1m✅ CI/CD checks passed!\033[0m"
+    @echo "{{GREEN}}{{BOLD}}✅ CI/CD checks passed!{{NORMAL}}"
 
 # Run tests with coverage
 test:
-    @echo "\033[1m🧪 RUNNING TESTS\033[0m"
-    @echo "\033[0;36mRunning tests with coverage...\033[0m"
+    @echo "{{BOLD}}🧪 RUNNING TESTS{{NORMAL}}"
+    @echo "{{CYAN}}Running tests with coverage...{{NORMAL}}"
     go test ./... -v -race -coverprofile={{COVERAGE_OUT}}
-    @echo "\033[0;32m✅ Tests completed!\033[0m"
+    @echo "{{GREEN}}✅ Tests completed!{{NORMAL}}"
 
 # Run comprehensive coverage analysis with threshold enforcement
 coverage THRESHOLD="80":
-    @echo "\033[1m📊 COVERAGE ANALYSIS\033[0m"
-    @echo "\033[0;36mRunning tests with coverage...\033[0m"
+    @echo "{{BOLD}}📊 COVERAGE ANALYSIS{{NORMAL}}"
+    @echo "{{CYAN}}Running tests with coverage...{{NORMAL}}"
     go test ./... -v -race -coverprofile={{COVERAGE_OUT}} -covermode=atomic
-    @echo "\033[0;36mGenerating coverage reports...\033[0m"
+    @echo "{{CYAN}}Generating coverage reports...{{NORMAL}}"
     go tool cover -html={{COVERAGE_OUT}} -o {{COVERAGE_HTML}}
-    @echo "\033[0;33mCoverage Summary:\033[0m"
+    @echo "{{YELLOW}}Coverage Summary:{{NORMAL}}"
     @go tool cover -func={{COVERAGE_OUT}} | tail -1
-    @echo "\033[0;36mChecking coverage threshold ({{THRESHOLD}}%)...\033[0m"
+    @echo "{{CYAN}}Checking coverage threshold ({{THRESHOLD}}%)...{{NORMAL}}"
     @COVERAGE_PERCENT=$$(go tool cover -func={{COVERAGE_OUT}} | grep total: | awk '{print $$3}' | sed 's/%//'); \
     if [ "$$(echo "$$COVERAGE_PERCENT < {{THRESHOLD}}" | bc -l)" -eq 1 ]; then \
-        echo "\033[0;31m❌ Coverage $$COVERAGE_PERCENT% is below threshold {{THRESHOLD}}%\033[0m"; \
-        echo "\033[0;33m📈 Generated reports:\033[0m"; \
+        echo "{{RED}}❌ Coverage $$COVERAGE_PERCENT% is below threshold {{THRESHOLD}}%{{NORMAL}}"; \
+        echo "{{YELLOW}}📈 Generated reports:{{NORMAL}}"; \
         echo "  → {{COVERAGE_OUT}} (machine readable)"; \
         echo "  → {{COVERAGE_HTML}} (browser viewable)"; \
         exit 1; \
     else \
-        echo "\033[0;32m✅ Coverage $$COVERAGE_PERCENT% meets threshold {{THRESHOLD}}%\033[0m"; \
-        echo "\033[0;33m📈 Generated reports:\033[0m"; \
+        echo "{{GREEN}}✅ Coverage $$COVERAGE_PERCENT% meets threshold {{THRESHOLD}}%{{NORMAL}}"; \
+        echo "{{YELLOW}}📈 Generated reports:{{NORMAL}}"; \
         echo "  → {{COVERAGE_OUT}} (machine readable)"; \
         echo "  → {{COVERAGE_HTML}} (browser viewable)"; \
     fi
 
 # Quick coverage check without detailed output
 coverage-check THRESHOLD="80":
-    @echo "\033[1m📊 QUICK COVERAGE CHECK\033[0m"
+    @echo "{{BOLD}}📊 QUICK COVERAGE CHECK{{NORMAL}}"
     @go test ./... -coverprofile={{COVERAGE_OUT}} -covermode=atomic >/dev/null 2>&1
     @COVERAGE_PERCENT=$$(go tool cover -func={{COVERAGE_OUT}} | grep total: | awk '{print $$3}' | sed 's/%//'); \
     if [ "$$(echo "$$COVERAGE_PERCENT < {{THRESHOLD}}" | bc -l)" -eq 1 ]; then \
-        echo "\033[0;31m❌ Coverage: $$COVERAGE_PERCENT% (threshold: {{THRESHOLD}}%)\033[0m"; \
+        echo "{{RED}}❌ Coverage: $$COVERAGE_PERCENT% (threshold: {{THRESHOLD}}%){{NORMAL}}"; \
         exit 1; \
     else \
-        echo "\033[0;32m✅ Coverage: $$COVERAGE_PERCENT% (threshold: {{THRESHOLD}}%)\033[0m"; \
+        echo "{{GREEN}}✅ Coverage: $$COVERAGE_PERCENT% (threshold: {{THRESHOLD}}%){{NORMAL}}"; \
     fi
 
 # Coverage by package/component breakdown
 coverage-detailed:
-    @echo "\033[1m📊 DETAILED COVERAGE ANALYSIS\033[0m"
+    @echo "{{BOLD}}📊 DETAILED COVERAGE ANALYSIS{{NORMAL}}"
     go test ./... -v -race -coverprofile={{COVERAGE_OUT}} -covermode=atomic
     @echo "\033[0;33mCoverage by component:\033[0m"
     @echo ""
