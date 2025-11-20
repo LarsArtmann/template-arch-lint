@@ -450,23 +450,23 @@ coverage-check THRESHOLD="80":
 # Coverage by package/component breakdown
 coverage-detailed:
     @echo "\033[1m📊 DETAILED COVERAGE ANALYSIS\033[0m"
-    go test ./... -v -race -coverprofile=coverage.out -covermode=atomic
+    go test ./... -v -race -coverprofile={{REPORT_DIR}}/coverage.out -covermode=atomic
     @echo "\033[0;33mCoverage by component:\033[0m"
     @echo ""
     @echo "\033[1mDomain Layer:\033[0m"
-    @go tool cover -func=coverage.out | grep "internal/domain" || echo "  No domain coverage data"
+    @go tool cover -func={{REPORT_DIR}}/coverage.out | grep "internal/domain" || echo "  No domain coverage data"
     @echo ""
     @echo "\033[1mApplication Layer:\033[0m"
-    @go tool cover -func=coverage.out | grep "internal/application" || echo "  No application coverage data"
+    @go tool cover -func={{REPORT_DIR}}/coverage.out | grep "internal/application" || echo "  No application coverage data"
     @echo ""
     @echo "\033[1mInfrastructure Layer:\033[0m"
-    @go tool cover -func=coverage.out | grep "internal/infrastructure" || echo "  No infrastructure coverage data"
+    @go tool cover -func={{REPORT_DIR}}/coverage.out | grep "internal/infrastructure" || echo "  No infrastructure coverage data"
     @echo ""
     @echo "\033[1mConfiguration:\033[0m"
-    @go tool cover -func=coverage.out | grep "internal/config\|internal/container" || echo "  No config coverage data"
+    @go tool cover -func={{REPORT_DIR}}/coverage.out | grep "internal/config\|internal/container" || echo "  No config coverage data"
     @echo ""
     @echo "\033[1mOverall Summary:\033[0m"
-    @go tool cover -func=coverage.out | tail -1
+    @go tool cover -func={{REPORT_DIR}}/coverage.out | tail -1
 
 # Generate detailed linting reports
 report:
