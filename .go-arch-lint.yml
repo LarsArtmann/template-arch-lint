@@ -66,20 +66,16 @@ components:
     in: cmd/**
 
   # ========================================
-  # SQLC GENERATED CODE - Type-Safe Database Models
-  # ========================================
-  sqlc-generated:
-    in: internal/db/**
-
-  # ========================================
-  # APPLICATION LAYER - HTTP Handlers 
+  # APPLICATION LAYER - HTTP Handlers
   # ========================================
   application-handlers:
     in: internal/application/handlers/**
 
   # ========================================
-  # INFRASTRUCTURE LAYER - Adapters for External Systems
+  # INFRASTRUCTURE LAYER - SQLC Generated Code & External Systems
   # ========================================
+  sqlc-generated:
+    in: internal/infrastructure/db/**
   internalinfrastructure:
     in: internal/infrastructure/**
 
@@ -131,7 +127,6 @@ deps:
       - domain-values
       - pkg-errors  # MUST use centralized errors
 
-  # APPLICATION LAYER - HTTP handlers
   application-handlers:
     anyVendorDeps: true
     mayDependOn:
@@ -139,7 +134,7 @@ deps:
       - domain-services
       - domain-repositories
       - domain-values
-      - sqlc-generated  # Use SQLC generated types instead of manual DTOs
+      - sqlc-generated  # Use SQLC generated types for request/response
       - pkg-errors  # MUST use centralized errors
 
   # SQLC GENERATED CODE - Type-safe database models and queries
@@ -155,14 +150,13 @@ deps:
       - domain-values  # Allow config to use domain value objects for validation
       - pkg-errors    # MUST use centralized errors
 
-  # INFRASTRUCTURE LAYER - Adapters for external systems
   internalinfrastructure:
     anyVendorDeps: true
     mayDependOn:
       - domain-entities
       - domain-repositories
       - domain-values
-      - sqlc-generated  # Infrastructure implements SQLC generated interfaces
+      - sqlc-generated  # Infrastructure implements and uses SQLC generated code
       - pkg-errors  # MUST use centralized errors
 
   main:
@@ -198,7 +192,7 @@ exclude:
   - "**/*_gen.go"
   - "**/*_templ.go"
   - "**/mock_*.go"
-  - "internal/db/**"  # SQLC generated code
+  - "internal/infrastructure/db/**"  # SQLC generated code
 
   # Test data files only (exclude test helpers from directory exclusion)
   - "**/testdata/**"
@@ -292,11 +286,9 @@ excludeFiles:
 #    - handlers/     : HTTP handlers (adapters)
 #    - middleware/   : Cross-cutting concerns
 #
-# 3. SQLC GENERATED LAYER (Type-Safe Database Code)
-#    - db/           : SQLC generated models, queries, and interfaces
-#
-# 4. INFRASTRUCTURE LAYER (External Dependencies)
-#    - infrastructure/ : External service implementations (uses SQLC)
+# 3. INFRASTRUCTURE LAYER (External Dependencies)
+#    - infrastructure/db/ : SQLC generated models, queries, and interfaces
+#    - infrastructure/ : External service implementations
 #
 # 4. CONFIGURATION & ENTRY POINTS
 #    - config/       : Application configuration

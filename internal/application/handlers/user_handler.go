@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"net/http"
 
-	"github.com/LarsArtmann/template-arch-lint/internal/db/sqlite"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	"github.com/charmbracelet/log"
@@ -15,7 +14,6 @@ import (
 // UserHandler handles HTTP requests for user management.
 type UserHandler struct {
 	userService *services.UserService
-	queries     *sqlite.Queries
 }
 
 // NewUserHandler creates a new user handler.
@@ -73,8 +71,8 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		"id":        user.ID.String(),
 		"email":     user.GetEmail().String(),
 		"name":      user.GetUserName().String(),
-		"createdAt":  user.GetCreatedAt(),
-		"updatedAt":  user.GetUpdatedAt(),
+		"createdAt": user.GetCreatedAt(),
+		"updatedAt": user.GetUpdatedAt(),
 	})
 }
 
@@ -105,8 +103,8 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 		"id":        user.ID.String(),
 		"email":     user.GetEmail().String(),
 		"name":      user.GetUserName().String(),
-		"createdAt":  user.GetCreatedAt(),
-		"updatedAt":  user.GetUpdatedAt(),
+		"createdAt": user.GetCreatedAt(),
+		"updatedAt": user.GetUpdatedAt(),
 	})
 }
 
@@ -150,8 +148,8 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		"id":        user.ID.String(),
 		"email":     user.GetEmail().String(),
 		"name":      user.GetUserName().String(),
-		"createdAt":  user.GetCreatedAt(),
-		"updatedAt":  user.GetUpdatedAt(),
+		"createdAt": user.GetCreatedAt(),
+		"updatedAt": user.GetUpdatedAt(),
 	})
 }
 
