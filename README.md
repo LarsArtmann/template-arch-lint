@@ -183,7 +183,11 @@ just build           # Build the application
 just lint-arch       # Clean Architecture boundary validation
 just lint-code       # Code quality linting (complexity, naming, etc.)
 just lint-strict     # Maximum strictness mode
-just graph           # Generate architecture dependency graph (SVG)
+just graph           # Generate flow architecture graph (SVG)
+just graph-di        # Generate dependency injection graph
+just graph-vendor    # Generate graph with vendor dependencies
+just graph-all       # Generate ALL architecture graphs
+just graph-component <name> # Generate focused component graph
 ```
 
 #### 🔒 **Security & Safety** 

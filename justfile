@@ -57,6 +57,14 @@ help:
     @echo "\033[1mDOCKER COMMANDS:\033[0m"
     @echo "  • \033[0;36mjust docker-test\033[0m         - Build and test Docker image (if available)"
     @echo ""
+    @echo "\033[1mARCHITECTURE ANALYSIS:\033[0m"
+    @echo "  • \033[0;36mjust graph\033[0m              - Generate flow graph (default)"
+    @echo "  • \033[0;36mjust graph-di\033[0m           - Generate dependency injection graph"
+    @echo "  • \033[0;36mjust graph-vendor\033[0m       - Generate vendor-inclusive graph"
+    @echo "  • \033[0;36mjust graph-all\033[0m          - Generate ALL graph types"
+    @echo "  • \033[0;36mjust graph-component <name>\033[0m - Generate focused component graph"
+    @echo "  • \033[0;36mjust graph-list-components\033[0m - List available components"
+    @echo ""
     @echo "\033[1mTESTING & COVERAGE:\033[0m"
     @echo "  • \033[0;36mjust test\033[0m                - Run tests with coverage"
     @echo "  • \033[0;36mjust coverage\033[0m            - Run coverage analysis with 80% threshold"
@@ -345,7 +353,7 @@ commit-auto: pre-commit
         git commit -m "🔧 chore: Auto-update formatting and architecture graph" \
                    -m "Automated changes:" \
                    -m "- Applied gofumpt and goimports formatting" \
-                   -m "- Regenerated architecture dependency graph (go-arch-lint-graph.svg)" \
+                   -m "- Regenerated architecture dependency graphs in docs/graphs/" \
                    -m "- Ensured consistent code style across the codebase" \
                    -m "" \
                    -m "Files modified:" \
@@ -375,7 +383,7 @@ check-pre-commit:
     fi
     @echo "\033[0;36mChecking if architecture graph is up-to-date...\033[0m"
     @go-arch-lint graph --out /tmp/test-graph.svg 2>/dev/null; \
-    if ! diff -q /tmp/test-graph.svg go-arch-lint-graph.svg > /dev/null 2>&1; then \
+    if ! diff -q /tmp/test-graph.svg docs/graphs/flow/architecture-flow.svg > /dev/null 2>&1; then \
         echo "\033[0;33m⚠️  Architecture graph needs updating. Run 'just graph'\033[0m"; \
     else \
         echo "\033[0;32m✅ Architecture graph is up-to-date\033[0m"; \
@@ -407,24 +415,24 @@ test:
 coverage THRESHOLD="80":
     @echo "\033[1m📊 COVERAGE ANALYSIS\033[0m"
     @echo "\033[0;36mRunning tests with coverage...\033[0m"
-    go test ./... -v -race -coverprofile=coverage.out -covermode=atomic
+    go test ./... -v -race -coverprofile={{REPORT_DIR}}/coverage.out -covermode=atomic
     @echo "\033[0;36mGenerating coverage reports...\033[0m"
-    go tool cover -html=coverage.out -o coverage.html
+    go tool cover -html={{REPORT_DIR}}/coverage.out -o {{REPORT_DIR}}/coverage.html
     @echo "\033[0;33mCoverage Summary:\033[0m"
-    @go tool cover -func=coverage.out | tail -1
+    @go tool cover -func={{REPORT_DIR}}/coverage.out | tail -1
     @echo "\033[0;36mChecking coverage threshold ({{THRESHOLD}}%)...\033[0m"
-    @COVERAGE_PERCENT=$$(go tool cover -func=coverage.out | grep total: | awk '{print $$3}' | sed 's/%//'); \
+    @COVERAGE_PERCENT=$$(go tool cover -func={{REPORT_DIR}}/coverage.out | grep total: | awk '{print $$3}' | sed 's/%//'); \
     if [ "$$(echo "$$COVERAGE_PERCENT < {{THRESHOLD}}" | bc -l)" -eq 1 ]; then \
         echo "\033[0;31m❌ Coverage $$COVERAGE_PERCENT% is below threshold {{THRESHOLD}}%\033[0m"; \
         echo "\033[0;33m📈 Generated reports:\033[0m"; \
-        echo "  → coverage.out (machine readable)"; \
-        echo "  → coverage.html (browser viewable)"; \
+        echo "  → {{REPORT_DIR}}/coverage.out (machine readable)"; \
+        echo "  → {{REPORT_DIR}}/coverage.html (browser viewable)"; \
         exit 1; \
     else \
         echo "\033[0;32m✅ Coverage $$COVERAGE_PERCENT% meets threshold {{THRESHOLD}}%\033[0m"; \
         echo "\033[0;33m📈 Generated reports:\033[0m"; \
-        echo "  → coverage.out (machine readable)"; \
-        echo "  → coverage.html (browser viewable)"; \
+        echo "  → {{REPORT_DIR}}/coverage.out (machine readable)"; \
+        echo "  → {{REPORT_DIR}}/coverage.html (browser viewable)"; \
     fi
 
 # Quick coverage check without detailed output
@@ -635,13 +643,13 @@ format:
 # Format code (legacy alias - use 'format' instead)
 fmt: format
 
-# Generate architecture dependency graph
+# Generate architecture dependency graph (flow type)
 graph:
-    @echo "\033[1m📊 GENERATING ARCHITECTURE GRAPH\033[0m"
+    @echo "\033[1m📊 GENERATING ARCHITECTURE FLOW GRAPH\033[0m"
     @if command -v go-arch-lint >/dev/null 2>&1; then \
-        echo "\033[0;36mGenerating SVG graph...\033[0m"; \
-        go-arch-lint graph --out ./go-arch-lint-graph.svg; \
-        echo "\033[0;32m✅ Graph saved to go-arch-lint-graph.svg\033[0m"; \
+        echo "\033[0;36mGenerating SVG flow graph...\033[0m"; \
+        go-arch-lint graph --out docs/graphs/flow/architecture-flow.svg; \
+        echo "\033[0;32m✅ Flow graph saved to docs/graphs/flow/architecture-flow.svg\033[0m"; \
     else \
         echo "\033[0;31m❌ go-arch-lint not found. Run 'just install' first.\033[0m"; \
         exit 1; \
@@ -649,14 +657,100 @@ graph:
 
 # Generate focused architecture graphs for specific components
 graph-component component:
-    @echo "\033[1m📊 GENERATING COMPONENT GRAPH: {{component}}\033[0m"
+    @echo "\033[1m📊 GENERATING FOCUSED COMPONENT GRAPH: {{component}}\033[0m"
     @if command -v go-arch-lint >/dev/null 2>&1; then \
-        go-arch-lint graph --focus {{component}} --out ./{{component}}-graph.svg; \
-        echo "\033[0;32m✅ Graph saved to {{component}}-graph.svg\033[0m"; \
+        go-arch-lint graph --focus {{component}} --out docs/graphs/focused/{{component}}-focused.svg; \
+        echo "\033[0;32m✅ Focused graph saved to docs/graphs/focused/{{component}}-focused.svg\033[0m"; \
     else \
         echo "\033[0;31m❌ go-arch-lint not found. Run 'just install' first.\033[0m"; \
         exit 1; \
     fi
+
+# Generate dependency injection graph (DI type)
+graph-di:
+    @echo "\033[1m📊 GENERATING DEPENDENCY INJECTION GRAPH\033[0m"
+    @if command -v go-arch-lint >/dev/null 2>&1; then \
+        echo "\033[0;36mGenerating SVG DI graph (component dependencies)...\033[0m"; \
+        go-arch-lint graph --type di --out docs/graphs/dependency-injection/architecture-di.svg; \
+        echo "\033[0;32m✅ DI graph saved to docs/graphs/dependency-injection/architecture-di.svg\033[0m"; \
+    else \
+        echo "\033[0;31m❌ go-arch-lint not found. Run 'just install' first.\033[0m"; \
+        exit 1; \
+    fi
+
+# Generate vendor-inclusive graph (with external dependencies)
+graph-vendor:
+    @echo "\033[1m📊 GENERATING VENDOR-INCLUSIVE GRAPH\033[0m"
+    @if command -v go-arch-lint >/dev/null 2>&1; then \
+        echo "\033[0;36mGenerating SVG vendor graph (with external dependencies)...\033[0m"; \
+        go-arch-lint graph --include-vendors --out docs/graphs/vendor/architecture-with-vendors.svg; \
+        echo "\033[0;32m✅ Vendor graph saved to docs/graphs/vendor/architecture-with-vendors.svg\033[0m"; \
+    else \
+        echo "\033[0;31m❌ go-arch-lint not found. Run 'just install' first.\033[0m"; \
+        exit 1; \
+    fi
+
+# Generate ALL graph types comprehensively
+graph-all:
+    @echo "\033[1m📊 GENERATING ALL ARCHITECTURE GRAPHS\033[0m"
+    @echo "\033[0;36mThis will generate flow, DI, and vendor graphs for complete documentation...\033[0m"
+    @echo ""
+    @mkdir -p docs/graphs/{flow,dependency-injection,focused,vendor}
+    @echo "\033[1m1️⃣  Generating Flow Graph (default)...\033[0m"
+    @just graph
+    @echo ""
+    @echo "\033[1m2️⃣  Generating Dependency Injection Graph...\033[0m"
+    @just graph-di
+    @echo ""
+    @echo "\033[1m3️⃣  Generating Vendor-Inclusive Graph...\033[0m"
+    @just graph-vendor
+    @echo ""
+    @echo "\033[1m4️⃣  Generating Component-Focused Graphs...\033[0m"
+    @echo "  → Focusing on: domain"
+    @go-arch-lint graph --focus domain --out "docs/graphs/focused/domain-focused.svg" 2>/dev/null || true
+    @echo "  → Focusing on: application"
+    @go-arch-lint graph --focus application --out "docs/graphs/focused/application-focused.svg" 2>/dev/null || true
+    @echo "  → Focusing on: infrastructure"
+    @go-arch-lint graph --focus infrastructure --out "docs/graphs/focused/infrastructure-focused.svg" 2>/dev/null || true
+    @echo "  → Focusing on: cmd"
+    @go-arch-lint graph --focus cmd --out "docs/graphs/focused/cmd-focused.svg" 2>/dev/null || true
+    @echo ""
+    @echo "\033[1m5️⃣  Creating Graph Index...\033[0m"
+    @echo "# Architecture Graphs - Generated on $$(date)" > docs/graphs/index.md
+    @echo "" >> docs/graphs/index.md
+    @echo "## Generated Graphs" >> docs/graphs/index.md
+    @echo "" >> docs/graphs/index.md
+    @echo "### 🔄 Flow Graphs" >> docs/graphs/index.md
+    @echo "- [Architecture Flow](flow/architecture-flow.svg) - Execution flow (reverse DI)" >> docs/graphs/index.md
+    @echo "" >> docs/graphs/index.md
+    @echo "### 🔗 Dependency Injection Graphs" >> docs/graphs/index.md
+    @echo "- [Architecture DI](dependency-injection/architecture-di.svg) - Component dependencies" >> docs/graphs/index.md
+    @echo "" >> docs/graphs/index.md
+    @echo "### 🌐 Vendor-Inclusive Graphs" >> docs/graphs/index.md
+    @echo "- [Architecture with Vendors](vendor/architecture-with-vendors.svg) - Including external deps" >> docs/graphs/index.md
+    @echo "" >> docs/graphs/index.md
+    @echo "### 🎯 Component-Focused Graphs" >> docs/graphs/index.md
+    @echo "- [domain-focused](focused/domain-focused.svg) - Domain layer dependencies" >> docs/graphs/index.md
+    @echo "- [application-focused](focused/application-focused.svg) - Application layer dependencies" >> docs/graphs/index.md
+    @echo "- [infrastructure-focused](focused/infrastructure-focused.svg) - Infrastructure layer dependencies" >> docs/graphs/index.md
+    @echo "- [cmd-focused](focused/cmd-focused.svg) - Command layer dependencies" >> docs/graphs/index.md
+    @echo ""
+    @echo "\033[0;32m✅ All graphs generated successfully!\033[0m"
+    @echo "\033[0;36m📁 Graph directory: docs/graphs/\033[0m"
+    @echo "\033[0;36m📋 Index file: docs/graphs/index.md\033[0m"
+
+# List available components for focused graphs
+graph-list-components:
+    @echo "\033[1m📋 AVAILABLE ARCHITECTURE COMPONENTS\033[0m"
+    @echo "\033[0;36mCommon component names you can focus on:\033[0m"
+    @echo "  • domain"
+    @echo "  • application"
+    @echo "  • infrastructure"
+    @echo "  • cmd"
+    @echo "  • internal"
+    @echo ""
+    @echo "\033[0;33m💡 Usage: just graph-component <component_name>\033[0m"
+    @echo "Example: just graph-component domain"
 
 # Find code duplications in the project
 find-duplicates threshold="15":

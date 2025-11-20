@@ -93,7 +93,12 @@ just lint-deps-advanced  # Advanced dependency vulnerability analysis
 # Architecture & Design
 just lint-arch           # Architecture boundary validation only
 just lint-cmd-single     # CMD single main.go enforcement only
-just graph               # Generate architecture dependency graph (SVG)
+just graph               # Generate flow architecture graph (SVG)
+just graph-di           # Generate dependency injection graph
+just graph-vendor       # Generate graph with vendor dependencies
+just graph-all          # Generate ALL architecture graphs
+just graph-component <name> # Generate focused component graph
+just graph-list-components   # List available components
 
 # Code Quality
 just lint-code           # Code quality linting (40+ linters)
@@ -208,6 +213,47 @@ just lint                 # Includes cmd/ validation in full linting pipeline
 #### Result Pattern (`internal/domain/shared/result.go`)
 - Functional error handling without exceptions
 - Chain operations with success/failure paths
+
+### Architecture Graph Organization
+
+**📁 Graph Location: `docs/graphs/` (not polluting project root!)**
+
+```
+docs/graphs/
+├── README.md                     # This documentation
+├── index.md                      # Auto-generated index of all graphs
+├── flow/                         # Flow graphs (execution flow)
+│   └── architecture-flow.svg        # Main flow graph
+├── dependency-injection/           # DI graphs (component dependencies)
+│   └── architecture-di.svg         # Dependencies graph
+├── vendor/                       # Vendor-inclusive graphs
+│   └── architecture-with-vendors.svg # Including external dependencies
+└── focused/                      # Component-focused graphs
+    ├── domain-focused.svg           # Domain layer only
+    ├── application-focused.svg      # Application layer only
+    ├── infrastructure-focused.svg   # Infrastructure layer only
+    └── cmd-focused.svg            # Command layer only
+```
+
+**Graph Types Explained:**
+- **Flow graphs** (`just graph`): Show execution flow (reverse dependency injection)
+- **DI graphs** (`just graph-di`): Show direct component dependencies
+- **Vendor graphs** (`just graph-vendor`): Include external library dependencies
+- **Focused graphs** (`just graph-component <name>`): Single component and its deps
+
+**Usage Examples:**
+```bash
+# Generate all graphs (recommended for documentation)
+just graph-all
+
+# Generate specific graph types
+just graph-di          # Dependency injection view
+just graph-vendor      # Including external deps
+just graph-component domain  # Focus on domain layer
+
+# View organized graphs
+open docs/graphs/index.md  # See all available graphs
+```
 
 #### Functional Programming with samber/lo
 - Heavy use of `lo.Map()`, `lo.Filter()`, `lo.Reduce()`
