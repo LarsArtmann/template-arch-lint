@@ -438,8 +438,8 @@ coverage THRESHOLD="80":
 # Quick coverage check without detailed output
 coverage-check THRESHOLD="80":
     @echo "\033[1m📊 QUICK COVERAGE CHECK\033[0m"
-    @go test ./... -coverprofile=coverage.out -covermode=atomic >/dev/null 2>&1
-    @COVERAGE_PERCENT=$$(go tool cover -func=coverage.out | grep total: | awk '{print $$3}' | sed 's/%//'); \
+    @go test ./... -coverprofile={{REPORT_DIR}}/coverage.out -covermode=atomic >/dev/null 2>&1
+    @COVERAGE_PERCENT=$$(go tool cover -func={{REPORT_DIR}}/coverage.out | grep total: | awk '{print $$3}' | sed 's/%//'); \
     if [ "$$(echo "$$COVERAGE_PERCENT < {{THRESHOLD}}" | bc -l)" -eq 1 ]; then \
         echo "\033[0;31m❌ Coverage: $$COVERAGE_PERCENT% (threshold: {{THRESHOLD}}%)\033[0m"; \
         exit 1; \
