@@ -248,11 +248,12 @@ bootstrap-quick:
 install:
     @echo "\033[1m📦 Installing linting tools...\033[0m"
     @echo "\033[0;33mInstalling golangci-lint {{GOLANGCI_VERSION}}...\033[0m"
-    go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@{{GOLANGCI_VERSION}}
+    go get -tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint@{{GOLANGCI_VERSION}}
     @echo "\033[0;33mInstalling go-arch-lint {{GO_ARCH_LINT_VERSION}}...\033[0m"
-    go install github.com/fe3dback/go-arch-lint@{{GO_ARCH_LINT_VERSION}}
+    go get -tool github.com/fe3dback/go-arch-lint@{{GO_ARCH_LINT_VERSION}}
     @echo "\033[0;33mInstalling capslock {{CAPSLOCK_VERSION}}...\033[0m"
-    go install github.com/google/capslock/cmd/capslock@{{CAPSLOCK_VERSION}}
+    go get -tool github.com/google/capslock@latest
+    @echo "\033[0;32m✅ Tools added to go.mod successfully!\033[0m"
     @echo "\033[0;32m✅ All tools installed successfully!\033[0m"
 
 # Run all linters (architecture + code quality + filenames + security)
@@ -528,7 +529,7 @@ lint-vulns:
         govulncheck ./...; \
     else \
         echo "⚠️  govulncheck not found. Installing..."; \
-        go install golang.org/x/vuln/cmd/govulncheck@latest; \
+        go get -tool golang.org/x/vuln/cmd/govulncheck@latest
         govulncheck ./...; \
     fi
 
@@ -557,7 +558,7 @@ lint-deps-advanced:
 lint-goroutines:
     @echo "\033[1m🔍 GOROUTINE LEAK DETECTION\033[0m"
     @echo "🔍 Installing Uber's goleak..."
-    @go install github.com/uber-go/goleak@latest
+    go get -tool go.uber.org/goleak@latest
     @echo "🔍 Running tests with goroutine leak detection..."
     @go test -race ./... -v -timeout=30s || echo "⚠️ Tests failed or goroutine leaks detected"
 
@@ -569,7 +570,7 @@ lint-licenses:
     @go mod download -json all | jq -r '.Path + " " + .Version' | head -20
     @echo "💡 Installing go-licenses for comprehensive scanning..."
     @if ! command -v go-licenses >/dev/null 2>&1; then \
-        go install github.com/google/go-licenses@latest; \
+        go get -tool github.com/google/go-licenses@latest
     fi
     @echo "🔍 Running go-licenses check..."
     @go-licenses check ./... 2>/dev/null || echo "⚠️ Some licenses may need review"
@@ -587,7 +588,7 @@ lint-nilaway:
         nilaway -include-pkgs="github.com/LarsArtmann/template-arch-lint" -json ./... 2>/dev/null || nilaway ./...; \
     else \
         echo "⚠️  nilaway not found. Installing Uber's NilAway..."; \
-        go install go.uber.org/nilaway/cmd/nilaway@latest; \
+        go get -tool go.uber.org/nilaway/cmd/nilaway@latest
         nilaway -include-pkgs="github.com/LarsArtmann/template-arch-lint" ./...; \
     fi
 
@@ -613,7 +614,7 @@ lint-capslock:
         fi; \
     else \
         echo "⚠️  capslock not found. Installing Google's capslock..."; \
-        go install github.com/google/capslock/cmd/capslock@latest; \
+        go install -tool github.com/google/capslock/cmd/capslock@latest; \
         echo "📋 Running capslock capability analysis..."; \
         capslock -packages="./..." -output=package; \
     fi
@@ -626,7 +627,7 @@ format:
         gofumpt -w .; \
     else \
         echo "\033[0;31m❌ gofumpt not installed. Installing...\033[0m"; \
-        go install mvdan.cc/gofumpt@latest; \
+        go install -tool mvdan.cc/gofumpt@latest; \
         gofumpt -w .; \
     fi
     @echo "\033[0;33mRunning goimports...\033[0m"
@@ -634,7 +635,7 @@ format:
         goimports -w .; \
     else \
         echo "\033[0;31m❌ goimports not installed. Installing...\033[0m"; \
-        go install golang.org/x/tools/cmd/goimports@latest; \
+        go install -tool golang.org/x/tools/cmd/goimports@latest; \
         goimports -w .; \
     fi
     @echo "\033[0;32m✅ Code formatted!\033[0m"
@@ -768,7 +769,7 @@ find-duplicates threshold="15":
         echo "  Go duplications found: $DUPL_COUNT"; \
     else \
         echo "\033[0;31m❌ dupl not found. Installing...\033[0m"; \
-        go install github.com/mibk/dupl@latest; \
+        go install -tool github.com/mibk/dupl@latest; \
         dupl -t {{threshold}} -v . > {{REPORT_DIR}}/go-duplications.txt 2>&1 || true; \
         dupl -t {{threshold}} -html . > {{REPORT_DIR}}/go-duplications.html 2>&1 || true; \
     fi
@@ -829,7 +830,7 @@ capslock-analysis:
         echo "\033[0;32m✅ Comprehensive capslock analysis completed!\033[0m"; \
     else \
         echo "\033[0;31m❌ capslock not found. Installing..."; \
-        go install github.com/google/capslock/cmd/capslock@latest; \
+        go install -tool github.com/google/capslock/cmd/capslock@latest; \
         echo "🔍 Retrying capability analysis..."; \
         capslock -packages="./..." -output=package > {{REPORT_DIR}}/capslock-analysis.txt 2>&1 || true; \
         echo "\033[0;32m✅ Capslock analysis completed after installation!\033[0m"; \
@@ -862,7 +863,7 @@ build:
         templ generate; \
     else \
         echo "\033[0;31m❌ templ not installed. Installing...\033[0m"; \
-        go install github.com/a-h/templ/cmd/templ@latest; \
+        go install -tool github.com/a-h/templ/cmd/templ@latest; \
         templ generate; \
     fi
     @echo "\033[0;33mBuilding Go modules...\033[0m"
@@ -876,7 +877,7 @@ templ:
         templ generate; \
     else \
         echo "\033[0;31m❌ templ not installed. Installing...\033[0m"; \
-        go install github.com/a-h/templ/cmd/templ@latest; \
+        go install -tool github.com/a-h/templ/cmd/templ@latest; \
         templ generate; \
     fi
     @echo "\033[0;32m✅ Templates generated!\033[0m"
@@ -893,7 +894,7 @@ dev:
         air; \
     else \
         echo "\033[0;31m❌ air not installed. Installing...\033[0m"; \
-        go install github.com/cosmtrek/air@latest; \
+        go install -tool github.com/cosmtrek/air@latest; \
         air; \
     fi
 
@@ -1072,8 +1073,8 @@ find-duplicates-loose: (find-duplicates "25")
 profile-cpu:
     @echo "\033[1m📊 CAPTURING CPU PROFILE\033[0m"
     @echo "\033[0;36mCapturing CPU profile for 30 seconds...\033[0m"
-    @if curl -s "http://localhost:8080/debug/pprof/profile?seconds=30" -o cpu.prof; then \
-        echo "\033[0;32m✅ CPU profile saved to cpu.prof\033[0m"; \
+    @if curl -s "http://localhost:8080/debug/pprof/profile?seconds=30" -o {{REPORT_DIR}}/cpu.prof; then \
+        echo "\033[0;32m✅ CPU profile saved to {{REPORT_DIR}}/cpu.prof\033[0m"; \
         echo "\033[0;33m💡 Use 'just analyze-cpu' to view analysis\033[0m"; \
     else \
         echo "\033[0;31m❌ Failed to capture CPU profile. Is the server running in development mode?\033[0m"; \
@@ -1084,8 +1085,8 @@ profile-cpu:
 profile-heap:
     @echo "\033[1m📊 CAPTURING HEAP PROFILE\033[0m"
     @echo "\033[0;36mCapturing heap memory profile...\033[0m"
-    @if curl -s http://localhost:8080/debug/pprof/heap -o heap.prof; then \
-        echo "\033[0;32m✅ Heap profile saved to heap.prof\033[0m"; \
+    @if curl -s http://localhost:8080/debug/pprof/heap -o {{REPORT_DIR}}/heap.prof; then \
+        echo "\033[0;32m✅ Heap profile saved to {{REPORT_DIR}}/heap.prof\033[0m"; \
         echo "\033[0;33m💡 Use 'just analyze-heap' to view analysis\033[0m"; \
     else \
         echo "\033[0;31m❌ Failed to capture heap profile. Is the server running in development mode?\033[0m"; \
@@ -1096,9 +1097,9 @@ profile-heap:
 profile-goroutines:
     @echo "\033[1m📊 CAPTURING GOROUTINE DUMP\033[0m"
     @echo "\033[0;36mCapturing goroutine dump...\033[0m"
-    @if curl -s http://localhost:8080/debug/pprof/goroutine -o goroutine.prof; then \
-        echo "\033[0;32m✅ Goroutine dump saved to goroutine.prof\033[0m"; \
-        echo "\033[0;33m💡 Use 'go tool pprof goroutine.prof' to analyze\033[0m"; \
+    @if curl -s http://localhost:8080/debug/pprof/goroutine -o {{REPORT_DIR}}/goroutine.prof; then \
+        echo "\033[0;32m✅ Goroutine dump saved to {{REPORT_DIR}}/goroutine.prof\033[0m"; \
+        echo "\033[0;33m💡 Use 'go tool pprof {{REPORT_DIR}}/goroutine.prof' to analyze\033[0m"; \
     else \
         echo "\033[0;31m❌ Failed to capture goroutine dump. Is the server running in development mode?\033[0m"; \
         exit 1; \
@@ -1108,9 +1109,9 @@ profile-goroutines:
 profile-trace:
     @echo "\033[1m📊 CAPTURING EXECUTION TRACE\033[0m"
     @echo "\033[0;36mCapturing execution trace for 10 seconds...\033[0m"
-    @if curl -s "http://localhost:8080/debug/pprof/trace?seconds=10" -o trace.out; then \
-        echo "\033[0;32m✅ Execution trace saved to trace.out\033[0m"; \
-        echo "\033[0;33m💡 Use 'go tool trace trace.out' to analyze\033[0m"; \
+    @if curl -s "http://localhost:8080/debug/pprof/trace?seconds=10" -o {{REPORT_DIR}}/trace.out; then \
+        echo "\033[0;32m✅ Execution trace saved to {{REPORT_DIR}}/trace.out\033[0m"; \
+        echo "\033[0;33m💡 Use 'go tool trace {{REPORT_DIR}}/trace.out' to analyze\033[0m"; \
     else \
         echo "\033[0;31m❌ Failed to capture execution trace. Is the server running in development mode?\033[0m"; \
         exit 1; \
@@ -1120,9 +1121,9 @@ profile-trace:
 profile-allocs:
     @echo "\033[1m📊 CAPTURING ALLOCATION PROFILE\033[0m"
     @echo "\033[0;36mCapturing allocation profile...\033[0m"
-    @if curl -s http://localhost:8080/debug/pprof/allocs -o allocs.prof; then \
-        echo "\033[0;32m✅ Allocation profile saved to allocs.prof\033[0m"; \
-        echo "\033[0;33m💡 Use 'go tool pprof allocs.prof' to analyze\033[0m"; \
+    @if curl -s http://localhost:8080/debug/pprof/allocs -o {{REPORT_DIR}}/allocs.prof; then \
+        echo "\033[0;32m✅ Allocation profile saved to {{REPORT_DIR}}/allocs.prof\033[0m"; \
+        echo "\033[0;33m💡 Use 'go tool pprof {{REPORT_DIR}}/allocs.prof' to analyze\033[0m"; \
     else \
         echo "\033[0;31m❌ Failed to capture allocation profile. Is the server running in development mode?\033[0m"; \
         exit 1; \
@@ -1131,10 +1132,10 @@ profile-allocs:
 # Open CPU profile analysis in browser
 analyze-cpu:
     @echo "\033[1m🔍 ANALYZING CPU PROFILE\033[0m"
-    @if [ -f cpu.prof ]; then \
+    @if [ -f {{REPORT_DIR}}/cpu.prof ]; then \
         echo "\033[0;36mOpening CPU profile analysis in browser...\033[0m"; \
         echo "\033[0;33mBrowser will open at http://localhost:8081\033[0m"; \
-        go tool pprof -http=:8081 cpu.prof; \
+        go tool pprof -http=:8081 {{REPORT_DIR}}/cpu.prof; \
     else \
         echo "\033[0;31m❌ CPU profile not found. Run 'just profile-cpu' first.\033[0m"; \
         exit 1; \
@@ -1143,10 +1144,10 @@ analyze-cpu:
 # Open heap profile analysis in browser
 analyze-heap:
     @echo "\033[1m🔍 ANALYZING HEAP PROFILE\033[0m"
-    @if [ -f heap.prof ]; then \
+    @if [ -f {{REPORT_DIR}}/heap.prof ]; then \
         echo "\033[0;36mOpening heap profile analysis in browser...\033[0m"; \
         echo "\033[0;33mBrowser will open at http://localhost:8081\033[0m"; \
-        go tool pprof -http=:8081 heap.prof; \
+        go tool pprof -http=:8081 {{REPORT_DIR}}/heap.prof; \
     else \
         echo "\033[0;31m❌ Heap profile not found. Run 'just profile-heap' first.\033[0m"; \
         exit 1; \
@@ -1204,16 +1205,16 @@ profile-all:
     @echo ""
     @echo "\033[0;32m🎉 All profiles captured successfully!\033[0m"
     @echo "\033[0;36mFiles created:\033[0m"
-    @echo "  • cpu.prof - CPU profiling data"
-    @echo "  • heap.prof - Heap memory allocations"
-    @echo "  • goroutine.prof - Goroutine dump"
-    @echo "  • allocs.prof - Allocation history"
-    @echo "  • trace.out - Execution trace"
+    @echo "  • {{REPORT_DIR}}/cpu.prof - CPU profiling data"
+    @echo "  • {{REPORT_DIR}}/heap.prof - Heap memory allocations"
+    @echo "  • {{REPORT_DIR}}/goroutine.prof - Goroutine dump"
+    @echo "  • {{REPORT_DIR}}/allocs.prof - Allocation history"
+    @echo "  • {{REPORT_DIR}}/trace.out - Execution trace"
 
 # Clean up profile files
 profile-clean:
     @echo "\033[1m🧹 CLEANING PROFILE FILES\033[0m"
-    rm -f *.prof *.out
+    rm -f {{REPORT_DIR}}/*.prof {{REPORT_DIR}}/*.out
     @echo "\033[0;32m✅ Profile files cleaned!\033[0m"
 
 # ==============================================
@@ -1290,7 +1291,7 @@ bench-compare:
         echo "\033[0;32m✅ Comparison completed!\033[0m"; \
         echo "\033[0;36m→ Results saved to: benchmarks/comparison.txt\033[0m"; \
     else \
-        echo "\033[0;33m⚠️ benchcmp tool not found. Install with: go install golang.org/x/tools/cmd/benchcmp@latest\033[0m"; \
+        echo "\033[0;33m⚠️ benchcmp tool not found. Install with: go install -tool golang.org/x/tools/cmd/benchcmp@latest\033[0m"; \
         echo "\033[0;36mManual comparison available in:\033[0m"; \
         echo "  → benchmarks/baseline/results.txt"; \
         echo "  → benchmarks/current/results.txt"; \

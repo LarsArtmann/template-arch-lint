@@ -228,9 +228,9 @@ bootstrap-quick:
 install:
     @echo "\033[1m📦 Installing linting tools...\033[0m"
     @echo "\033[0;33mInstalling golangci-lint {{GOLANGCI_VERSION}}...\033[0m"
-    go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@{{GOLANGCI_VERSION}}
+    go install -tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint@{{GOLANGCI_VERSION}}
     @echo "\033[0;33mInstalling go-arch-lint {{GO_ARCH_LINT_VERSION}}...\033[0m"
-    go install github.com/fe3dback/go-arch-lint@{{GO_ARCH_LINT_VERSION}}
+    go install -tool github.com/fe3dback/go-arch-lint@{{GO_ARCH_LINT_VERSION}}
     @echo "\033[0;32m✅ All tools installed successfully!\033[0m"
 
 # Run all linters (architecture + code quality + filenames)
@@ -502,7 +502,7 @@ lint-vulns:
         govulncheck ./...; \
     else \
         echo "⚠️  govulncheck not found. Installing..."; \
-        go install golang.org/x/vuln/cmd/govulncheck@latest; \
+        go install -tool golang.org/x/vuln/cmd/govulncheck@latest; \
         govulncheck ./...; \
     fi
 
@@ -531,7 +531,7 @@ lint-deps-advanced:
 lint-goroutines:
     @echo "\033[1m🔍 GOROUTINE LEAK DETECTION\033[0m"
     @echo "🔍 Installing Uber's goleak..."
-    @go install github.com/uber-go/goleak@latest
+    @go install -tool github.com/uber-go/goleak@latest
     @echo "🔍 Running tests with goroutine leak detection..."
     @go test -race ./... -v -timeout=30s || echo "⚠️ Tests failed or goroutine leaks detected"
 
@@ -543,7 +543,7 @@ lint-licenses:
     @go mod download -json all | jq -r '.Path + " " + .Version' | head -20
     @echo "💡 Installing go-licenses for comprehensive scanning..."
     @if ! command -v go-licenses >/dev/null 2>&1; then \
-        go install github.com/google/go-licenses@latest; \
+        go install -tool github.com/google/go-licenses@latest; \
     fi
     @echo "🔍 Running go-licenses check..."
     @go-licenses check ./... 2>/dev/null || echo "⚠️ Some licenses may need review"
@@ -561,7 +561,7 @@ lint-nilaway:
         nilaway -include-pkgs="github.com/LarsArtmann/template-arch-lint" -json ./... 2>/dev/null || nilaway ./...; \
     else \
         echo "⚠️  nilaway not found. Installing Uber's NilAway..."; \
-        go install go.uber.org/nilaway/cmd/nilaway@latest; \
+        go install -tool go.uber.org/nilaway/cmd/nilaway@latest; \
         nilaway -include-pkgs="github.com/LarsArtmann/template-arch-lint" ./...; \
     fi
 
@@ -573,7 +573,7 @@ format:
         gofumpt -w .; \
     else \
         echo "\033[0;31m❌ gofumpt not installed. Installing...\033[0m"; \
-        go install mvdan.cc/gofumpt@latest; \
+        go install -tool mvdan.cc/gofumpt@latest; \
         gofumpt -w .; \
     fi
     @echo "\033[0;33mRunning goimports...\033[0m"
@@ -581,7 +581,7 @@ format:
         goimports -w .; \
     else \
         echo "\033[0;31m❌ goimports not installed. Installing...\033[0m"; \
-        go install golang.org/x/tools/cmd/goimports@latest; \
+        go install -tool golang.org/x/tools/cmd/goimports@latest; \
         goimports -w .; \
     fi
     @echo "\033[0;32m✅ Code formatted!\033[0m"
@@ -629,7 +629,7 @@ find-duplicates threshold="15":
         echo "  Go duplications found: $DUPL_COUNT"; \
     else \
         echo "\033[0;31m❌ dupl not found. Installing...\033[0m"; \
-        go install github.com/mibk/dupl@latest; \
+        go install -tool github.com/mibk/dupl@latest; \
         dupl -t {{threshold}} -v . > {{REPORT_DIR}}/go-duplications.txt 2>&1 || true; \
         dupl -t {{threshold}} -html . > {{REPORT_DIR}}/go-duplications.html 2>&1 || true; \
     fi
@@ -660,7 +660,7 @@ build:
         templ generate; \
     else \
         echo "\033[0;31m❌ templ not installed. Installing...\033[0m"; \
-        go install github.com/a-h/templ/cmd/templ@latest; \
+        go install -tool github.com/a-h/templ/cmd/templ@latest; \
         templ generate; \
     fi
     @echo "\033[0;33mBuilding Go modules...\033[0m"
@@ -674,7 +674,7 @@ templ:
         templ generate; \
     else \
         echo "\033[0;31m❌ templ not installed. Installing...\033[0m"; \
-        go install github.com/a-h/templ/cmd/templ@latest; \
+        go install -tool github.com/a-h/templ/cmd/templ@latest; \
         templ generate; \
     fi
     @echo "\033[0;32m✅ Templates generated!\033[0m"
@@ -691,7 +691,7 @@ dev:
         air; \
     else \
         echo "\033[0;31m❌ air not installed. Installing...\033[0m"; \
-        go install github.com/cosmtrek/air@latest; \
+        go install -tool github.com/cosmtrek/air@latest; \
         air; \
     fi
 
@@ -1084,7 +1084,7 @@ bench-compare:
         echo "\033[0;32m✅ Comparison completed!\033[0m"; \
         echo "\033[0;36m→ Results saved to: benchmarks/comparison.txt\033[0m"; \
     else \
-        echo "\033[0;33m⚠️ benchcmp tool not found. Install with: go install golang.org/x/tools/cmd/benchcmp@latest\033[0m"; \
+        echo "\033[0;33m⚠️ benchcmp tool not found. Install with: go install -tool golang.org/x/tools/cmd/benchcmp@latest\033[0m"; \
         echo "\033[0;36mManual comparison available in:\033[0m"; \
         echo "  → benchmarks/baseline/results.txt"; \
         echo "  → benchmarks/current/results.txt"; \
