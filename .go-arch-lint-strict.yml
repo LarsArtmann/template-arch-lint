@@ -1,0 +1,402 @@
+# 🔥 ENTERPRISE-GRADE GO ARCHITECTURE ENFORCEMENT TEMPLATE
+# MAXIMUM STRICTNESS - Domain-Driven Design & Clean Architecture
+#
+# This configuration demonstrates STRICT architectural boundaries
+# NO anyVendorDeps: true - All vendor dependencies must be explicitly allowed
+#
+# Features:
+# - ✅ Domain isolation (zero infrastructure dependencies)
+# - ✅ Application layer mediates between domain and infrastructure
+# - ✅ Infrastructure abstractions via interfaces
+# - ✅ Clear dependency flow: Infrastructure → Application → Domain
+# - ✅ STRICT vendor dependency control using library-policy.yaml
+# - ✅ Deep scanning enabled for comprehensive AST analysis
+
+version: 3
+workdir: .
+
+# 🚨 VENDOR DEPENDENCY CONFIGURATION
+allow:
+  depOnAnyVendor: false  # STRICT: No unlimited vendor dependencies
+  deepScan: true        # Enable comprehensive AST analysis
+
+# 📦 VENDOR LIBRARIES - Explicitly Allowed Based on library-policy.yaml
+vendors:
+  # Core Go Standard Library - ALWAYS ALLOWED
+  std:
+    in:
+      - "context"
+      - "crypto"
+      - "crypto/*"
+      - "database/sql"
+      - "encoding"
+      - "encoding/*"
+      - "errors"
+      - "fmt"
+      - "io"
+      - "io/*"
+      - "log"
+      - "math"
+      - "net"
+      - "net/*"
+      - "os"
+      - "path"
+      - "path/*"
+      - "reflect"
+      - "runtime"
+      - "sort"
+      - "strconv"
+      - "strings"
+      - "sync"
+      - "sync/*"
+      - "time"
+      - "unicode"
+      - "unicode/*"
+
+  # x/errgroup for error handling groups
+  x_errgroup:
+    in: ["golang.org/x/sync/errgroup"]
+
+  # HTTP Framework - GIN (recommended in library-policy.yaml)
+  gin:
+    in: ["github.com/gin-gonic/gin"]
+
+  # Configuration - Viper (recommended in library-policy.yaml)
+  viper:
+    in: ["github.com/spf13/viper"]
+
+  # Input Validation - go-playground/validator (commonly used with Gin)
+  validator:
+    in: ["github.com/go-playground/validator/v10"]
+
+  # Logging - charmbracelet/log (not in library-policy but used in project)
+  charm_log:
+    in: ["github.com/charmbracelet/log"]
+
+  # Templating - Type-safe HTML templates (recommended in library-policy.yaml)
+  templ:
+    in: ["github.com/a-h/templ"]
+
+  # Database - Manual implementation (not using SQLC in this project)
+  # sqlc: # Uncomment if using SQLC
+  #   in: ["github.com/sqlc-dev/sqlc"]
+
+  # Functional Programming - samber/lo (recommended in library-policy.yaml)
+  samber_lo:
+    in: ["github.com/samber/lo"]
+
+  # Railway Programming - samber/mo (error handling pattern)
+  samber_mo:
+    in: ["github.com/samber/mo"]
+
+  # Dependency Injection - samber/do (recommended in library-policy.yaml)
+  samber_do:
+    in: ["github.com/samber/do"]
+
+  # Testing - Ginkgo (recommended in library-policy.yaml)
+  ginkgo:
+    in: ["github.com/onsi/ginkgo", "github.com/onsi/ginkgo/*"]
+
+  # CLI - fang (recommended in library-policy.yaml)
+  fang:
+    in: ["github.com/charmbracelet/fang"]
+
+  # Authorization - Casbin (recommended in library-policy.yaml)
+  casbin:
+    in: ["github.com/casbin/casbin"]
+
+  # Error Handling - uniflow (recommended in library-policy.yaml)
+  uniflow:
+    in: ["github.com/larsartmann/uniflow"]
+
+  # UUID - google/uuid (recommended in library-policy.yaml)
+  google_uuid:
+    in: ["github.com/google/uuid"]
+
+  # YAML - go-faster/yaml (recommended in library-policy.yaml)
+  go_faster_yaml:
+    in: ["github.com/go-faster/yaml"]
+
+  # SIMD Detection - cpuid/v2 (recommended in library-policy.yaml)
+  cpuid_v2:
+    in: ["github.com/klauspost/cpuid/v2"]
+
+  # Authentication - golang-jwt/jwt/v5 (security-critical, recommended)
+  golang_jwt:
+    in: ["github.com/golang-jwt/jwt/v5"]
+
+  # Terminal Styling - lipgloss (recommended in library-policy.yaml)
+  lipgloss:
+    in: ["github.com/charmbracelet/lipgloss"]
+
+  # Caching - otter/v2 (recommended in library-policy.yaml)
+  otter_v2:
+    in: ["github.com/maypok86/otter/v2"]
+
+  # Financial - shopspring/decimal (recommended in library-policy.yaml)
+  shopspring_decimal:
+    in: ["github.com/shopspring/decimal"]
+
+  # Resilience - failsafe-go (recommended in library-policy.yaml)
+  failsafe_go:
+    in: ["github.com/failsafe-go/failsafe-go"]
+
+  # Observability - OpenTelemetry (recommended in library-policy.yaml)
+  opentelemetry:
+    in: ["go.opentelemetry.io/otel/*"]
+
+  # Rate Limiting - standard library (recommended in library-policy.yaml)
+  x_time_rate:
+    in: ["golang.org/x/time/rate"]
+
+# 📦 ARCHITECTURAL COMPONENTS
+# Define your project's architectural layers and boundaries
+components:
+  # ========================================
+  # CENTRALIZED ERROR MANAGEMENT
+  # ========================================
+  # ALL projects (libs and apps) MUST use pkg/errors for ALL error definitions
+  # No exceptions - this enforces consistent error handling across the entire codebase
+  pkg-errors:
+    in: pkg/errors/**
+
+  # ========================================
+  # DOMAIN LAYER - Pure Business Logic
+  # ========================================
+  domain-entities:
+    in: internal/domain/entities/**
+
+  domain-values:
+    in: internal/domain/values/**
+  domain-repositories:
+    in: internal/domain/repositories/**
+  domain-services:
+    in: internal/domain/services/**
+
+  # ========================================
+  # CONFIGURATION & STARTUP
+  # ========================================
+  config:
+    in: internal/config/**
+  main:
+    in: cmd/**
+
+  # ========================================
+  # DATABASE LAYER - Manual Database Implementation (no SQLC)
+  # ========================================
+  database-layer:
+    in: internal/infrastructure/**
+
+  # ========================================
+  # APPLICATION LAYER - HTTP Handlers 
+  # ========================================
+  application-handlers:
+    in: internal/application/handlers/**
+  application-dto:
+    in: internal/application/dto/**
+
+  # ========================================
+  # TEST HELPERS - Testing Utilities
+  # ========================================
+  test-helpers-base:
+    in: internal/testhelpers/base/**
+  test-helpers-domain-entities:
+    in: internal/testhelpers/domain/entities/**
+  test-helpers-domain-values:
+    in: internal/testhelpers/domain/values/**
+  test-helpers-domain-validation:
+    in: internal/testhelpers/domain/validation/**
+
+# 🔒 DEPENDENCY RULES - Enforce Clean Architecture with STRICT Vendor Control
+deps:
+  # CENTRALIZED ERROR MANAGEMENT - Available to ALL components
+  pkg-errors:
+    canUse: [std, x_errgroup]
+    mayDependOn: []
+
+  domain-entities:
+    canUse: [std]
+    mayDependOn:
+      - domain-values
+      - pkg-errors  # MUST use centralized errors
+
+  domain-values:
+    canUse: [std]
+    mayDependOn:
+      - pkg-errors  # MUST use centralized errors
+
+  domain-repositories:
+    canUse: [std]
+    mayDependOn:
+      - domain-entities
+      - domain-values
+      - pkg-errors  # MUST use centralized errors
+
+  domain-services:
+    canUse: [std, x_errgroup, samber_lo, samber_mo]
+    mayDependOn:
+      - domain-entities
+      - domain-repositories
+      - domain-values
+      - pkg-errors  # MUST use centralized errors
+
+  # APPLICATION LAYER - HTTP handlers
+  application-handlers:
+    canUse: [std, gin, ginkgo, golang_jwt, casbin, charm_log]
+    mayDependOn:
+      - domain-entities
+      - domain-services
+      - domain-repositories
+      - domain-values
+      - application-dto  # Use DTOs instead of SQLC generated types
+      - pkg-errors  # MUST use centralized errors
+
+  # APPLICATION DTOs
+  application-dto:
+    canUse: [std]
+    mayDependOn:
+      - domain-entities
+      - domain-values
+      - pkg-errors  # MUST use centralized errors
+
+  # ========================================
+  # DATABASE LAYER - Manual Database Implementation
+  # ========================================
+  database-layer:
+    canUse: [std, shopspring_decimal, google_uuid, go_faster_yaml, failsafe_go, x_time_rate]
+    mayDependOn:
+      - domain-entities
+      - domain-repositories
+      - domain-values
+      - pkg-errors  # MUST use centralized errors
+
+  # CONFIGURATION & STARTUP
+  config:
+    canUse: [std, viper, validator]
+    mayDependOn:
+      - domain-values  # Allow config to use domain value objects for validation
+      - pkg-errors    # MUST use centralized errors
+
+  main:
+    anyProjectDeps: true
+    canUse: [std, fang, viper, samber_do, lipgloss, cpuid_v2, gin, charm_log]
+
+  # TEST HELPERS - Allow broad dependencies for testing utilities
+  test-helpers-base:
+    anyProjectDeps: true
+    canUse: [std, ginkgo, samber_lo, google_uuid]
+
+  test-helpers-domain-entities:
+    anyProjectDeps: true
+    canUse: [std, ginkgo, samber_lo]
+
+  test-helpers-domain-values:
+    anyProjectDeps: true
+    canUse: [std, ginkgo, samber_lo]
+
+  test-helpers-domain-validation:
+    anyProjectDeps: true
+    canUse: [std, ginkgo, samber_lo]
+
+# 🌍 COMMON COMPONENTS - Available everywhere
+commonComponents:
+  - pkg-errors  # CENTRALIZED ERROR MANAGEMENT - MANDATORY
+
+# 🌍 COMMON VENDORS - Available to ALL components
+commonVendors:
+  - std  # Go standard library available everywhere
+
+# 🚫 EXCLUSION PATTERNS (glob patterns)
+exclude:
+  # Generated and temporary files
+  - "**/*.pb.go"
+  - "**/*_generated.go"
+  - "**/*_gen.go"
+  - "**/*_templ.go"
+  - "**/mock_*.go"
+  - "internal/db/**"  # SQLC generated code
+
+  # Test data files only (exclude test helpers from directory exclusion)
+  - "**/testdata/**"
+
+  # Build and vendor
+  - "**/vendor/**"
+  - "**/bin/**"
+  - "**/build/**"
+  - "**/dist/**"
+  - "**/node_modules/**"
+
+  # Plugins (separate Go plugin modules with independent arch-lint configs)
+  - "**/plugins/**"
+  - "plugins/**"
+
+  # Documentation and configuration
+  - "**/docs/**"
+  - "**/examples/**"
+  - "example/**"
+  - "**/*.md"
+  - "**/.git/**"
+  - "**/.github/**"
+
+  # IDE and editor files
+  - "**/.vscode/**"
+  - "**/.idea/**"
+  - "**/*.swp"
+  - "**/.DS_Store"
+
+# 🚫 EXCLUSION FILES (regex patterns)
+excludeFiles:
+  - ".*_test\\.go$"         # All test files (_test.go suffix)
+  - "integration_test\\.go$" # Integration test files
+  - ".*_integration_test\\.go$" # Integration test variations
+
+# 📋 ARCHITECTURE VALIDATION RULES & DECISIONS
+#
+# This configuration implements Clean Architecture with Domain-Driven Design
+# and STRICT vendor dependency control:
+#
+# ARCHITECTURAL LAYERS (from inner to outer):
+# 1. DOMAIN LAYER (Core Business Logic)
+#    - entities/     : Core business entities with identity
+#    - values/       : Value objects (immutable, validated data)
+#    - repositories/ : Interfaces for data access (ports)
+#    - services/     : Domain services and business rules
+#
+# 2. APPLICATION LAYER (Use Cases & Orchestration)
+#    - handlers/     : HTTP handlers (adapters)
+#    - middleware/   : Cross-cutting concerns
+#
+# 3. SQLC GENERATED LAYER (Type-Safe Database Code)
+#    - db/           : SQLC generated models, queries, and interfaces
+#
+# 4. INFRASTRUCTURE LAYER (External Dependencies)
+#    - infrastructure/ : External service implementations (uses SQLC)
+#
+# 5. CONFIGURATION & ENTRY POINTS
+#    - config/       : Application configuration
+#    - cmd/          : Main application entry points
+#
+# DEPENDENCY RULES ENFORCED:
+# ✅ Domain entities can only depend on domain layer components + stdlib
+# ✅ Application layer can orchestrate domain and use specific approved vendors
+# ✅ Infrastructure implements domain interfaces using SQLC generated code
+# ✅ SQLC generated code is treated as infrastructure/external dependency
+# ✅ No circular dependencies between components
+# ✅ Test files excluded from architecture validation
+# ✅ ONLY approved vendor libraries from library-policy.yaml are allowed
+#
+# VENDOR CONTROL ENFORCEMENT:
+# ✅ NO anyVendorDeps: true - All vendor deps must be explicitly declared
+# ✅ Based on library-policy.yaml recommended stack
+# ✅ Security-critical libraries (JWT, crypto) use approved versions
+# ✅ Performance-critical libraries use recommended alternatives
+# ✅ No deprecated/abandoned libraries allowed
+# ✅ Deep scanning enabled for comprehensive AST analysis
+#
+# To customize for your project:
+# 1. Update component paths to match your directory structure
+# 2. Add/remove components as needed
+# 3. Add/remove vendor libraries from vendors section based on needs
+# 4. Update canUse arrays for each component based on actual vendor requirements
+# 5. NEVER remove pkg-errors dependency - centralized errors are mandatory
+# 6. ALWAYS keep depOnAnyVendor: false for strict architectural control
