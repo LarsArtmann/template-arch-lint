@@ -7,10 +7,10 @@ import (
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/shared"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	domainerrors "github.com/LarsArtmann/template-arch-lint/pkg/errors"
 	"github.com/samber/lo"
+	"github.com/samber/mo"
 )
 
 // UserQueryService defines the interface for user query operations.
@@ -26,10 +26,10 @@ type UserQueryService interface {
 	ListUsers(ctx context.Context) ([]*entities.User, error)
 
 	// GetUserEmailsWithResult retrieves all user emails using Result pattern.
-	GetUserEmailsWithResult(ctx context.Context) shared.Result[[]string]
+	GetUserEmailsWithResult(ctx context.Context) mo.Result[[]string]
 
 	// FindUserByEmailOption finds a user by email using Option pattern.
-	FindUserByEmailOption(ctx context.Context, email string) shared.Option[*entities.User]
+	FindUserByEmailOption(ctx context.Context, email string) mo.Option[*entities.User]
 
 	// GetUserStats retrieves user statistics and metrics.
 	GetUserStats(ctx context.Context) (map[string]int, error)
@@ -103,40 +103,40 @@ func (s *userQueryServiceImpl) ListUsers(ctx context.Context) ([]*entities.User,
 }
 
 // GetUserEmailsWithResult retrieves all user emails using Result pattern.
-func (s *userQueryServiceImpl) GetUserEmailsWithResult(ctx context.Context) shared.Result[[]string] {
+func (s *userQueryServiceImpl) GetUserEmailsWithResult(ctx context.Context) mo.Result[[]string] {
 	// TODO: Optimize with direct email query instead of fetching full users
 	// TODO: Add email deduplication logic
 	// TODO: Add email format validation
 
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
-		return shared.Err[[]string](domainerrors.WrapRepoError("list for emails", "user", err))
+		return mo.Err[[]string](domainerrors.WrapRepoError("list for emails", "user", err))
 	}
 
 	emails := lo.Map(users, func(user *entities.User, _ int) string {
 		return user.GetEmail().String()
 	})
 
-	return shared.Ok(emails)
+	return mo.Ok(emails)
 }
 
 // FindUserByEmailOption finds a user by email using Option pattern.
-func (s *userQueryServiceImpl) FindUserByEmailOption(ctx context.Context, email string) shared.Option[*entities.User] {
+func (s *userQueryServiceImpl) FindUserByEmailOption(ctx context.Context, email string) mo.Option[*entities.User] {
 	// TODO: Add email validation using Email value object
 	// TODO: Add caching support
 	// TODO: Add audit logging for security compliance
 
 	if email == "" {
-		return shared.None[*entities.User]()
+		return mo.None[*entities.User]()
 	}
 
 	user, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil {
 		// Log error but return None for Option pattern
-		return shared.None[*entities.User]()
+		return mo.None[*entities.User]()
 	}
 
-	return shared.Some(user)
+	return mo.Some(user)
 }
 
 // GetUserStats retrieves user statistics and metrics.

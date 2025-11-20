@@ -21,13 +21,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/samber/lo"
-
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/shared"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	domainerrors "github.com/LarsArtmann/template-arch-lint/pkg/errors"
+
+	"github.com/samber/lo"
+	"github.com/samber/mo"
 )
 
 // TODO: TYPE SAFETY - Replace *string with proper value objects (DomainName value object)
@@ -253,10 +253,10 @@ func (s *UserService) FilterActiveUsers(ctx context.Context) ([]*entities.User, 
 }
 
 // GetUserEmailsWithResult demonstrates Result pattern with Railway Oriented Programming.
-func (s *UserService) GetUserEmailsWithResult(ctx context.Context) shared.Result[[]string] {
+func (s *UserService) GetUserEmailsWithResult(ctx context.Context) mo.Result[[]string] {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
-		return shared.Err[[]string](domainerrors.NewInternalError("failed to list users", err))
+		return mo.Err[[]string](domainerrors.NewInternalError("failed to list users", err))
 	}
 
 	// Functional operation: extract emails
@@ -264,20 +264,20 @@ func (s *UserService) GetUserEmailsWithResult(ctx context.Context) shared.Result
 		return user.GetEmail().String()
 	})
 
-	return shared.Ok(emails)
+	return mo.Ok(emails)
 }
 
 // CreateUserWithResult demonstrates Railway Oriented Programming.
 // TODO: FUNCTIONAL PROGRAMMING - This shows good Result[T] pattern usage - expand this approach
-func (s *UserService) CreateUserWithResult(ctx context.Context, id values.UserID, email, name string) shared.Result[*entities.User] {
+func (s *UserService) CreateUserWithResult(ctx context.Context, id values.UserID, email, name string) mo.Result[*entities.User] {
 	// Step 1: Validate inputs
 	if validationResult := s.validateUserInputsResult(email, name); validationResult.IsError() {
-		return shared.Err[*entities.User](validationResult.Error())
+		return mo.Err[*entities.User](validationResult.Error())
 	}
 
 	// Step 2: Check user doesn't exist
 	if existsResult := s.checkUserNotExistsResult(ctx, email); existsResult.IsError() {
-		return shared.Err[*entities.User](existsResult.Error())
+		return mo.Err[*entities.User](existsResult.Error())
 	}
 
 	// Step 3: Create and save user
@@ -285,55 +285,55 @@ func (s *UserService) CreateUserWithResult(ctx context.Context, id values.UserID
 }
 
 // validateUserInputsResult validates user inputs using Result pattern.
-func (s *UserService) validateUserInputsResult(email, name string) shared.Result[struct{}] {
+func (s *UserService) validateUserInputsResult(email, name string) mo.Result[struct{}] {
 	if err := s.validateEmail(email); err != nil {
-		return shared.Err[struct{}](domainerrors.NewValidationError("email", err.Error()))
+		return mo.Err[struct{}](domainerrors.NewValidationError("email", err.Error()))
 	}
 	if err := s.validateUserName(name); err != nil {
-		return shared.Err[struct{}](domainerrors.NewValidationError("name", err.Error()))
+		return mo.Err[struct{}](domainerrors.NewValidationError("name", err.Error()))
 	}
-	return shared.Ok(struct{}{})
+	return mo.Ok(struct{}{})
 }
 
 // checkUserNotExistsResult checks if user exists using Result pattern.
-func (s *UserService) checkUserNotExistsResult(ctx context.Context, email string) shared.Result[*entities.User] {
+func (s *UserService) checkUserNotExistsResult(ctx context.Context, email string) mo.Result[*entities.User] {
 	existingUser, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) {
-		return shared.Err[*entities.User](domainerrors.NewInternalError("failed to check existing user", err))
+		return mo.Err[*entities.User](domainerrors.NewInternalError("failed to check existing user", err))
 	}
 	if existingUser != nil {
-		return shared.Err[*entities.User](repositories.ErrUserAlreadyExists)
+		return mo.Err[*entities.User](repositories.ErrUserAlreadyExists)
 	}
-	return shared.Ok[*entities.User](nil)
+	return mo.Ok[*entities.User](nil)
 }
 
 // createAndSaveUserResult creates and saves user using Result pattern.
 // TODO: EXTRACTION - This private method could be part of a UserCreationService
-func (s *UserService) createAndSaveUserResult(ctx context.Context, id values.UserID, email, name string) shared.Result[*entities.User] {
+func (s *UserService) createAndSaveUserResult(ctx context.Context, id values.UserID, email, name string) mo.Result[*entities.User] {
 	user, err := entities.NewUser(id, email, name)
 	if err != nil {
-		return shared.Err[*entities.User](err)
+		return mo.Err[*entities.User](err)
 	}
 
 	if err := s.userRepo.Save(ctx, user); err != nil {
-		return shared.Err[*entities.User](domainerrors.NewInternalError("failed to save user", err))
+		return mo.Err[*entities.User](domainerrors.NewInternalError("failed to save user", err))
 	}
 
-	return shared.Ok(user)
+	return mo.Ok(user)
 }
 
 // FindUserByEmailOption demonstrates Option pattern.
-func (s *UserService) FindUserByEmailOption(ctx context.Context, email string) shared.Option[*entities.User] {
+func (s *UserService) FindUserByEmailOption(ctx context.Context, email string) mo.Option[*entities.User] {
 	if err := s.validateEmail(email); err != nil {
-		return shared.None[*entities.User]()
+		return mo.None[*entities.User]()
 	}
 
 	user, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil {
-		return shared.None[*entities.User]()
+		return mo.None[*entities.User]()
 	}
 
-	return shared.Some(user)
+	return mo.Some(user)
 }
 
 // BatchValidateUsers demonstrates functional operations for batch processing.
@@ -431,7 +431,7 @@ func (s *UserService) GetUsersWithFilters(ctx context.Context, filters UserFilte
 
 // ValidateUserBatchWithEither demonstrates Either pattern for batch operations.
 // TODO: FUNCTIONAL PATTERN - Good Either usage, consider expanding this pattern throughout service layer
-func (s *UserService) ValidateUserBatchWithEither(users []*entities.User) shared.Either[[]error, []values.UserID] {
+func (s *UserService) ValidateUserBatchWithEither(users []*entities.User) mo.Either[[]error, []values.UserID] {
 	validUsers := make([]values.UserID, 0)
 	validationErrors := make([]error, 0)
 
@@ -445,9 +445,9 @@ func (s *UserService) ValidateUserBatchWithEither(users []*entities.User) shared
 
 	// Return either errors (if any) or valid user IDs
 	if len(validationErrors) > 0 {
-		return shared.Left[[]error, []values.UserID](validationErrors)
+		return mo.Left[[]error, []values.UserID](validationErrors)
 	}
-	return shared.Right[[]error, []values.UserID](validUsers)
+	return mo.Right[[]error, []values.UserID](validUsers)
 }
 
 // GetUsersByEmailDomains demonstrates more complex lo operations.

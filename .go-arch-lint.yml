@@ -49,8 +49,7 @@ components:
   # ========================================
   domain-entities:
     in: internal/domain/entities/**
-  domain-shared:
-    in: internal/domain/shared/**
+
   domain-values:
     in: internal/domain/values/**
   domain-repositories:
@@ -98,33 +97,25 @@ deps:
   # CENTRALIZED ERROR MANAGEMENT - Available to ALL components
   pkg-errors:
     anyVendorDeps: true
-    mayDependOn:
-      - domain-shared  # Only allowed dependency
+    mayDependOn: []
 
-  # DOMAIN LAYER - Zero infrastructure dependencies
+
+
   domain-entities:
     anyVendorDeps: true
     mayDependOn:
-      - domain-shared
       - domain-values
-      - pkg-errors  # MUST use centralized errors
-
-  domain-shared:
-    anyVendorDeps: true
-    mayDependOn:
       - pkg-errors  # MUST use centralized errors
 
   domain-values:
     anyVendorDeps: true
     mayDependOn:
-      - domain-shared
       - pkg-errors  # MUST use centralized errors
 
   domain-repositories:
     anyVendorDeps: true
     mayDependOn:
       - domain-entities
-      - domain-shared
       - domain-values
       - pkg-errors  # MUST use centralized errors
 
@@ -133,7 +124,6 @@ deps:
     mayDependOn:
       - domain-entities
       - domain-repositories
-      - domain-shared
       - domain-values
       - pkg-errors  # MUST use centralized errors
 
@@ -144,7 +134,6 @@ deps:
       - domain-entities
       - domain-services
       - domain-repositories
-      - domain-shared
       - domain-values
       - application-dto
       - pkg-errors  # MUST use centralized errors
@@ -168,7 +157,6 @@ deps:
     mayDependOn:
       - domain-entities
       - domain-repositories
-      - domain-shared
       - domain-values
       - pkg-errors  # MUST use centralized errors
 
@@ -195,7 +183,6 @@ deps:
 
 # 🌍 COMMON COMPONENTS - Available everywhere
 commonComponents:
-  - domain-shared
   - pkg-errors  # CENTRALIZED ERROR MANAGEMENT - MANDATORY
 
 # 🚫 EXCLUSION PATTERNS (glob patterns)
