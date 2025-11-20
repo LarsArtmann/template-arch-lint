@@ -179,13 +179,11 @@ tool (
 
 ## 🟡 Organization Issues (Priority: MEDIUM)
 
-### 5. **`/plugins`** Location Questionable
-**Current State:** `/plugins/template-arch-lint/` with its own Go module  
-**Issue:** Should be in `/pkg` (if public) or `/internal` (if private)  
-**Recommendation:** Move to `/pkg/linter-plugins/` for public extensibility
-
-**Impact:** Plugin architecture not clearly accessible to users
-**Effort:** 1-2 hours (medium impact)
+### 5. **`/plugins`** → **COMPLETED MOVED TO `/pkg/linter-plugins/`**
+**Previous State:** `/plugins/template-arch-lint/` with its own Go module  
+**Current State:** ✅ MOVED to `/pkg/linter-plugins/template-arch-lint/` for Go Project Layout compliance  
+**Completed:** 2025-11-20 - Module path updated to `github.com/LarsArtmann/template-arch-lint/pkg/linter-plugins/template-arch-lint`  
+**Updates:** Config files updated, documentation references migrated, public API properly exposed
 
 ### 6. **Missing `/build` Directory**
 **Current State:** CI/CD configurations scattered in `.github/workflows/`  

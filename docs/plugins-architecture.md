@@ -11,7 +11,7 @@ parent-project/
 ├── .go-arch-lint.yml          # Main project architecture rules
 ├── go.mod                     # Main project dependencies
 ├── internal/                  # Clean Architecture layers
-└── plugins/                   # ❌ EXCLUDED from parent arch validation
+└── pkg/linter-plugins/        # ✅ Public API - plugin extensibility
     ├── auth-plugin/           # ✅ Independent Go module
     │   ├── go.mod            # Plugin-specific dependencies
     │   ├── .go-arch-lint.yml  # Plugin-specific architecture rules

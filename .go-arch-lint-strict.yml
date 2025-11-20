@@ -327,8 +327,8 @@ exclude:
   - "**/node_modules/**"
 
   # Plugins (separate Go plugin modules with independent arch-lint configs)
-  - "**/plugins/**"
-  - "plugins/**"
+  - "**/pkg/linter-plugins/**"
+  - "pkg/linter-plugins/**"
 
   # Documentation and configuration
   - "**/docs/**"

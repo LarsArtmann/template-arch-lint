@@ -10,7 +10,7 @@ linters:
     custom:
       # Template Arch Lint Plugin
       template-arch-lint:
-        path: ./plugins/template-arch-lint/template-arch-lint.so
+        path: ./pkg/linter-plugins/template-arch-lint/template-arch-lint.so
         description: "Unified enterprise Go architecture and code quality enforcement plugin"
         original-url: github.com/LarsArtmann/template-arch-lint
         settings:

@@ -209,8 +209,8 @@ exclude:
   # Plugins have independent architectural rules tailored to their specific purpose
   # Examples: auth-plugin, logging-plugin, metrics-plugin, database-plugin
   # Exclusion prevents parent project architecture from constraining plugin design
-  - "**/plugins/**"
-  - "plugins/**"
+  - "**/pkg/linter-plugins/**"
+  - "pkg/linter-plugins/**"
 
   # Documentation and configuration
   - "**/docs/**"
