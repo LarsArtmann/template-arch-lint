@@ -17,10 +17,9 @@ type UserHandler struct {
 }
 
 // NewUserHandler creates a new user handler.
-func NewUserHandler(userService *services.UserService, queries *sqlite.Queries) *UserHandler {
+func NewUserHandler(userService *services.UserService) *UserHandler {
 	return &UserHandler{
 		userService: userService,
-		queries:     queries,
 	}
 }
 
