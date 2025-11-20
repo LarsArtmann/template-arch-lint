@@ -408,7 +408,7 @@ check-pre-commit-fast:
 test:
     @echo "\033[1m🧪 RUNNING TESTS\033[0m"
     @echo "\033[0;36mRunning tests with coverage...\033[0m"
-    go test ./... -v -race -coverprofile=coverage.out
+    go test ./... -v -race -coverprofile={{REPORT_DIR}}/coverage.out
     @echo "\033[0;32m✅ Tests completed!\033[0m"
 
 # Run comprehensive coverage analysis with threshold enforcement
