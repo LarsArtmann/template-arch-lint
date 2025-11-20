@@ -613,13 +613,9 @@ validate-reports:
     fi
     
     # Coverage reports
-    @if [ -f "{{COVERAGE_OUT}}" ] && [ -s "{{COVERAGE_OUT}}" ]; then \
-        echo "{{GREEN}}✅ Coverage data{{NORMAL}}"; \
-        COVERAGE=$$(go tool cover -func={{COVERAGE_OUT}} 2>/dev/null | tail -1 | grep -o '[0-9.]*%'); \
-        echo "{{CYAN}}📊 Overall coverage: $$COVERAGE{{NORMAL}}"; \
-    else \
-        echo "{{RED}}❌ Missing or empty Coverage data{{NORMAL}}"; \
-    fi
+    @echo "{{BOLD}}📊 Coverage Status:{{NORMAL}}"
+    @if test -f "{{COVERAGE_OUT}}"; then echo "  {{GREEN}}✓ Coverage file exists{{NORMAL}}"; else echo "  {{RED}}✗ Coverage file missing{{NORMAL}}"; fi
+    @if test -s "{{COVERAGE_OUT}}"; then echo "  {{GREEN}}✓ Coverage file has data{{NORMAL}}"; else echo "  {{RED}}✗ Coverage file empty{{NORMAL}}"; fi
     
     @echo "{{YELLOW}}🎯 Validation complete!{{NORMAL}}"
 
