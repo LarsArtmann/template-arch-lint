@@ -1,11 +1,12 @@
-package entities
+package entities_test
 
 import (
-	"time"
+	"testing"
 
 	ginkgo "github.com/onsi/ginkgo/v2"
 	gomega "github.com/onsi/gomega"
 
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
@@ -16,11 +17,12 @@ var _ = ginkgo.Describe("User Entity", func() {
 				// Given
 				id, idErr := values.NewUserID("user-123")
 				gomega.Expect(idErr).To(gomega.BeNil())
+				// Convert to domain values for entities.NewUser
 				email := "test@example.com"
 				name := "TestUser"
 
 				// When
-				user, err := NewUser(id, email, name)
+				user, err := entities.NewUser(id, email, name)
 
 				// Then
 				gomega.Expect(err).To(gomega.BeNil())

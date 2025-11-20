@@ -66,12 +66,16 @@ components:
     in: cmd/**
 
   # ========================================
-  # APPLICATION LAYER - HTTP Handlers & DTOs
+  # SQLC GENERATED CODE - Type-Safe Database Models
+  # ========================================
+  sqlc-generated:
+    in: internal/db/**
+
+  # ========================================
+  # APPLICATION LAYER - HTTP Handlers 
   # ========================================
   application-handlers:
     in: internal/application/handlers/**
-  application-dto:
-    in: internal/application/dto/**
 
   # ========================================
   # INFRASTRUCTURE LAYER - Adapters for External Systems
@@ -127,7 +131,7 @@ deps:
       - domain-values
       - pkg-errors  # MUST use centralized errors
 
-  # APPLICATION LAYER - HTTP handlers and DTOs
+  # APPLICATION LAYER - HTTP handlers
   application-handlers:
     anyVendorDeps: true
     mayDependOn:
@@ -135,13 +139,13 @@ deps:
       - domain-services
       - domain-repositories
       - domain-values
-      - application-dto
+      - sqlc-generated  # Use SQLC generated types instead of manual DTOs
       - pkg-errors  # MUST use centralized errors
 
-  application-dto:
+  # SQLC GENERATED CODE - Type-safe database models and queries
+  sqlc-generated:
     anyVendorDeps: true
     mayDependOn:
-      - domain-values
       - pkg-errors  # MUST use centralized errors
 
   # CONFIGURATION & STARTUP
@@ -158,6 +162,7 @@ deps:
       - domain-entities
       - domain-repositories
       - domain-values
+      - sqlc-generated  # Infrastructure implements SQLC generated interfaces
       - pkg-errors  # MUST use centralized errors
 
   main:
@@ -193,6 +198,7 @@ exclude:
   - "**/*_gen.go"
   - "**/*_templ.go"
   - "**/mock_*.go"
+  - "internal/db/**"  # SQLC generated code
 
   # Test data files only (exclude test helpers from directory exclusion)
   - "**/testdata/**"
@@ -286,9 +292,11 @@ excludeFiles:
 #    - handlers/     : HTTP handlers (adapters)
 #    - middleware/   : Cross-cutting concerns
 #
-# 3. INFRASTRUCTURE LAYER (External Dependencies)
-#    - infrastructure/ : External service implementations
-#    - db/           : Database access and queries
+# 3. SQLC GENERATED LAYER (Type-Safe Database Code)
+#    - db/           : SQLC generated models, queries, and interfaces
+#
+# 4. INFRASTRUCTURE LAYER (External Dependencies)
+#    - infrastructure/ : External service implementations (uses SQLC)
 #
 # 4. CONFIGURATION & ENTRY POINTS
 #    - config/       : Application configuration
@@ -301,8 +309,9 @@ excludeFiles:
 #
 # DEPENDENCY RULES ENFORCED:
 # ✅ Domain entities can only depend on domain layer components
-# ✅ Application layer can orchestrate domain and infrastructure
-# ✅ Infrastructure implements domain interfaces (dependency inversion)
+# ✅ Application layer can orchestrate domain and use SQLC generated types
+# ✅ Infrastructure implements domain interfaces using SQLC generated code
+# ✅ SQLC generated code is treated as infrastructure/external dependency
 # ✅ No circular dependencies between components
 # ✅ Test files excluded from architecture validation
 #
@@ -314,12 +323,14 @@ excludeFiles:
 #    - Business logic stays pure and testable
 #
 # 2. DEPENDENCY INVERSION
-#    - Application layer defines interfaces
-#    - Infrastructure implements those interfaces
+#    - Domain layer defines repository interfaces
+#    - Infrastructure implements those interfaces using SQLC
+#    - SQLC generated code provides type-safe database access
 #    - Domain depends on abstractions, not concretions
 #
 # 3. CLEAN ARCHITECTURE FLOW
 #    - Infrastructure → Application → Domain
+#    - SQLC generated code flows from Infrastructure → Application
 #    - Each layer can only depend on inner layers
 #    - No circular dependencies allowed
 #
