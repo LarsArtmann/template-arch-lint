@@ -6,7 +6,7 @@
 
 # Tool versions
 GOLANGCI_VERSION := "v2.6.0"
-GO_ARCH_LINT_VERSION := "v1.13.0"
+GO_ARCH_LINT_VERSION := "v1.14.0"
 CAPSLOCK_VERSION := "latest"
 
 # Directories
