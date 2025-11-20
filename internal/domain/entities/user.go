@@ -102,6 +102,16 @@ func (u *User) GetUserName() values.UserName {
 	return u.name
 }
 
+// GetCreatedAt returns the creation timestamp.
+func (u *User) GetCreatedAt() time.Time {
+	return u.Created
+}
+
+// GetUpdatedAt returns the modification timestamp.
+func (u *User) GetUpdatedAt() time.Time {
+	return u.Modified
+}
+
 // SetEmail updates the email with validation.
 // REFACTORED: Split brain eliminated - only updates single value object field
 func (u *User) SetEmail(email string) error {

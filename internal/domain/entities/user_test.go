@@ -6,7 +6,7 @@ import (
 	ginkgo "github.com/onsi/ginkgo/v2"
 	gomega "github.com/onsi/gomega"
 
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
+	. "github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
@@ -22,7 +22,7 @@ var _ = ginkgo.Describe("User Entity", func() {
 				name := "TestUser"
 
 				// When
-				user, err := entities.NewUser(id, email, name)
+				user, err := NewUser(id, email, name)
 
 				// Then
 				gomega.Expect(err).To(gomega.BeNil())
@@ -188,17 +188,11 @@ var _ = ginkgo.Describe("User Entity", func() {
 			ginkgo.It("should fail validation when name is empty", func() {
 				// Given - Create user with valid ID and email but zero value name
 				userID, _ := values.NewUserID("user-123")
-				email, _ := values.NewEmail("test@example.com")
-				user := &User{
-					ID:       userID,
-					Created:  time.Now(),
-					Modified: time.Now(),
-					email:    email, // Valid email
-					// name is zero value (empty) - will fail validation
-				}
+				// Create user via constructor to properly set private fields
+				user, err := NewUser(userID, "test@example.com", "") // Empty name will fail validation
 
 				// When
-				err := user.Validate()
+				err = user.Validate()
 
 				// Then
 				gomega.Expect(err).To(gomega.HaveOccurred())
@@ -210,15 +204,10 @@ var _ = ginkgo.Describe("User Entity", func() {
 			ginkgo.It("should still validate successfully (timestamps not validated)", func() {
 				// Given - Create user with valid fields but zero timestamps
 				userID, _ := values.NewUserID("user-123")
-				email, _ := values.NewEmail("test@example.com")
-				name, _ := values.NewUserName("TestUser")
-				user := &User{
-					ID:       userID,
-					Created:  time.Time{}, // zero value
-					Modified: time.Time{}, // zero value
-					email:    email,       // Valid email
-					name:     name,        // Valid name
-				}
+				// Create user via constructor then override timestamps for testing
+				user, _ := NewUser(userID, "test@example.com", "TestUser")
+				user.Created = time.Time{}  // zero value for testing
+				user.Modified = time.Time{} // zero value for testing
 
 				// When
 				err := user.Validate()

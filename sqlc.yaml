@@ -49,7 +49,7 @@ sql:
         package: "sqlite"
         out: "internal/infrastructure/db"
         sql_package: "database/sql"
-        build_tags: "sqlite3,fts5"
+        build_tags: ""
         
         # === CODE GENERATION OPTIONS ===
         emit_json_tags: true
