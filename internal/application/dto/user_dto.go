@@ -33,5 +33,5 @@ type SuccessResponse struct {
 // UsersResponse represents a list of users response.
 type UsersResponse struct {
 	Users []UserResponse `json:"users"`
-	Total int           `json:"total"`
+	Total int            `json:"total"`
 }

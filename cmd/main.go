@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	exitCodeSuccess    = 0
-	exitCodeFailure    = 1
+	exitCodeSuccess   = 0
+	exitCodeFailure   = 1
 	defaultServerPort = 8080
 )
 
@@ -45,8 +45,8 @@ func main() {
 
 	// Start server with graceful shutdown
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", defaultServerPort),
-		Handler:  router,
+		Addr:         fmt.Sprintf(":%d", defaultServerPort),
+		Handler:      router,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
