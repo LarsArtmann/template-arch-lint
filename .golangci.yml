@@ -88,6 +88,13 @@ linters:
 
     # 💀 DEAD CODE DETECTION
     - unused         # Comprehensive unused code detection (replaces deadcode, varcheck, structcheck)
+    
+    # 🔄 DEPENDENCY & MODERNIZATION
+    - gomodguard     # Dependency management linter
+    - dupl           # Code duplication detection
+    - dupword        # Duplicate word detection
+    - modernize      # Modern Go features
+    - nosprintfhostport  # Detect fmt.Sprintf misuse for host:port URLs
 
 
 # 🔧 LINTER SETTINGS - Maximum strictness
@@ -364,6 +371,47 @@ linters-settings:
   nilnesserr:
     check-len: true
     check-cap: true
+  
+  # 🔄 DEPENDENCY & MODERNIZATION SETTINGS
+  
+  # Dependency management linter
+  gomodguard:
+    allowed:
+      modules:
+        # Core Go ecosystem
+        - golang.org/x/*
+        - google.golang.org/*
+        # Standard library domains
+      domains:
+        - golang.org
+        - google.golang.org
+        - gopkg.in
+    blocked:
+      modules:
+        # Deprecated packages
+        - github.com/golang/protobuf:
+            reason: "Use google.golang.org/protobuf instead"
+            recommendations:
+              - google.golang.org/protobuf
+      local-replace-directives: true
+  
+  # Code duplication detection
+  dupl:
+    threshold: 150  # Higher threshold to reduce noise
+  
+  # Duplicate word detection
+  dupword:
+    keywords:
+      - "TODO"
+      - "FIXME"
+      - "NOTE"
+      - "WARNING"
+  
+  # Modern Go features linter
+  modernize:
+    disable:
+      - omitzero      # Can make code less explicit
+      - simplify-range # Sometimes reduces readability
 
   # 🆕 NEW ENTERPRISE LINTERS (v2.4.0)
   
@@ -456,6 +504,16 @@ issues:
       linters:
         - revive
       text: "file-length-limit"
+    
+    # Allow higher code duplication in tests (common test patterns)
+    - path: _test\.go
+      linters:
+        - dupl
+    
+    # Allow modernize suggestions in generated code
+    - path: ".*_gen\\.go$|.*\\.pb\\.go$|.*_templ\\.go$"
+      linters:
+        - modernize
 
   exclude-dirs:
     - vendor
