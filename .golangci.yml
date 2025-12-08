@@ -1094,6 +1094,20 @@ linters-settings:
       
   testifylint:
     enable-all: true
+    bool-compare:
+      ignore-custom-types: true
+    expected-actual:
+      pattern: ^expected
+    formatter:
+      check-format-string: true
+      require-f-funcs: true
+      require-string-msg: true
+    go-require:
+      ignore-http-handlers: true
+    require-error:
+      fn-pattern: ^(Errorf?|NoErrorf?)$
+    suite-extra-assert-call:
+      mode: remove
 
 # 🚨 ISSUES CONFIGURATION
 # Note: Formatters (gofumpt, goimports) should be run separately via 'just fix'
