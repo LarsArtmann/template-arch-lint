@@ -783,9 +783,19 @@ linters-settings:
           - "!**/*_test.go"
         allow:
           - $gostd
-          # Allow our project's internal modules
-          - github.com/LarsArtmann/template-arch-lint/internal/*
-          - github.com/LarsArtmann/template-arch-lint/pkg/*
+          # Allow our project's internal modules - exact matches
+          - github.com/LarsArtmann/template-arch-lint/internal/application/handlers
+          - github.com/LarsArtmann/template-arch-lint/internal/application
+          - github.com/LarsArtmann/template-arch-lint/internal/domain/repositories
+          - github.com/LarsArtmann/template-arch-lint/internal/domain/services
+          - github.com/LarsArtmann/template-arch-lint/internal/domain/values
+          - github.com/LarsArtmann/template-arch-lint/internal/domain/entities
+          - github.com/LarsArtmann/template-arch-lint/internal/domain
+          - github.com/LarsArtmann/template-arch-lint/internal/infrastructure
+          - github.com/LarsArtmann/template-arch-lint/internal/config
+          - github.com/LarsArtmann/template-arch-lint/internal
+          - github.com/LarsArtmann/template-arch-lint/pkg/errors
+          - github.com/LarsArtmann/template-arch-lint/pkg
           # Allow our approved modules from gomodguard configuration
           - golang.org/x/*
           - google.golang.org/*
@@ -821,6 +831,57 @@ linters-settings:
             desc: "CRITICAL SECURITY: MD5 is broken for cryptographic purposes due to collision attacks"
           - pkg: "crypto/sha1"
             desc: "CRITICAL SECURITY: SHA-1 is cryptographically broken with practical collision attacks"
+      tests:
+        # Strict mode for test files as well
+        list-mode: strict
+        files:
+          - "**/*_test.go"
+        allow:
+          - $gostd
+          # Allow our project's internal modules - exact matches
+          - github.com/LarsArtmann/template-arch-lint/internal/application/handlers
+          - github.com/LarsArtmann/template-arch-lint/internal/application
+          - github.com/LarsArtmann/template-arch-lint/internal/domain/repositories
+          - github.com/LarsArtmann/template-arch-lint/internal/domain/services
+          - github.com/LarsArtmann/template-arch-lint/internal/domain/values
+          - github.com/LarsArtmann/template-arch-lint/internal/domain/entities
+          - github.com/LarsArtmann/template-arch-lint/internal/domain
+          - github.com/LarsArtmann/template-arch-lint/internal/infrastructure
+          - github.com/LarsArtmann/template-arch-lint/internal/config
+          - github.com/LarsArtmann/template-arch-lint/internal
+          - github.com/LarsArtmann/template-arch-lint/pkg/errors
+          - github.com/LarsArtmann/template-arch-lint/pkg
+          # Testing packages
+          - github.com/onsi/ginkgo/v2
+          - github.com/onsi/gomega
+          - github.com/stretchr/testify/*
+          - github.com/go-playground/validator/v10
+          # Allow our approved modules from gomodguard configuration
+          - golang.org/x/*
+          - google.golang.org/*
+          - go.opentelemetry.io/otel/*
+          - github.com/a-h/templ
+          - github.com/charmbracelet/*
+          - github.com/gin-gonic/gin
+          - github.com/spf13/viper
+          - github.com/sqlc-dev/sqlc
+          - github.com/samber/lo
+          - github.com/samber/do
+          - github.com/google/uuid
+          - github.com/klauspost/cpuid/v2
+          - github.com/cockroachdb/errors
+          - github.com/larsartmann/uniflow
+          - github.com/go-faster/yaml
+          - github.com/dominikbraun/graph
+          - github.com/hashicorp/raft
+          - github.com/failsafe-go/failsafe-go
+          - github.com/mennanov/limiters
+          - github.com/cenkalti/backoff/v4
+          - github.com/casbin/casbin
+          - github.com/go-faster/errors
+          - github.com/govalues/money
+          - github.com/shopspring/decimal
+          - golang.org/x/text/message
 
   # Declaration order and count validation
   decorder:
