@@ -135,32 +135,39 @@ linters-settings:
   forbidigo:
     forbid:
       # Type safety violations
-      - p: 'interface\{\}'
+      - pattern: 'interface\{\}'
         msg: "🚨 BANNED: interface{} erases type safety. Use specific types or generics"
-      - p: '\bany\b'
+      - pattern: '\bany\b'
         msg: "🚨 BANNED: any erases type safety. Use specific types or generics"
-      - p: 'panic\('
+      - pattern: 'panic\('
         msg: "🚨 BANNED: panic() crashes programs. Return errors instead"
       
       # 🚫 ERROR CENTRALIZATION - Direct error creation outside pkg/errors
-      - p: 'errors\.New\('
+      - pattern: 'errors\.New\('
         msg: "🚨 BANNED: Direct error creation. Use pkg/errors predefined types instead"
         # Allow in pkg/errors only
-      - p: 'fmt\.Errorf\('
+      - pattern: 'fmt\.Errorf\('
         msg: "🚨 BANNED: Direct error formatting. Use pkg/errors predefined types instead"
         # Allow in pkg/errors only
-      - p: 'error\(\s*{'
+      - pattern: 'error\(\s*{'
         msg: "🚨 BANNED: Anonymous error structs. Use pkg/errors Error type instead"
         # Allow in pkg/errors only
       
       # Basic print statement bans
-      - p: '^fmt\.Print.*$'
+      - pattern: '^fmt\.Print.*$'
         msg: "🚨 BANNED: Do not commit print statements. Use structured logging instead"
-      - p: '^print$|^println$'
+      - pattern: '^print$|^println$'
         msg: "🚨 BANNED: Do not commit print statements. Use structured logging instead"
-      - p: 'fmt\.Printf.*'
+      - pattern: 'fmt\.Printf.*'
         msg: "🚨 BANNED: Use structured logging instead of fmt.Printf. Prefer log.Info() with fields"
+      
+      # 🚫 COMMON ANTI-PATTERNS
+      - pattern: 'log\.Fatal'
+        msg: "🚨 BANNED: log.Fatal calls os.Exit, which can't be recovered from. Return errors instead"
+      - pattern: 'log\.Panic'
+        msg: "🚨 BANNED: log.Panic is equivalent to panic(). Use structured error returns instead"
 
+    exclude-godoc-examples: false
     analyze-types: true
 
   # Cyclomatic complexity
@@ -226,9 +233,66 @@ linters-settings:
 
   # Security
   gosec:
-    severity: low
-    confidence: low
-    excludes: []
+    severity: medium
+    confidence: medium
+    includes:
+      # Enable most important security rules
+      - G101  # Hard coded credentials
+      - G102  # Bind to all interfaces
+      - G103  # Audit the use of unsafe block
+      - G104  # Audit errors not checked
+      - G107  # Url provided to HTTP request as taint input
+      - G108  # Profiling endpoint automatically exposed
+      - G109  # Potential Integer overflow
+      - G110  # Potential DoS vulnerability via decompression bomb
+      - G111  # Potential directory traversal
+      - G112  # Potential slowloris attack
+      - G114  # Use of net/http serve function that has no support for setting timeouts
+      - G115  # Potential integer overflow when converting between integer types
+      - G201  # SQL query construction using format string
+      - G202  # SQL query construction using string concatenation
+      - G203  # Use of unescaped data in HTML templates
+      - G204  # Audit use of command execution
+      - G301  # Poor file permissions used when creating a directory
+      - G302  # Poor file permissions used with chmod
+      - G304  # File path provided as taint input
+      - G305  # File traversal when extracting zip/tar archive
+      - G306  # Poor file permissions used when writing to a new file
+      - G307  # Poor file permissions used when creating a file with os.Create
+      - G401  # Detect the usage of MD5 or SHA1
+      - G402  # Look for bad TLS connection settings
+      - G403  # Ensure minimum RSA key length of 2048 bits
+      - G404  # Insecure random number source (rand)
+      - G405  # Detect the usage of DES or RC4
+      - G406  # Detect the usage of MD4 or RIPEMD160
+      - G501  # Import blocklist: crypto/md5
+      - G502  # Import blocklist: crypto/des
+      - G503  # Import blocklist: crypto/rc4
+      - G504  # Import blocklist: net/http/cgi
+      - G505  # Import blocklist: crypto/sha1
+      - G506  # Import blocklist: golang.org/x/crypto/md4
+      - G507  # Import blocklist: golang.org/x/crypto/ripemd160
+      - G601  # Implicit memory aliasing of items from a range statement
+      - G602  # Slice access out of bounds
+    excludes:
+      - G106  # Allow ssh.InsecureIgnoreHostKey for development environments
+    config:
+      global:
+        nosec: false
+        show-ignored: false
+        audit: false
+      G101:
+        pattern: "(?i)passwd|pass|password|pwd|secret|token|pw|apiKey|bearer|cred"
+        ignore_entropy: false
+        entropy_threshold: "80.0"
+        per_char_threshold: "3.0"
+        truncate: "32"
+      G104:
+        fmt:
+          - Fscanf
+      G301: "0750"
+      G302: "0600"
+      G306: "0600"
 
   # Static analysis
   staticcheck:
@@ -252,6 +316,43 @@ linters-settings:
       - performance
       - style
     disabled-checks: []
+    settings:
+      # Check for suspicious append result assignments
+      appendAssign: {}
+      
+      # Check for too many blank identifiers
+      dogsled:
+        max-blank-identifiers: 2
+      
+      # Check for errors not checked in type assertions
+      errcheck:
+        check-blank: true
+        check-type-assertions: true
+      
+      # Check for hex literals with mixed case
+      hexLiteral:
+        allowedUpperCaseDigits: 0
+      
+      # Check for functions with too many parameters
+      paramTypeCombine:
+        maxParams: 5
+      
+      # Check for performance issues with range expressions
+      rangeExprCopy:
+        sizeThreshold: 512
+        skipTestFuncs: false
+      
+      # Check for performance issues with range values
+      rangeValCopy:
+        sizeThreshold: 128
+        skipTestFuncs: false
+      
+      # Check for ruleguard rules
+      ruleguard:
+        failOn: "dsl,import"
+      
+      # Check for unneeded imports
+      unimport: {}
 
   # Unused code
   unused: {}
@@ -276,8 +377,16 @@ linters-settings:
 
   # Exhaustiveness
   exhaustive:
-    check-generated: false
-    default-signifies-exhaustive: true
+    check:
+      - switch
+      - map
+    default-signifies-exhaustive: false
+    ignore-enum-members: "Example.+"
+    ignore-enum-types: "Example.+"
+    package-scope-only: false
+    explicit-exhaustive-switch: false
+    explicit-exhaustive-map: false
+    default-case-required: false
 
   # Preallocation
   prealloc:
@@ -354,11 +463,24 @@ linters-settings:
       - 'strconv.ParseFloat'
       - 'time.Sleep'
       - 'time.Duration'
+
+  # Spelling errors
+  misspell:
+    locale: US
+    ignore-rules:
+      - someword
+    extra-words:
+      - typo: "iff"
+        correction: "if"
+      - typo: "cancelation"
+        correction: "cancellation"
+    mode: restricted
   
   # 🚀 MODERN GO LINTER SETTINGS
   
   # Nested context detection
   fatcontext:
+    check-struct-pointers: true
     ignore-len: 3
   
   # Modern range loop opportunities  
@@ -375,9 +497,20 @@ linters-settings:
   # Standard slog usage validation
   sloglint:
     no-mixed-args: true
-    kv-check: true
-    attr-check: true
+    kv-only: false
+    attr-only: false
+    no-global: "all"
+    context: "all"
     static-msg: true
+    msg-style: ""
+    no-raw-keys: true
+    key-naming-case: ""
+    forbidden-keys:
+      - time
+      - level
+      - msg
+      - source
+    args-on-sep-lines: false
     
   # OpenTelemetry span validation
   spancheck:
@@ -388,6 +521,8 @@ linters-settings:
     ignore-check-signatures:
       - "telemetry.Record"
       - "telemetry.RecordError"
+    extra-start-span-signatures:
+      - "github.com/larsartmann/uniflow/telemetry.Start:opentelemetry"
       
   # Standard library constant usage
   usestdlibvars:
@@ -612,6 +747,23 @@ linters-settings:
       - "FIXME"
       - "NOTE"
       - "WARNING"
+    ignore:
+      - "0C0C"  # Common hex value that might be detected
+    comments-only: true
+
+  # Magic string/number detection
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+    match-constant: true
+    numbers: true
+    min: 2
+    max: 1000
+    ignore-calls: false
+    ignore-string-values:
+      - 'foo.+'
+    find-duplicates: true
+    eval-const-expressions: true
   
   # Modern Go features linter
   modernize:
@@ -621,6 +773,271 @@ linters-settings:
 
   # 🆕 NEW ENTERPRISE LINTERS (v2.4.0)
   
+  # Import blocklist/allowlist (complementary to gomodguard)
+  depguard:
+    rules:
+      main:
+        # Strict mode - allow only explicitly allowed packages
+        list-mode: strict
+        files:
+          - "!**/*_test.go"
+        allow:
+          - $gostd
+          # Allow our approved modules from gomodguard configuration
+          - golang.org/x/*
+          - google.golang.org/*
+          - go.opentelemetry.io/otel/*
+          - github.com/a-h/templ
+          - github.com/charmbracelet/*
+          - github.com/gin-gonic/gin
+          - github.com/spf13/viper
+          - github.com/sqlc-dev/sqlc
+          - github.com/samber/lo
+          - github.com/samber/do
+          - github.com/onsi/ginkgo/v2
+          - github.com/google/uuid
+          - github.com/klauspost/cpuid/v2
+          - github.com/cockroachdb/errors
+          - github.com/larsartmann/uniflow
+          - github.com/go-faster/yaml
+          - github.com/dominikbraun/graph
+          - github.com/hashicorp/raft
+          - github.com/failsafe-go/failsafe-go
+          - github.com/mennanov/limiters
+          - github.com/cenkalti/backoff/v4
+          - github.com/casbin/casbin
+          - github.com/govalues/money
+          - github.com/shopspring/decimal
+          - golang.org/x/text/message
+        deny:
+          # Critical security vulnerabilities
+          - pkg: "github.com/dgrijalva/jwt-go"
+            desc: "CRITICAL SECURITY: CVE-2020-26160 - deprecated jwt-go library with known vulnerabilities"
+          - pkg: "crypto/md5"
+            desc: "CRITICAL SECURITY: MD5 is broken for cryptographic purposes due to collision attacks"
+          - pkg: "crypto/sha1"
+            desc: "CRITICAL SECURITY: SHA-1 is cryptographically broken with practical collision attacks"
+
+  # Declaration order and count validation
+  decorder:
+    dec-order:
+      - type
+      - const
+      - var
+      - func
+    ignore-underscore-vars: false
+    disable-dec-order-check: false
+    disable-init-func-first-check: false
+    disable-dec-num-check: false
+
+  # Embedded struct field positioning
+  embeddedstructfieldcheck:
+    empty-line: true
+    forbid-mutex: true
+
+  # Function/method ordering
+  funcorder:
+    constructor: true
+    struct-method: true
+    alphabetical: true
+
+  # Ginkgo test framework enforcement
+  ginkgolinter:
+    suppress-len-assertion: false
+    suppress-nil-assertion: false
+    suppress-err-assertion: false
+    forbid-focus-container: true
+    allow-havelen-zero: false
+    force-expect-to: true
+    validate-async-intervals: true
+    forbid-spec-pollution: true
+
+  # Documentation practice checks
+  godoclint:
+    default: all  # Enable all documentation rules
+
+  # Declaration grouping enforcement
+  grouper:
+    const-require-single-const: true
+    const-require-grouping: true
+    import-require-single-import: true
+    import-require-grouping: true
+    type-require-single-type: true
+    type-require-grouping: true
+    var-require-single-var: true
+    var-require-grouping: true
+
+  # Interface pollution detection
+  iface:
+    enable:
+      - identical
+      - unused
+      - opaque
+      - unexported
+
+  # Import alias enforcement
+  importas:
+    no-unaliased: true
+    no-extra-aliases: true
+    alias:
+      # Standard aliases for commonly used packages
+      - pkg: github.com/onsi/ginkgo/v2
+        alias: ginkgo
+      - pkg: github.com/onsi/gomega
+        alias: gomega
+
+  # Interface unnamed parameter detection
+  inamedparam:
+    skip-single-param: false
+
+  # Interface method count limits
+  interfacebloat:
+    max: 10  # Limit interfaces to 10 methods max
+
+  # Interface return pattern enforcement (Accept Interfaces, Return Concrete Types)
+  ireturn:
+    allow:
+      - anon
+      - error
+      - empty
+      - stdlib
+
+  # Structured logging validation
+  loggercheck:
+    kitlog: false
+    klog: false
+    logr: false
+    slog: true
+    zap: false
+    require-string-key: true
+    no-printf-like: true
+
+  # Maintainability index
+  maintidx:
+    under: 50  # Flag functions with maintainability index below 50
+
+  # Slice zero-length declaration validation
+  makezero:
+    always: true
+
+  # Bytes/strings usage patterns
+  mirror:
+    # No specific settings available
+
+  # Named returns enforcement
+  nonamedreturns:
+    report-error-in-defer: true
+
+  # Prometheus metrics naming
+  promlinter:
+    strict: true
+    disabled-linters:
+      - Help
+      - MetricUnits
+      - Counter
+      - HistogramSummaryReserved
+      - MetricTypeInName
+      - ReservedChars
+      - CamelCase
+      - UnitAbbreviations
+
+  # Proto getter usage
+  protogetter:
+    skip-any-generated: true
+
+  # Receiver consistency
+  recvcheck:
+    disable-builtin: false
+
+  # Struct tag alignment
+  tagalign:
+    align: true
+    sort: true
+    order:
+      - json
+      - yaml
+      - yml
+      - toml
+      - mapstructure
+      - binding
+      - validate
+      - db
+      - gorm
+    strict: true
+
+  # Struct tag validation
+  tagliatelle:
+    case:
+      rules:
+        json: camel
+        yaml: camel
+        xml: camel
+        toml: camel
+        bson: camel
+        avro: snake
+        mapstructure: kebab
+        env: upperSnake
+        envconfig: upperSnake
+    use-field-name: true
+
+  # Example testability
+  testableexamples:
+    # No settings available
+
+  # SELECT * in SQL queries detection
+  unqueryvet:
+    check-sql-builders: true
+    allowed-patterns:
+      - "SELECT \\* FROM information_schema\\..*"
+      - "SELECT \\* FROM pg_catalog\\..*"
+      - "SELECT COUNT\\(\\*\\)"
+      - "SELECT MAX\\(\\*\\)"
+      - "SELECT MIN\\(\\*\\)"
+
+  # Testing package usage
+  usetesting:
+    os-create-temp: false
+    os-mkdir-temp: false
+    os-setenv: false
+    os-temp-dir: false
+    os-chdir: false
+    context-background: true
+    context-todo: true
+
+  # Variable name length validation
+  varnamelen:
+    max-distance: 5
+    min-name-length: 3
+    check-receiver: true
+    check-return: true
+    check-type-param: true
+    ignore-type-assert-ok: true
+    ignore-map-index-ok: true
+    ignore-chan-recv-ok: true
+    ignore-names:
+      - err
+      - ok
+      - id
+      - ctx
+      - wg
+      - db
+    ignore-decls:
+      - c echo.Context
+      - t testing.T
+      - f *foo.Bar
+      - e error
+      - i int
+      - const C
+      - T any
+
+  # Wasted assignment detection
+  wastedassign:
+    # No settings available
+
+  # Zerolog usage validation
+  zerologlint:
+    # No settings available
+
   # Unicode security - dangerous character sequences
   bidichk:
     left-to-right-embedding: true
@@ -638,6 +1055,7 @@ linters-settings:
     exclude:
       - ".*\\.pb\\.go$"    # Exclude protobuf generated files
       - ".*_gen\\.go$"     # Exclude generated files
+    use-builtin-exclusions: true  # Enable builtin exclusions for fmt, log, etc.
       
   # Sum type exhaustiveness (modern type pattern enforcement)  
   gochecksumtype:
@@ -654,6 +1072,11 @@ linters-settings:
   # Testing quality enforcement  
   testpackage:
     skip-regexp: ".*_internal_test\\.go$"
+
+  # Parallel testing
+  paralleltest:
+    ignore-missing: false
+    ignore-missing-subtests: true
     
   thelper:
     test:
