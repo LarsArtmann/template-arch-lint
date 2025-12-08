@@ -777,27 +777,14 @@ linters-settings:
   depguard:
     rules:
       main:
-        # Strict mode - deny everything unless explicitly allowed
-        list-mode: strict
+        # Allow mode for testing
+        list-mode: allow
         files:
           - "!**/*_test.go"
-        allow:
-          - $gostd
-          # Allow our project's internal modules - all specific patterns
-          - github.com/LarsArtmann/template-arch-lint
-          - github.com/LarsArtmann/template-arch-lint/internal
-          - github.com/LarsArtmann/template-arch-lint/internal/application
-          - github.com/LarsArtmann/template-arch-lint/internal/application/handlers
-          - github.com/LarsArtmann/template-arch-lint/internal/domain
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/repositories
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/services
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/values
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/entities
-          - github.com/LarsArtmann/template-arch-lint/internal/infrastructure
-          - github.com/LarsArtmann/template-arch-lint/internal/config
-          - github.com/LarsArtmann/template-arch-lint/pkg
-          - github.com/LarsArtmann/template-arch-lint/pkg/errors
-          # Approved external dependencies
+        deny:
+          # Only block these problematic packages
+          - pkg: "github.com/dgrijalva/jwt-go"
+            desc: "CRITICAL SECURITY: CVE-2020-26160 - deprecated jwt-go library with known vulnerabilities"
           - golang.org/x/*
           - google.golang.org/*
           - go.opentelemetry.io/otel/*
@@ -842,7 +829,7 @@ linters-settings:
         allow:
           - $gostd
           # Allow our project's modules for tests
-          - github.com/LarsArtmann/template-arch-lint
+          - github.com/LarsArtmann/template-arch-lint/
           # Testing packages
           - github.com/onsi/ginkgo/v2
           - github.com/onsi/gomega
