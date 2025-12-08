@@ -92,7 +92,7 @@ linters:
     
     # 🔄 DEPENDENCY & MODERNIZATION
     - gomodguard     # Dependency management linter
-    # - depguard        # Import blocklist/allowlist (complementary to gomodguard)
+    - depguard        # Import blocklist/allowlist (complementary to gomodguard)
     - dupl           # Code duplication detection
     - dupword        # Duplicate word detection
     - modernize      # Modern Go features
@@ -777,17 +777,27 @@ linters-settings:
   depguard:
     rules:
       main:
-        # Allow mode with proper internal module handling
-        list-mode: allow
+        # Strict mode - deny everything unless explicitly allowed
+        list-mode: strict
         files:
           - "!**/*_test.go"
         allow:
           - $gostd
-          # Allow our project's internal modules (wildcard approach)
+          # Allow our project's internal modules - all specific patterns
+          - github.com/LarsArtmann/template-arch-lint
           - github.com/LarsArtmann/template-arch-lint/internal
+          - github.com/LarsArtmann/template-arch-lint/internal/application
+          - github.com/LarsArtmann/template-arch-lint/internal/application/handlers
+          - github.com/LarsArtmann/template-arch-lint/internal/domain
+          - github.com/LarsArtmann/template-arch-lint/internal/domain/repositories
+          - github.com/LarsArtmann/template-arch-lint/internal/domain/services
+          - github.com/LarsArtmann/template-arch-lint/internal/domain/values
+          - github.com/LarsArtmann/template-arch-lint/internal/domain/entities
+          - github.com/LarsArtmann/template-arch-lint/internal/infrastructure
+          - github.com/LarsArtmann/template-arch-lint/internal/config
           - github.com/LarsArtmann/template-arch-lint/pkg
-          - github.com/LarsArtmann/template-arch-lint/cmd
-          # Allow our approved modules from gomodguard configuration
+          - github.com/LarsArtmann/template-arch-lint/pkg/errors
+          # Approved external dependencies
           - golang.org/x/*
           - google.golang.org/*
           - go.opentelemetry.io/otel/*
@@ -825,16 +835,14 @@ linters-settings:
           - pkg: "crypto/sha1"
             desc: "CRITICAL SECURITY: SHA-1 is cryptographically broken with practical collision attacks"
       tests:
-        # Allow mode for test files as well
+        # Allow mode for test files
         list-mode: allow
         files:
           - "**/*_test.go"
         allow:
           - $gostd
-          # Allow our project's internal modules (wildcard approach)
-          - github.com/LarsArtmann/template-arch-lint/internal
-          - github.com/LarsArtmann/template-arch-lint/pkg
-          - github.com/LarsArtmann/template-arch-lint/cmd
+          # Allow our project's modules for tests
+          - github.com/LarsArtmann/template-arch-lint
           # Testing packages
           - github.com/onsi/ginkgo/v2
           - github.com/onsi/gomega
