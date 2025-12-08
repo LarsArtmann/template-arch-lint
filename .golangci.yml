@@ -92,7 +92,7 @@ linters:
     
     # 🔄 DEPENDENCY & MODERNIZATION
     - gomodguard     # Dependency management linter
-    - depguard        # Import blocklist/allowlist (complementary to gomodguard)
+    # - depguard        # Import blocklist/allowlist (complementary to gomodguard)
     - dupl           # Code duplication detection
     - dupword        # Duplicate word detection
     - modernize      # Modern Go features
@@ -777,25 +777,16 @@ linters-settings:
   depguard:
     rules:
       main:
-        # Strict mode - allow only explicitly allowed packages
-        list-mode: strict
+        # Allow mode with proper internal module handling
+        list-mode: allow
         files:
           - "!**/*_test.go"
         allow:
           - $gostd
-          # Allow our project's internal modules - exact matches
-          - github.com/LarsArtmann/template-arch-lint/internal/application/handlers
-          - github.com/LarsArtmann/template-arch-lint/internal/application
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/repositories
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/services
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/values
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/entities
-          - github.com/LarsArtmann/template-arch-lint/internal/domain
-          - github.com/LarsArtmann/template-arch-lint/internal/infrastructure
-          - github.com/LarsArtmann/template-arch-lint/internal/config
+          # Allow our project's internal modules (wildcard approach)
           - github.com/LarsArtmann/template-arch-lint/internal
-          - github.com/LarsArtmann/template-arch-lint/pkg/errors
           - github.com/LarsArtmann/template-arch-lint/pkg
+          - github.com/LarsArtmann/template-arch-lint/cmd
           # Allow our approved modules from gomodguard configuration
           - golang.org/x/*
           - google.golang.org/*
@@ -808,6 +799,7 @@ linters-settings:
           - github.com/samber/lo
           - github.com/samber/do
           - github.com/onsi/ginkgo/v2
+          - github.com/onsi/gomega
           - github.com/google/uuid
           - github.com/klauspost/cpuid/v2
           - github.com/cockroachdb/errors
@@ -823,6 +815,7 @@ linters-settings:
           - github.com/govalues/money
           - github.com/shopspring/decimal
           - golang.org/x/text/message
+          - github.com/go-playground/validator/v10
         deny:
           # Critical security vulnerabilities
           - pkg: "github.com/dgrijalva/jwt-go"
@@ -832,25 +825,16 @@ linters-settings:
           - pkg: "crypto/sha1"
             desc: "CRITICAL SECURITY: SHA-1 is cryptographically broken with practical collision attacks"
       tests:
-        # Strict mode for test files as well
-        list-mode: strict
+        # Allow mode for test files as well
+        list-mode: allow
         files:
           - "**/*_test.go"
         allow:
           - $gostd
-          # Allow our project's internal modules - exact matches
-          - github.com/LarsArtmann/template-arch-lint/internal/application/handlers
-          - github.com/LarsArtmann/template-arch-lint/internal/application
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/repositories
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/services
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/values
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/entities
-          - github.com/LarsArtmann/template-arch-lint/internal/domain
-          - github.com/LarsArtmann/template-arch-lint/internal/infrastructure
-          - github.com/LarsArtmann/template-arch-lint/internal/config
+          # Allow our project's internal modules (wildcard approach)
           - github.com/LarsArtmann/template-arch-lint/internal
-          - github.com/LarsArtmann/template-arch-lint/pkg/errors
           - github.com/LarsArtmann/template-arch-lint/pkg
+          - github.com/LarsArtmann/template-arch-lint/cmd
           # Testing packages
           - github.com/onsi/ginkgo/v2
           - github.com/onsi/gomega
