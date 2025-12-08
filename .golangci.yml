@@ -43,6 +43,7 @@ linters:
     # 📊 CODE QUALITY
     - bodyclose      # HTTP body closure
     - cyclop         # Cyclomatic complexity
+    - durationcheck  # Duration multiplication safety
     - exhaustive     # Switch statement completeness
     - gochecksumtype # Exhaustiveness checks on Go sum types
     - funlen         # Function length
@@ -91,10 +92,41 @@ linters:
     
     # 🔄 DEPENDENCY & MODERNIZATION
     - gomodguard     # Dependency management linter
+    - depguard        # Import blocklist/allowlist (complementary to gomodguard)
     - dupl           # Code duplication detection
     - dupword        # Duplicate word detection
     - modernize      # Modern Go features
     - nosprintfhostport  # Detect fmt.Sprintf misuse for host:port URLs
+
+    # 🏗️ ADDITIONAL ARCHITECTURE & STRUCTURE ENFORCEMENT
+    - canonicalheader  # HTTP header canonicalization
+    - decorder       # Declaration order and count validation
+    - embeddedstructfieldcheck  # Embedded struct field positioning
+    - funcorder      # Function/method ordering
+    - ginkgolinter   # Ginkgo test framework enforcement
+    - godoclint      # Documentation practice checks
+    - grouper        # Declaration grouping enforcement
+    - iface          # Interface pollution detection
+    - importas       # Import alias enforcement
+    - inamedparam     # Interface unnamed parameter detection
+    - interfacebloat # Interface method count limits
+    - ireturn        # Interface return pattern enforcement
+    - loggercheck    # Structured logging validation
+    - maintidx       # Maintainability index
+    - makezero       # Slice zero-length declaration validation
+    - mirror         # Bytes/strings usage patterns
+    - nonamedreturns # Named returns enforcement
+    - promlinter     # Prometheus metrics naming
+    - protogetter    # Proto getter usage
+    - recvcheck      # Receiver consistency
+    - tagalign       # Struct tag alignment
+    - tagliatelle    # Struct tag validation
+    - testableexamples # Example testability
+    - unqueryvet     # SELECT * in SQL queries detection
+    - usetesting     # Testing package usage
+    - varnamelen     # Variable name length validation
+    - wastedassign   # Wasted assignment detection
+    - zerologlint    # Zerolog usage validation
 
 
 # 🔧 LINTER SETTINGS - Maximum strictness
@@ -374,26 +406,200 @@ linters-settings:
   
   # 🔄 DEPENDENCY & MODERNIZATION SETTINGS
   
-  # Dependency management linter
+  # Dependency management linter - CRITICAL SECURITY & ARCHITECTURE ENFORCEMENT
   gomodguard:
     allowed:
       modules:
-        # Core Go ecosystem
+        # Approved Go ecosystem
         - golang.org/x/*
         - google.golang.org/*
-        # Standard library domains
+        - go.opentelemetry.io/otel/*
+        - github.com/a-h/templ
+        - github.com/charmbracelet/*
+        - github.com/gin-gonic/gin
+        - github.com/spf13/viper
+        - github.com/sqlc-dev/sqlc
+        - github.com/samber/lo
+        - github.com/samber/do
+        - github.com/maypok86/otter/v2
+        - github.com/onsi/ginkgo/v2
+        - github.com/google/uuid
+        - github.com/klauspost/cpuid/v2
+        - github.com/cockroachdb/errors
+        - github.com/larsartmann/uniflow
+        - github.com/go-faster/yaml
+        - github.com/dominikbraun/graph
+        - github.com/hashicorp/raft
+        - github.com/failsafe-go/failsafe-go
+        - github.com/mennanov/limiters
+        - github.com/cenkalti/backoff/v4
+        - github.com/casbin/casbin
+        - github.com/govalues/money
+        - github.com/shopspring/decimal
+        - golang.org/x/text/message
       domains:
         - golang.org
         - google.golang.org
+        - go.opentelemetry.io
         - gopkg.in
+    
     blocked:
       modules:
-        # Deprecated packages
+        # 🚨 CRITICAL SECURITY BANS - CVEs & Vulnerabilities
+        - github.com/dgrijalva/jwt-go:
+            reason: "CRITICAL SECURITY: CVE-2020-26160 - deprecated jwt-go library with known vulnerabilities"
+            recommendations:
+              - github.com/golang-jwt/jwt/v5
+        - github.com/square/go-jose/v3:
+            reason: "CRITICAL SECURITY: Multiple CVEs in go-jose v3 and below - only v4+ has security fixes"
+            recommendations:
+              - github.com/go-jose/go-jose/v4
+        - crypto/md5:
+            reason: "CRITICAL SECURITY: MD5 is broken for cryptographic purposes due to collision attacks"
+            recommendations:
+              - crypto/sha256
+        - crypto/sha1:
+            reason: "CRITICAL SECURITY: SHA-1 is cryptographically broken with practical collision attacks"
+            recommendations:
+              - crypto/sha256
+        - math/rand:
+            reason: "CRITICAL SECURITY: Use crypto/rand for all cryptographic random number generation"
+            recommendations:
+              - crypto/rand
+        
+        # 🚨 DEPRECATED/ARCHIVED BANS - Unmaintained libraries
+        - github.com/featurebasedb/featurebase:
+            reason: "CRITICAL: Repository archived February 2024 - unmaintained analytical database with data integrity risks"
+            recommendations:
+              - github.com/ClickHouse/clickhouse-go
+        - github.com/mitchellh/go-homedir:
+            reason: "CRITICAL: Repository archived July 2024 - unmaintained security risk. Use os.UserHomeDir() instead"
+            recommendations:
+              - os
+        - github.com/mitchellh/mapstructure:
+            reason: "CRITICAL: Repository archived July 2024 - unmaintained security risk. Use standard library JSON or modern alternatives"
+            recommendations:
+              - encoding/json
+        - github.com/russross/blackfriday:
+            reason: "CRITICAL: Last release Nov 2020 (5+ years old), 187 open issues, unmaintained. Major security and compatibility risk"
+            recommendations:
+              - github.com/gomarkdown/markdown
+        - github.com/blang/vfs:
+            reason: "CRITICAL: Inactive since 2018 - unmaintained library with security risks"
+            recommendations:
+              - io/fs
+        - github.com/siddontang/ledisdb:
+            reason: "CRITICAL: Project abandoned for 3+ years - no updates or security patches"
+            recommendations:
+              - github.com/go-redis/redis/v8
+        - github.com/gorgonia/gorgonia:
+            reason: "CRITICAL: Abandoned project - last update Aug 2024, 114 open issues, no GPU acceleration"
+            recommendations:
+              - github.com/klauspost/cpuid/v2
+        
+        # 🚀 PERFORMANCE BANS - Superior alternatives available
+        - github.com/patrickmn/go-cache:
+            reason: "Otter v2 provides 11x better performance (141M vs 12M ops/s) with superior hit rates (99.5% vs 92%)"
+            recommendations:
+              - github.com/maypok86/otter/v2
+        - github.com/dgraph-io/ristretto/v2:
+            reason: "ristretto has critical hit rate issues (85% vs 99.5%) and poor performance despite its popularity"
+            recommendations:
+              - github.com/maypok86/otter/v2
+        - github.com/allegro/bigcache/v3:
+            reason: "Otter v2 offers 300x better performance (141M vs 441ns ops) with modern generics and superior eviction policies"
+            recommendations:
+              - github.com/maypok86/otter/v2
+        - github.com/coocood/freecache:
+            reason: "Otter v2 provides better performance, modern API, and proven production track record over freecache"
+            recommendations:
+              - github.com/maypok86/otter/v2
+        - github.com/hashicorp/golang-lru/v2:
+            reason: "Otter v2 provides advanced W-TinyLFU eviction vs simple LRU, with dramatically better performance and features"
+            recommendations:
+              - github.com/maypok86/otter/v2
+        - github.com/satori/go.uuid:
+            reason: "Poor performance - 497ns vs google/uuid 108ns (4.6x slower)"
+            recommendations:
+              - github.com/google/uuid
         - github.com/golang/protobuf:
             reason: "Use google.golang.org/protobuf instead"
             recommendations:
               - google.golang.org/protobuf
-      local-replace-directives: true
+        
+        # 🏗️ ARCHITECTURAL BANS - Company standards & best practices
+        - github.com/onsi/gomega:
+            reason: "Use Ginkgo's built-in assertions instead of Gomega dependencies"
+            recommendations:
+              - github.com/onsi/ginkgo/v2
+        - github.com/cucumber/godog:
+            reason: "Prefer Ginkgo for BDD-style testing in Go"
+            recommendations:
+              - github.com/onsi/ginkgo/v2
+        - github.com/gorilla/mux:
+            reason: "Gin provides better performance, middleware ecosystem, and integrated HTTP features"
+            recommendations:
+              - github.com/gin-gonic/gin
+        - github.com/labstack/echo/v4:
+            reason: "Gin has better community adoption and middleware ecosystem"
+            recommendations:
+              - github.com/gin-gonic/gin
+        - github.com/kelseyhightower/envconfig:
+            reason: "Viper provides more comprehensive configuration management with multiple sources"
+            recommendations:
+              - github.com/spf13/viper
+        - gorm.io/gorm:
+            reason: "Use sqlc for type-safe SQL without ORM magic"
+            recommendations:
+              - github.com/sqlc-dev/sqlc
+        - github.com/oklog/run:
+            reason: "samber/do provides comprehensive dependency injection vs simple goroutine coordination"
+            recommendations:
+              - github.com/samber/do
+        - github.com/google/wire:
+            reason: "samber/do provides simpler dependency injection with better runtime flexibility"
+            recommendations:
+              - github.com/samber/do
+        - github.com/urfave/cli/v2:
+            reason: "fang provides better integration with cobra ecosystem and battery-included features"
+            recommendations:
+              - github.com/charmbracelet/fang
+        - github.com/pkg/errors:
+            reason: "Use cockroachdb/errors or our LarsArtmann/uniflow for better error handling"
+            recommendations:
+              - github.com/larsartmann/uniflow
+        
+        # 🌐 OBSERVABILITY BANS - OpenTelemetry standardization
+        - github.com/prometheus/client_golang:
+            reason: "Use OpenTelemetry metrics exporter for unified observability instead of separate Prometheus client"
+            recommendations:
+              - go.opentelemetry.io/otel/exporters/prometheus
+        - github.com/uber/jaeger-client-go:
+            reason: "Use OpenTelemetry OTLP exporter for standardized tracing instead of Jaeger-specific client"
+            recommendations:
+              - go.opentelemetry.io/otel/exporters/otlp/otlptrace
+        - github.com/openzipkin/zipkin-go:
+            reason: "Use OpenTelemetry tracing exporters instead of Zipkin-specific implementations"
+            recommendations:
+              - go.opentelemetry.io/otel/exporters/zipkin
+        - github.com/opentracing/opentracing-go:
+            reason: "OpenTracing is deprecated - migrate to OpenTelemetry for CNCF standard observability"
+            recommendations:
+              - go.opentelemetry.io/otel
+        - github.com/sirupsen/logrus:
+            reason: "Use structured logging with OpenTelemetry or standard library logger"
+            recommendations:
+              - go.opentelemetry.io/otel
+        - github.com/rs/zerolog:
+            reason: "Use charmbracelet/fang for better CLI logging integration or OpenTelemetry for observability"
+            recommendations:
+              - github.com/charmbracelet/fang
+        - go.uber.org/zap:
+            reason: "Use charmbracelet/fang for better CLI logging integration or OpenTelemetry for observability"
+            recommendations:
+              - github.com/charmbracelet/fang
+    
+    local-replace-directives: true
   
   # Code duplication detection
   dupl:
