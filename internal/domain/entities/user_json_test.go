@@ -8,14 +8,14 @@ import (
 	gomega "github.com/onsi/gomega"
 )
 
-// JSON Marshaling Test Suite - Verifies custom JSON implementation works correctly
+// JSON Marshaling Test Suite - Verifies custom JSON implementation works correctly.
 var _ = ginkgo.Describe("User JSON Marshaling", func() {
 	var user *User
 
 	ginkgo.BeforeEach(func() {
 		var err error
 		user, err = NewUserFromStrings("user-123", "test@example.com", "TestUser")
-		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 		// Set specific timestamps for predictable testing
 		user.Created = time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC)
@@ -28,13 +28,13 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 			jsonBytes, err := json.Marshal(user)
 
 			// Then
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 			gomega.Expect(jsonBytes).ToNot(gomega.BeEmpty())
 
 			// Parse back to verify structure
 			var jsonMap map[string]any
 			err = json.Unmarshal(jsonBytes, &jsonMap)
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// Verify all expected fields are present with correct types
 			gomega.Expect(jsonMap["id"]).To(gomega.Equal("user-123"))
@@ -47,7 +47,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 		ginkgo.It("should marshal to clean JSON without value object complexity", func() {
 			// When
 			jsonBytes, err := json.Marshal(user)
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			jsonString := string(jsonBytes)
 
@@ -62,17 +62,17 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 		ginkgo.It("should handle special characters in email and name", func() {
 			// Given
 			specialUser, err := NewUserFromStrings("user-456", "test+special@sub.domain.com", "José María")
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// When
 			jsonBytes, err := json.Marshal(specialUser)
 
 			// Then
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			var jsonMap map[string]any
 			err = json.Unmarshal(jsonBytes, &jsonMap)
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			gomega.Expect(jsonMap["email"]).To(gomega.Equal("test+special@sub.domain.com"))
 			gomega.Expect(jsonMap["name"]).To(gomega.Equal("José María"))
@@ -95,7 +95,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 			err := json.Unmarshal([]byte(jsonInput), &unmarshaledUser)
 
 			// Then
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// Verify value objects were created correctly
 			gomega.Expect(unmarshaledUser.ID.String()).To(gomega.Equal("user-789"))
@@ -190,11 +190,11 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 
 			// When - Marshal then unmarshal
 			jsonBytes, err := json.Marshal(original)
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			var roundtrip User
 			err = json.Unmarshal(jsonBytes, &roundtrip)
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// Then - Data should be identical
 			gomega.Expect(roundtrip.ID.String()).To(gomega.Equal(original.ID.String()))
@@ -221,7 +221,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 
 			var unmarshaledUser User
 			err := json.Unmarshal([]byte(jsonInput), &unmarshaledUser)
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// When - Use domain methods
 			domain := unmarshaledUser.EmailDomain()
@@ -233,7 +233,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 
 			// Validation should also work
 			err = unmarshaledUser.Validate()
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 		})
 	})
 })

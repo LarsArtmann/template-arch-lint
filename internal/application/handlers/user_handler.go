@@ -33,8 +33,8 @@ func generateUserID() string {
 // CreateUser handles user creation requests.
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var req struct {
-		Email string `json:"email" binding:"required,email"`
-		Name  string `json:"name" binding:"required,min=2,max=100"`
+		Email string `binding:"required,email"         json:"email"`
+		Name  string `binding:"required,min=2,max=100" json:"name"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Error("Invalid request format", "error", err)
@@ -121,8 +121,8 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	}
 
 	var req struct {
-		Email string `json:"email" binding:"omitempty,email"`
-		Name  string `json:"name" binding:"omitempty,min=2,max=100"`
+		Email string `binding:"omitempty,email"         json:"email"`
+		Name  string `binding:"omitempty,min=2,max=100" json:"name"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Error("Invalid request format", "error", err)

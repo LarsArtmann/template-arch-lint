@@ -12,7 +12,7 @@ import (
 
 // InMemoryUserRepository implements UserRepository interface with in-memory storage.
 // TODO: SCALABILITY - Consider implementing LRU cache eviction for production use
-// TODO: PERSISTENCE - Add optional backup/restore functionality
+// TODO: PERSISTENCE - Add optional backup/restore functionality.
 type InMemoryUserRepository struct {
 	mu    sync.RWMutex
 	users map[values.UserID]*entities.User

@@ -7,7 +7,7 @@ import (
 	gomega "github.com/onsi/gomega"
 )
 
-// Split Brain Test Suite - Documents current behavior and defines target behavior
+// Split Brain Test Suite - Documents current behavior and defines target behavior.
 var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 	ginkgo.Describe("CURRENT SPLIT BRAIN ISSUES", func() {
 		var user *User
@@ -15,7 +15,7 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 		ginkgo.BeforeEach(func() {
 			var err error
 			user, err = NewUserFromStrings("user-123", "test@example.com", "TestUser")
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 		})
 
 		ginkgo.It("should demonstrate split brain ELIMINATED - single value object access", func() {
@@ -31,7 +31,7 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 		ginkgo.It("should demonstrate synchronization ELIMINATED - single source of truth", func() {
 			// When
 			err := user.SetEmail("new@example.com")
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// REFACTORED: Only value object updated - no synchronization needed
 			gomega.Expect(user.GetEmail().Value()).To(gomega.Equal("new@example.com")) // Value object updated
@@ -43,7 +43,7 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 		ginkgo.It("should demonstrate lazy initialization ELIMINATED - direct value object access", func() {
 			// Given - Create user properly through constructor
 			directUser, err := NewUserFromStrings("user-123", "direct@example.com", "DirectUser")
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// REFACTORED: No lazy initialization - value objects created once during construction
 			email1 := directUser.GetEmail()
@@ -64,7 +64,7 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 			gomega.Expect(err).To(gomega.HaveOccurred()) // Validation happens in setter
 
 			// User remains in valid state - invalid updates are rejected
-			gomega.Expect(user.Validate()).To(gomega.BeNil()) // Still valid
+			gomega.Expect(user.Validate()).To(gomega.Succeed()) // Still valid
 		})
 	})
 
@@ -74,7 +74,7 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 			// No more user.Email string field - only private user.email values.Email
 
 			user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// VERIFIED:
 			// 1. No direct string field access - fields are private
@@ -88,15 +88,15 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 		ginkgo.It("should have custom JSON marshaling for value objects", func() {
 			// TARGET: JSON serialization should work seamlessly
 			user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// Should marshal to expected JSON structure
 			jsonBytes, err := json.Marshal(user)
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			var jsonMap map[string]any
 			err = json.Unmarshal(jsonBytes, &jsonMap)
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// Should contain string values, not value object structures
 			gomega.Expect(jsonMap["id"]).To(gomega.Equal("user-123"))
@@ -116,7 +116,7 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 
 			var user User
 			err := json.Unmarshal([]byte(jsonInput), &user)
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// Should create valid value objects internally
 			gomega.Expect(user.GetEmail().Value()).To(gomega.Equal("json@example.com"))
@@ -134,8 +134,8 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 
 			// Only valid way should be through constructors and setters
 			user, err := NewUserFromStrings("user-123", "valid@example.com", "ValidName")
-			gomega.Expect(err).To(gomega.BeNil())
-			gomega.Expect(user.Validate()).To(gomega.BeNil()) // Always valid
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
+			gomega.Expect(user.Validate()).To(gomega.Succeed()) // Always valid
 		})
 
 		ginkgo.It("should eliminate lazy initialization overhead", func() {
@@ -143,7 +143,7 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 			// No repeated validation on every getter call
 
 			user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// Multiple getter calls should return same object (no re-validation)
 			email1 := user.GetEmail()
@@ -159,7 +159,7 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 		ginkgo.It("should verify no string fields remain after refactoring", func() {
 			// VALIDATED: Refactoring was successful
 			user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// VERIFIED: These are the ONLY ways to access data:
 			gomega.Expect(user.ID.String()).To(gomega.Equal("user-123"))                // UserID value object
@@ -174,10 +174,10 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 		ginkgo.It("should verify setter synchronization is eliminated", func() {
 			// After refactoring, setters should only update value objects
 			user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			err = user.SetEmail("new@example.com")
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// Only value object should be updated (no dual field sync needed)
 			gomega.Expect(user.GetEmail().Value()).To(gomega.Equal("new@example.com"))
@@ -186,10 +186,10 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 		ginkgo.It("should verify JSON marshaling works without string fields", func() {
 			// Validate that custom JSON marshaling handles value objects
 			user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			jsonBytes, err := json.Marshal(user)
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// Should produce clean JSON without value object complexity
 			gomega.Expect(string(jsonBytes)).To(gomega.ContainSubstring("\"email\":\"test@example.com\""))
@@ -201,7 +201,7 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 		ginkgo.It("should maintain backward compatibility for existing code", func() {
 			// Existing code using User entity should continue working
 			user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// These methods must continue to work after refactoring:
 			gomega.Expect(user.GetEmail().Value()).To(gomega.Equal("test@example.com"))

@@ -14,7 +14,7 @@ type Email struct {
 }
 
 // emailRegex provides basic email validation pattern.
-// Updated to support numeric domains like IP addresses
+// Updated to support numeric domains like IP addresses.
 var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9]{2,}$`)
 
 // NewEmail creates a new Email value object with validation.
@@ -59,7 +59,7 @@ func (e Email) LocalPart() string {
 
 // Equals compares two Email value objects (case-insensitive).
 func (e Email) Equals(other Email) bool {
-	return strings.ToLower(e.value) == strings.ToLower(other.value)
+	return strings.EqualFold(e.value, other.value)
 }
 
 // IsEmpty checks if the email is empty.

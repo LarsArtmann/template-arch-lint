@@ -783,6 +783,9 @@ linters-settings:
           - "!**/*_test.go"
         allow:
           - $gostd
+          # Allow our project's internal modules
+          - github.com/LarsArtmann/template-arch-lint/internal/*
+          - github.com/LarsArtmann/template-arch-lint/pkg/*
           # Allow our approved modules from gomodguard configuration
           - golang.org/x/*
           - google.golang.org/*
@@ -806,6 +809,7 @@ linters-settings:
           - github.com/mennanov/limiters
           - github.com/cenkalti/backoff/v4
           - github.com/casbin/casbin
+          - github.com/go-faster/errors
           - github.com/govalues/money
           - github.com/shopspring/decimal
           - golang.org/x/text/message

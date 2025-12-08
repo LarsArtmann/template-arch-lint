@@ -22,7 +22,7 @@ func TestUserServiceErrorPaths(t *testing.T) {
 	RunSpecs(t, "🚨 UserService Error Path Testing Suite")
 }
 
-// Mock repository that can simulate various failure scenarios
+// Mock repository that can simulate various failure scenarios.
 type FailingUserRepository struct {
 	saveError         error
 	findByIDError     error

@@ -2,10 +2,10 @@ package values
 
 import "slices"
 
-// EnvVar represents a typed environment variable name for type-safe configuration
+// EnvVar represents a typed environment variable name for type-safe configuration.
 type EnvVar string
 
-// Server configuration environment variables
+// Server configuration environment variables.
 const (
 	EnvServerPort         EnvVar = "APP_SERVER_PORT"
 	EnvServerHost         EnvVar = "APP_SERVER_HOST"
@@ -14,7 +14,7 @@ const (
 	EnvServerIdleTimeout  EnvVar = "APP_SERVER_IDLE_TIMEOUT"
 )
 
-// Database configuration environment variables
+// Database configuration environment variables.
 const (
 	EnvDatabaseDriver          EnvVar = "APP_DATABASE_DRIVER"
 	EnvDatabaseDSN             EnvVar = "APP_DATABASE_DSN"
@@ -23,33 +23,33 @@ const (
 	EnvDatabaseConnMaxLifetime EnvVar = "APP_DATABASE_CONN_MAX_LIFETIME"
 )
 
-// Logging configuration environment variables
+// Logging configuration environment variables.
 const (
 	EnvLoggingLevel  EnvVar = "APP_LOGGING_LEVEL"
 	EnvLoggingFormat EnvVar = "APP_LOGGING_FORMAT"
 	EnvLoggingOutput EnvVar = "APP_LOGGING_OUTPUT"
 )
 
-// Application configuration environment variables
+// Application configuration environment variables.
 const (
 	EnvApplicationName        EnvVar = "APP_NAME"
 	EnvApplicationVersion     EnvVar = "APP_VERSION"
 	EnvApplicationEnvironment EnvVar = "APP_ENVIRONMENT"
 )
 
-// JWT configuration environment variables
+// JWT configuration environment variables.
 const (
 	EnvJWTSecretKey EnvVar = "APP_JWT_SECRET_KEY" // #nosec G101 -- This is just the environment variable name, not a hardcoded secret
 	EnvJWTIssuer    EnvVar = "APP_JWT_ISSUER"
 	EnvJWTAlgorithm EnvVar = "APP_JWT_ALGORITHM"
 )
 
-// String returns the environment variable name as a string
+// String returns the environment variable name as a string.
 func (e EnvVar) String() string {
 	return string(e)
 }
 
-// AllEnvVars returns a slice of all defined environment variables
+// AllEnvVars returns a slice of all defined environment variables.
 func AllEnvVars() []EnvVar {
 	return []EnvVar{
 		// Server
@@ -83,7 +83,7 @@ func AllEnvVars() []EnvVar {
 	}
 }
 
-// Category returns the configuration category for this environment variable
+// Category returns the configuration category for this environment variable.
 func (e EnvVar) Category() string {
 	switch e {
 	case EnvServerPort, EnvServerHost, EnvServerReadTimeout, EnvServerWriteTimeout, EnvServerIdleTimeout:
@@ -101,7 +101,7 @@ func (e EnvVar) Category() string {
 	}
 }
 
-// IsRequired returns true if this environment variable is required for the application to run
+// IsRequired returns true if this environment variable is required for the application to run.
 func (e EnvVar) IsRequired() bool {
 	requiredVars := []EnvVar{
 		EnvApplicationName,
@@ -115,7 +115,7 @@ func (e EnvVar) IsRequired() bool {
 	return slices.Contains(requiredVars, e)
 }
 
-// IsSensitive returns true if this environment variable contains sensitive information
+// IsSensitive returns true if this environment variable contains sensitive information.
 func (e EnvVar) IsSensitive() bool {
 	sensitiveVars := []EnvVar{
 		EnvJWTSecretKey,

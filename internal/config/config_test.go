@@ -386,7 +386,7 @@ func testInvalidEnvironment(t *testing.T) {
 	}
 }
 
-// TestConfigurationParameterValidation tests comprehensive configuration validation at startup
+// TestConfigurationParameterValidation tests comprehensive configuration validation at startup.
 func TestConfigurationParameterValidation(t *testing.T) {
 	t.Run("server configuration validation", func(t *testing.T) {
 		testServerConfigValidation(t)
@@ -409,7 +409,7 @@ func TestConfigurationParameterValidation(t *testing.T) {
 	})
 }
 
-// testServerConfigValidation tests server configuration parameter validation
+// testServerConfigValidation tests server configuration parameter validation.
 func testServerConfigValidation(t *testing.T) {
 	t.Helper()
 
@@ -453,7 +453,7 @@ func testServerConfigValidation(t *testing.T) {
 	}
 }
 
-// testDatabaseConfigValidation tests database configuration parameter validation
+// testDatabaseConfigValidation tests database configuration parameter validation.
 func testDatabaseConfigValidation(t *testing.T) {
 	t.Helper()
 
@@ -494,7 +494,7 @@ func testDatabaseConfigValidation(t *testing.T) {
 	}
 }
 
-// testLoggingConfigValidation tests logging configuration parameter validation
+// testLoggingConfigValidation tests logging configuration parameter validation.
 func testLoggingConfigValidation(t *testing.T) {
 	t.Helper()
 
@@ -536,7 +536,7 @@ func testLoggingConfigValidation(t *testing.T) {
 	}
 }
 
-// testApplicationConfigValidation tests application configuration parameter validation
+// testApplicationConfigValidation tests application configuration parameter validation.
 func testApplicationConfigValidation(t *testing.T) {
 	t.Helper()
 
@@ -578,7 +578,7 @@ func testApplicationConfigValidation(t *testing.T) {
 	}
 }
 
-// testCrossConfigurationDependencies tests validation of configuration dependencies
+// testCrossConfigurationDependencies tests validation of configuration dependencies.
 func testCrossConfigurationDependencies(t *testing.T) {
 	t.Helper()
 	t.Run("database connection limits consistency", testDatabaseConnectionLimits)
@@ -655,7 +655,7 @@ func testLoggingPathValidation(t *testing.T) {
 	}
 }
 
-// TestConfigValidationErrorMessages tests that validation errors provide clear messages
+// TestConfigValidationErrorMessages tests that validation errors provide clear messages.
 func TestConfigValidationErrorMessages(t *testing.T) {
 	testCases := []struct {
 		envVar      string
@@ -694,7 +694,7 @@ func TestConfigValidationErrorMessages(t *testing.T) {
 	}
 }
 
-// TestConfigValidationPerformance tests that config validation is efficient
+// TestConfigValidationPerformance tests that config validation is efficient.
 func TestConfigValidationPerformance(t *testing.T) {
 	const iterations = 100
 

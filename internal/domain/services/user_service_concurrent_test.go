@@ -432,7 +432,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				// Verify all users are deleted
 				finalUsers, err := userService.ListUsers(ctx)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(finalUsers).To(HaveLen(0))
+				Expect(finalUsers).To(BeEmpty())
 			})
 		})
 	})

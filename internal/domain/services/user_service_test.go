@@ -263,7 +263,7 @@ var _ = Describe("UserService", func() {
 				users, err := userService.ListUsers(ctx)
 
 				Expect(err).ToNot(HaveOccurred())
-				Expect(users).To(HaveLen(0))
+				Expect(users).To(BeEmpty())
 			})
 		})
 	})
@@ -544,7 +544,7 @@ var _ = Describe("UserService", func() {
 					activeUsers, err := userService.FilterActiveUsers(ctx)
 
 					Expect(err).ToNot(HaveOccurred())
-					Expect(activeUsers).To(HaveLen(0))
+					Expect(activeUsers).To(BeEmpty())
 					Expect(activeUsers).ToNot(BeNil())
 				})
 

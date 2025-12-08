@@ -71,6 +71,7 @@ type DomainError interface {
 // ValidationError represents validation failures in domain entities.
 type ValidationError struct {
 	baseError
+
 	field string
 }
 
@@ -93,7 +94,7 @@ func NewRequiredFieldError(field string) *ValidationError {
 	return &ValidationError{
 		baseError: baseError{
 			code:    RequiredFieldCode,
-			message: fmt.Sprintf("%s cannot be empty", field),
+			message: field + " cannot be empty",
 			details: ErrorDetails{
 				Field: field,
 			},
@@ -115,6 +116,7 @@ func (e *ValidationError) Field() string {
 // NotFoundError represents resources that cannot be found.
 type NotFoundError struct {
 	baseError
+
 	resource string
 	id       string
 }
@@ -174,6 +176,7 @@ func (e *ConflictError) HTTPStatus() int {
 // InternalError represents system-level errors.
 type InternalError struct {
 	baseError
+
 	cause error
 }
 

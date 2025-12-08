@@ -16,7 +16,7 @@ var _ = ginkgo.Describe("User Entity", func() {
 			ginkgo.It("should create a new user successfully", func() {
 				// Given
 				id, idErr := values.NewUserID("user-123")
-				gomega.Expect(idErr).To(gomega.BeNil())
+				gomega.Expect(idErr).ToNot(gomega.HaveOccurred())
 				// Convert to domain values for entities.NewUser
 				email := "test@example.com"
 				name := "TestUser"
@@ -25,7 +25,7 @@ var _ = ginkgo.Describe("User Entity", func() {
 				user, err := NewUser(id, email, name)
 
 				// Then
-				gomega.Expect(err).To(gomega.BeNil())
+				gomega.Expect(err).ToNot(gomega.HaveOccurred())
 				gomega.Expect(user).ToNot(gomega.BeNil())
 				gomega.Expect(user.ID.Equals(id)).To(gomega.BeTrue())
 				gomega.Expect(user.GetEmail().String()).To(gomega.Equal(email))
@@ -44,7 +44,7 @@ var _ = ginkgo.Describe("User Entity", func() {
 
 				// Then
 				afterCreation := time.Now()
-				gomega.Expect(err).To(gomega.BeNil())
+				gomega.Expect(err).ToNot(gomega.HaveOccurred())
 				gomega.Expect(user.Created).To(gomega.BeTemporally(">=", beforeCreation))
 				gomega.Expect(user.Created).To(gomega.BeTemporally("<=", afterCreation))
 				gomega.Expect(user.Modified).To(gomega.Equal(user.Created))
@@ -127,7 +127,7 @@ var _ = ginkgo.Describe("User Entity", func() {
 			user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
 
 			// Then
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 			gomega.Expect(user).ToNot(gomega.BeNil())
 			gomega.Expect(user.ID.String()).To(gomega.Equal("user-123"))
 		})
@@ -138,13 +138,13 @@ var _ = ginkgo.Describe("User Entity", func() {
 			ginkgo.It("should pass validation", func() {
 				// Given
 				user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
-				gomega.Expect(err).To(gomega.BeNil())
+				gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 				// When
 				err = user.Validate()
 
 				// Then
-				gomega.Expect(err).To(gomega.BeNil())
+				gomega.Expect(err).ToNot(gomega.HaveOccurred())
 			})
 		})
 
@@ -213,7 +213,7 @@ var _ = ginkgo.Describe("User Entity", func() {
 				err := user.Validate()
 
 				// Then - Current implementation doesn't validate timestamps
-				gomega.Expect(err).To(gomega.BeNil())
+				gomega.Expect(err).ToNot(gomega.HaveOccurred())
 			})
 		})
 	})
@@ -224,7 +224,7 @@ var _ = ginkgo.Describe("User Entity", func() {
 		ginkgo.BeforeEach(func() {
 			var err error
 			user, err = NewUserFromStrings("user-123", "test@example.com", "TestUser")
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 		})
 
 		ginkgo.Describe("Email operations", func() {
@@ -242,7 +242,7 @@ var _ = ginkgo.Describe("User Entity", func() {
 				err := user.SetEmail("new@example.com")
 
 				// Then
-				gomega.Expect(err).To(gomega.BeNil())
+				gomega.Expect(err).ToNot(gomega.HaveOccurred())
 				gomega.Expect(user.GetEmail().String()).To(gomega.Equal("new@example.com"))
 			})
 
@@ -283,7 +283,7 @@ var _ = ginkgo.Describe("User Entity", func() {
 				err := user.SetName("NewName")
 
 				// Then
-				gomega.Expect(err).To(gomega.BeNil())
+				gomega.Expect(err).ToNot(gomega.HaveOccurred())
 				gomega.Expect(user.GetUserName().String()).To(gomega.Equal("NewName"))
 			})
 
@@ -303,7 +303,7 @@ var _ = ginkgo.Describe("User Entity", func() {
 			id, err := values.NewUserID("test-id")
 
 			// Then
-			gomega.Expect(err).To(gomega.BeNil())
+			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 			gomega.Expect(id.String()).To(gomega.Equal("test-id"))
 			gomega.Expect(id.Value()).To(gomega.Equal("test-id"))
 		})
@@ -324,7 +324,7 @@ var _ = ginkgo.Describe("User Entity", func() {
 			validIDs := []string{"user-123", "test_id", "UserID123", "a1b2c3"}
 			for _, validID := range validIDs {
 				id, err := values.NewUserID(validID)
-				gomega.Expect(err).To(gomega.BeNil(), "Expected %s to be valid", validID)
+				gomega.Expect(err).ToNot(gomega.HaveOccurred(), "Expected %s to be valid", validID)
 				gomega.Expect(id.String()).To(gomega.Equal(validID))
 			}
 
@@ -342,8 +342,8 @@ var _ = ginkgo.Describe("User Entity", func() {
 			id2, err2 := values.GenerateUserID()
 
 			// Then
-			gomega.Expect(err1).To(gomega.BeNil())
-			gomega.Expect(err2).To(gomega.BeNil())
+			gomega.Expect(err1).ToNot(gomega.HaveOccurred())
+			gomega.Expect(err2).ToNot(gomega.HaveOccurred())
 			gomega.Expect(id1.Equals(id2)).To(gomega.BeFalse())
 			gomega.Expect(id1.IsGenerated()).To(gomega.BeTrue())
 			gomega.Expect(id2.IsGenerated()).To(gomega.BeTrue())

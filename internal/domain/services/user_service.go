@@ -64,7 +64,7 @@ func NewUserService(userRepo repositories.UserRepository) *UserService {
 // CreateUser creates a new user with business validation.
 // TODO: ARCHITECTURAL IMPROVEMENT - Consider splitting this large service (511 lines) into smaller, focused services
 // TODO: TYPE SAFETY - Migrate from string parameters to value objects (email values.Email, name values.UserName)
-// TODO: BUSINESS RULES - Extract validation logic to dedicated validator service
+// TODO: BUSINESS RULES - Extract validation logic to dedicated validator service.
 func (s *UserService) CreateUser(ctx context.Context, id values.UserID, email, name string) (*entities.User, error) {
 	// Business rule: Validate email format
 	if err := s.validateEmail(email); err != nil {
@@ -100,7 +100,7 @@ func (s *UserService) CreateUser(ctx context.Context, id values.UserID, email, n
 }
 
 // GetUser retrieves a user by ID with business logic.
-// TODO: ERROR HANDLING - Consider using Result[T] pattern for better functional error handling
+// TODO: ERROR HANDLING - Consider using Result[T] pattern for better functional error handling.
 func (s *UserService) GetUser(ctx context.Context, id values.UserID) (*entities.User, error) {
 	user, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
@@ -127,7 +127,7 @@ func (s *UserService) GetUserByEmail(ctx context.Context, email string) (*entiti
 
 // UpdateUser updates user information with business rules.
 // TODO: TRANSACTION SAFETY - Consider implementing optimistic locking to prevent concurrent updates
-// TODO: VALUE OBJECTS - Replace string parameters with proper value objects for type safety
+// TODO: VALUE OBJECTS - Replace string parameters with proper value objects for type safety.
 func (s *UserService) UpdateUser(ctx context.Context, id values.UserID, email, name string) (*entities.User, error) {
 	user, err := s.getUserForUpdate(ctx, id)
 	if err != nil {
@@ -141,7 +141,7 @@ func (s *UserService) UpdateUser(ctx context.Context, id values.UserID, email, n
 	return s.applyUserUpdates(ctx, user, email, name)
 }
 
-// TODO: PERFORMANCE - Consider caching frequently accessed users
+// TODO: PERFORMANCE - Consider caching frequently accessed users.
 func (s *UserService) getUserForUpdate(ctx context.Context, id values.UserID) (*entities.User, error) {
 	user, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
@@ -268,7 +268,7 @@ func (s *UserService) GetUserEmailsWithResult(ctx context.Context) mo.Result[[]s
 }
 
 // CreateUserWithResult demonstrates Railway Oriented Programming.
-// TODO: FUNCTIONAL PROGRAMMING - This shows good Result[T] pattern usage - expand this approach
+// TODO: FUNCTIONAL PROGRAMMING - This shows good Result[T] pattern usage - expand this approach.
 func (s *UserService) CreateUserWithResult(ctx context.Context, id values.UserID, email, name string) mo.Result[*entities.User] {
 	// Step 1: Validate inputs
 	if validationResult := s.validateUserInputsResult(email, name); validationResult.IsError() {
@@ -308,7 +308,7 @@ func (s *UserService) checkUserNotExistsResult(ctx context.Context, email string
 }
 
 // createAndSaveUserResult creates and saves user using Result pattern.
-// TODO: EXTRACTION - This private method could be part of a UserCreationService
+// TODO: EXTRACTION - This private method could be part of a UserCreationService.
 func (s *UserService) createAndSaveUserResult(ctx context.Context, id values.UserID, email, name string) mo.Result[*entities.User] {
 	user, err := entities.NewUser(id, email, name)
 	if err != nil {
@@ -338,7 +338,7 @@ func (s *UserService) FindUserByEmailOption(ctx context.Context, email string) m
 
 // BatchValidateUsers demonstrates functional operations for batch processing.
 // TODO: PERFORMANCE - Consider parallel validation for large batches using goroutines
-// TODO: MEMORY OPTIMIZATION - Stream processing for very large user sets
+// TODO: MEMORY OPTIMIZATION - Stream processing for very large user sets.
 func (s *UserService) BatchValidateUsers(users []*entities.User) map[values.UserID]error {
 	// Use lo to create a map of validation results
 	validationResults := lo.SliceToMap(users, func(user *entities.User) (values.UserID, error) {
@@ -430,7 +430,7 @@ func (s *UserService) GetUsersWithFilters(ctx context.Context, filters UserFilte
 }
 
 // ValidateUserBatchWithEither demonstrates Either pattern for batch operations.
-// TODO: FUNCTIONAL PATTERN - Good Either usage, consider expanding this pattern throughout service layer
+// TODO: FUNCTIONAL PATTERN - Good Either usage, consider expanding this pattern throughout service layer.
 func (s *UserService) ValidateUserBatchWithEither(users []*entities.User) mo.Either[[]error, []values.UserID] {
 	validUsers := make([]values.UserID, 0)
 	validationErrors := make([]error, 0)

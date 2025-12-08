@@ -15,7 +15,7 @@ type UserID = values.UserID
 // User represents a domain entity with value objects.
 // REFACTORED: Split brain eliminated - using ONLY value objects for type safety
 // JSON serialization handled by custom MarshalJSON/UnmarshalJSON methods
-// Direct field access prevented through private fields - validation guaranteed
+// Direct field access prevented through private fields - validation guaranteed.
 type User struct {
 	ID       values.UserID `json:"id"`
 	Created  time.Time     `json:"created"`
@@ -55,7 +55,7 @@ func NewUser(id values.UserID, email, name string) (*User, error) {
 
 // NewUserFromStrings creates a new user with string ID (for backward compatibility).
 // TODO: DEPRECATION CANDIDATE - Remove this once all callers use values.UserID directly
-// TODO: TYPE SAFETY - Prefer NewUser with proper value objects over string conversion
+// TODO: TYPE SAFETY - Prefer NewUser with proper value objects over string conversion.
 func NewUserFromStrings(id, email, name string) (*User, error) {
 	userID, err := values.NewUserID(id)
 	if err != nil {
@@ -66,7 +66,7 @@ func NewUserFromStrings(id, email, name string) (*User, error) {
 }
 
 // Validate ensures the user is in a valid state using value objects.
-// REFACTORED: Split brain eliminated - direct validation of value objects with no performance overhead
+// REFACTORED: Split brain eliminated - direct validation of value objects with no performance overhead.
 func (u *User) Validate() error {
 	if u.ID.IsEmpty() {
 		return errors.NewRequiredFieldError("user ID")
@@ -91,13 +91,13 @@ func (u *User) Validate() error {
 // Value objects are now created once during construction and stored as single source of truth
 
 // GetEmail returns the email value object directly.
-// REFACTORED: No lazy initialization needed - value object created during construction
+// REFACTORED: No lazy initialization needed - value object created during construction.
 func (u *User) GetEmail() values.Email {
 	return u.email
 }
 
 // GetUserName returns the username value object directly.
-// REFACTORED: No lazy initialization needed - value object created during construction
+// REFACTORED: No lazy initialization needed - value object created during construction.
 func (u *User) GetUserName() values.UserName {
 	return u.name
 }
@@ -113,7 +113,7 @@ func (u *User) GetUpdatedAt() time.Time {
 }
 
 // SetEmail updates the email with validation.
-// REFACTORED: Split brain eliminated - only updates single value object field
+// REFACTORED: Split brain eliminated - only updates single value object field.
 func (u *User) SetEmail(email string) error {
 	emailVO, err := values.NewEmail(email)
 	if err != nil {
@@ -127,7 +127,7 @@ func (u *User) SetEmail(email string) error {
 }
 
 // SetName updates the name with validation.
-// REFACTORED: Split brain eliminated - only updates single value object field
+// REFACTORED: Split brain eliminated - only updates single value object field.
 func (u *User) SetName(name string) error {
 	nameVO, err := values.NewUserName(name)
 	if err != nil {
