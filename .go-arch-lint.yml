@@ -17,10 +17,10 @@ workdir: .
 allow:
   depOnAnyVendor: true  # Allow vendor dependencies (set to false for stricter control)
 
-  # ARCHITECTURAL DECISION: Enable Deep Scanning (STABLE in v1.13.0)
+  # ARCHITECTURAL DECISION: Enable Deep Scanning (STABLE in v1.14.0)
   #
   # Deep scanning enables advanced AST analysis for method calls and dependency
-  # injection patterns. Verified stable operation with go-arch-lint v1.13.0
+  # injection patterns. Verified stable operation with go-arch-lint v1.14.0
   # providing comprehensive architectural violation detection capabilities.
   #
   # Enhanced Analysis Features:
@@ -29,9 +29,9 @@ allow:
   # - Constructor pattern enforcement (validates DI frameworks)
   # - Advanced architectural boundary verification
   #
-  # TEMPORARILY DISABLED: Internal Go packages error - investigating
+  # ENABLED: Working correctly with v1.14.0
   # Provides superior violation detection over basic import-level validation.
-  deepScan: false
+  deepScan: true
 
 # 📦 ARCHITECTURAL COMPONENTS
 # Define your project's architectural layers and boundaries

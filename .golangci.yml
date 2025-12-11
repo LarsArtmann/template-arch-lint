@@ -783,10 +783,10 @@ linters-settings:
           - "!**/*_test.go"
         allow:
           - $gostd
-          # Allow all our project packages - specific patterns
+          # Allow all our project packages - comprehensive wildcard patterns
+          - github.com/LarsArtmann/template-arch-lint/**
+          # Explicitly allow major internal package patterns
           - github.com/LarsArtmann/template-arch-lint/internal
-          - github.com/LarsArtmann/template-arch-lint/pkg
-          - github.com/LarsArtmann/template-arch-lint/cmd
           - github.com/LarsArtmann/template-arch-lint/internal/application
           - github.com/LarsArtmann/template-arch-lint/internal/application/handlers
           - github.com/LarsArtmann/template-arch-lint/internal/domain
@@ -797,6 +797,7 @@ linters-settings:
           - github.com/LarsArtmann/template-arch-lint/internal/infrastructure
           - github.com/LarsArtmann/template-arch-lint/internal/config
           - github.com/LarsArtmann/template-arch-lint/pkg/errors
+          - github.com/LarsArtmann/template-arch-lint/pkg/**
           # Allow standard external dependencies
           - golang.org/x/*
           - google.golang.org/*
