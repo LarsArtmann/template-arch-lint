@@ -150,7 +150,12 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				user, err := userService.CreateUser(ctx, id, "test@example.com", "Test User")
 
 				Expect(user).To(BeNil())
-				Expect(err).To(Equal(sql.ErrConnDone))
+				// Service should wrap repository error in InternalError
+				Expect(domainErrors.IsDomainError(err)).To(BeTrue())
+				internalErr, ok := domainErrors.AsInternalError(err)
+				Expect(ok).To(BeTrue())
+				Expect(internalErr.Cause()).To(Equal(sql.ErrConnDone))
+				Expect(internalErr.Error()).To(Equal("failed to check existing user: sql: connection is already closed"))
 				Expect(failingRepo.findByEmailCallCount).To(Equal(1))
 				Expect(failingRepo.saveCallCount).To(Equal(0)) // Should not reach Save
 			})
@@ -162,7 +167,12 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				user, err := userService.CreateUser(ctx, id, "test@example.com", "Test User")
 
 				Expect(user).To(BeNil())
-				Expect(err).To(Equal(sql.ErrTxDone))
+				// Service should wrap repository error in InternalError
+				Expect(domainErrors.IsDomainError(err)).To(BeTrue())
+				internalErr, ok := domainErrors.AsInternalError(err)
+				Expect(ok).To(BeTrue())
+				Expect(internalErr.Cause()).To(Equal(sql.ErrTxDone))
+				Expect(internalErr.Error()).To(Equal("failed to save user: sql: transaction has already been committed or rolled back"))
 				Expect(failingRepo.findByEmailCallCount).To(Equal(1))
 				Expect(failingRepo.saveCallCount).To(Equal(1))
 			})
