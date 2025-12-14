@@ -1,0 +1,141 @@
+graph TD
+    subgraph "PRESENTATION LAYER"
+        A[HTTP Requests]
+        B[Command Dispatcher]
+        C[Query Dispatcher]
+    end
+    
+    subgraph "APPLICATION LAYER - COMMAND SIDE"
+        D[UserCommandService]
+        E[CreateUserCommand Handler]
+        F[UpdateUserCommand Handler]
+        G[DeleteUserCommand Handler]
+        H[Command Validation]
+    end
+    
+    subgraph "APPLICATION LAYER - QUERY SIDE"
+        I[UserQueryService]
+        J[GetUserByIdQuery Handler]
+        K[ListUsersQuery Handler]
+        L[Query Validation]
+        M[Read Models Projections]
+    end
+    
+    subgraph "DOMAIN LAYER - COMMANDS"
+        N[Command Objects]
+        O[Domain Events]
+        P[Aggregates]
+        Q[Business Rules Engine]
+        R[Domain Event Publisher]
+    end
+    
+    subgraph "DOMAIN LAYER - QUERIES"
+        S[Query Objects]
+        T[Specifications]
+        U[Domain Filters]
+        V[Read Model Interfaces]
+    end
+    
+    subgraph "INFRASTRUCTURE LAYER"
+        W[Event Store]
+        X[Command Bus]
+        Y[Query Bus]
+        Z[Event Handlers]
+        AA[Projection Writers]
+        AB[Read Optimized Storage]
+        AC[Repository Implementations]
+    end
+    
+    subgraph "CROSS-CUTTING CONCERNS"
+        AD[pkg/errors/ Error Catalog]
+        AE[Event Bus/Message Broker]
+        AF[Distributed Transactions]
+        AG[Observability/Tracing]
+    end
+    
+    A --> B
+    A --> C
+    B --> D
+    B --> E
+    B --> F
+    B --> G
+    B --> H
+    
+    C --> I
+    C --> J
+    C --> K
+    C --> L
+    C --> M
+    
+    E --> N
+    F --> N
+    G --> N
+    H --> Q
+    D --> Q
+    
+    N --> P
+    P --> O
+    Q --> P
+    R --> O
+    
+    I --> S
+    J --> S
+    K --> S
+    L --> T
+    M --> U
+    T --> V
+    U --> V
+    
+    X --> W
+    Y --> AB
+    Z --> AA
+    AA --> M
+    AC --> P
+    
+    O --> AE
+    R --> AE
+    Z --> AE
+    
+    AD --> E
+    AD --> F
+    AD --> G
+    AD --> J
+    AD --> K
+    
+    AF --> X
+    AG --> P
+    AG --> V
+    
+    style A fill:#e1f5fe
+    style B fill:#fff3e0
+    style C fill:#fff3e0
+    style D fill:#fff3e0
+    style E fill:#fff3e0
+    style F fill:#fff3e0
+    style G fill:#fff3e0
+    style H fill:#fff3e0
+    style I fill:#fff3e0
+    style J fill:#fff3e0
+    style K fill:#fff3e0
+    style L fill:#fff3e0
+    style M fill:#fff3e0
+    style N fill:#f3e5f5
+    style O fill:#f3e5f5
+    style P fill:#f3e5f5
+    style Q fill:#f3e5f5
+    style R fill:#f3e5f5
+    style S fill:#f3e5f5
+    style T fill:#f3e5f5
+    style U fill:#f3e5f5
+    style V fill:#f3e5f5
+    style W fill:#e8f5e8
+    style X fill:#e8f5e8
+    style Y fill:#e8f5e8
+    style Z fill:#e8f5e8
+    style AA fill:#e8f5e8
+    style AB fill:#e8f5e8
+    style AC fill:#e8f5e8
+    style AD fill:#ffebee
+    style AE fill:#ffebee
+    style AF fill:#ffebee
+    style AG fill:#ffebee

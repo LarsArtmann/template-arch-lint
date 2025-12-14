@@ -1,0 +1,85 @@
+graph TD
+    subgraph "PRESENTATION LAYER"
+        A[web/templates/ HTML/Templ] 
+        B[HTMX Progressive Enhancement]
+    end
+    
+    subgraph "APPLICATION LAYER"
+        C[HTTP Handlers]
+        D[Use Cases/Services]
+        E[DTOs/Request Models]
+        F[Response Mappers]
+        G[Middleware]
+    end
+    
+    subgraph "DOMAIN LAYER"
+        H[Domain Entities]
+        I[Value Objects]
+        J[Domain Services]
+        K[Repository Interfaces]
+        L[Domain Events]
+        M[Domain Errors]
+        N[Business Rules]
+    end
+    
+    subgraph "INFRASTRUCTURE LAYER"
+        O[Repository Implementations]
+        P[Database/SQLC]
+        Q[External Service Adapters]
+        R[Event Dispatchers]
+        S[Configuration]
+    end
+    
+    subgraph "CROSS-CUTTING CONCERNS"
+        T[pkg/errors/ Error Catalog]
+        U[pkg/logging/ Logging]
+        V[pkg/metrics/ Observability]
+        W[pkg/security/ Security]
+    end
+    
+    A --> B
+    B --> C
+    C --> D
+    D --> J
+    J --> H
+    H --> I
+    C --> E
+    E --> F
+    
+    J --> K
+    K --> O
+    O --> P
+    Q --> R
+    R --> L
+    
+    D --> L
+    L --> R
+    
+    T --> C
+    T --> D
+    T --> O
+    T --> Q
+    
+    G --> C
+    S --> O
+    S --> Q
+    
+    style A fill:#e1f5fe
+    style C fill:#fff3e0
+    style D fill:#fff3e0
+    style H fill:#f3e5f5
+    style I fill:#f3e5f5
+    style J fill:#f3e5f5
+    style K fill:#f3e5f5
+    style L fill:#f3e5f5
+    style M fill:#f3e5f5
+    style N fill:#f3e5f5
+    style O fill:#e8f5e8
+    style P fill:#e8f5e8
+    style Q fill:#e8f5e8
+    style R fill:#e8f5e8
+    style S fill:#e8f5e8
+    style T fill:#ffebee
+    style U fill:#ffebee
+    style V fill:#ffebee
+    style W fill:#ffebee

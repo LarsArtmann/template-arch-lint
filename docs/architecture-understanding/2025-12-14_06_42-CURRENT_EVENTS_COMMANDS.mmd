@@ -1,0 +1,32 @@
+graph TD
+    A[Client/Browser] -->|HTTP Request| B[gin.Router]
+    B --> C[HTTP Handlers - CreateUser/GetUser/UpdateUser/DeleteUser]
+    C -->|Direct Service Calls| D[UserService - Mixed Query/Command Operations]
+    D -->|Repository Operations| E[UserRepository Interface]
+    E -->|Implementation| F[InMemoryUserRepository]
+    E -->|Implementation| G[PostgreSQL User Repository]
+    
+    C -->|JSON Response| H[HTTP Response]
+    H -->|JSON Payload| A
+    
+    I[pkg/errors/ Error Catalog] --> C
+    I --> D
+    I --> F
+    I --> G
+    
+    J[Domain Values - UserID/Email/UserName] --> D
+    J --> C
+    
+    K[Domain Entities - User] --> D
+    K --> F
+    K --> G
+    
+    style A fill:#e1f5fe
+    style C fill:#fff3e0
+    style D fill:#f3e5f5
+    style E fill:#f3e5f5
+    style F fill:#e8f5e8
+    style G fill:#e8f5e8
+    style I fill:#ffebee
+    style J fill:#f3e5f5
+    style K fill:#f3e5f5

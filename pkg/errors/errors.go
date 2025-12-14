@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // baseError provides common error functionality to reduce duplication.
@@ -58,6 +59,15 @@ const (
 
 	// InternalErrorCode represents internal system errors.
 	InternalErrorCode ErrorCode = "INTERNAL_ERROR"
+	
+	// DatabaseErrorCode represents database errors.
+	DatabaseErrorCode ErrorCode = "DATABASE_ERROR"
+	// NetworkErrorCode represents network errors.
+	NetworkErrorCode ErrorCode = "NETWORK_ERROR"
+	// ConfigurationErrorCode represents configuration errors.
+	ConfigurationErrorCode ErrorCode = "CONFIGURATION_ERROR"
+	// AuthorizationErrorCode represents authorization errors.
+	AuthorizationErrorCode ErrorCode = "AUTHORIZATION_ERROR"
 )
 
 // DomainError represents the base interface for all domain errors.
@@ -66,6 +76,15 @@ type DomainError interface {
 	Code() ErrorCode
 	HTTPStatus() int
 	Details() ErrorDetails
+}
+
+// InfrastructureError represents infrastructure-layer technical errors.
+type InfrastructureError interface {
+	error
+	Code() ErrorCode
+	HTTPStatus() int
+	Details() ErrorDetails
+	IsRetryable() bool
 }
 
 // ValidationError represents validation failures in domain entities.
@@ -199,9 +218,14 @@ func (e *InternalError) Error() string {
 	return e.message
 }
 
-// HTTPStatus returns the HTTP status code for the internal error.
+// HTTPStatus returns the HTTP status code for internal error.
 func (e *InternalError) HTTPStatus() int {
 	return http.StatusInternalServerError
+}
+
+// IsRetryable returns whether the internal error can be retried.
+func (e *InternalError) IsRetryable() bool {
+	return false
 }
 
 // Cause returns the underlying cause of the internal error.
@@ -212,6 +236,126 @@ func (e *InternalError) Cause() error {
 // Unwrap implements error unwrapping for InternalError.
 func (e *InternalError) Unwrap() error {
 	return e.cause
+}
+
+// DatabaseError represents database operation errors.
+type DatabaseError struct {
+	baseError
+	
+	operation string
+	retryable bool
+}
+
+// NewDatabaseError creates a new database error.
+func NewDatabaseError(operation string, cause error, retryable bool) *DatabaseError {
+	return &DatabaseError{
+		baseError: baseError{
+			code:    DatabaseErrorCode,
+			message: fmt.Sprintf("database %s failed: %v", operation, cause),
+			details: ErrorDetails{
+				Extra: map[string]string{
+					"operation": operation,
+					"retryable": fmt.Sprintf("%t", retryable),
+				},
+			},
+		},
+		operation: operation,
+		retryable: retryable,
+	}
+}
+
+// HTTPStatus returns the HTTP status code for database error.
+func (e *DatabaseError) HTTPStatus() int {
+	return http.StatusInternalServerError
+}
+
+// Operation returns the database operation that failed.
+func (e *DatabaseError) Operation() string {
+	return e.operation
+}
+
+// IsRetryable returns whether the database operation can be retried.
+func (e *DatabaseError) IsRetryable() bool {
+	return e.retryable
+}
+
+// NetworkError represents network operation errors.
+type NetworkError struct {
+	baseError
+	
+	service   string
+	retryable bool
+}
+
+// NewNetworkError creates a new network error.
+func NewNetworkError(service string, cause error, retryable bool) *NetworkError {
+	return &NetworkError{
+		baseError: baseError{
+			code:    NetworkErrorCode,
+			message: fmt.Sprintf("network service %s failed: %v", service, cause),
+			details: ErrorDetails{
+				Extra: map[string]string{
+					"service": service,
+					"retryable": fmt.Sprintf("%t", retryable),
+				},
+			},
+		},
+		service:   service,
+		retryable: retryable,
+	}
+}
+
+// HTTPStatus returns the HTTP status code for network error.
+func (e *NetworkError) HTTPStatus() int {
+	return http.StatusServiceUnavailable
+}
+
+// Service returns the network service that failed.
+func (e *NetworkError) Service() string {
+	return e.service
+}
+
+// IsRetryable returns whether the network operation can be retried.
+func (e *NetworkError) IsRetryable() bool {
+	return e.retryable
+}
+
+// ConfigurationError represents configuration errors.
+type ConfigurationError struct {
+	baseError
+	
+	configKey string
+}
+
+// NewConfigurationError creates a new configuration error.
+func NewConfigurationError(key, message string) *ConfigurationError {
+	return &ConfigurationError{
+		baseError: baseError{
+			code:    ConfigurationErrorCode,
+			message: fmt.Sprintf("configuration error for %s: %s", key, message),
+			details: ErrorDetails{
+				Extra: map[string]string{
+					"config_key": key,
+				},
+			},
+		},
+		configKey: key,
+	}
+}
+
+// HTTPStatus returns the HTTP status code for configuration error.
+func (e *ConfigurationError) HTTPStatus() int {
+	return http.StatusInternalServerError
+}
+
+// ConfigKey returns the configuration key that caused the error.
+func (e *ConfigurationError) ConfigKey() string {
+	return e.configKey
+}
+
+// IsRetryable returns whether the configuration error can be retried.
+func (e *ConfigurationError) IsRetryable() bool {
+	return false
 }
 
 // IsDomainError checks if an error is a domain error.
@@ -246,4 +390,85 @@ func AsInternalError(err error) (*InternalError, bool) {
 	var ie *InternalError
 	ok := errors.As(err, &ie)
 	return ie, ok
+}
+
+// AsDatabaseError attempts to cast error to DatabaseError.
+func AsDatabaseError(err error) (*DatabaseError, bool) {
+	var de *DatabaseError
+	ok := errors.As(err, &de)
+	return de, ok
+}
+
+// AsNetworkError attempts to cast error to NetworkError.
+func AsNetworkError(err error) (*NetworkError, bool) {
+	var ne *NetworkError
+	ok := errors.As(err, &ne)
+	return ne, ok
+}
+
+// AsConfigurationError attempts to cast error to ConfigurationError.
+func AsConfigurationError(err error) (*ConfigurationError, bool) {
+	var ce *ConfigurationError
+	ok := errors.As(err, &ce)
+	return ce, ok
+}
+
+// IsInfrastructureError checks if error is an infrastructure error.
+func IsInfrastructureError(err error) bool {
+	var infraErr InfrastructureError
+	return errors.As(err, &infraErr)
+}
+
+// IsRetryableError checks if error can be retried.
+func IsRetryableError(err error) bool {
+	var de *DatabaseError
+	if errors.As(err, &de) {
+		return de.IsRetryable()
+	}
+	
+	var ne *NetworkError
+	if errors.As(err, &ne) {
+		return ne.IsRetryable()
+	}
+	
+	return false
+}
+
+// NewDomainValidationError creates a new domain validation error (alias for NewValidationError).
+func NewDomainValidationError(field, reason string) *ValidationError {
+	return NewValidationError(field, fmt.Sprintf("validation failed for %s: %s", field, reason))
+}
+
+// NewDomainNotFoundError creates a new domain not found error (alias for NewNotFoundError).
+func NewDomainNotFoundError(resource, id string) *NotFoundError {
+	return NewNotFoundError(resource, id)
+}
+
+// NewDomainConflictError creates a new domain conflict error (alias for NewConflictError).
+func NewDomainConflictError(resource, reason string) *ConflictError {
+	return NewConflictError(fmt.Sprintf("%s conflict", resource), ErrorDetails{
+		Extra: map[string]string{
+			"resource": resource,
+			"reason":   reason,
+		},
+	})
+}
+
+// NewInfrastructureError creates a new infrastructure error based on the type.
+func NewInfrastructureError(resource, operation string, cause error) InfrastructureError {
+	// Try to determine specific error type based on the context
+	if strings.Contains(strings.ToLower(resource), "database") || strings.Contains(strings.ToLower(operation), "query") || strings.Contains(strings.ToLower(operation), "insert") || strings.Contains(strings.ToLower(operation), "update") || strings.Contains(strings.ToLower(operation), "delete") {
+		return NewDatabaseError(operation, cause, false)
+	}
+	
+	if strings.Contains(strings.ToLower(resource), "network") || strings.Contains(strings.ToLower(operation), "http") || strings.Contains(strings.ToLower(operation), "request") {
+		return NewNetworkError(resource, cause, true)
+	}
+	
+	if strings.Contains(strings.ToLower(resource), "config") || strings.Contains(strings.ToLower(operation), "configuration") {
+		return NewConfigurationError(resource, cause.Error())
+	}
+	
+	// Default to internal error
+	return NewInternalError(fmt.Sprintf("%s %s failed", resource, operation), cause)
 }

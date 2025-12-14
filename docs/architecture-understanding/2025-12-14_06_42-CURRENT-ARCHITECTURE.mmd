@@ -1,0 +1,27 @@
+graph TD
+    A[web/templates/] --> B[HTTP Requests]
+    B --> C[internal/application/handlers/]
+    C --> D[internal/domain/services/]
+    C --> E[internal/infrastructure/]
+    D --> F[internal/domain/entities/]
+    D --> G[internal/domain/repositories/]
+    D --> H[internal/domain/values/]
+    E --> I[internal/db/ SQLC Generated]
+    E --> J[External Systems]
+    G --> I
+    F --> H
+    
+    K[pkg/errors/] --> C
+    K --> D
+    K --> E
+    K --> L[cmd/main.go]
+    
+    L --> M[internal/config/]
+    M --> N[Configuration Files]
+    
+    style A fill:#e1f5fe
+    style C fill:#fff3e0
+    style D fill:#f3e5f5
+    style E fill:#e8f5e8
+    style K fill:#ffebee
+    style L fill:#f5f5f5
