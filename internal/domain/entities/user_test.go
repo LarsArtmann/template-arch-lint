@@ -191,12 +191,9 @@ var _ = ginkgo.Describe("User Entity", func() {
 				// Create user via constructor to properly set private fields
 				user, err := NewUser(userID, "test@example.com", "") // Empty name will fail validation
 
-				// When
-				err = user.Validate()
-
-				// Then
+				// When - User creation should fail for empty name
 				gomega.Expect(err).To(gomega.HaveOccurred())
-				gomega.Expect(err.Error()).To(gomega.ContainSubstring("name"))
+				gomega.Expect(user).To(gomega.BeNil()) // User should be nil when validation fails during construction
 			})
 		})
 
