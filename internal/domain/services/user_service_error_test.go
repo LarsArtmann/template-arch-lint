@@ -135,6 +135,15 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 		return userID
 	}
 
+	// Helper to check if error is wrapped InternalError with specific cause
+	expectInternalErrorWithCause := func(err error, expectedCause error, expectedMessagePrefix string) {
+		Expect(domainErrors.IsDomainError(err)).To(BeTrue())
+		internalErr, ok := domainErrors.AsInternalError(err)
+		Expect(ok).To(BeTrue())
+		Expect(internalErr.Cause()).To(Equal(expectedCause))
+		Expect(internalErr.Error()).To(ContainSubstring(expectedMessagePrefix))
+	}
+
 	BeforeEach(func() {
 		ctx = context.Background()
 		failingRepo = NewFailingUserRepository()
@@ -197,7 +206,7 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				user, err := userService.GetUser(ctx, id)
 
 				Expect(user).To(BeNil())
-				Expect(err).To(Equal(sql.ErrNoRows))
+				expectInternalErrorWithCause(err, sql.ErrNoRows, "failed to get user")
 				Expect(failingRepo.findByIDCallCount).To(Equal(1))
 			})
 
@@ -208,7 +217,8 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				user, err := userService.GetUser(ctx, id)
 
 				Expect(user).To(BeNil())
-				Expect(err).To(Equal(context.DeadlineExceeded))
+				expectInternalErrorWithCause(err, context.DeadlineExceeded, "failed to get user")
+				Expect(failingRepo.findByIDCallCount).To(Equal(1))
 			})
 		})
 
