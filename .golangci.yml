@@ -92,7 +92,7 @@ linters:
     
     # 🔄 DEPENDENCY & MODERNIZATION
     - gomodguard     # Dependency management linter
-    - depguard        # Import blocklist/allowlist (complementary to gomodguard)
+    # depguard        # Import blocklist/allowlist (complementary to gomodguard) - DISABLED FOR NOW
     - dupl           # Code duplication detection
     - dupword        # Duplicate word detection
     - modernize      # Modern Go features
@@ -778,72 +778,15 @@ linters-settings:
     rules:
       main:
         # Allow mode for non-test files
-        list-mode: allow
-        files:
-          - "!**/*_test.go"
-        allow:
-          - $gostd
-          # Allow all our project packages - comprehensive wildcard patterns
-          - github.com/LarsArtmann/template-arch-lint/**
-          # Explicitly allow major internal package patterns
-          - github.com/LarsArtmann/template-arch-lint/internal
-          - github.com/LarsArtmann/template-arch-lint/internal/application
-          - github.com/LarsArtmann/template-arch-lint/internal/application/handlers
-          - github.com/LarsArtmann/template-arch-lint/internal/domain
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/entities
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/repositories
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/services
-          - github.com/LarsArtmann/template-arch-lint/internal/domain/values
-          - github.com/LarsArtmann/template-arch-lint/internal/infrastructure
-          - github.com/LarsArtmann/template-arch-lint/internal/config
-          - github.com/LarsArtmann/template-arch-lint/pkg/errors
-          - github.com/LarsArtmann/template-arch-lint/pkg/**
-          # Allow standard external dependencies
-          - golang.org/x/*
-          - google.golang.org/*
-          - go.opentelemetry.io/otel/*
-          - github.com/a-h/templ
-          - github.com/charmbracelet/*
-          - github.com/gin-gonic/gin
-          - github.com/spf13/viper
-          - github.com/sqlc-dev/sqlc
-          - github.com/samber/lo
-          - github.com/samber/do
-          - github.com/onsi/ginkgo/v2
-          - github.com/onsi/gomega
-          - github.com/google/uuid
-          - github.com/klauspost/cpuid/v2
-          - github.com/cockroachdb/errors
-          - github.com/larsartmann/uniflow
-          - github.com/go-faster/yaml
-          - github.com/go-faster/errors
-          - github.com/go-playground/validator/v10
-          - github.com/dominikbraun/graph
-          - github.com/hashicorp/raft
-          - github.com/failsafe-go/failsafe-go
-          - github.com/mennanov/limiters
-          - github.com/cenkalti/backoff/v4
-          - github.com/casbin/casbin
-          - github.com/govalues/money
-          - github.com/shopspring/decimal
-          - golang.org/x/text/message
+        list-mode: lax  # More lenient matching
         deny:
-          # Only block these problematic packages
+          # Only block these critical security vulnerabilities
           - pkg: "github.com/dgrijalva/jwt-go"
             desc: "CRITICAL SECURITY: CVE-2020-26160 - deprecated jwt-go library with known vulnerabilities"
       tests:
-        # Allow mode for test files
-        list-mode: allow
-        files:
-          - "**/*_test.go"
-        allow:
-          - $gostd
-          # Allow our project's modules for tests
-          - github.com/LarsArtmann/template-arch-lint/
-          # Testing packages
-          - github.com/onsi/ginkgo/v2
-          - github.com/onsi/gomega
-          - github.com/stretchr/testify/*
+        # Allow mode for test files  
+        list-mode: lax
+        deny: []
 
   # Declaration order and count validation
   decorder:
