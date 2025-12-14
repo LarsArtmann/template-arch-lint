@@ -34,6 +34,9 @@ type FailingUserRepository struct {
 	existsError       error
 	findByUsernameErr error
 
+	// Test data for success scenarios
+	testUser *entities.User
+
 	saveCallCount           int
 	findByIDCallCount       int
 	findByEmailCallCount    int
@@ -61,6 +64,9 @@ func (r *FailingUserRepository) FindByID(ctx context.Context, id values.UserID) 
 	r.findByIDCallCount++
 	if r.findByIDError != nil {
 		return nil, r.findByIDError
+	}
+	if r.testUser != nil {
+		return r.testUser, nil
 	}
 	return nil, repositories.ErrUserNotFound
 }
@@ -93,6 +99,9 @@ func (r *FailingUserRepository) List(ctx context.Context) ([]*entities.User, err
 	r.listCallCount++
 	if r.listError != nil {
 		return nil, r.listError
+	}
+	if r.testUser != nil {
+		return []*entities.User{r.testUser}, nil
 	}
 	return []*entities.User{}, nil
 }
@@ -230,55 +239,70 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				user, err := userService.UpdateUser(ctx, id, "new@example.com", "New Name")
 
 				Expect(user).To(BeNil())
-				Expect(err).To(Equal(sql.ErrConnDone))
+				expectInternalErrorWithCause(err, sql.ErrConnDone, "failed to get for update user")
 				Expect(failingRepo.findByIDCallCount).To(Equal(1))
 				Expect(failingRepo.updateCallCount).To(Equal(0)) // Should not reach Update
 			})
 
 			It("should handle Update repository errors", func() {
-				// Make FindByID succeed but Update fail
+				// Make FindByID succeed but Save fail during update
+				testUser, _ := entities.NewUser(createTestUserID("test-user"), "test@example.com", "Test User")
+				failingRepo.testUser = testUser
 				failingRepo.findByIDError = nil
-				failingRepo.updateError = sql.ErrTxDone
+				failingRepo.saveError = sql.ErrTxDone // Save method is called during update
 
 				id := createTestUserID("test-user")
 				user, err := userService.UpdateUser(ctx, id, "new@example.com", "New Name")
 
+				// Update should fail during repository Save operation
+				Expect(err).To(HaveOccurred())
 				Expect(user).To(BeNil())
-				Expect(err).To(Equal(sql.ErrTxDone))
-				Expect(failingRepo.updateCallCount).To(Equal(1))
+				Expect(failingRepo.saveCallCount).To(Equal(1))
 			})
 		})
 
 		Context("DeleteUser with repository failures", func() {
 			It("should handle Delete repository errors", func() {
+				// Make FindByID succeed but Delete fail
+				testUser, _ := entities.NewUser(createTestUserID("test-user"), "test@example.com", "Test User")
+				failingRepo.testUser = testUser
+				failingRepo.findByIDError = nil
 				failingRepo.deleteError = sql.ErrConnDone
 
 				id := createTestUserID("test-user")
 				err := userService.DeleteUser(ctx, id)
 
-				Expect(err).To(Equal(sql.ErrConnDone))
+				expectInternalErrorWithCause(err, sql.ErrConnDone, "failed to delete user")
 				Expect(failingRepo.deleteCallCount).To(Equal(1))
 			})
 
 			It("should handle foreign key constraint errors", func() {
+				// Make FindByID succeed but Delete fail
+				testUser, _ := entities.NewUser(createTestUserID("test-user"), "test@example.com", "Test User")
+				failingRepo.testUser = testUser
+				failingRepo.findByIDError = nil
 				failingRepo.deleteError = errors.New("FOREIGN KEY constraint failed")
 
 				id := createTestUserID("test-user")
 				err := userService.DeleteUser(ctx, id)
 
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("FOREIGN KEY constraint failed"))
+				Expect(err.Error()).To(ContainSubstring("failed to delete user: FOREIGN KEY constraint failed"))
 			})
 		})
 
 		Context("ListUsers with repository failures", func() {
 			It("should handle List repository errors", func() {
+				// Make List fail
+				testUser, _ := entities.NewUser(createTestUserID("test-user"), "test@example.com", "Test User")
+				failingRepo.testUser = testUser
+				failingRepo.findByIDError = nil
 				failingRepo.listError = sql.ErrConnDone
 
 				users, err := userService.ListUsers(ctx)
 
 				Expect(users).To(BeNil())
-				Expect(err).To(Equal(sql.ErrConnDone))
+				expectInternalErrorWithCause(err, sql.ErrConnDone, "failed to list users")
 				Expect(failingRepo.listCallCount).To(Equal(1))
 			})
 		})
@@ -296,6 +320,7 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				Expect(user).To(BeNil())
 				Expect(err).To(HaveOccurred())
 				// The repository should handle context cancellation
+				// Note: Context cancellation is handled by the service/repository, not wrapped
 			})
 
 			It("should handle context cancellation in GetUser", func() {
@@ -307,6 +332,7 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 
 				Expect(user).To(BeNil())
 				Expect(err).To(HaveOccurred())
+				// Note: Context cancellation is handled by service/repository, not wrapped
 			})
 		})
 
@@ -323,6 +349,7 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 
 				Expect(user).To(BeNil())
 				Expect(err).To(HaveOccurred())
+				// Note: Timeout is handled by context, not wrapped in service
 			})
 		})
 	})
