@@ -477,7 +477,7 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				result := userService.GetUserEmailsWithResult(ctx)
 
 				Expect(result.IsError()).To(BeTrue())
-				Expect(result.Error()).To(Equal(sql.ErrConnDone))
+				Expect(result.Error().Error()).To(ContainSubstring("failed to list users: sql: connection is already closed"))
 			})
 		})
 
@@ -488,7 +488,8 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				stats, err := userService.GetUserStats(ctx)
 
 				Expect(stats).To(BeNil())
-				Expect(err).To(Equal(sql.ErrConnDone))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("failed to list users: sql: connection is already closed"))
 			})
 		})
 
