@@ -59,7 +59,7 @@ const (
 
 	// InternalErrorCode represents internal system errors.
 	InternalErrorCode ErrorCode = "INTERNAL_ERROR"
-	
+
 	// DatabaseErrorCode represents database errors.
 	DatabaseErrorCode ErrorCode = "DATABASE_ERROR"
 	// NetworkErrorCode represents network errors.
@@ -241,7 +241,7 @@ func (e *InternalError) Unwrap() error {
 // DatabaseError represents database operation errors.
 type DatabaseError struct {
 	baseError
-	
+
 	operation string
 	retryable bool
 }
@@ -282,7 +282,7 @@ func (e *DatabaseError) IsRetryable() bool {
 // NetworkError represents network operation errors.
 type NetworkError struct {
 	baseError
-	
+
 	service   string
 	retryable bool
 }
@@ -295,7 +295,7 @@ func NewNetworkError(service string, cause error, retryable bool) *NetworkError 
 			message: fmt.Sprintf("network service %s failed: %v", service, cause),
 			details: ErrorDetails{
 				Extra: map[string]string{
-					"service": service,
+					"service":   service,
 					"retryable": fmt.Sprintf("%t", retryable),
 				},
 			},
@@ -323,7 +323,7 @@ func (e *NetworkError) IsRetryable() bool {
 // ConfigurationError represents configuration errors.
 type ConfigurationError struct {
 	baseError
-	
+
 	configKey string
 }
 
@@ -425,12 +425,12 @@ func IsRetryableError(err error) bool {
 	if errors.As(err, &de) {
 		return de.IsRetryable()
 	}
-	
+
 	var ne *NetworkError
 	if errors.As(err, &ne) {
 		return ne.IsRetryable()
 	}
-	
+
 	return false
 }
 
@@ -460,15 +460,15 @@ func NewInfrastructureError(resource, operation string, cause error) Infrastruct
 	if strings.Contains(strings.ToLower(resource), "database") || strings.Contains(strings.ToLower(operation), "query") || strings.Contains(strings.ToLower(operation), "insert") || strings.Contains(strings.ToLower(operation), "update") || strings.Contains(strings.ToLower(operation), "delete") {
 		return NewDatabaseError(operation, cause, false)
 	}
-	
+
 	if strings.Contains(strings.ToLower(resource), "network") || strings.Contains(strings.ToLower(operation), "http") || strings.Contains(strings.ToLower(operation), "request") {
 		return NewNetworkError(resource, cause, true)
 	}
-	
+
 	if strings.Contains(strings.ToLower(resource), "config") || strings.Contains(strings.ToLower(operation), "configuration") {
 		return NewConfigurationError(resource, cause.Error())
 	}
-	
+
 	// Default to internal error
 	return NewInternalError(fmt.Sprintf("%s %s failed", resource, operation), cause)
 }

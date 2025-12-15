@@ -145,7 +145,7 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 	}
 
 	// Helper to check if error is wrapped InternalError with specific cause
-	expectInternalErrorWithCause := func(err error, expectedCause error, expectedMessagePrefix string) {
+	expectInternalErrorWithCause := func(err, expectedCause error, expectedMessagePrefix string) {
 		Expect(domainErrors.IsDomainError(err)).To(BeTrue())
 		internalErr, ok := domainErrors.AsInternalError(err)
 		Expect(ok).To(BeTrue())

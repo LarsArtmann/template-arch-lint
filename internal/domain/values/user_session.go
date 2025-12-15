@@ -13,7 +13,7 @@ import (
 
 // SessionToken represents a user session token.
 type SessionToken struct {
-	value string
+	value   string
 	expires time.Time
 }
 
@@ -23,10 +23,10 @@ func NewSessionToken(duration time.Duration) (SessionToken, error) {
 	if _, err := rand.Read(bytes); err != nil {
 		return SessionToken{}, errors.NewInfrastructureError("session_token", "generate", err)
 	}
-	
+
 	token := fmt.Sprintf("%x", bytes)
 	expires := time.Now().Add(duration)
-	
+
 	return SessionToken{
 		value:   token,
 		expires: expires,
@@ -38,7 +38,7 @@ func NewSessionTokenFromValue(value string, expires time.Time) (SessionToken, er
 	if err := validateSessionToken(value); err != nil {
 		return SessionToken{}, err
 	}
-	
+
 	return SessionToken{
 		value:   value,
 		expires: expires,
@@ -50,21 +50,21 @@ func validateSessionToken(token string) error {
 	if len(token) < 32 {
 		return errors.NewDomainValidationError("session_token", "token too short (minimum 32 characters)")
 	}
-	
+
 	if len(token) > 256 {
 		return errors.NewDomainValidationError("session_token", "token too long (maximum 256 characters)")
 	}
-	
+
 	// Should be hexadecimal characters only
 	matched, err := regexp.MatchString(`^[a-fA-F0-9]+$`, token)
 	if err != nil {
 		return errors.NewInfrastructureError("session_token", "validate", err)
 	}
-	
+
 	if !matched {
 		return errors.NewDomainValidationError("session_token", "token must contain only hexadecimal characters")
 	}
-	
+
 	return nil
 }
 
@@ -105,16 +105,16 @@ func (t *SessionToken) UnmarshalJSON(data []byte) error {
 		Token   string    `json:"token"`
 		Expires time.Time `json:"expires"`
 	}
-	
+
 	if err := json.Unmarshal(data, &session); err != nil {
 		return err
 	}
-	
+
 	token, err := NewSessionTokenFromValue(session.Token, session.Expires)
 	if err != nil {
 		return err
 	}
-	
+
 	*t = token
 	return nil
 }
@@ -218,11 +218,11 @@ func (a *AuditTrail) UnmarshalJSON(data []byte) error {
 		UserAgent string            `json:"user_agent"`
 		Metadata  map[string]string `json:"metadata"`
 	}
-	
+
 	if err := json.Unmarshal(data, &audit); err != nil {
 		return err
 	}
-	
+
 	a.userID = audit.UserID
 	a.action = audit.Action
 	a.resource = audit.Resource
@@ -230,6 +230,6 @@ func (a *AuditTrail) UnmarshalJSON(data []byte) error {
 	a.ip = audit.IP
 	a.userAgent = audit.UserAgent
 	a.metadata = audit.Metadata
-	
+
 	return nil
 }
