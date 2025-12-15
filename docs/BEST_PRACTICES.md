@@ -20,6 +20,7 @@ This guide consolidates enterprise-grade best practices for Go development, Clea
 ### Layer Separation Rules
 
 **✅ DO:**
+
 ```go
 // Domain layer - Pure business logic
 package entities
@@ -37,6 +38,7 @@ type User struct {
 ```
 
 **❌ DON'T:**
+
 ```go
 // Domain layer with infrastructure dependency
 package entities
@@ -55,6 +57,7 @@ type User struct {
 ### Dependency Inversion Pattern
 
 **✅ Correct Pattern:**
+
 ```go
 // 1. Interface in domain layer
 package repositories
@@ -64,7 +67,7 @@ type UserRepository interface {
     FindByID(ctx context.Context, id values.UserID) (*entities.User, error)
 }
 
-// 2. Implementation in infrastructure layer  
+// 2. Implementation in infrastructure layer
 package persistence
 
 type SQLUserRepository struct {
@@ -86,6 +89,7 @@ func main() {
 ### Value Objects Best Practices
 
 **✅ Immutable Value Objects:**
+
 ```go
 type Email struct {
     value string
@@ -111,6 +115,7 @@ func (e Email) Domain() string {
 ### Entity Best Practices
 
 **✅ Entities with Business Logic:**
+
 ```go
 type User struct {
     ID        values.UserID
@@ -154,6 +159,7 @@ func (u *User) Deactivate() error {
 ### Error Handling Excellence
 
 **✅ Comprehensive Error Wrapping:**
+
 ```go
 func (s *UserService) CreateUser(ctx context.Context, email string) (*entities.User, error) {
     // Validate input
@@ -190,6 +196,7 @@ func (s *UserService) CreateUser(ctx context.Context, email string) (*entities.U
 ### Function Design Principles
 
 **✅ Single Responsibility Functions:**
+
 ```go
 // Good: Single purpose, clear responsibility
 func (s *UserService) validateUserEmail(email string) error {
@@ -224,6 +231,7 @@ func calculateUserAge(birthDate time.Time) int {
 ### Type Safety Best Practices
 
 **✅ Strong Typing Over Primitives:**
+
 ```go
 // Good: Type-safe domain concepts
 type UserID struct{ value string }
@@ -245,6 +253,7 @@ func ProcessPayment(userID string, amount int64) error {
 ### Concurrency Best Practices
 
 **✅ Safe Concurrent Patterns:**
+
 ```go
 type UserCache struct {
     users map[string]*entities.User
@@ -298,6 +307,7 @@ func (c *UserCache) Set(user *entities.User) {
 ### Domain Testing Best Practices
 
 **✅ BDD-Style Domain Tests:**
+
 ```go
 var _ = Describe("User Entity", func() {
     Describe("Creating a new user", func() {
@@ -333,6 +343,7 @@ var _ = Describe("User Entity", func() {
 ### Repository Testing Patterns
 
 **✅ Test Against Real Implementations:**
+
 ```go
 var _ = Describe("SQLUserRepository", func() {
     var (
@@ -370,6 +381,7 @@ var _ = Describe("SQLUserRepository", func() {
 ### HTTP Handler Testing
 
 **✅ Complete Request/Response Testing:**
+
 ```go
 func TestUserHandler_CreateUser(t *testing.T) {
     // Setup
@@ -419,6 +431,7 @@ func TestUserHandler_CreateUser(t *testing.T) {
 ### Memory Management Best Practices
 
 **✅ Efficient Memory Patterns:**
+
 ```go
 // Pre-allocate slices when size is known
 func ProcessUsers(userCount int) []*entities.User {
@@ -465,6 +478,7 @@ func ProcessLargeDataset(data io.Reader) error {
 ### Database Optimization Patterns
 
 **✅ Efficient Query Patterns:**
+
 ```go
 // Batch operations instead of N+1 queries
 func (r *SQLUserRepository) SaveBatch(ctx context.Context, users []*entities.User) error {
@@ -517,6 +531,7 @@ func (r *SQLUserRepository) FindByEmailPrefix(ctx context.Context, prefix string
 ### Benchmarking Best Practices
 
 **✅ Comprehensive Benchmarks:**
+
 ```go
 func BenchmarkUserService_CreateUser(b *testing.B) {
     service := setupBenchmarkService(b)
@@ -564,6 +579,7 @@ func BenchmarkUserRepository_BatchInsert(b *testing.B) {
 ### Git Workflow Best Practices
 
 **✅ Conventional Commits:**
+
 ```bash
 # Use clear, conventional commit messages
 git commit -m "feat(auth): add user registration with email validation
@@ -583,6 +599,7 @@ git checkout -b refactor/user-service-cleanup
 ```
 
 **✅ Branch Management:**
+
 ```bash
 # Use git-town for branch management
 git town append feature/user-auth    # Create feature branch
@@ -593,7 +610,7 @@ git town ship                        # Merge and cleanup
 git add internal/domain/entities/user.go
 git commit -m "feat(domain): add User entity with business validation"
 
-git add internal/domain/services/user_service.go  
+git add internal/domain/services/user_service.go
 git commit -m "feat(services): implement UserService with creation logic"
 ```
 
@@ -626,6 +643,7 @@ git commit -m "feat(services): implement UserService with creation logic"
 ### Development Environment Setup
 
 **✅ Essential Tools Configuration:**
+
 ```bash
 # Install core tools
 brew install just golangci-lint
@@ -660,13 +678,14 @@ alias jr="just run"
 ### Pipeline Design Principles
 
 **✅ Fast Feedback Loops:**
+
 ```yaml
 # Stage 1: Fast quality checks (< 2 minutes)
 - Linting (golangci-lint, go-arch-lint)
 - Unit tests
 - Security scanning (gosec)
 
-# Stage 2: Integration validation (< 5 minutes)  
+# Stage 2: Integration validation (< 5 minutes)
 - Integration tests
 - Build verification
 - Template generation
@@ -679,6 +698,7 @@ alias jr="just run"
 ```
 
 **✅ Quality Gates:**
+
 ```yaml
 quality_gates:
   required_checks:
@@ -698,6 +718,7 @@ quality_gates:
 ### Deployment Best Practices
 
 **✅ Blue-Green Deployment Pattern:**
+
 ```yaml
 # Health checks before traffic switch
 health_checks:
@@ -706,7 +727,7 @@ health_checks:
     timeout: 5s
     retries: 3
 
-  - endpoint: /health/ready  
+  - endpoint: /health/ready
     expected_status: 200
     timeout: 10s
     retries: 5
@@ -732,6 +753,7 @@ rollback_conditions:
 ### Code Documentation Best Practices
 
 **✅ Self-Documenting Code:**
+
 ```go
 // UserRegistrationService handles the complete user registration workflow
 // including validation, duplication checks, and email verification.
@@ -760,6 +782,7 @@ func (s *UserRegistrationService) RegisterUser(ctx context.Context, req Registra
 ### Architecture Documentation
 
 **✅ Decision Records:**
+
 ```markdown
 # ADR-001: Domain Layer Isolation
 
@@ -769,7 +792,7 @@ func (s *UserRegistrationService) RegisterUser(ctx context.Context, req Registra
 We need to ensure domain business logic remains pure and testable
 without external dependencies.
 
-## Decision  
+## Decision
 Domain layer (entities, services, value objects) cannot import:
 - Infrastructure packages (database, HTTP, external APIs)
 - Framework-specific code (gin, echo, etc.)
@@ -794,6 +817,7 @@ Domain layer (entities, services, value objects) cannot import:
 ### Secure Coding Standards
 
 **✅ Input Validation & Sanitization:**
+
 ```go
 func (s *UserService) CreateUser(ctx context.Context, req CreateUserRequest) (*entities.User, error) {
     // Validate all inputs
@@ -838,6 +862,7 @@ func (s *UserService) validateCreateUserRequest(req CreateUserRequest) error {
 ```
 
 **✅ Database Security:**
+
 ```go
 // Always use parameterized queries
 func (r *SQLUserRepository) FindByEmail(ctx context.Context, email string) (*entities.User, error) {
@@ -876,6 +901,7 @@ func setupDatabase() *sql.DB {
 ### Secret Management
 
 **✅ Environment-Based Configuration:**
+
 ```go
 type Config struct {
     Database struct {
@@ -913,7 +939,7 @@ func maskDSN(dsn string) string {
 ```bash
 # Daily development workflow
 just build                 # Build application
-just lint                  # Run all linting  
+just lint                  # Run all linting
 just test                  # Run all tests
 just coverage 80           # Check coverage threshold
 just run                   # Start development server
@@ -935,7 +961,7 @@ just profile-heap          # Memory profiling
 ```bash
 # Check for common violations
 grep -r "interface{}" internal/domain/     # Should be empty
-grep -r "panic(" internal/                 # Should be empty  
+grep -r "panic(" internal/                 # Should be empty
 grep -r "github.com/gin" internal/domain/ # Should be empty
 
 # Verify layer separation
@@ -957,6 +983,7 @@ go list -deps ./internal/domain/entities | grep infrastructure  # Should be empt
 This best practices guide represents battle-tested patterns for enterprise Go development. Follow these practices to build maintainable, scalable, and robust applications.
 
 For specific implementation examples, see:
+
 - 📁 **[Example Project](../example/)** - Working demonstration
-- 📊 **[Profiling Guide](./PROFILING.md)** - Performance optimization  
+- 📊 **[Profiling Guide](./PROFILING.md)** - Performance optimization
 - 📚 **[Usage Guide](./USAGE.md)** - Complete instructions

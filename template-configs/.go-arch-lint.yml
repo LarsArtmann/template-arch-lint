@@ -15,7 +15,7 @@ workdir: .
 
 # 🚨 VENDOR DEPENDENCY CONFIGURATION
 allow:
-  depOnAnyVendor: true  # Allow vendor dependencies (set to false for stricter control)
+  depOnAnyVendor: true # Allow vendor dependencies (set to false for stricter control)
 
   # ARCHITECTURAL DECISION: Disable Deep Scanning
   #
@@ -113,7 +113,6 @@ components:
     in: internal/testhelpers/application/handlers/**
   test-helpers-infrastructure-repositories:
     in: internal/testhelpers/infrastructure/repositories/**
-
 
 # 🔒 DEPENDENCY RULES - Enforce Clean Architecture
 deps:
@@ -283,7 +282,6 @@ deps:
     anyProjectDeps: true
     anyVendorDeps: true
 
-
 # 🌍 COMMON COMPONENTS - Available everywhere
 commonComponents:
   - domain-shared
@@ -354,9 +352,10 @@ exclude:
 # Note: Integration tests and end-to-end tests may have different
 # import patterns and are also excluded from architecture validation.
 excludeFiles:
-  - ".*_test\\.go$"         # All test files (_test.go suffix)
+  - ".*_test\\.go$" # All test files (_test.go suffix)
   - "integration_test\\.go$" # Integration test files
   - ".*_integration_test\\.go$" # Integration test variations
+
 
 # 📋 ARCHITECTURE VALIDATION RULES & DECISIONS
 #

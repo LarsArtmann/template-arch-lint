@@ -72,7 +72,7 @@ func (h *UserQueryHandler) SearchUsers(c *gin.Context) {
 	if err != nil {
 		_, isNotFound := pkgerrors.AsNotFoundError(err)
 		if isNotFound {
-			c.JSON(http.StatusOK, gin.H{"data": []interface{}{}})
+			c.JSON(http.StatusOK, gin.H{"data": []any{}})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to search users"})

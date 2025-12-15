@@ -4,15 +4,15 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
   workflow_dispatch:
 
 env:
-  GO_VERSION: '1.24.0'
-  GOLANGCI_LINT_VERSION: 'v2.3.1'
-  GO_ARCH_LINT_VERSION: 'v1.12.0'
+  GO_VERSION: "1.24.0"
+  GOLANGCI_LINT_VERSION: "v2.3.1"
+  GO_ARCH_LINT_VERSION: "v1.12.0"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -97,17 +97,17 @@ jobs:
       - name: 🛡️ Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH,MEDIUM'
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH,MEDIUM"
 
       - name: 📤 Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
   # 🏗️ Build validation
   build:
@@ -204,7 +204,7 @@ jobs:
     needs: validate
     strategy:
       matrix:
-        go-version: ['1.24.0', '1.23.0']
+        go-version: ["1.24.0", "1.23.0"]
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -384,19 +384,19 @@ jobs:
       - name: 🛡️ Run Trivy vulnerability scanner on container
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'local-scan:latest'
-          format: 'sarif'
-          output: 'trivy-image-results.sarif'
-          severity: 'CRITICAL,HIGH,MEDIUM'
-          exit-code: '1'
+          image-ref: "local-scan:latest"
+          format: "sarif"
+          output: "trivy-image-results.sarif"
+          severity: "CRITICAL,HIGH,MEDIUM"
+          exit-code: "1"
           ignore-unfixed: true
 
       - name: 📤 Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-image-results.sarif'
-          category: 'container-image'
+          sarif_file: "trivy-image-results.sarif"
+          category: "container-image"
 
       - name: 🔍 Run Grype vulnerability scanner
         uses: anchore/scan-action@v4
@@ -411,7 +411,7 @@ jobs:
         if: always()
         with:
           sarif_file: ${{ steps.grype.outputs.sarif }}
-          category: 'container-grype'
+          category: "container-grype"
 
   # 🏗️ Multi-architecture container build and push
   build-and-push:
@@ -550,7 +550,17 @@ jobs:
     name: 📊 Final Validation
     runs-on: ["self-hosted", "linux", "x64"]
     timeout-minutes: 5
-    needs: [security, build, quality, test, integration, prepare-metadata, container-security, build-and-push]
+    needs:
+      [
+        security,
+        build,
+        quality,
+        test,
+        integration,
+        prepare-metadata,
+        container-security,
+        build-and-push,
+      ]
     if: always()
     steps:
       - name: 📥 Checkout code

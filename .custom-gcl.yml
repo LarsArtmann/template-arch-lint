@@ -1,6 +1,6 @@
 # Custom golangci-lint plugin configuration for template-arch-lint
 # This configuration integrates the unified template-arch-lint plugin
-# providing filename validation, CMD single main enforcement, 
+# providing filename validation, CMD single main enforcement,
 # import cycle detection, and code duplication analysis.
 
 version: "2"
@@ -19,17 +19,17 @@ linters:
             enable: true
             strict-naming: true
             check-package-alignment: true
-            
+
           cmd-single-main:
             enable: true
             enforce-main-function: true
             validate-package-name: true
-            
+
           import-cycle-detector:
             enable: true
             check-indirect-cycles: true
             max-cycle-length: 10
-            
+
           code-duplication-detector:
             enable: true
             min-tokens: 15
@@ -39,10 +39,10 @@ linters:
   enable:
     # Enable our custom plugin (custom linters are enabled by default but being explicit)
     - template-arch-lint
-  
+
   disable:
     # Disable built-in linters that might conflict
-    - dupl  # We have our own code duplication detector
+    - dupl # We have our own code duplication detector
 
 # Integration with existing .golangci.yml
 # Users should include this file or merge settings into their main config

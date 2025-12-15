@@ -5,13 +5,14 @@ This directory contains automatically generated architecture graphs using `go-ar
 ## Directory Structure
 
 - `flow/` - Flow graphs showing reverse dependency injection (default)
-- `dependency-injection/` - DI graphs showing component dependencies  
+- `dependency-injection/` - DI graphs showing component dependencies
 - `focused/` - Component-specific focused graphs
 - `vendor/` - Graphs including vendor dependencies
 
 ## Generation Commands
 
 See the justfile for available graph commands:
+
 - `just graph` - Generate main flow graph
 - `just graph-all` - Generate ALL graph types
 - `just graph-di` - Generate dependency injection graph
@@ -26,4 +27,3 @@ See the justfile for available graph commands:
 - **Focused graphs**: Show single component and its dependencies
 
 Generated: Thu Nov 20 22:04:03 CET 2025
-

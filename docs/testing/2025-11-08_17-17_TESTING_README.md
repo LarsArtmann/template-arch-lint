@@ -21,21 +21,25 @@ tests/
 ## Test Categories
 
 ### Bootstrap Tests (`tests/bootstrap/`)
+
 - **BDD Tests**: Comprehensive behavior-driven development tests
 - **Local Tests**: Local environment validation
 - **Simple BDD**: Essential BDD functionality tests
 - **Ubuntu Tests**: Docker container compatibility
 
 ### Integration Tests (`tests/integration/`)
+
 - **PATH Verification**: Tool installation and PATH setup
 - **Simple Bootstrap**: Basic bootstrap functionality validation
 
 ### Workflow Tests (`tests/workflow/`)
+
 - **Complete Workflow**: End-to-end bootstrap → immediate usage validation
 
 ## Running Tests
 
 ### Individual Tests
+
 ```bash
 # Run specific bootstrap test
 ./tests/bootstrap/test-bootstrap-bdd.sh
@@ -48,6 +52,7 @@ tests/
 ```
 
 ### All Tests in Category
+
 ```bash
 # Run all bootstrap tests
 for test in tests/bootstrap/*.sh; do echo "Running $test"; "$test"; done
@@ -60,6 +65,7 @@ for test in tests/workflow/*.sh; do echo "Running $test"; "$test"; done
 ```
 
 ### All Tests
+
 ```bash
 # Run all tests
 find tests -name "*.sh" -executable -exec echo "Running {}" \; -exec {} \;
@@ -68,6 +74,7 @@ find tests -name "*.sh" -executable -exec echo "Running {}" \; -exec {} \;
 ## Test Dependencies
 
 All test scripts require:
+
 - `bash` (tested with Bash 4+)
 - `git` (for repository operations)
 - `curl` (for downloading configuration files)
@@ -76,6 +83,7 @@ All test scripts require:
 ## Test Output
 
 Tests provide detailed output including:
+
 - ✅ Success indicators
 - ❌ Failure indicators with actionable error messages
 - 📊 Summary statistics
@@ -84,6 +92,7 @@ Tests provide detailed output including:
 ## Contributing
 
 When adding new tests:
+
 1. Place in appropriate category directory
 2. Follow existing naming convention: `test-<description>.sh`
 3. Make executable: `chmod +x tests/<category>/test-<description>.sh`

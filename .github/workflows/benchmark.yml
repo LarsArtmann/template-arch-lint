@@ -6,18 +6,18 @@ name: ⚡ Performance Benchmarks
 
 on:
   push:
-    branches: [ master, main, develop ]
+    branches: [master, main, develop]
   pull_request:
-    branches: [ master, main, develop ]
+    branches: [master, main, develop]
   schedule:
     # Run benchmarks daily at 2 AM UTC to track performance trends
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
   workflow_dispatch:
     inputs:
       benchmark_type:
-        description: 'Type of benchmark to run'
+        description: "Type of benchmark to run"
         required: false
-        default: 'all'
+        default: "all"
         type: choice
         options:
           - all
@@ -35,7 +35,7 @@ env:
   # Benchmark configuration
   BENCHMARK_TIME: "10s"
   BENCHMARK_COUNT: "3"
-  REGRESSION_THRESHOLD: "10"  # % threshold for performance regression detection
+  REGRESSION_THRESHOLD: "10" # % threshold for performance regression detection
   GO_VERSION: "1.24"
 
 jobs:
@@ -51,31 +51,31 @@ jobs:
       baseline-available: ${{ steps.check-baseline.outputs.available }}
 
     steps:
-    - name: 📥 Checkout Code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Fetch full history for baseline comparison
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch full history for baseline comparison
 
-    - name: 🔍 Find Baseline Reference
-      id: baseline
-      run: |
-        # For PRs, use the target branch as baseline
-        if [ "${{ github.event_name }}" == "pull_request" ]; then
-          echo "ref=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
-        else
-          # For pushes, use the previous commit
-          echo "ref=HEAD~1" >> $GITHUB_OUTPUT
-        fi
+      - name: 🔍 Find Baseline Reference
+        id: baseline
+        run: |
+          # For PRs, use the target branch as baseline
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "ref=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
+          else
+            # For pushes, use the previous commit
+            echo "ref=HEAD~1" >> $GITHUB_OUTPUT
+          fi
 
-    - name: 🔍 Check Baseline Availability
-      id: check-baseline
-      run: |
-        # Check if we can access the baseline commit
-        if git rev-parse --verify ${{ steps.baseline.outputs.ref }} >/dev/null 2>&1; then
-          echo "available=true" >> $GITHUB_OUTPUT
-        else
-          echo "available=false" >> $GITHUB_OUTPUT
-        fi
+      - name: 🔍 Check Baseline Availability
+        id: check-baseline
+        run: |
+          # Check if we can access the baseline commit
+          if git rev-parse --verify ${{ steps.baseline.outputs.ref }} >/dev/null 2>&1; then
+            echo "available=true" >> $GITHUB_OUTPUT
+          else
+            echo "available=false" >> $GITHUB_OUTPUT
+          fi
 
   # ==============================================
   # CPU Performance Benchmarks
@@ -87,54 +87,54 @@ jobs:
     if: ${{ inputs.benchmark_type == 'all' || inputs.benchmark_type == 'cpu' || inputs.benchmark_type == '' }}
 
     steps:
-    - name: 📥 Checkout Code
-      uses: actions/checkout@v4
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
 
-    - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ env.GO_VERSION }}
-        cache: true
-        cache-dependency-path: go.sum
+      - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: go.sum
 
-    - name: 📋 Download Dependencies
-      run: |
-        go mod download
-        go mod verify
+      - name: 📋 Download Dependencies
+        run: |
+          go mod download
+          go mod verify
 
-    - name: 🔧 Install Just and Tools
-      uses: extractions/setup-just@v2
-      with:
-        just-version: '1.36.0'
+      - name: 🔧 Install Just and Tools
+        uses: extractions/setup-just@v2
+        with:
+          just-version: "1.36.0"
 
-    - name: 🔧 Install Required Tools
-      run: |
-        go install github.com/a-h/templ/cmd/templ@latest
+      - name: 🔧 Install Required Tools
+        run: |
+          go install github.com/a-h/templ/cmd/templ@latest
 
-    - name: 🏗️ Build Project
-      run: |
-        echo "🔨 Building project for benchmarks..."
-        just build
+      - name: 🏗️ Build Project
+        run: |
+          echo "🔨 Building project for benchmarks..."
+          just build
 
-    - name: 🖥️ Run CPU Benchmarks
-      run: |
-        echo "🖥️ Running CPU-focused benchmarks..."
-        mkdir -p benchmark-results
+      - name: 🖥️ Run CPU Benchmarks
+        run: |
+          echo "🖥️ Running CPU-focused benchmarks..."
+          mkdir -p benchmark-results
 
-        # Run CPU benchmarks with multiple iterations
-        just bench-cpu | tee benchmark-results/cpu-benchmarks.txt
+          # Run CPU benchmarks with multiple iterations
+          just bench-cpu | tee benchmark-results/cpu-benchmarks.txt
 
-        # Parse and format results
-        echo "📊 CPU Benchmark Summary:" | tee benchmark-results/cpu-summary.txt
-        grep "Benchmark" benchmark-results/cpu-benchmarks.txt | \
-          awk '{print $1 ": " $3 " ns/op"}' | tee -a benchmark-results/cpu-summary.txt
+          # Parse and format results
+          echo "📊 CPU Benchmark Summary:" | tee benchmark-results/cpu-summary.txt
+          grep "Benchmark" benchmark-results/cpu-benchmarks.txt | \
+            awk '{print $1 ": " $3 " ns/op"}' | tee -a benchmark-results/cpu-summary.txt
 
-    - name: 📤 Upload CPU Benchmark Results
-      uses: actions/upload-artifact@v4
-      with:
-        name: cpu-benchmarks-${{ github.run_number }}
-        path: benchmark-results/
-        retention-days: 30
+      - name: 📤 Upload CPU Benchmark Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpu-benchmarks-${{ github.run_number }}
+          path: benchmark-results/
+          retention-days: 30
 
   # ==============================================
   # Memory Performance Benchmarks
@@ -146,55 +146,55 @@ jobs:
     if: ${{ inputs.benchmark_type == 'all' || inputs.benchmark_type == 'memory' || inputs.benchmark_type == '' }}
 
     steps:
-    - name: 📥 Checkout Code
-      uses: actions/checkout@v4
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
 
-    - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ env.GO_VERSION }}
-        cache: true
-        cache-dependency-path: go.sum
+      - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: go.sum
 
-    - name: 📋 Download Dependencies
-      run: |
-        go mod download
-        go mod verify
+      - name: 📋 Download Dependencies
+        run: |
+          go mod download
+          go mod verify
 
-    - name: 🔧 Install Just and Tools
-      uses: extractions/setup-just@v2
-      with:
-        just-version: '1.36.0'
+      - name: 🔧 Install Just and Tools
+        uses: extractions/setup-just@v2
+        with:
+          just-version: "1.36.0"
 
-    - name: 🔧 Install Required Tools
-      run: |
-        go install github.com/a-h/templ/cmd/templ@latest
+      - name: 🔧 Install Required Tools
+        run: |
+          go install github.com/a-h/templ/cmd/templ@latest
 
-    - name: 🏗️ Build Project
-      run: |
-        echo "🔨 Building project for benchmarks..."
-        just build
+      - name: 🏗️ Build Project
+        run: |
+          echo "🔨 Building project for benchmarks..."
+          just build
 
-    - name: 🧠 Run Memory Benchmarks
-      run: |
-        echo "🧠 Running memory-focused benchmarks..."
-        mkdir -p benchmark-results
+      - name: 🧠 Run Memory Benchmarks
+        run: |
+          echo "🧠 Running memory-focused benchmarks..."
+          mkdir -p benchmark-results
 
-        # Run memory benchmarks with allocation tracking
-        just bench-memory | tee benchmark-results/memory-benchmarks.txt
+          # Run memory benchmarks with allocation tracking
+          just bench-memory | tee benchmark-results/memory-benchmarks.txt
 
-        # Parse and format results
-        echo "📊 Memory Benchmark Summary:" | tee benchmark-results/memory-summary.txt
-        grep "Benchmark" benchmark-results/memory-benchmarks.txt | \
-          awk '{print $1 ": " $3 " ns/op, " $5 " B/op, " $7 " allocs/op"}' | \
-          tee -a benchmark-results/memory-summary.txt
+          # Parse and format results
+          echo "📊 Memory Benchmark Summary:" | tee benchmark-results/memory-summary.txt
+          grep "Benchmark" benchmark-results/memory-benchmarks.txt | \
+            awk '{print $1 ": " $3 " ns/op, " $5 " B/op, " $7 " allocs/op"}' | \
+            tee -a benchmark-results/memory-summary.txt
 
-    - name: 📤 Upload Memory Benchmark Results
-      uses: actions/upload-artifact@v4
-      with:
-        name: memory-benchmarks-${{ github.run_number }}
-        path: benchmark-results/
-        retention-days: 30
+      - name: 📤 Upload Memory Benchmark Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: memory-benchmarks-${{ github.run_number }}
+          path: benchmark-results/
+          retention-days: 30
 
   # ==============================================
   # Concurrent Performance Benchmarks
@@ -206,56 +206,56 @@ jobs:
     if: ${{ inputs.benchmark_type == 'all' || inputs.benchmark_type == 'concurrent' || inputs.benchmark_type == '' }}
 
     steps:
-    - name: 📥 Checkout Code
-      uses: actions/checkout@v4
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
 
-    - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ env.GO_VERSION }}
-        cache: true
-        cache-dependency-path: go.sum
+      - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: go.sum
 
-    - name: 📋 Download Dependencies
-      run: |
-        go mod download
-        go mod verify
+      - name: 📋 Download Dependencies
+        run: |
+          go mod download
+          go mod verify
 
-    - name: 🔧 Install Just and Tools
-      uses: extractions/setup-just@v2
-      with:
-        just-version: '1.36.0'
+      - name: 🔧 Install Just and Tools
+        uses: extractions/setup-just@v2
+        with:
+          just-version: "1.36.0"
 
-    - name: 🔧 Install Required Tools
-      run: |
-        go install github.com/a-h/templ/cmd/templ@latest
+      - name: 🔧 Install Required Tools
+        run: |
+          go install github.com/a-h/templ/cmd/templ@latest
 
-    - name: 🏗️ Build Project
-      run: |
-        echo "🔨 Building project for benchmarks..."
-        just build
+      - name: 🏗️ Build Project
+        run: |
+          echo "🔨 Building project for benchmarks..."
+          just build
 
-    - name: 🔄 Run Concurrent Benchmarks
-      run: |
-        echo "🔄 Running concurrent performance benchmarks..."
-        mkdir -p benchmark-results
+      - name: 🔄 Run Concurrent Benchmarks
+        run: |
+          echo "🔄 Running concurrent performance benchmarks..."
+          mkdir -p benchmark-results
 
-        # Run concurrent benchmarks
-        go test ./... -bench=Concurrent -benchmem -count=${{ env.BENCHMARK_COUNT }} \
-          -benchtime=${{ env.BENCHMARK_TIME }} -cpu=1,2,4,8 | \
-          tee benchmark-results/concurrent-benchmarks.txt
+          # Run concurrent benchmarks
+          go test ./... -bench=Concurrent -benchmem -count=${{ env.BENCHMARK_COUNT }} \
+            -benchtime=${{ env.BENCHMARK_TIME }} -cpu=1,2,4,8 | \
+            tee benchmark-results/concurrent-benchmarks.txt
 
-        # Parse and format results
-        echo "📊 Concurrent Benchmark Summary:" | tee benchmark-results/concurrent-summary.txt
-        grep "Benchmark.*Concurrent" benchmark-results/concurrent-benchmarks.txt | \
-          awk '{print $1 ": " $3 " ns/op"}' | tee -a benchmark-results/concurrent-summary.txt
+          # Parse and format results
+          echo "📊 Concurrent Benchmark Summary:" | tee benchmark-results/concurrent-summary.txt
+          grep "Benchmark.*Concurrent" benchmark-results/concurrent-benchmarks.txt | \
+            awk '{print $1 ": " $3 " ns/op"}' | tee -a benchmark-results/concurrent-summary.txt
 
-    - name: 📤 Upload Concurrent Benchmark Results
-      uses: actions/upload-artifact@v4
-      with:
-        name: concurrent-benchmarks-${{ github.run_number }}
-        path: benchmark-results/
-        retention-days: 30
+      - name: 📤 Upload Concurrent Benchmark Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: concurrent-benchmarks-${{ github.run_number }}
+          path: benchmark-results/
+          retention-days: 30
 
   # ==============================================
   # Stress Testing Benchmarks
@@ -267,55 +267,55 @@ jobs:
     if: ${{ inputs.benchmark_type == 'all' || inputs.benchmark_type == 'stress' || inputs.benchmark_type == '' }}
 
     steps:
-    - name: 📥 Checkout Code
-      uses: actions/checkout@v4
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
 
-    - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ env.GO_VERSION }}
-        cache: true
-        cache-dependency-path: go.sum
+      - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: go.sum
 
-    - name: 📋 Download Dependencies
-      run: |
-        go mod download
-        go mod verify
+      - name: 📋 Download Dependencies
+        run: |
+          go mod download
+          go mod verify
 
-    - name: 🔧 Install Just and Tools
-      uses: extractions/setup-just@v2
-      with:
-        just-version: '1.36.0'
+      - name: 🔧 Install Just and Tools
+        uses: extractions/setup-just@v2
+        with:
+          just-version: "1.36.0"
 
-    - name: 🔧 Install Required Tools
-      run: |
-        go install github.com/a-h/templ/cmd/templ@latest
+      - name: 🔧 Install Required Tools
+        run: |
+          go install github.com/a-h/templ/cmd/templ@latest
 
-    - name: 🏗️ Build Project
-      run: |
-        echo "🔨 Building project for benchmarks..."
-        just build
+      - name: 🏗️ Build Project
+        run: |
+          echo "🔨 Building project for benchmarks..."
+          just build
 
-    - name: 💪 Run Stress Benchmarks
-      run: |
-        echo "💪 Running stress testing benchmarks..."
-        mkdir -p benchmark-results
+      - name: 💪 Run Stress Benchmarks
+        run: |
+          echo "💪 Running stress testing benchmarks..."
+          mkdir -p benchmark-results
 
-        # Run stress benchmarks with extended time
-        just bench-stress | tee benchmark-results/stress-benchmarks.txt
+          # Run stress benchmarks with extended time
+          just bench-stress | tee benchmark-results/stress-benchmarks.txt
 
-        # Parse and format results
-        echo "📊 Stress Benchmark Summary:" | tee benchmark-results/stress-summary.txt
-        grep "Benchmark" benchmark-results/stress-benchmarks.txt | \
-          tail -20 | awk '{print $1 ": " $3 " ns/op"}' | \
-          tee -a benchmark-results/stress-summary.txt
+          # Parse and format results
+          echo "📊 Stress Benchmark Summary:" | tee benchmark-results/stress-summary.txt
+          grep "Benchmark" benchmark-results/stress-benchmarks.txt | \
+            tail -20 | awk '{print $1 ": " $3 " ns/op"}' | \
+            tee -a benchmark-results/stress-summary.txt
 
-    - name: 📤 Upload Stress Benchmark Results
-      uses: actions/upload-artifact@v4
-      with:
-        name: stress-benchmarks-${{ github.run_number }}
-        path: benchmark-results/
-        retention-days: 30
+      - name: 📤 Upload Stress Benchmark Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: stress-benchmarks-${{ github.run_number }}
+          path: benchmark-results/
+          retention-days: 30
 
   # ==============================================
   # Baseline Comparison (for PRs)
@@ -328,209 +328,209 @@ jobs:
     if: ${{ github.event_name == 'pull_request' && needs.setup-baseline.outputs.baseline-available == 'true' }}
 
     steps:
-    - name: 📥 Checkout Current Code
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.pull_request.head.sha }}
+      - name: 📥 Checkout Current Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
-    - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ env.GO_VERSION }}
-        cache: true
-        cache-dependency-path: go.sum
+      - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: go.sum
 
-    - name: 📋 Download Dependencies
-      run: |
-        go mod download
-        go mod verify
+      - name: 📋 Download Dependencies
+        run: |
+          go mod download
+          go mod verify
 
-    - name: 🔧 Install Just and Tools
-      uses: extractions/setup-just@v2
-      with:
-        just-version: '1.36.0'
+      - name: 🔧 Install Just and Tools
+        uses: extractions/setup-just@v2
+        with:
+          just-version: "1.36.0"
 
-    - name: 🔧 Install Required Tools
-      run: |
-        go install github.com/a-h/templ/cmd/templ@latest
+      - name: 🔧 Install Required Tools
+        run: |
+          go install github.com/a-h/templ/cmd/templ@latest
 
-    - name: 🏗️ Build Current Code
-      run: |
-        echo "🔨 Building current code..."
-        just build
+      - name: 🏗️ Build Current Code
+        run: |
+          echo "🔨 Building current code..."
+          just build
 
-    - name: ⚡ Run Current Benchmarks
-      run: |
-        echo "⚡ Running current benchmarks..."
-        mkdir -p benchmark-results/current
-        just bench-quick | tee benchmark-results/current/benchmarks.txt
+      - name: ⚡ Run Current Benchmarks
+        run: |
+          echo "⚡ Running current benchmarks..."
+          mkdir -p benchmark-results/current
+          just bench-quick | tee benchmark-results/current/benchmarks.txt
 
-    - name: 📥 Checkout Baseline Code
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ needs.setup-baseline.outputs.baseline-ref }}
-        path: baseline
+      - name: 📥 Checkout Baseline Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.setup-baseline.outputs.baseline-ref }}
+          path: baseline
 
-    - name: 🏗️ Build Baseline Code
-      run: |
-        cd baseline
-        echo "🔨 Building baseline code..."
-        go mod download
-        just build
+      - name: 🏗️ Build Baseline Code
+        run: |
+          cd baseline
+          echo "🔨 Building baseline code..."
+          go mod download
+          just build
 
-    - name: ⚡ Run Baseline Benchmarks
-      run: |
-        cd baseline
-        echo "⚡ Running baseline benchmarks..."
-        mkdir -p ../benchmark-results/baseline
-        just bench-quick | tee ../benchmark-results/baseline/benchmarks.txt
+      - name: ⚡ Run Baseline Benchmarks
+        run: |
+          cd baseline
+          echo "⚡ Running baseline benchmarks..."
+          mkdir -p ../benchmark-results/baseline
+          just bench-quick | tee ../benchmark-results/baseline/benchmarks.txt
 
-    - name: 📊 Compare Performance
-      run: |
-        echo "📊 Comparing performance between baseline and current..."
-        mkdir -p benchmark-results/comparison
+      - name: 📊 Compare Performance
+        run: |
+          echo "📊 Comparing performance between baseline and current..."
+          mkdir -p benchmark-results/comparison
 
-        # Create comparison script
-        cat > compare_benchmarks.go << 'EOF'
-        package main
+          # Create comparison script
+          cat > compare_benchmarks.go << 'EOF'
+          package main
 
-        import (
-            "bufio"
-            "fmt"
-            "os"
-            "regexp"
-            "strconv"
-            "strings"
-        )
+          import (
+              "bufio"
+              "fmt"
+              "os"
+              "regexp"
+              "strconv"
+              "strings"
+          )
 
-        type BenchResult struct {
-            Name   string
-            NsPerOp float64
-            BytesPerOp int64
-            AllocsPerOp int64
-        }
-
-        func parseBenchmarks(filename string) (map[string]BenchResult, error) {
-            file, err := os.Open(filename)
-            if err != nil {
-                return nil, err
-            }
-            defer file.Close()
-
-            results := make(map[string]BenchResult)
-            scanner := bufio.NewScanner(file)
-            re := regexp.MustCompile(`^Benchmark(\w+)\s+\d+\s+([\d.]+)\s+ns/op(?:\s+([\d.]+)\s+B/op)?(?:\s+([\d.]+)\s+allocs/op)?`)
-
-            for scanner.Scan() {
-                line := scanner.Text()
-                matches := re.FindStringSubmatch(line)
-                if len(matches) >= 3 {
-                    nsPerOp, _ := strconv.ParseFloat(matches[2], 64)
-                    result := BenchResult{
-                        Name:    matches[1],
-                        NsPerOp: nsPerOp,
-                    }
-                    if len(matches) > 3 && matches[3] != "" {
-                        result.BytesPerOp, _ = strconv.ParseInt(matches[3], 10, 64)
-                    }
-                    if len(matches) > 4 && matches[4] != "" {
-                        result.AllocsPerOp, _ = strconv.ParseInt(matches[4], 10, 64)
-                    }
-                    results[matches[1]] = result
-                }
-            }
-            return results, scanner.Err()
-        }
-
-        func main() {
-            baseline, err := parseBenchmarks("benchmark-results/baseline/benchmarks.txt")
-            if err != nil {
-                fmt.Printf("Error parsing baseline: %v\n", err)
-                return
-            }
-
-            current, err := parseBenchmarks("benchmark-results/current/benchmarks.txt")
-            if err != nil {
-                fmt.Printf("Error parsing current: %v\n", err)
-                return
-            }
-
-            fmt.Println("# 📊 Performance Comparison Report")
-            fmt.Println()
-            fmt.Println("| Benchmark | Baseline (ns/op) | Current (ns/op) | Change | Status |")
-            fmt.Println("|-----------|------------------|-----------------|---------|---------|")
-
-            regressions := 0
-            improvements := 0
-
-            for name, currentResult := range current {
-                if baselineResult, exists := baseline[name]; exists {
-                    changePercent := ((currentResult.NsPerOp - baselineResult.NsPerOp) / baselineResult.NsPerOp) * 100
-                    var status, change string
-
-                    if changePercent > ${{ env.REGRESSION_THRESHOLD }} {
-                        status = "❌ REGRESSION"
-                        regressions++
-                    } else if changePercent < -5 {
-                        status = "✅ IMPROVEMENT"
-                        improvements++
-                    } else {
-                        status = "➖ NO CHANGE"
-                    }
-
-                    if changePercent > 0 {
-                        change = fmt.Sprintf("+%.1f%%", changePercent)
-                    } else {
-                        change = fmt.Sprintf("%.1f%%", changePercent)
-                    }
-
-                    fmt.Printf("| %s | %.1f | %.1f | %s | %s |\n",
-                        name, baselineResult.NsPerOp, currentResult.NsPerOp, change, status)
-                }
-            }
-
-            fmt.Println()
-            fmt.Printf("## Summary\n")
-            fmt.Printf("- 🔺 Regressions: %d\n", regressions)
-            fmt.Printf("- 🔻 Improvements: %d\n", improvements)
-            fmt.Printf("- 📊 Total benchmarks compared: %d\n", len(current))
-
-            if regressions > 0 {
-                fmt.Printf("\n❌ Performance regressions detected! Review the changes.\n")
-                os.Exit(1)
-            } else {
-                fmt.Printf("\n✅ No significant performance regressions detected.\n")
-            }
-        }
-        EOF
-
-        # Run comparison
-        go run compare_benchmarks.go | tee benchmark-results/comparison/report.md
-
-    - name: 📤 Upload Comparison Results
-      uses: actions/upload-artifact@v4
-      with:
-        name: benchmark-comparison-${{ github.run_number }}
-        path: benchmark-results/
-        retention-days: 30
-
-    - name: 💬 Comment PR with Results
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const fs = require('fs');
-          try {
-            const report = fs.readFileSync('benchmark-results/comparison/report.md', 'utf8');
-
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `## ⚡ Performance Benchmark Results\n\n${report}\n\n---\n*Automated benchmark comparison against baseline commit ${context.payload.pull_request.base.sha.slice(0, 7)}*`
-            });
-          } catch (error) {
-            console.log('Could not post benchmark results:', error);
+          type BenchResult struct {
+              Name   string
+              NsPerOp float64
+              BytesPerOp int64
+              AllocsPerOp int64
           }
+
+          func parseBenchmarks(filename string) (map[string]BenchResult, error) {
+              file, err := os.Open(filename)
+              if err != nil {
+                  return nil, err
+              }
+              defer file.Close()
+
+              results := make(map[string]BenchResult)
+              scanner := bufio.NewScanner(file)
+              re := regexp.MustCompile(`^Benchmark(\w+)\s+\d+\s+([\d.]+)\s+ns/op(?:\s+([\d.]+)\s+B/op)?(?:\s+([\d.]+)\s+allocs/op)?`)
+
+              for scanner.Scan() {
+                  line := scanner.Text()
+                  matches := re.FindStringSubmatch(line)
+                  if len(matches) >= 3 {
+                      nsPerOp, _ := strconv.ParseFloat(matches[2], 64)
+                      result := BenchResult{
+                          Name:    matches[1],
+                          NsPerOp: nsPerOp,
+                      }
+                      if len(matches) > 3 && matches[3] != "" {
+                          result.BytesPerOp, _ = strconv.ParseInt(matches[3], 10, 64)
+                      }
+                      if len(matches) > 4 && matches[4] != "" {
+                          result.AllocsPerOp, _ = strconv.ParseInt(matches[4], 10, 64)
+                      }
+                      results[matches[1]] = result
+                  }
+              }
+              return results, scanner.Err()
+          }
+
+          func main() {
+              baseline, err := parseBenchmarks("benchmark-results/baseline/benchmarks.txt")
+              if err != nil {
+                  fmt.Printf("Error parsing baseline: %v\n", err)
+                  return
+              }
+
+              current, err := parseBenchmarks("benchmark-results/current/benchmarks.txt")
+              if err != nil {
+                  fmt.Printf("Error parsing current: %v\n", err)
+                  return
+              }
+
+              fmt.Println("# 📊 Performance Comparison Report")
+              fmt.Println()
+              fmt.Println("| Benchmark | Baseline (ns/op) | Current (ns/op) | Change | Status |")
+              fmt.Println("|-----------|------------------|-----------------|---------|---------|")
+
+              regressions := 0
+              improvements := 0
+
+              for name, currentResult := range current {
+                  if baselineResult, exists := baseline[name]; exists {
+                      changePercent := ((currentResult.NsPerOp - baselineResult.NsPerOp) / baselineResult.NsPerOp) * 100
+                      var status, change string
+
+                      if changePercent > ${{ env.REGRESSION_THRESHOLD }} {
+                          status = "❌ REGRESSION"
+                          regressions++
+                      } else if changePercent < -5 {
+                          status = "✅ IMPROVEMENT"
+                          improvements++
+                      } else {
+                          status = "➖ NO CHANGE"
+                      }
+
+                      if changePercent > 0 {
+                          change = fmt.Sprintf("+%.1f%%", changePercent)
+                      } else {
+                          change = fmt.Sprintf("%.1f%%", changePercent)
+                      }
+
+                      fmt.Printf("| %s | %.1f | %.1f | %s | %s |\n",
+                          name, baselineResult.NsPerOp, currentResult.NsPerOp, change, status)
+                  }
+              }
+
+              fmt.Println()
+              fmt.Printf("## Summary\n")
+              fmt.Printf("- 🔺 Regressions: %d\n", regressions)
+              fmt.Printf("- 🔻 Improvements: %d\n", improvements)
+              fmt.Printf("- 📊 Total benchmarks compared: %d\n", len(current))
+
+              if regressions > 0 {
+                  fmt.Printf("\n❌ Performance regressions detected! Review the changes.\n")
+                  os.Exit(1)
+              } else {
+                  fmt.Printf("\n✅ No significant performance regressions detected.\n")
+              }
+          }
+          EOF
+
+          # Run comparison
+          go run compare_benchmarks.go | tee benchmark-results/comparison/report.md
+
+      - name: 📤 Upload Comparison Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-comparison-${{ github.run_number }}
+          path: benchmark-results/
+          retention-days: 30
+
+      - name: 💬 Comment PR with Results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const report = fs.readFileSync('benchmark-results/comparison/report.md', 'utf8');
+
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## ⚡ Performance Benchmark Results\n\n${report}\n\n---\n*Automated benchmark comparison against baseline commit ${context.payload.pull_request.base.sha.slice(0, 7)}*`
+              });
+            } catch (error) {
+              console.log('Could not post benchmark results:', error);
+            }
 
   # ==============================================
   # Historical Performance Tracking
@@ -543,27 +543,27 @@ jobs:
     needs: [cpu-benchmarks, memory-benchmarks]
 
     steps:
-    - name: 📥 Checkout Code
-      uses: actions/checkout@v4
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
 
-    - name: 📊 Archive Performance Metrics
-      run: |
-        echo "📊 Archiving performance metrics for historical tracking..."
-        mkdir -p performance-history
+      - name: 📊 Archive Performance Metrics
+        run: |
+          echo "📊 Archiving performance metrics for historical tracking..."
+          mkdir -p performance-history
 
-        # Create performance record
-        cat > performance-history/perf-$(date +%Y-%m-%d-%H-%M).json << EOF
-        {
-          "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-          "commit": "${{ github.sha }}",
-          "branch": "${{ github.ref_name }}",
-          "go_version": "${{ env.GO_VERSION }}",
-          "event": "${{ github.event_name }}",
-          "run_number": "${{ github.run_number }}"
-        }
-        EOF
+          # Create performance record
+          cat > performance-history/perf-$(date +%Y-%m-%d-%H-%M).json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "go_version": "${{ env.GO_VERSION }}",
+            "event": "${{ github.event_name }}",
+            "run_number": "${{ github.run_number }}"
+          }
+          EOF
 
-        echo "📈 Performance metrics archived for commit ${{ github.sha }}"
+          echo "📈 Performance metrics archived for commit ${{ github.sha }}"
 
   # ==============================================
   # Benchmark Summary
@@ -576,26 +576,26 @@ jobs:
     if: always()
 
     steps:
-    - name: 🎉 Benchmark Results Summary
-      run: |
-        echo "🎉 Performance benchmarking completed!"
-        echo ""
-        echo "📊 Benchmark Jobs Status:"
-        echo "  🖥️  CPU Benchmarks: ${{ needs.cpu-benchmarks.result }}"
-        echo "  🧠 Memory Benchmarks: ${{ needs.memory-benchmarks.result }}"
-        echo "  🔄 Concurrent Benchmarks: ${{ needs.concurrent-benchmarks.result }}"
-        echo "  💪 Stress Benchmarks: ${{ needs.stress-benchmarks.result }}"
-        echo ""
+      - name: 🎉 Benchmark Results Summary
+        run: |
+          echo "🎉 Performance benchmarking completed!"
+          echo ""
+          echo "📊 Benchmark Jobs Status:"
+          echo "  🖥️  CPU Benchmarks: ${{ needs.cpu-benchmarks.result }}"
+          echo "  🧠 Memory Benchmarks: ${{ needs.memory-benchmarks.result }}"
+          echo "  🔄 Concurrent Benchmarks: ${{ needs.concurrent-benchmarks.result }}"
+          echo "  💪 Stress Benchmarks: ${{ needs.stress-benchmarks.result }}"
+          echo ""
 
-        # Check if any benchmark failed
-        if [[ "${{ needs.cpu-benchmarks.result }}" == "failure" ]] || \
-           [[ "${{ needs.memory-benchmarks.result }}" == "failure" ]] || \
-           [[ "${{ needs.concurrent-benchmarks.result }}" == "failure" ]] || \
-           [[ "${{ needs.stress-benchmarks.result }}" == "failure" ]]; then
-          echo "❌ Some benchmarks failed!"
-          echo "📋 Check the individual job logs for details."
-          exit 1
-        else
-          echo "✅ All benchmarks completed successfully!"
-          echo "📈 Performance metrics are ready for analysis."
-        fi
+          # Check if any benchmark failed
+          if [[ "${{ needs.cpu-benchmarks.result }}" == "failure" ]] || \
+             [[ "${{ needs.memory-benchmarks.result }}" == "failure" ]] || \
+             [[ "${{ needs.concurrent-benchmarks.result }}" == "failure" ]] || \
+             [[ "${{ needs.stress-benchmarks.result }}" == "failure" ]]; then
+            echo "❌ Some benchmarks failed!"
+            echo "📋 Check the individual job logs for details."
+            exit 1
+          else
+            echo "✅ All benchmarks completed successfully!"
+            echo "📈 Performance metrics are ready for analysis."
+          fi

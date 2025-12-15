@@ -37,6 +37,7 @@ parent-project/
 ## 📋 Plugin Examples and Architectures
 
 ### Example 1: Auth Plugin
+
 ```yaml
 # plugins/auth-plugin/.go-arch-lint.yml
 version: 3
@@ -52,7 +53,7 @@ deps:
   auth-domain:
     anyVendorDeps: true
     mayDependOn: []
-  
+
   auth-handlers:
     mayDependOn:
       - auth-domain
@@ -60,6 +61,7 @@ deps:
 ```
 
 ### Example 2: Logging Plugin
+
 ```yaml
 # plugins/logging-plugin/.go-arch-lint.yml
 version: 3
@@ -73,13 +75,14 @@ deps:
   logging-core:
     anyVendorDeps: true
     mayDependOn: []
-  
+
   logging-adapters:
     mayDependOn:
       - logging-core
 ```
 
 ### Example 3: Database Plugin
+
 ```yaml
 # plugins/database-plugin/.go-arch-lint.yml
 version: 3
@@ -99,6 +102,7 @@ deps:
 ## 🔧 Implementation Guidelines
 
 ### 1. Plugin Structure
+
 ```
 plugins/my-plugin/
 ├── go.mod                    # Plugin module definition
@@ -112,6 +116,7 @@ plugins/my-plugin/
 ```
 
 ### 2. Plugin go.mod Example
+
 ```go
 module github.com/yourorg/project/plugins/auth-plugin
 
@@ -124,7 +129,9 @@ require (
 ```
 
 ### 3. Plugin Architecture Rules
+
 Each plugin should:
+
 - Define its own Clean Architecture layers
 - Use appropriate dependencies for its domain
 - Have independent architectural validation
@@ -133,6 +140,7 @@ Each plugin should:
 ## 🚀 Plugin Integration Patterns
 
 ### 1. Interface-Based Integration
+
 ```go
 // In main project
 type AuthProvider interface {
@@ -146,15 +154,16 @@ func RegisterAuthPlugin(provider AuthProvider) {
 ```
 
 ### 2. Plugin Discovery
+
 ```go
 // Main project discovers and loads plugins
 func LoadPlugins() error {
     plugins := []string{
         "auth-plugin",
-        "logging-plugin", 
+        "logging-plugin",
         "metrics-plugin",
     }
-    
+
     for _, plugin := range plugins {
         if err := loadPlugin(plugin); err != nil {
             return fmt.Errorf("failed to load %s: %w", plugin, err)
@@ -167,6 +176,7 @@ func LoadPlugins() error {
 ## 📊 Architectural Validation Strategy
 
 ### Main Project Validation
+
 ```bash
 # Main project - plugins excluded
 cd /project
@@ -174,16 +184,18 @@ just lint-arch    # Validates main architecture only
 ```
 
 ### Individual Plugin Validation
+
 ```bash
 # Each plugin validates independently
 cd plugins/auth-plugin
 just lint-arch    # Validates auth plugin architecture
 
-cd plugins/logging-plugin  
+cd plugins/logging-plugin
 just lint-arch    # Validates logging plugin architecture
 ```
 
 ### CI/CD Pipeline
+
 ```yaml
 # .github/workflows/architecture.yml
 jobs:
@@ -193,7 +205,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Validate Main Architecture
         run: just lint-arch
-  
+
   architecture-plugins:
     runs-on: ubuntu-latest
     strategy:
@@ -209,21 +221,25 @@ jobs:
 ## 🎯 Best Practices
 
 ### 1. Clear Plugin Boundaries
+
 - Each plugin should solve one specific problem
 - Avoid circular dependencies between plugins
 - Use well-defined interfaces for communication
 
 ### 2. Consistent Architecture
+
 - Follow Clean Architecture in each plugin
 - Use similar naming conventions
 - Maintain consistent documentation
 
 ### 3. Independent Testing
+
 - Each plugin has its own test suite
 - Plugin tests validate plugin-specific architecture
 - Integration tests verify plugin interactions
 
 ### 4. Version Management
+
 - Each plugin has independent versioning
 - Maintain compatibility matrices
 - Document breaking changes clearly
@@ -231,16 +247,19 @@ jobs:
 ## 🚨 Common Pitfalls to Avoid
 
 ### 1. Plugin Proliferation
+
 - Don't create plugins for simple utilities
 - Consider if functionality belongs in main project
 - Balance modularity with complexity
 
 ### 2. Inconsistent Architectures
+
 - Don't mix architectural patterns between plugins
 - Maintain consistency in Clean Architecture implementation
 - Review and standardize plugin architectures regularly
 
 ### 3. Dependency Hell
+
 - Minimize plugin interdependencies
 - Use interface contracts to reduce coupling
 - Consider dependency injection for plugin coordination

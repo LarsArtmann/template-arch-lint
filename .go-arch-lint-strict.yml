@@ -17,8 +17,8 @@ workdir: .
 
 # 🚨 VENDOR DEPENDENCY CONFIGURATION
 allow:
-  depOnAnyVendor: false  # STRICT: No unlimited vendor dependencies
-  deepScan: true        # Enable comprehensive AST analysis
+  depOnAnyVendor: false # STRICT: No unlimited vendor dependencies
+  deepScan: true # Enable comprehensive AST analysis
 
 # 📦 VENDOR LIBRARIES - Explicitly Allowed Based on library-policy.yaml
 vendors:
@@ -188,7 +188,7 @@ components:
     in: internal/infrastructure/**
 
   # ========================================
-  # APPLICATION LAYER - HTTP Handlers 
+  # APPLICATION LAYER - HTTP Handlers
   # ========================================
   application-handlers:
     in: internal/application/handlers/**
@@ -218,19 +218,19 @@ deps:
     canUse: [std]
     mayDependOn:
       - domain-values
-      - pkg-errors  # MUST use centralized errors
+      - pkg-errors # MUST use centralized errors
 
   domain-values:
     canUse: [std]
     mayDependOn:
-      - pkg-errors  # MUST use centralized errors
+      - pkg-errors # MUST use centralized errors
 
   domain-repositories:
     canUse: [std]
     mayDependOn:
       - domain-entities
       - domain-values
-      - pkg-errors  # MUST use centralized errors
+      - pkg-errors # MUST use centralized errors
 
   domain-services:
     canUse: [std, x_errgroup, samber_lo, samber_mo]
@@ -238,7 +238,7 @@ deps:
       - domain-entities
       - domain-repositories
       - domain-values
-      - pkg-errors  # MUST use centralized errors
+      - pkg-errors # MUST use centralized errors
 
   # APPLICATION LAYER - HTTP handlers
   application-handlers:
@@ -248,8 +248,8 @@ deps:
       - domain-services
       - domain-repositories
       - domain-values
-      - application-dto  # Use DTOs instead of SQLC generated types
-      - pkg-errors  # MUST use centralized errors
+      - application-dto # Use DTOs instead of SQLC generated types
+      - pkg-errors # MUST use centralized errors
 
   # APPLICATION DTOs
   application-dto:
@@ -257,7 +257,7 @@ deps:
     mayDependOn:
       - domain-entities
       - domain-values
-      - pkg-errors  # MUST use centralized errors
+      - pkg-errors # MUST use centralized errors
 
   # ========================================
   # DATABASE LAYER - Manual Database Implementation
@@ -268,14 +268,14 @@ deps:
       - domain-entities
       - domain-repositories
       - domain-values
-      - pkg-errors  # MUST use centralized errors
+      - pkg-errors # MUST use centralized errors
 
   # CONFIGURATION & STARTUP
   config:
     canUse: [std, viper, validator]
     mayDependOn:
-      - domain-values  # Allow config to use domain value objects for validation
-      - pkg-errors    # MUST use centralized errors
+      - domain-values # Allow config to use domain value objects for validation
+      - pkg-errors # MUST use centralized errors
 
   main:
     anyProjectDeps: true
@@ -300,11 +300,11 @@ deps:
 
 # 🌍 COMMON COMPONENTS - Available everywhere
 commonComponents:
-  - pkg-errors  # CENTRALIZED ERROR MANAGEMENT - MANDATORY
+  - pkg-errors # CENTRALIZED ERROR MANAGEMENT - MANDATORY
 
 # 🌍 COMMON VENDORS - Available to ALL components
 commonVendors:
-  - std  # Go standard library available everywhere
+  - std # Go standard library available everywhere
 
 # 🚫 EXCLUSION PATTERNS (glob patterns)
 exclude:
@@ -314,7 +314,7 @@ exclude:
   - "**/*_gen.go"
   - "**/*_templ.go"
   - "**/mock_*.go"
-  - "internal/db/**"  # SQLC generated code
+  - "internal/db/**" # SQLC generated code
 
   # Test data files only (exclude test helpers from directory exclusion)
   - "**/testdata/**"
@@ -346,9 +346,10 @@ exclude:
 
 # 🚫 EXCLUSION FILES (regex patterns)
 excludeFiles:
-  - ".*_test\\.go$"         # All test files (_test.go suffix)
+  - ".*_test\\.go$" # All test files (_test.go suffix)
   - "integration_test\\.go$" # Integration test files
   - ".*_integration_test\\.go$" # Integration test variations
+
 
 # 📋 ARCHITECTURE VALIDATION RULES & DECISIONS
 #

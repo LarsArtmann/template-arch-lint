@@ -3,33 +3,37 @@
 ## 🚨 CRITICAL ARCHITECTURAL VIOLATIONS IDENTIFIED
 
 ### P0: FILE SIZE CRISIS (IMMEDIATE)
+
 - **6 Files Over 350-Limit**: Massive SRP violations
 - **Maximum Violation**: 720 lines (2.06x over limit)
 - **Total Lines to Refactor**: ~3,618 lines
 - **Impact**: Critical maintainability and readability issues
 
-| File | Lines | Violation | Priority |
-|-------|--------|------------|----------|
-| `internal/config/config_test.go` | 720 | 2.06x | P0 |
-| `internal/domain/services/user_service_test.go` | 610 | 1.74x | P0 |
-| `internal/domain/services/user_service_concurrent_test.go` | 598 | 1.71x | P0 |
-| `internal/domain/services/user_service_error_test.go` | 566 | 1.62x | P0 |
-| `internal/domain/services/user_service.go` | 550 | 1.57x | P0 |
-| `pkg/errors/errors.go` | 474 | 1.35x | P0 |
+| File                                                       | Lines | Violation | Priority |
+| ---------------------------------------------------------- | ----- | --------- | -------- |
+| `internal/config/config_test.go`                           | 720   | 2.06x     | P0       |
+| `internal/domain/services/user_service_test.go`            | 610   | 1.74x     | P0       |
+| `internal/domain/services/user_service_concurrent_test.go` | 598   | 1.71x     | P0       |
+| `internal/domain/services/user_service_error_test.go`      | 566   | 1.62x     | P0       |
+| `internal/domain/services/user_service.go`                 | 550   | 1.57x     | P0       |
+| `pkg/errors/errors.go`                                     | 474   | 1.35x     | P0       |
 
 ### P1: TYPE SAFETY EMERGENCY (IMMEDIATE)
+
 - **String Primitive Obsession**: UserService using string instead of Email/UserName VOs
 - **Constructor Violations**: User entity taking strings instead of value objects
 - **Interface Pollution**: Methods exposing raw primitives
 - **Impact**: Compile-time safety lost, runtime errors inevitable
 
 ### P2: DDD VIOLATIONS (HIGH)
+
 - **No Domain Events**: Missing event-driven architecture
 - **No Specification Pattern**: Validation scattered everywhere
 - **No Aggregate Roots**: No explicit domain boundaries
 - **No Bounded Contexts**: Single monolithic domain
 
 ### P3: TECHNICAL DEBT (HIGH)
+
 - **50+ TODO Comments**: Massive technical debt burden
 - **Validation Duplication**: Same logic in multiple places
 - **Inconsistent Patterns**: Mixed error handling, Result[T] vs error
@@ -42,9 +46,11 @@
 ### PHASE 1: ARCHITECTURAL CRISIS RESOLUTION (4-6 hours)
 
 #### Step 1: File Size Emergency Refactoring (2-3 hours, P0)
+
 **Target**: Break all 6 violating files under 350-line limit
 
 **1.1 Config Test Refactoring** (30 minutes)
+
 ```
 Break `config_test.go` (720 lines) into:
 - `config_load_test.go` - Load config tests (120 lines)
@@ -56,6 +62,7 @@ Break `config_test.go` (720 lines) into:
 ```
 
 **1.2 Service Test Refactoring** (1 hour)
+
 ```
 Break service test files (610+598+566 lines) into:
 - `user_service_crud_test.go` - CRUD operations (150 lines)
@@ -67,6 +74,7 @@ Break service test files (610+598+566 lines) into:
 ```
 
 **1.3 UserService Refactoring** (1 hour)
+
 ```
 Break `user_service.go` (550 lines) into:
 - `user_command_service.go` - Write operations (150 lines)
@@ -77,6 +85,7 @@ Break `user_service.go` (550 lines) into:
 ```
 
 **1.4 Error System Refactoring** (30 minutes)
+
 ```
 Break `errors.go` (474 lines) into:
 - `error_types.go` - Error type definitions (120 lines)
@@ -87,9 +96,11 @@ Break `errors.go` (474 lines) into:
 ```
 
 #### Step 2: Type Safety Emergency Fix (1-2 hours, P0)
+
 **Target**: Eliminate ALL string primitive usage in domain layer
 
 **2.1 Service Layer Type Safety** (60 minutes)
+
 ```
 Replace all string parameters with value objects:
 - `CreateUser(email, name string)` → `CreateUser(email Email, name UserName)`
@@ -99,6 +110,7 @@ Replace all string parameters with value objects:
 ```
 
 **2.2 Entity Constructor Type Safety** (30 minutes)
+
 ```
 Fix User entity constructor:
 - `NewUser(id, email, name string)` → `NewUser(id UserID, email Email, name UserName)`
@@ -107,6 +119,7 @@ Fix User entity constructor:
 ```
 
 **2.3 Repository Interface Type Safety** (30 minutes)
+
 ```
 Update repository interface:
 - `FindByEmail(email string)` → `FindByEmail(email Email)`
@@ -115,9 +128,11 @@ Update repository interface:
 ```
 
 #### Step 3: Validation Centralization (1 hour, P1)
+
 **Target**: Implement specification pattern for validation
 
 **3.1 Specification Pattern Framework** (30 minutes)
+
 ```go
 // domain/specifications/specification.go
 type Specification[T any] interface {
@@ -134,6 +149,7 @@ type OrSpecification[T any] struct {
 ```
 
 **3.2 User Specifications** (30 minutes)
+
 ```go
 // domain/specifications/user_specifications.go
 type UserEmailSpecification struct{}
@@ -150,9 +166,11 @@ func (uas UserActiveSpecification) IsSatisfiedBy(user *User) bool {
 ### PHASE 2: DDD ARCHITECTURE IMPLEMENTATION (6-8 hours)
 
 #### Step 4: Domain Events System (2-3 hours, P1)
+
 **Target**: Complete event-driven architecture foundation
 
 **4.1 Event Framework** (60 minutes)
+
 ```go
 // domain/events/event.go
 type DomainEvent interface {
@@ -171,6 +189,7 @@ type EventDispatcher interface {
 ```
 
 **4.2 User Events** (60 minutes)
+
 ```go
 // domain/events/user_events.go
 type UserCreatedEvent struct {
@@ -184,6 +203,7 @@ type UserCreatedEvent struct {
 ```
 
 **4.3 Event Handlers** (60 minutes)
+
 ```go
 // application/handlers/user_event_handlers.go
 type UserEventHandler struct {
@@ -197,9 +217,11 @@ func (h UserEventHandler) Handle(event UserCreatedEvent) error {
 ```
 
 #### Step 5: Aggregate Roots Implementation (2-3 hours, P1)
+
 **Target**: Explicit domain boundaries and invariants
 
 **5.1 User Aggregate** (60 minutes)
+
 ```go
 // domain/aggregates/user_aggregate.go
 type UserAggregate struct {
@@ -212,7 +234,7 @@ func (ua *UserAggregate) ChangeEmail(email Email) error {
     if ua.root.GetEmail().Equals(email) {
         return nil // No change
     }
-    
+
     // Business rule: Email changes require re-verification
     ua.root.SetEmailVerificationStatus(EmailVerificationPending)
     ua.addEvent(UserEmailChangedEvent{...})
@@ -221,6 +243,7 @@ func (ua *UserAggregate) ChangeEmail(email Email) error {
 ```
 
 **5.2 Aggregate Repository** (60 minutes)
+
 ```go
 // domain/repositories/aggregate_repository.go
 type AggregateRepository[T Aggregate] interface {
@@ -235,9 +258,11 @@ type UserRepository interface {
 ```
 
 #### Step 6: Bounded Contexts Definition (2-3 hours, P2)
+
 **Target**: Separate domain contexts for better organization
 
 **6.1 User Context** (60 minutes)
+
 ```
 internal/domain/user/
 ├── entities/
@@ -250,6 +275,7 @@ internal/domain/user/
 ```
 
 **6.2 Authentication Context** (60 minutes)
+
 ```
 internal/domain/auth/
 ├── entities/
@@ -263,9 +289,11 @@ internal/domain/auth/
 ### PHASE 3: TECHNICAL DEBT RESOLUTION (4-6 hours)
 
 #### Step 7: TODO Cleanup (2-3 hours, P1)
+
 **Target**: Resolve ALL 50+ technical debt items
 
 **7.1 Repository TODO Resolution** (60 minutes)
+
 ```
 Fix all repository TODOs:
 - [ ] Replace string parameters with value objects
@@ -276,6 +304,7 @@ Fix all repository TODOs:
 ```
 
 **7.2 Service TODO Resolution** (60 minutes)
+
 ```
 Fix all service TODOs:
 - [ ] Add caching layer
@@ -286,6 +315,7 @@ Fix all service TODOs:
 ```
 
 **7.3 Validation TODO Resolution** (60 minutes)
+
 ```
 Fix all validation TODOs:
 - [ ] Centralize validation rules
@@ -295,9 +325,11 @@ Fix all validation TODOs:
 ```
 
 #### Step 8: Consistency Standardization (2-3 hours, P2)
+
 **Target**: Standardize all patterns across codebase
 
 **8.1 Error Handling Consistency** (60 minutes)
+
 ```
 Standardize Result[T] pattern:
 - All service methods return Result[T]
@@ -307,6 +339,7 @@ Standardize Result[T] pattern:
 ```
 
 **8.2 Testing Pattern Standardization** (60 minutes)
+
 ```
 Standardize BDD patterns:
 - All tests use Given/When/Then
@@ -316,6 +349,7 @@ Standardize BDD patterns:
 ```
 
 **8.3 Code Style Consistency** (60 minutes)
+
 ```
 Standardize across codebase:
 - Naming conventions
@@ -327,9 +361,11 @@ Standardize across codebase:
 ### PHASE 4: ADVANCED ARCHITECTURE PATTERNS (6-8 hours)
 
 #### Step 9: Plugin Architecture (2-3 hours, P2)
+
 **Target**: Extensible plugin system
 
 **9.1 Plugin Interface** (60 minutes)
+
 ```go
 // pkg/plugins/interface.go
 type Plugin interface {
@@ -351,6 +387,7 @@ type RepositoryPlugin interface {
 ```
 
 **9.2 Plugin Manager** (60 minutes)
+
 ```go
 // pkg/plugins/manager.go
 type PluginManager struct {
@@ -364,9 +401,11 @@ func (pm *PluginManager) ListPlugins() []Plugin
 ```
 
 #### Step 10: Code Generation Strategy (2-3 hours, P3)
+
 **Target**: Generate repetitive code automatically
 
 **10.1 TypeSpec Definition** (60 minutes)
+
 ```go
 // tools/typespec/definitions.go
 type ValueObjectSpec struct {
@@ -385,6 +424,7 @@ type EntitySpec struct {
 ```
 
 **10.2 Code Generation** (60 minutes)
+
 ```go
 // tools/generator/vo_generator.go
 func GenerateValueObject(spec ValueObjectSpec) error
@@ -397,9 +437,11 @@ func GenerateRepository(entity EntitySpec) error
 ```
 
 #### Step 11: Caching Strategy Implementation (2-3 hours, P2)
+
 **Target**: Multi-layer caching system
 
 **11.1 Cache Interfaces** (60 minutes)
+
 ```go
 // pkg/cache/interface.go
 type Cache[K any, V any] interface {
@@ -417,6 +459,7 @@ type MultiLayerCache[K any, V any] interface {
 ```
 
 **11.2 Cache Implementation** (60 minutes)
+
 ```go
 // pkg/cache/multilayer.go
 type MultiLayerCacheImpl[K, V any] struct {
@@ -430,37 +473,40 @@ type MultiLayerCacheImpl[K, V any] struct {
 
 ## 📊 WORK vs IMPACT MATRIX (FINAL)
 
-| Priority | Step | Work Hours | Impact | Dependencies |
-|----------|-------|-------------|-------------|
-| **P0** | 1. File Size Refactoring | 2-3 | CRITICAL | None |
-| **P0** | 2. Type Safety Fix | 1-2 | CRITICAL | Step 1 |
-| **P1** | 3. Validation Centralization | 1 | HIGH | Step 2 |
-| **P1** | 4. Domain Events System | 2-3 | HIGH | Step 3 |
-| **P1** | 5. Aggregate Roots | 2-3 | HIGH | Step 3 |
-| **P1** | 7. TODO Cleanup | 2-3 | HIGH | Step 6 |
-| **P2** | 6. Bounded Contexts | 2-3 | HIGH | Step 5 |
-| **P2** | 8. Consistency Standardization | 2-3 | HIGH | Step 7 |
-| **P2** | 9. Plugin Architecture | 2-3 | HIGH | Step 8 |
-| **P2** | 11. Caching Strategy | 2-3 | HIGH | Step 10 |
-| **P3** | 10. Code Generation | 2-3 | MEDIUM | Step 9 |
+| Priority | Step                           | Work Hours | Impact   | Dependencies |
+| -------- | ------------------------------ | ---------- | -------- | ------------ |
+| **P0**   | 1. File Size Refactoring       | 2-3        | CRITICAL | None         |
+| **P0**   | 2. Type Safety Fix             | 1-2        | CRITICAL | Step 1       |
+| **P1**   | 3. Validation Centralization   | 1          | HIGH     | Step 2       |
+| **P1**   | 4. Domain Events System        | 2-3        | HIGH     | Step 3       |
+| **P1**   | 5. Aggregate Roots             | 2-3        | HIGH     | Step 3       |
+| **P1**   | 7. TODO Cleanup                | 2-3        | HIGH     | Step 6       |
+| **P2**   | 6. Bounded Contexts            | 2-3        | HIGH     | Step 5       |
+| **P2**   | 8. Consistency Standardization | 2-3        | HIGH     | Step 7       |
+| **P2**   | 9. Plugin Architecture         | 2-3        | HIGH     | Step 8       |
+| **P2**   | 11. Caching Strategy           | 2-3        | HIGH     | Step 10      |
+| **P3**   | 10. Code Generation            | 2-3        | MEDIUM   | Step 9       |
 
 ---
 
 ## 🎯 EXECUTION EXCELLENCE STRATEGY
 
 ### Code Quality Standards
+
 - **File Size**: ALL files <350 lines (strict enforcement)
 - **Type Safety**: Zero primitive obsession in domain layer
 - **SRP**: Single responsibility per file/interface
 - **DDD**: Proper domain modeling with events/aggregates
 
 ### Testing Excellence
+
 - **BDD Patterns**: Given/When/Then in all tests
 - **Integration Coverage**: E2E tests for critical paths
 - **Performance Baselines**: Benchmarks for all major operations
 - **Mutation Testing**: Ensure test quality
 
 ### Architecture Excellence
+
 - **Plugin System**: Extensible architecture for future growth
 - **Code Generation**: Eliminate repetitive code
 - **Caching Strategy**: Multi-layer performance optimization
@@ -471,6 +517,7 @@ type MultiLayerCacheImpl[K, V any] struct {
 ## 🚀 IMMEDIATE EXECUTION ORDER
 
 ### START HERE: Step 1.1 - Config Test Refactoring
+
 **Goal**: Break 720-line config test into 6 focused files
 **Approach**: SRP-based file separation by responsibility
 **Validation**: All files <350 lines, tests passing

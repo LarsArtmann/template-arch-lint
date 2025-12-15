@@ -7,7 +7,9 @@
 ## 📋 Files Included
 
 ### 1. `.golangci.yml` (13KB)
+
 **Enterprise Go Linting Configuration**
+
 - 40+ linters with maximum strictness
 - Type safety enforcement (bans `interface{}`, `any`, `panic()`)
 - Security scanning (gosec, vulnerability detection)
@@ -15,14 +17,18 @@
 - Modern Go 1.25 features and best practices
 
 ### 2. `.go-arch-lint.yml` (2KB)
+
 **Clean Architecture Boundary Validation**
+
 - Domain-driven design enforcement
 - Dependency inversion validation
 - Import cycle prevention
 - Layer isolation (domain → application → infrastructure)
 
 ### 3. `justfile` (50KB)
+
 **Development Workflow Automation**
+
 - 30+ standardized commands
 - `just lint` - Run all quality checks
 - `just fix` - Auto-fix formatting issues
@@ -31,7 +37,9 @@
 - `just security-audit` - Complete security scan
 
 ### 4. `QUICK_START.md` (7KB)
+
 **5-Minute Setup Guide**
+
 - Installation instructions
 - Usage examples
 - Common issues and solutions

@@ -5,6 +5,7 @@
 Based on the project structure and justfile, I can see:
 
 ### Existing Test Infrastructure:
+
 1. **`bootstrap-test`** command in justfile (line 180) - downloads and runs BDD tests
 2. **Test scripts** that need to be organized:
    - `test-bootstrap-simple-bdd.sh` - BDD tests for bootstrap functionality
@@ -14,6 +15,7 @@ Based on the project structure and justfile, I can see:
    - `test_graceful_shutdown.sh` - Graceful shutdown tests (seems misplaced)
 
 ### Issues Identified:
+
 1. **Scattered tests**: Test files are not organized in a proper directory structure
 2. **Misplaced tests**: Some tests (rate limiting, graceful shutdown) seem to be for a web server, not a linting template
 3. **Inconsistent naming**: Some files use hyphens, others use underscores
@@ -48,20 +50,24 @@ tests/
 ## Test Categories and Responsibilities
 
 ### 1. Bootstrap Tests (`tests/bootstrap/`)
+
 - **BDD Tests**: Behavior-driven tests for bootstrap script functionality
 - **Integration Tests**: PATH verification, complete workflow tests
 - **Unit Tests**: Individual function testing
 
 ### 2. Linting Tests (`tests/linting/`)
+
 - **Architecture Tests**: go-arch-lint configuration validation
 - **Code Quality Tests**: golangci-lint rule validation
 - **Security Tests**: Security linting rule validation
 
 ### 3. Integration Tests (`tests/integration/`)
+
 - **CI Pipeline Tests**: Simulate complete CI pipeline
 - **End-to-End Tests**: Full workflow from bootstrap to linting
 
 ### 4. Test Scripts (`tests/scripts/`)
+
 - **Test Runner**: Unified test execution script
 - **Environment Setup**: Prepare test environments
 - **Environment Cleanup**: Clean up after tests
@@ -69,6 +75,7 @@ tests/
 ## Justfile Integration Plan
 
 ### New Test Commands:
+
 ```bash
 just test              # Run all tests
 just test-bootstrap    # Run bootstrap tests only
@@ -79,6 +86,7 @@ just test-clean         # Clean up test artifacts
 ```
 
 ### Enhanced CI Integration:
+
 - Update `ci` command to include comprehensive test suite
 - Add test coverage reporting
 - Add test result archiving
@@ -106,8 +114,9 @@ just test-clean         # Clean up test artifacts
 - **CI Integration**: Ensure tests run properly in CI environment
 
 This organization will provide:
+
 - Clear separation of test concerns
 - Easy maintenance and extensibility
 - Better CI/CD integration
 - Comprehensive test coverage for all project aspects
-</file>
+  </file>

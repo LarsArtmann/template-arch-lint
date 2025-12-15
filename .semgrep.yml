@@ -1,7 +1,7 @@
 # 🛡️ SEMGREP CUSTOM SECURITY RULES
 # Enterprise-grade security pattern detection for Go applications
-# 
-# This configuration provides custom security rules tailored for the 
+#
+# This configuration provides custom security rules tailored for the
 # template-arch-lint project's architecture and common Go vulnerabilities.
 
 rules:
@@ -195,9 +195,9 @@ rules:
 # 📊 Semgrep Configuration
 options:
   # Performance settings
-  max_target_bytes: 5000000  # 5MB max file size
-  timeout: 30               # 30 second timeout per file
-  
+  max_target_bytes: 5000000 # 5MB max file size
+  timeout: 30 # 30 second timeout per file
+
   # Output settings
   force_color: false
   quiet: false

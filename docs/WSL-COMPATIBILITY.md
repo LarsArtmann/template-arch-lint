@@ -11,7 +11,7 @@ The enhanced bootstrap script and linting tools are designed to work seamlessly 
 The following WSL distributions have been validated with template-arch-lint:
 
 - ✅ **Ubuntu 20.04 LTS** (Recommended)
-- ✅ **Ubuntu 22.04 LTS** (Recommended)  
+- ✅ **Ubuntu 22.04 LTS** (Recommended)
 - ✅ **Debian 11** (Stable)
 - 🟡 **Alpine Linux** (Basic support)
 - 🟡 **openSUSE** (Community tested)
@@ -103,7 +103,7 @@ Run the provided WSL validation script:
 - [ ] Go installation and version compatibility (1.19+)
 - [ ] Git configuration and SSH key setup
 - [ ] Network connectivity to GitHub and Go proxy
-- [ ] File permissions and PATH configuration  
+- [ ] File permissions and PATH configuration
 - [ ] Tool installation (golangci-lint, go-arch-lint, just)
 - [ ] Bootstrap script functionality
 - [ ] Linting tools execution
@@ -112,12 +112,14 @@ Run the provided WSL validation script:
 ### Performance Considerations
 
 WSL performance characteristics:
+
 - **File I/O**: ~20% slower than native Linux
 - **Network**: Comparable to native
 - **CPU**: Near-native performance
 - **Memory**: Shared with Windows host
 
 Optimization tips:
+
 - Use WSL2 for better performance
 - Keep Go projects in WSL filesystem
 - Consider increasing WSL memory allocation
@@ -127,11 +129,13 @@ Optimization tips:
 ### Issue 1: Permission Denied on Executable Files
 
 **Symptoms:**
+
 ```
 bash: ./bootstrap.sh: Permission denied
 ```
 
 **Solution:**
+
 ```bash
 chmod +x bootstrap.sh
 chmod +x test-*.sh
@@ -140,11 +144,13 @@ chmod +x test-*.sh
 ### Issue 2: Go Tools Not in PATH
 
 **Symptoms:**
+
 ```
 golangci-lint: command not found
 ```
 
 **Solution:**
+
 ```bash
 export PATH=$PATH:$HOME/go/bin
 echo 'export PATH=$PATH:$HOME/go/bin' >> ~/.bashrc
@@ -153,11 +159,13 @@ echo 'export PATH=$PATH:$HOME/go/bin' >> ~/.bashrc
 ### Issue 3: Network Connectivity Issues
 
 **Symptoms:**
+
 ```
 Failed to download configuration files
 ```
 
 **Solution:**
+
 ```bash
 # Check DNS resolution
 nslookup github.com
@@ -172,11 +180,13 @@ export https_proxy=your-proxy:port
 ### Issue 4: File System Permissions
 
 **Symptoms:**
+
 ```
 mkdir: cannot create directory: Permission denied
 ```
 
 **Solution:**
+
 ```bash
 # Check if working in Windows filesystem
 pwd
@@ -190,20 +200,20 @@ sudo chown -R $USER:$USER $HOME/go
 
 ### Typical Bootstrap Times
 
-| Environment | Time | Notes |
-|-------------|------|-------|
+| Environment       | Time    | Notes       |
+| ----------------- | ------- | ----------- |
 | WSL2 Ubuntu 22.04 | 2-3 min | Recommended |
-| WSL2 Ubuntu 20.04 | 2-4 min | Stable |
-| WSL1 Ubuntu | 4-6 min | Legacy |
-| Native Linux | 1-2 min | Reference |
+| WSL2 Ubuntu 20.04 | 2-4 min | Stable      |
+| WSL1 Ubuntu       | 4-6 min | Legacy      |
+| Native Linux      | 1-2 min | Reference   |
 
 ### Linting Performance
 
-| Tool | WSL2 | Native Linux | Overhead |
-|------|------|-------------|----------|
-| golangci-lint | 45s | 38s | +18% |
-| go-arch-lint | 12s | 10s | +20% |
-| gosec | 8s | 7s | +14% |
+| Tool          | WSL2 | Native Linux | Overhead |
+| ------------- | ---- | ------------ | -------- |
+| golangci-lint | 45s  | 38s          | +18%     |
+| go-arch-lint  | 12s  | 10s          | +20%     |
+| gosec         | 8s   | 7s           | +14%     |
 
 ## 🛠️ Troubleshooting Commands
 
@@ -323,4 +333,4 @@ Create issues at: https://github.com/LarsArtmann/template-arch-lint/issues
 
 ---
 
-*This WSL compatibility guide is maintained as part of the template-arch-lint project. For updates and community contributions, please see the GitHub repository.*
+_This WSL compatibility guide is maintained as part of the template-arch-lint project. For updates and community contributions, please see the GitHub repository._

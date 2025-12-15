@@ -1,11 +1,13 @@
 # Error Handling Best Practices
 
 ## Overview
+
 This document establishes comprehensive error handling patterns for Go applications following Clean Architecture principles. Proper error handling is crucial for maintainable, debuggable, and reliable software.
 
 ## Core Principles
 
 ### 1. Errors are Values
+
 Treat errors as first-class values, not exceptional conditions.
 
 ```go
@@ -29,6 +31,7 @@ func GetUser(id UserID) *User {
 ```
 
 ### 2. Error Context and Wrapping
+
 Always provide context when wrapping errors using `fmt.Errorf` with `%w` verb.
 
 ```go
@@ -37,17 +40,17 @@ func ProcessUserRegistration(req RegistrationRequest) error {
     if err := validateRegistrationRequest(req); err != nil {
         return fmt.Errorf("registration validation failed for %s: %w", req.Email, err)
     }
-    
+
     user, err := createUserAccount(req)
     if err != nil {
         return fmt.Errorf("failed to create account for %s: %w", req.Email, err)
     }
-    
+
     if err := sendWelcomeEmail(user); err != nil {
         // Note: This might not be fatal - consider logging instead
         return fmt.Errorf("account created but welcome email failed for %s: %w", user.Email, err)
     }
-    
+
     return nil
 }
 
@@ -57,17 +60,18 @@ func ProcessUserRegistration(req RegistrationRequest) error {
     if err != nil {
         return err // Lost: where validation failed
     }
-    
+
     _, err = createUserAccount(req)
     if err != nil {
         return errors.New("failed") // Lost: original error details
     }
-    
+
     return nil
 }
 ```
 
 ### 3. Domain-Specific Error Types
+
 Create meaningful error types for your domain.
 
 ```go
@@ -95,12 +99,12 @@ var (
         Code:    "USER_NOT_FOUND",
         Message: "user does not exist",
     }
-    
+
     ErrInvalidEmail = DomainError{
         Code:    "INVALID_EMAIL",
         Message: "email address is not valid",
     }
-    
+
     ErrEmailAlreadyExists = DomainError{
         Code:    "EMAIL_EXISTS",
         Message: "email address is already registered",
@@ -112,7 +116,7 @@ func CreateUser(req CreateUserRequest) (*User, error) {
     if !isValidEmail(req.Email) {
         return nil, ErrInvalidEmail
     }
-    
+
     existing, err := repository.FindByEmail(req.Email)
     if err != nil && !errors.Is(err, ErrUserNotFound) {
         return nil, fmt.Errorf("failed to check existing user: %w", err)
@@ -120,7 +124,7 @@ func CreateUser(req CreateUserRequest) (*User, error) {
     if existing != nil {
         return nil, ErrEmailAlreadyExists
     }
-    
+
     // ... creation logic
     return user, nil
 }
@@ -129,6 +133,7 @@ func CreateUser(req CreateUserRequest) (*User, error) {
 ## Layer-Specific Error Handling
 
 ### Domain Layer Errors
+
 Domain layer should define business-specific error types.
 
 ```go
@@ -143,7 +148,7 @@ var (
     ErrInvalidEmail        = errors.New("invalid email address")
     ErrWeakPassword        = errors.New("password does not meet security requirements")
     ErrUsernameUnavailable = errors.New("username is already taken")
-    
+
     // Domain invariant violations
     ErrUserAlreadyActive   = errors.New("user is already active")
     ErrUserNotActive       = errors.New("user is not active")
@@ -158,7 +163,7 @@ type UserValidationError struct {
 }
 
 func (e UserValidationError) Error() string {
-    return fmt.Sprintf("validation failed for field '%s' with value '%s': %s", 
+    return fmt.Sprintf("validation failed for field '%s' with value '%s': %s",
         e.Field, e.Value, e.Message)
 }
 
@@ -172,7 +177,7 @@ func (ve ValidationErrors) Error() string {
     if len(ve) == 1 {
         return ve[0].Error()
     }
-    
+
     var msgs []string
     for _, err := range ve {
         msgs = append(msgs, err.Error())
@@ -182,6 +187,7 @@ func (ve ValidationErrors) Error() string {
 ```
 
 ### Application Layer Error Handling
+
 Application layer translates domain errors to appropriate responses.
 
 ```go
@@ -192,13 +198,13 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
         h.respondWithError(c, http.StatusBadRequest, "invalid request format", err)
         return
     }
-    
+
     user, err := h.userService.CreateUser(req)
     if err != nil {
         h.handleUserServiceError(c, err)
         return
     }
-    
+
     h.respondWithSuccess(c, http.StatusCreated, user)
 }
 
@@ -209,7 +215,7 @@ func (h *UserHandler) handleUserServiceError(c *gin.Context, err error) {
         h.respondWithValidationErrors(c, validationErrors)
         return
     }
-    
+
     switch {
     case errors.Is(err, ErrUserNotFound):
         h.respondWithError(c, http.StatusNotFound, "user not found", err)
@@ -233,22 +239,22 @@ func (h *UserHandler) respondWithError(c *gin.Context, status int, message strin
         Timestamp: time.Now(),
         Path:      c.Request.URL.Path,
     }
-    
+
     // Add correlation ID if available
     if correlationID := c.GetString("correlation_id"); correlationID != "" {
         response.CorrelationID = correlationID
     }
-    
+
     // Log error with correlation ID
     if err != nil {
-        h.logger.Error("request error", 
+        h.logger.Error("request error",
             "error", err,
             "correlation_id", response.CorrelationID,
             "path", response.Path,
             "status", status,
         )
     }
-    
+
     c.JSON(status, response)
 }
 
@@ -262,7 +268,7 @@ func (h *UserHandler) respondWithValidationErrors(c *gin.Context, validationErro
         Timestamp:        time.Now(),
         Path:             c.Request.URL.Path,
     }
-    
+
     for i, ve := range validationErrors {
         response.ValidationErrors[i] = FieldError{
             Field:   ve.Field,
@@ -270,19 +276,20 @@ func (h *UserHandler) respondWithValidationErrors(c *gin.Context, validationErro
             Message: ve.Message,
         }
     }
-    
+
     c.JSON(http.StatusBadRequest, response)
 }
 ```
 
 ### Infrastructure Layer Error Handling
+
 Infrastructure layer handles external system errors and translates them to domain errors.
 
 ```go
 // internal/infrastructure/persistence/user_repository_sql.go
 func (r *UserRepositorySQL) FindByID(ctx context.Context, id UserID) (*User, error) {
     const query = `SELECT id, email, username, created_at, updated_at FROM users WHERE id = $1`
-    
+
     var user User
     err := r.db.QueryRowContext(ctx, query, id.String()).Scan(
         &user.ID,
@@ -291,14 +298,14 @@ func (r *UserRepositorySQL) FindByID(ctx context.Context, id UserID) (*User, err
         &user.CreatedAt,
         &user.UpdatedAt,
     )
-    
+
     if err != nil {
         if errors.Is(err, sql.ErrNoRows) {
             return nil, ErrUserNotFound
         }
         return nil, fmt.Errorf("failed to query user by ID %s: %w", id, err)
     }
-    
+
     return &user, nil
 }
 
@@ -307,7 +314,7 @@ func (r *UserRepositorySQL) Create(ctx context.Context, user *User) error {
         INSERT INTO users (id, email, username, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5)
     `
-    
+
     _, err := r.db.ExecContext(ctx, query,
         user.ID.String(),
         user.Email.String(),
@@ -315,7 +322,7 @@ func (r *UserRepositorySQL) Create(ctx context.Context, user *User) error {
         user.CreatedAt,
         user.UpdatedAt,
     )
-    
+
     if err != nil {
         // Check for constraint violations
         if isUniqueConstraintViolation(err, "users_email_key") {
@@ -324,10 +331,10 @@ func (r *UserRepositorySQL) Create(ctx context.Context, user *User) error {
         if isUniqueConstraintViolation(err, "users_username_key") {
             return ErrUsernameUnavailable
         }
-        
+
         return fmt.Errorf("failed to create user %s: %w", user.Email, err)
     }
-    
+
     return nil
 }
 
@@ -344,6 +351,7 @@ func isUniqueConstraintViolation(err error, constraintName string) bool {
 ## Error Response Patterns
 
 ### Standardized Error Response Structure
+
 ```go
 // Standard error response
 type ErrorResponse struct {
@@ -377,6 +385,7 @@ type FieldError struct {
 ## Testing Error Handling
 
 ### Unit Testing Error Scenarios
+
 ```go
 func TestUserService_CreateUser_ValidationErrors(t *testing.T) {
     tests := []struct {
@@ -403,13 +412,13 @@ func TestUserService_CreateUser_ValidationErrors(t *testing.T) {
             expectedError: ErrWeakPassword,
         },
     }
-    
+
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             service := NewUserService(mockRepo, mockValidator)
-            
+
             _, err := service.CreateUser(tt.request)
-            
+
             assert.Error(t, err)
             assert.True(t, errors.Is(err, tt.expectedError))
         })
@@ -419,40 +428,41 @@ func TestUserService_CreateUser_ValidationErrors(t *testing.T) {
 func TestUserRepository_FindByID_NotFound(t *testing.T) {
     repo := NewUserRepositorySQL(testDB)
     nonExistentID := NewUserID()
-    
+
     user, err := repo.FindByID(context.Background(), nonExistentID)
-    
+
     assert.Nil(t, user)
     assert.True(t, errors.Is(err, ErrUserNotFound))
 }
 ```
 
 ### Integration Testing with Error Scenarios
+
 ```go
 func TestCreateUserHandler_DuplicateEmail(t *testing.T) {
     // Setup test server
     server := setupTestServer(t)
     defer server.Close()
-    
+
     // Create initial user
     createUserRequest := CreateUserRequest{
         Email:    "test@example.com",
         Username: "testuser",
         Password: "password123",
     }
-    
+
     // First request should succeed
     resp1 := makeCreateUserRequest(t, server.URL, createUserRequest)
     assert.Equal(t, http.StatusCreated, resp1.StatusCode)
-    
+
     // Second request with same email should fail
     resp2 := makeCreateUserRequest(t, server.URL, createUserRequest)
     assert.Equal(t, http.StatusConflict, resp2.StatusCode)
-    
+
     var errorResponse ErrorResponse
     err := json.NewDecoder(resp2.Body).Decode(&errorResponse)
     assert.NoError(t, err)
-    
+
     assert.Equal(t, "CONFLICT", errorResponse.Error.Code)
     assert.Contains(t, errorResponse.Error.Message, "email already registered")
     assert.NotEmpty(t, errorResponse.CorrelationID)
@@ -462,6 +472,7 @@ func TestCreateUserHandler_DuplicateEmail(t *testing.T) {
 ## Logging and Monitoring
 
 ### Structured Error Logging
+
 ```go
 type ErrorLogger struct {
     logger *slog.Logger
@@ -470,14 +481,14 @@ type ErrorLogger struct {
 func (el *ErrorLogger) LogError(ctx context.Context, err error, message string, fields ...any) {
     // Extract correlation ID from context
     correlationID := GetCorrelationID(ctx)
-    
+
     // Build log fields
     logFields := []any{
         "error", err.Error(),
         "correlation_id", correlationID,
     }
     logFields = append(logFields, fields...)
-    
+
     // Log with appropriate level based on error type
     if isDomainError(err) {
         el.logger.InfoContext(ctx, message, logFields...)
@@ -495,6 +506,7 @@ func isDomainError(err error) bool {
 ```
 
 ### Error Metrics
+
 ```go
 type ErrorMetrics struct {
     errorCounter *prometheus.CounterVec

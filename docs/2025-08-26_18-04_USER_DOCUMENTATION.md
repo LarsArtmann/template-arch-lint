@@ -22,6 +22,7 @@ This is the most sophisticated Go linting and code quality template available (2
 ## 🚀 Quick Start
 
 ### Installation
+
 ```bash
 # 1. Install all required tools
 just install
@@ -37,6 +38,7 @@ just security-audit
 ```
 
 ### Basic Commands
+
 ```bash
 just lint           # Run all linters
 just fix            # Auto-fix issues
@@ -67,6 +69,7 @@ internal/
 ```
 
 **Key Rules Enforced:**
+
 - Domain layer cannot import infrastructure
 - Application orchestrates domain and infrastructure
 - Infrastructure implements domain interfaces
@@ -77,11 +80,13 @@ internal/
 ## 🔍 Linting Capabilities
 
 ### 1. **Architecture Linting** (`go-arch-lint`)
+
 **What it does:** Enforces architectural boundaries and dependency rules
 
 **Why it matters:** Prevents architecture decay and maintains clean separation of concerns
 
 **Example violation:**
+
 ```go
 // ❌ BAD: Domain importing infrastructure
 package domain
@@ -91,9 +96,11 @@ import "internal/infrastructure/database" // VIOLATION!
 **Run:** `just lint-arch`
 
 ### 2. **Code Quality** (`golangci-lint`)
+
 **What it does:** Runs 40+ linters for code quality, style, and bugs
 
 **Key linters enabled:**
+
 - **forbidigo**: Bans dangerous patterns (panic, interface{}, fmt.Print)
 - **nilaway**: Uber's nil panic prevention (catches 80% of production panics!)
 - **godox**: TODO/FIXME detection
@@ -105,9 +112,11 @@ import "internal/infrastructure/database" // VIOLATION!
 **Run:** `just lint-code`
 
 ### 3. **File Naming Standards**
+
 **What it does:** Enforces consistent file naming conventions
 
 **Rules:**
+
 - No spaces in filenames
 - No special characters (@, #, $, etc.)
 - Max 255 characters
@@ -116,6 +125,7 @@ import "internal/infrastructure/database" // VIOLATION!
 **Run:** `just lint-files`
 
 ### 4. **Function Complexity Limits**
+
 - **Max function length:** 50 lines
 - **Max cyclomatic complexity:** 10
 - **Max cognitive complexity:** 10
@@ -124,6 +134,7 @@ import "internal/infrastructure/database" // VIOLATION!
 **Why:** Keeps code readable and maintainable
 
 ### 5. **Error Handling Intelligence**
+
 Smart error checking that eliminates false positives:
 
 ```go
@@ -140,14 +151,17 @@ data, err := os.ReadFile(file)  // Must check!
 ## 🛡️ Security Features
 
 ### 1. **Vulnerability Scanning** (`govulncheck`)
+
 **What:** Official Go vulnerability scanner
 **Detects:** Known CVEs in dependencies
 **Run:** `just lint-vulns`
 
 ### 2. **Security Analysis** (`gosec` via golangci-lint)
+
 **What:** Go security analyzer integrated into golangci-lint
 
 **Detects:**
+
 - Hardcoded secrets and API keys
 - SQL injection vulnerabilities
 - Command injection risks
@@ -160,7 +174,9 @@ data, err := os.ReadFile(file)  // Must check!
 **Run:** `just lint-security` (or included in `just lint`)
 
 ### 3. **Dependency Analysis**
+
 **Tools:**
+
 - **govulncheck:** Official Go vulnerability database (primary tool)
 - **License compliance:** Manual audit approach via go-licenses (no paid tools required)
 - **Note:** nancy and osv-scanner removed as redundant with govulncheck
@@ -168,6 +184,7 @@ data, err := os.ReadFile(file)  // Must check!
 **Run:** `just lint-deps-advanced`
 
 ### 4. **Goroutine Leak Detection**
+
 **What:** Uber's goleak finds goroutine leaks
 **Why:** Prevents memory leaks in production
 **Run:** `just lint-goroutines`
@@ -177,50 +194,56 @@ data, err := os.ReadFile(file)  // Must check!
 ## 📖 Commands Reference
 
 ### Core Commands
-| Command | Description | When to Use |
-|---------|-------------|-------------|
-| `just lint` | Run ALL linters | Before committing code |
-| `just fix` | Auto-fix formatting issues | When linters report fixable issues |
-| `just test` | Run tests with coverage | Before pushing code |
-| `just build` | Build the application | Verify compilation |
-| `just ci` | Complete CI pipeline | Simulates CI/CD locally |
+
+| Command      | Description                | When to Use                        |
+| ------------ | -------------------------- | ---------------------------------- |
+| `just lint`  | Run ALL linters            | Before committing code             |
+| `just fix`   | Auto-fix formatting issues | When linters report fixable issues |
+| `just test`  | Run tests with coverage    | Before pushing code                |
+| `just build` | Build the application      | Verify compilation                 |
+| `just ci`    | Complete CI pipeline       | Simulates CI/CD locally            |
 
 ### Specialized Linting
-| Command | Description | Focus Area |
-|---------|-------------|------------|
-| `just lint-arch` | Architecture boundaries | Clean Architecture compliance |
-| `just lint-code` | Code quality | Style, bugs, complexity |
-| `just lint-files` | File naming | Naming conventions |
-| `just lint-vulns` | Vulnerability scan | Security CVEs |
-| `just lint-cycles` | Import cycles | Dependency cycles |
-| `just lint-goroutines` | Goroutine leaks | Memory leaks |
-| `just lint-deps-advanced` | Dependency analysis | Supply chain security |
-| `just lint-nilaway` | Nil panic detection | Uber's nil safety analysis |
-| `just lint-licenses` | License compliance | Legal compliance |
+
+| Command                   | Description             | Focus Area                    |
+| ------------------------- | ----------------------- | ----------------------------- |
+| `just lint-arch`          | Architecture boundaries | Clean Architecture compliance |
+| `just lint-code`          | Code quality            | Style, bugs, complexity       |
+| `just lint-files`         | File naming             | Naming conventions            |
+| `just lint-vulns`         | Vulnerability scan      | Security CVEs                 |
+| `just lint-cycles`        | Import cycles           | Dependency cycles             |
+| `just lint-goroutines`    | Goroutine leaks         | Memory leaks                  |
+| `just lint-deps-advanced` | Dependency analysis     | Supply chain security         |
+| `just lint-nilaway`       | Nil panic detection     | Uber's nil safety analysis    |
+| `just lint-licenses`      | License compliance      | Legal compliance              |
 
 ### Security Commands
-| Command | Description | Coverage |
-|---------|-------------|----------|
-| `just security-audit` | Complete security scan | All security tools |
-| `just lint-security` | Security-focused linters | gosec + copyloopvar |
+
+| Command               | Description              | Coverage            |
+| --------------------- | ------------------------ | ------------------- |
+| `just security-audit` | Complete security scan   | All security tools  |
+| `just lint-security`  | Security-focused linters | gosec + copyloopvar |
 
 ### Development Commands
-| Command | Description | Use Case |
-|---------|-------------|----------|
-| `just format` | Format code | Code formatting |
-| `just templ` | Generate templates | After template changes |
-| `just dev` | Development mode | Live reload development |
-| `just install` | Install tools | Initial setup |
-| `just install-hooks` | Install git hooks | Automatic pre-commit checks |
+
+| Command              | Description        | Use Case                    |
+| -------------------- | ------------------ | --------------------------- |
+| `just format`        | Format code        | Code formatting             |
+| `just templ`         | Generate templates | After template changes      |
+| `just dev`           | Development mode   | Live reload development     |
+| `just install`       | Install tools      | Initial setup               |
+| `just install-hooks` | Install git hooks  | Automatic pre-commit checks |
 
 ---
 
 ## 📁 Configuration Files
 
 ### `.golangci.yml`
+
 **Purpose:** Configure 40+ Go linters
 
 **Key sections:**
+
 ```yaml
 linters:
   enable:
@@ -239,9 +262,11 @@ linters-settings:
 ```
 
 ### `.go-arch-lint.yml`
+
 **Purpose:** Enforce architectural boundaries
 
 **Example:**
+
 ```yaml
 deps:
   - name: "Domain Independence"
@@ -250,17 +275,21 @@ deps:
 ```
 
 ### Security Tools (No External Config Required)
+
 **Purpose:** Custom security pattern detection
 
 **Contains:**
+
 - 10+ security rules
 - Go-specific vulnerability patterns
 - Architecture violation detection
 
 ### `justfile`
+
 **Purpose:** Task automation and workflow
 
 **Features:**
+
 - 30+ pre-configured commands
 - Auto-installation of missing tools
 - Intelligent error handling
@@ -273,16 +302,19 @@ deps:
 ### Critical Tools (Must Have)
 
 #### **1. Uber's NilAway**
+
 - **Impact:** Prevents 80% of production panics
 - **How:** Advanced static analysis for nil dereferences
 - **Real-world:** Uber reduced crashes by 80% after deployment
 
 #### **2. Semgrep Security Rules**
+
 - **Impact:** Catches security vulnerabilities before production
 - **How:** Pattern matching for known vulnerability patterns
 - **Real-world:** Prevents OWASP Top 10 vulnerabilities
 
 #### **3. Architecture Linting**
+
 - **Impact:** Maintains clean architecture over time
 - **How:** Enforces dependency rules automatically
 - **Real-world:** Prevents "big ball of mud" architectures
@@ -290,16 +322,19 @@ deps:
 ### Important Tools (Should Have)
 
 #### **4. TODO/FIXME Detection (godox)**
+
 - **Impact:** Prevents technical debt accumulation
 - **How:** Tracks all TODO/FIXME markers
 - **Real-world:** Google requires TODO ownership and tracking
 
 #### **5. Goroutine Leak Detection**
+
 - **Impact:** Prevents memory leaks
 - **How:** Detects abandoned goroutines
 - **Real-world:** Critical for long-running services
 
 #### **6. License Compliance (Manual Audit)**
+
 - **Impact:** Legal compliance for commercial software
 - **How:** Manual review of dependency licenses (FOSSA removed - requires paid account)
 - **Real-world:** Required for enterprise distribution, can use go-licenses or licensed tools
@@ -309,6 +344,7 @@ deps:
 ## 🔄 Common Workflows
 
 ### Before Committing Code
+
 ```bash
 # 1. Check everything
 just lint
@@ -324,6 +360,7 @@ git commit -m "feat: Add new feature"
 ```
 
 ### Security Review
+
 ```bash
 # Complete security audit
 just security-audit
@@ -333,6 +370,7 @@ cat gosec-report.json
 ```
 
 ### Adding New Code
+
 ```bash
 # 1. Check architecture compliance
 just lint-arch
@@ -345,6 +383,7 @@ just lint-code | grep "cyclomatic\|cognitive"
 ```
 
 ### Dependency Management
+
 ```bash
 # 1. Add dependency
 go get github.com/some/package
@@ -363,12 +402,14 @@ just lint-licenses
 ### Common Issues
 
 #### "Tool not found" errors
+
 ```bash
 # Reinstall all tools
 just install
 ```
 
 #### Architecture violations
+
 ```bash
 # Check dependency graph
 just lint-arch
@@ -378,6 +419,7 @@ go mod graph | dot -Tpng -o deps.png
 ```
 
 #### Too many linting errors
+
 ```bash
 # Start with critical issues only
 just lint-security
@@ -390,6 +432,7 @@ just fix
 ```
 
 #### Performance issues
+
 ```bash
 # Run linters individually
 just lint-arch
@@ -405,12 +448,15 @@ golangci-lint run --fast
 ## ✨ Best Practices
 
 ### 1. **Incremental Adoption**
+
 Start with core linters, add sophisticated ones gradually:
+
 1. Start: `lint-arch` + `lint-code`
 2. Add: `lint-vulns` + `lint-security`
 3. Finally: `lint-goroutines` + `lint-nilaway`
 
 ### 2. **CI/CD Integration**
+
 ```yaml
 # .github/workflows/lint.yml
 - name: Lint
@@ -420,18 +466,21 @@ Start with core linters, add sophisticated ones gradually:
 ```
 
 ### 3. **Team Guidelines**
+
 - Run `just lint` before every commit
 - Fix all FIXME before release
 - Review TODO markers weekly
 - Zero tolerance for architecture violations
 
 ### 4. **Performance Tips**
+
 - Use `just lint-fast` for quick checks during development
 - Run full `just lint` before pushing
 - Cache linter results in CI/CD
 - Parallelize linting in CI/CD
 
 ### 5. **Security Practices**
+
 - Run `just security-audit` before releases
 - Review gosec findings manually
 - Keep tools updated: `just update-tools`
@@ -442,6 +491,7 @@ Start with core linters, add sophisticated ones gradually:
 ## 📊 Metrics and Goals
 
 ### Quality Targets
+
 - **Function length:** < 50 lines (enforced)
 - **Cyclomatic complexity:** < 10 (enforced)
 - **File length:** < 400 lines (enforced)
@@ -449,11 +499,13 @@ Start with core linters, add sophisticated ones gradually:
 - **TODOs:** 0 before release (tracked)
 
 ### Security Targets
+
 - **CVE count:** 0 high/critical (enforced)
 - **License issues:** 0 incompatible (enforced)
 - **Security patterns:** 0 violations (enforced)
 
 ### Architecture Targets
+
 - **Layer violations:** 0 (enforced)
 - **Import cycles:** 0 (enforced)
 - **Global variables:** 0 (enforced)
@@ -464,7 +516,9 @@ Start with core linters, add sophisticated ones gradually:
 ## 🚀 Advanced Features
 
 ### Custom Security Rules
+
 Security patterns are handled by built-in tools (gosec + NilAway):
+
 ```yaml
 rules:
   - id: custom-api-key-pattern
@@ -474,7 +528,9 @@ rules:
 ```
 
 ### Architecture Extensions
+
 Extend `.go-arch-lint.yml` for your architecture:
+
 ```yaml
 deps:
   - name: "Custom Layer"
@@ -483,7 +539,9 @@ deps:
 ```
 
 ### Tool Updates
+
 Keep tools current:
+
 ```bash
 # Update all tools
 go install -u all
@@ -497,17 +555,20 @@ go install github.com/uber-go/nilaway/cmd/nilaway@latest
 ## 📚 Learning Resources
 
 ### Documentation
+
 - [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [Domain-Driven Design](https://martinfowler.com/bliki/DomainDrivenDesign.html)
 - [Go Best Practices](https://go.dev/doc/effective_go)
 
 ### Tool Documentation
+
 - [golangci-lint](https://golangci-lint.run/)
 - [Gosec](https://securecodewarrior.github.io/docs-gosec/)
 - [go-arch-lint](https://github.com/fe3dback/go-arch-lint)
 - [Uber NilAway](https://github.com/uber-go/nilaway)
 
 ### Security Resources
+
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [CWE Database](https://cwe.mitre.org/)
 - [Go Security](https://go.dev/doc/security/)
@@ -517,6 +578,7 @@ go install github.com/uber-go/nilaway/cmd/nilaway@latest
 ## 🎉 Conclusion
 
 This template represents the pinnacle of Go development tooling, incorporating:
+
 - **40+ linters** for comprehensive code quality
 - **10+ security patterns** for vulnerability prevention
 - **Architecture enforcement** for clean code
@@ -529,4 +591,4 @@ By using this template, you're implementing practices that most Fortune 500 comp
 
 ---
 
-*Last updated: 2024-2025 | Template Version: Enterprise Edition*
+_Last updated: 2024-2025 | Template Version: Enterprise Edition_

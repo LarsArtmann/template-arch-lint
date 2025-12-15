@@ -20,67 +20,66 @@ run:
 linters:
   enable:
     # 🚨 TYPE SAFETY ENFORCEMENT
-    - forbidigo      # Custom forbidden patterns
-    - govet          # Suspicious constructs
-    - staticcheck    # Advanced static analysis
+    - forbidigo # Custom forbidden patterns
+    - govet # Suspicious constructs
+    - staticcheck # Advanced static analysis
 
     # 🛡️ ERROR HANDLING
-    - errcheck       # Unchecked errors
-    - errorlint      # Error wrapping
-    - nilerr         # Nil error returns
+    - errcheck # Unchecked errors
+    - errorlint # Error wrapping
+    - nilerr # Nil error returns
 
     # 🔒 SECURITY
-    - gosec          # Security audit
-    - copyloopvar    # Loop variable copies
-    - noctx          # HTTP context validation
-    - wrapcheck      # Error wrapping enforcement
-    - nilnesserr     # Advanced nil error checking
+    - gosec # Security audit
+    - copyloopvar # Loop variable copies
+    - noctx # HTTP context validation
+    - wrapcheck # Error wrapping enforcement
+    - nilnesserr # Advanced nil error checking
 
     # 📊 CODE QUALITY
-    - bodyclose      # HTTP body closure
-    - cyclop         # Cyclomatic complexity
-    - exhaustive     # Switch statement completeness
-    - funlen         # Function length
-    - gocognit       # Cognitive complexity
-    - gocyclo        # Cyclomatic complexity
-    - goconst        # Magic string detection (repeated constants)
-    - gocritic       # Opinionated checks
+    - bodyclose # HTTP body closure
+    - cyclop # Cyclomatic complexity
+    - exhaustive # Switch statement completeness
+    - funlen # Function length
+    - gocognit # Cognitive complexity
+    - gocyclo # Cyclomatic complexity
+    - goconst # Magic string detection (repeated constants)
+    - gocritic # Opinionated checks
     - gomoddirectives # go.mod validation
     - goprintffuncname # Printf function naming
-    - ineffassign    # Ineffective assignments
-    - misspell       # Spelling errors
-    - nakedret       # Naked returns
-    - nestif         # Deep nesting prevention
-    - nolintlint     # Nolint comment validation
-    - prealloc       # Slice preallocation
-    - revive         # Comprehensive checks
-    - rowserrcheck   # SQL rows error handling
-    - sqlclosecheck  # SQL resource closure
-    - tparallel      # Test parallelism
-    - unconvert      # Unnecessary conversions
-    - unparam        # Unused parameters
-    - unused         # Unused code
-    - whitespace     # Trailing whitespace
-    - godot          # Comment punctuation
-    
+    - ineffassign # Ineffective assignments
+    - misspell # Spelling errors
+    - nakedret # Naked returns
+    - nestif # Deep nesting prevention
+    - nolintlint # Nolint comment validation
+    - prealloc # Slice preallocation
+    - revive # Comprehensive checks
+    - rowserrcheck # SQL rows error handling
+    - sqlclosecheck # SQL resource closure
+    - tparallel # Test parallelism
+    - unconvert # Unnecessary conversions
+    - unparam # Unused parameters
+    - unused # Unused code
+    - whitespace # Trailing whitespace
+    - godot # Comment punctuation
+
     # 🚀 MODERN GO FEATURES
-    - fatcontext     # Nested context detection
-    - intrange       # Modern range loop opportunities
-    - perfsprint     # Performance-focused sprintf replacements
-    - sloglint       # Standard slog usage validation
-    - spancheck      # OpenTelemetry span validation
-    - usestdlibvars  # Standard library constant usage
+    - fatcontext # Nested context detection
+    - intrange # Modern range loop opportunities
+    - perfsprint # Performance-focused sprintf replacements
+    - sloglint # Standard slog usage validation
+    - spancheck # OpenTelemetry span validation
+    - usestdlibvars # Standard library constant usage
 
     # 🏗️ ARCHITECTURE & BEST PRACTICES
     - gochecknoinits # No init functions (anti-pattern)
     - gochecknoglobals # No global variables
-    - lll            # Line length limits
-    - godox          # TODO/FIXME/HACK detection
-    - mnd            # Magic number detection (modern replacement for gomnd)
+    - lll # Line length limits
+    - godox # TODO/FIXME/HACK detection
+    - mnd # Magic number detection (modern replacement for gomnd)
 
     # 💀 DEAD CODE DETECTION
-    - unused         # Comprehensive unused code detection (replaces deadcode, varcheck, structcheck)
-
+    - unused # Comprehensive unused code detection (replaces deadcode, varcheck, structcheck)
 
 # 🔧 LINTER SETTINGS - Maximum strictness
 linters-settings:
@@ -94,13 +93,13 @@ linters-settings:
         msg: "🚨 BANNED: any erases type safety. Use specific types or generics"
       - p: 'panic\('
         msg: "🚨 BANNED: panic() crashes programs. Return errors instead"
-      
+
       # Structured logging enforcement (inspired by Uniflow)
       - p: '^fmt\.Print.*$'
         msg: "🚨 BANNED: Do not commit print statements. Use github.com/charmbracelet/log for structured logging"
       - p: '^log\..*$'
-        msg: "🚨 BANNED: Do not use standard log package. Use github.com/charmbracelet/log for structured logging"  
-      - p: '^print$|^println$'
+        msg: "🚨 BANNED: Do not use standard log package. Use github.com/charmbracelet/log for structured logging"
+      - p: "^print$|^println$"
         msg: "🚨 BANNED: Do not commit print statements. Use structured logging instead"
       - p: 'fmt\.Printf.*'
         msg: "🚨 BANNED: Use structured logging instead of fmt.Printf. Prefer log.Info() with fields"
@@ -141,25 +140,25 @@ linters-settings:
       - (*sql.DB).Close
       - (*sql.Rows).Close
       - (*sql.Stmt).Close
-      
+
       # Formatting operations - rarely fail and errors are usually non-critical
       - fmt.Fprint
-      - fmt.Fprintf  
+      - fmt.Fprintf
       - fmt.Fprintln
       - fmt.Print
       - fmt.Printf
       - fmt.Println
-      
+
       # Buffer operations - bytes.Buffer operations never fail
       - (*bytes.Buffer).Write
       - (*bytes.Buffer).WriteByte
       - (*bytes.Buffer).WriteRune
       - (*bytes.Buffer).WriteString
-      
+
       # String builder operations - strings.Builder operations never fail
       - (*strings.Builder).Write
       - (*strings.Builder).WriteByte
-      - (*strings.Builder).WriteRune  
+      - (*strings.Builder).WriteRune
       - (*strings.Builder).WriteString
 
   errorlint:
@@ -251,7 +250,7 @@ linters-settings:
 
   # 🏗️ ARCHITECTURE ENFORCEMENT
   gochecknoinits: {}
-  
+
   gochecknoglobals:
     # Allow global variables only in main packages and tests
     exclude-files:
@@ -272,50 +271,50 @@ linters-settings:
       - HACK
       - BUG
       - XXX
-      
+
       # Enterprise-specific markers
-      - SECURITY     # Security-related todos
-      - PERFORMANCE  # Performance optimizations needed
-      - DEBT         # Technical debt markers
-      - REVIEW       # Code review follow-ups
-      - REFACTOR     # Refactoring needed
-      - TEST         # Missing tests
-      - DEPRECATED   # Deprecated code markers
+      - SECURITY # Security-related todos
+      - PERFORMANCE # Performance optimizations needed
+      - DEBT # Technical debt markers
+      - REVIEW # Code review follow-ups
+      - REFACTOR # Refactoring needed
+      - TEST # Missing tests
+      - DEPRECATED # Deprecated code markers
 
   # Magic number detection (modern replacement for gomnd)
   mnd:
     # Ignored numbers (common constants that don't need extraction)
     ignored-numbers:
-      - '0'
-      - '1' 
-      - '2'
-      - '10'
-      - '100'
-      - '1000'
+      - "0"
+      - "1"
+      - "2"
+      - "10"
+      - "100"
+      - "1000"
     # Ignored functions where numbers are acceptable
     ignored-functions:
-      - 'strconv.ParseInt'
-      - 'strconv.ParseFloat'
-      - 'time.Sleep'
-      - 'time.Duration'
-  
+      - "strconv.ParseInt"
+      - "strconv.ParseFloat"
+      - "time.Sleep"
+      - "time.Duration"
+
   # 🚀 MODERN GO LINTER SETTINGS
-  
+
   # Nested context detection
   fatcontext:
     ignore-len: 3
-  
-  # Modern range loop opportunities  
+
+  # Modern range loop opportunities
   intrange:
     skip-generated-code: true
-    
+
   # Performance sprintf replacements
   perfsprint:
     int-conversion: true
     err-error: true
     sprintf1: true
     strconcat: true
-    
+
   # Standard slog usage validation
   sloglint:
     no-mixed-args: true
@@ -323,7 +322,7 @@ linters-settings:
     attr-check: true
     context-only: true
     static-msg: true
-    
+
   # OpenTelemetry span validation
   spancheck:
     checks:
@@ -333,7 +332,7 @@ linters-settings:
     ignore-check-signatures:
       - "telemetry.Record"
       - "telemetry.RecordError"
-      
+
   # Standard library constant usage
   usestdlibvars:
     http-method: true
@@ -343,8 +342,8 @@ linters-settings:
     time-layout: true
     crypto-hash: true
     default-rpc-path: true
-    
-  # Advanced nil error checking  
+
+  # Advanced nil error checking
   nilnesserr:
     check-len: true
     check-cap: true
@@ -390,7 +389,7 @@ issues:
 
   exclude-dirs:
     - vendor
-    - node_modules   # Frontend dependencies 
+    - node_modules # Frontend dependencies
     - testdata
     - examples
     - docs

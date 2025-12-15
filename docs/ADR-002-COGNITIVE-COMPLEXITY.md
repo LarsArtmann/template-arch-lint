@@ -1,15 +1,19 @@
 # ADR-002: Cognitive Complexity Management
 
 ## Status
+
 Accepted
 
 ## Context
+
 Beyond cyclomatic complexity, we need to manage cognitive complexity - how difficult code is for humans to understand. This includes nested structures, logical operators, and control flow patterns.
 
 ## Decision
+
 We will enforce cognitive complexity limits and establish patterns that reduce mental overhead when reading code.
 
 ### Key Principles
+
 1. **Minimize Nesting**: Prefer early returns and guard clauses
 2. **Limit Logical Operators**: Break complex boolean expressions into named variables
 3. **Reduce Branching**: Use polymorphism or data structures instead of large switch statements
@@ -18,6 +22,7 @@ We will enforce cognitive complexity limits and establish patterns that reduce m
 ### Strategies for Cognitive Complexity Reduction
 
 #### 1. Early Returns (Guard Clauses)
+
 ```go
 // Bad - Nested complexity
 func ProcessOrder(order Order) error {
@@ -48,13 +53,14 @@ func ProcessOrder(order Order) error {
     if !order.Customer.IsActive() {
         return errors.New("inactive customer")
     }
-    
+
     // ... process logic
     return nil
 }
 ```
 
 #### 2. Named Boolean Variables
+
 ```go
 // Bad - Complex boolean logic
 if user.Age >= 18 && user.HasVerifiedEmail && (user.Country == "US" || user.Country == "CA") && !user.IsBanned {
@@ -73,6 +79,7 @@ if isAdult && hasVerifiedEmail && isFromNorthAmerica && isNotBanned {
 ```
 
 #### 3. Replace Switch with Polymorphism
+
 ```go
 // Bad - Large switch statement
 func ProcessPayment(payment Payment) error {
@@ -99,6 +106,7 @@ func (p *PaymentService) Process(payment Payment) error {
 ```
 
 #### 4. Functional Programming Patterns
+
 ```go
 // Bad - Imperative with complex loops
 func ProcessUsers(users []User) []ProcessedUser {
@@ -121,7 +129,7 @@ func ProcessUsers(users []User) []ProcessedUser {
     activeSubscribers := lo.Filter(users, func(u User, _ int) bool {
         return u.IsActive() && u.HasSubscription()
     })
-    
+
     return lo.Map(activeSubscribers, func(u User, _ int) ProcessedUser {
         return ProcessedUser{
             ID:   u.ID,
@@ -133,6 +141,7 @@ func ProcessUsers(users []User) []ProcessedUser {
 ```
 
 ## Consequences
+
 - Positive: Code is easier to understand and reason about
 - Positive: Reduced mental fatigue when reading code
 - Positive: Fewer bugs due to clearer logic flow
@@ -140,6 +149,7 @@ func ProcessUsers(users []User) []ProcessedUser {
 - Negative: Learning curve for functional programming patterns
 
 ## Monitoring
+
 - Code reviews focus on readability and comprehension
 - Cognitive complexity metrics tracked alongside cyclomatic complexity
 - Team feedback on code clarity during reviews

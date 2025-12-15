@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
@@ -33,12 +34,7 @@ func AllUserStatuses() []UserStatus {
 // IsValid checks if the user status is valid.
 func (s UserStatus) IsValid() bool {
 	validStatuses := AllUserStatuses()
-	for _, status := range validStatuses {
-		if s == status {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(validStatuses, s)
 }
 
 // String returns the string representation of user status.
@@ -78,7 +74,7 @@ func (s *UserStatus) UnmarshalJSON(data []byte) error {
 }
 
 // Scan implements the Scanner interface for database compatibility.
-func (s *UserStatus) Scan(value interface{}) error {
+func (s *UserStatus) Scan(value any) error {
 	if value == nil {
 		*s = UserStatusInactive
 		return nil
@@ -129,12 +125,7 @@ func AllUserRoles() []UserRole {
 // IsValid checks if the user role is valid.
 func (r UserRole) IsValid() bool {
 	validRoles := AllUserRoles()
-	for _, role := range validRoles {
-		if r == role {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(validRoles, r)
 }
 
 // String returns the string representation of user role.
@@ -179,7 +170,7 @@ func (r *UserRole) UnmarshalJSON(data []byte) error {
 }
 
 // Scan implements the Scanner interface for database compatibility.
-func (r *UserRole) Scan(value interface{}) error {
+func (r *UserRole) Scan(value any) error {
 	if value == nil {
 		*r = UserRoleGuest
 		return nil

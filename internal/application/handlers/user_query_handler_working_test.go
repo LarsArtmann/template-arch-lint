@@ -96,7 +96,7 @@ var _ = Describe("UserQueryHandler", func() {
 
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var response map[string]interface{}
+				var response map[string]any
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("data"))
@@ -111,7 +111,7 @@ var _ = Describe("UserQueryHandler", func() {
 
 				Expect(w.Code).To(Equal(http.StatusNotFound))
 
-				var response map[string]interface{}
+				var response map[string]any
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("error"))
@@ -126,7 +126,7 @@ var _ = Describe("UserQueryHandler", func() {
 
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
 
-				var response map[string]interface{}
+				var response map[string]any
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("error"))
@@ -146,12 +146,12 @@ var _ = Describe("UserQueryHandler", func() {
 
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var response map[string]interface{}
+				var response map[string]any
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("data"))
 
-				data := response["data"].([]interface{})
+				data := response["data"].([]any)
 				Expect(len(data)).To(BeNumerically(">=", 2))
 			})
 		})
@@ -164,12 +164,12 @@ var _ = Describe("UserQueryHandler", func() {
 
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var response map[string]interface{}
+				var response map[string]any
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("data"))
 
-				data := response["data"].([]interface{})
+				data := response["data"].([]any)
 				Expect(len(data)).To(Equal(0))
 			})
 		})
@@ -186,12 +186,12 @@ var _ = Describe("UserQueryHandler", func() {
 
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var response map[string]interface{}
+				var response map[string]any
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("data"))
 
-				data := response["data"].([]interface{})
+				data := response["data"].([]any)
 				Expect(len(data)).To(Equal(1))
 			})
 		})
@@ -204,7 +204,7 @@ var _ = Describe("UserQueryHandler", func() {
 
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
 
-				var response map[string]interface{}
+				var response map[string]any
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("error"))
@@ -219,12 +219,12 @@ var _ = Describe("UserQueryHandler", func() {
 
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var response map[string]interface{}
+				var response map[string]any
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("data"))
 
-				data := response["data"].([]interface{})
+				data := response["data"].([]any)
 				Expect(len(data)).To(Equal(0))
 			})
 		})
@@ -244,14 +244,14 @@ var _ = Describe("UserQueryHandler", func() {
 
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var response map[string]interface{}
+				var response map[string]any
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("data"))
 				Expect(response).To(HaveKey("pagination"))
 
-				data := response["data"].([]interface{})
-				pagination := response["pagination"].(map[string]interface{})
+				data := response["data"].([]any)
+				pagination := response["pagination"].(map[string]any)
 				Expect(len(data)).To(Equal(3))
 				Expect(pagination["page"]).To(Equal(float64(1)))
 				Expect(pagination["limit"]).To(Equal(float64(3)))
@@ -267,12 +267,12 @@ var _ = Describe("UserQueryHandler", func() {
 
 				Expect(w.Code).To(Equal(http.StatusOK))
 
-				var response map[string]interface{}
+				var response map[string]any
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("pagination"))
 
-				pagination := response["pagination"].(map[string]interface{})
+				pagination := response["pagination"].(map[string]any)
 				Expect(pagination["page"]).To(Equal(float64(1)))
 				Expect(pagination["limit"]).To(Equal(float64(10)))
 			})

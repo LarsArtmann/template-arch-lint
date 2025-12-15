@@ -7,6 +7,7 @@ This project implements a comprehensive CI/CD pipeline with **enterprise-grade q
 ## 📁 Workflow Files
 
 ### 1. `lint.yml` - Code Quality & Architecture Validation
+
 - **Triggers**: Push, PR, manual dispatch
 - **Purpose**: Comprehensive code quality and architecture validation
 - **Features**:
@@ -19,7 +20,8 @@ This project implements a comprehensive CI/CD pipeline with **enterprise-grade q
   - Detailed reporting and artifact uploads
 
 ### 2. `test.yml` - Testing Suite
-- **Triggers**: Push, PR, manual dispatch  
+
+- **Triggers**: Push, PR, manual dispatch
 - **Purpose**: Comprehensive testing with coverage analysis
 - **Features**:
   - Unit tests across all Go versions
@@ -32,6 +34,7 @@ This project implements a comprehensive CI/CD pipeline with **enterprise-grade q
   - Multi-run race detection for reliability
 
 ### 3. `ci.yml` - Complete CI Pipeline
+
 - **Triggers**: Push, PR, manual dispatch
 - **Purpose**: Orchestrated CI/CD with build verification
 - **Features**:
@@ -44,6 +47,7 @@ This project implements a comprehensive CI/CD pipeline with **enterprise-grade q
   - Complete integration testing
 
 ### 4. `status.yml` - Status Dashboard
+
 - **Triggers**: Workflow completion, daily schedule, manual
 - **Purpose**: Project health monitoring and status reporting
 - **Features**:
@@ -55,17 +59,20 @@ This project implements a comprehensive CI/CD pipeline with **enterprise-grade q
 ## 🔧 Tool Integration
 
 ### Core Linting Tools
+
 - **golangci-lint v2.3.1**: Maximum strictness code quality
 - **go-arch-lint v1.12.0**: Clean Architecture boundary enforcement
 - **templ**: Type-safe HTML template generation
 - **just**: Command automation and consistency
 
 ### Testing Framework
+
 - **Ginkgo/Gomega**: BDD testing (as configured in project)
 - **Go testing**: Standard Go testing with race detection
 - **Coverage analysis**: Atomic coverage mode with HTML reports
 
 ### Build Tools
+
 - **Go 1.21-1.24**: Multi-version compatibility testing
 - **Docker**: Container build verification
 - **Cross-platform**: Ubuntu, Windows, macOS support
@@ -73,6 +80,7 @@ This project implements a comprehensive CI/CD pipeline with **enterprise-grade q
 ## 📊 Quality Gates
 
 ### Code Quality Requirements
+
 - ✅ Zero linting violations (golangci-lint)
 - ✅ Architecture boundaries enforced (go-arch-lint)
 - ✅ No security vulnerabilities (gosec + govulncheck)
@@ -82,6 +90,7 @@ This project implements a comprehensive CI/CD pipeline with **enterprise-grade q
 - ✅ No `interface{}`, `any`, or `panic()` usage
 
 ### Testing Requirements
+
 - ✅ 80% minimum test coverage
 - ✅ All tests pass across Go versions
 - ✅ Race condition detection clean
@@ -89,6 +98,7 @@ This project implements a comprehensive CI/CD pipeline with **enterprise-grade q
 - ✅ Benchmarks establish performance baseline
 
 ### Build Requirements
+
 - ✅ Builds successfully on all platforms
 - ✅ Templates generate without errors
 - ✅ Executables run and respond to health checks
@@ -98,6 +108,7 @@ This project implements a comprehensive CI/CD pipeline with **enterprise-grade q
 ## 🚀 Workflow Execution Strategy
 
 ### Parallel Execution
+
 ```mermaid
 graph TD
     A[Push/PR] --> B[Pre-checks]
@@ -113,11 +124,13 @@ graph TD
 ```
 
 ### Matrix Strategies
+
 - **Go Versions**: 1.21, 1.22, 1.23, 1.24
 - **Platforms**: Ubuntu, Windows, macOS
 - **Test Types**: Unit, Integration, Race, Benchmarks
 
 ### Fail-Fast Strategy
+
 - Pre-checks fail fast on basic issues
 - Matrix jobs continue even if some versions fail
 - Final success gates require all critical jobs to pass
@@ -125,16 +138,19 @@ graph TD
 ## 📈 Performance Optimizations
 
 ### Caching Strategy
+
 - Go module cache shared across workflows
 - Tool installations cached per workflow
 - Dependency downloads optimized
 
 ### Resource Management
+
 - Appropriate timeouts for each job type
 - Concurrent job limits to prevent resource exhaustion
 - Artifact retention optimized (30 days)
 
 ### Efficiency Features
+
 - Quick pre-flight checks to fail early
 - Parallel execution where possible
 - Conditional steps based on Go version/platform
@@ -143,12 +159,14 @@ graph TD
 ## 🔐 Security Features
 
 ### Vulnerability Scanning
+
 - `govulncheck` for Go-specific vulnerabilities
 - `gosec` for security best practices
 - Dependency tree analysis
 - Container security (when Docker is used)
 
 ### Secret Management
+
 - Codecov token support (when configured)
 - No hardcoded secrets in workflows
 - Secure artifact handling
@@ -156,13 +174,15 @@ graph TD
 ## 📦 Artifact Management
 
 ### Generated Artifacts
+
 - **Lint Reports**: JSON, XML, HTML formats
-- **Coverage Reports**: HTML and text summaries  
+- **Coverage Reports**: HTML and text summaries
 - **Benchmark Results**: Performance baselines
 - **Dependency Analysis**: Graph and listing
 - **Build Artifacts**: Cross-platform executables
 
 ### Retention Policy
+
 - 30 days for all artifacts
 - Automatic cleanup prevents storage bloat
 - Critical reports always preserved
@@ -170,7 +190,9 @@ graph TD
 ## 🔄 Integration with Project
 
 ### Justfile Integration
+
 The workflows extensively use the project's `justfile` commands:
+
 - `just install`: Tool installation
 - `just lint`: Complete linting suite
 - `just test`: Test execution with coverage
@@ -178,6 +200,7 @@ The workflows extensively use the project's `justfile` commands:
 - `just fix`: Auto-formatting and fixes
 
 ### Configuration Files
+
 - `.golangci.yml`: Maximum strictness linting rules
 - `.go-arch-lint.yml`: Clean Architecture enforcement
 - `go.mod`: Dependency and version management
@@ -185,21 +208,24 @@ The workflows extensively use the project's `justfile` commands:
 ## 🎯 Usage Instructions
 
 ### For Developers
+
 ```bash
 # Run same checks locally as CI
 just install  # Install all tools
-just lint     # Run all linting  
+just lint     # Run all linting
 just test     # Run tests with coverage
 just build    # Build and verify
 ```
 
 ### For Repository Setup
+
 1. Ensure all configuration files are present
 2. Add repository secrets if using external services:
    - `CODECOV_TOKEN` (optional): For coverage reporting
 3. Workflows will automatically run on push/PR
 
 ### For Customization
+
 - **Go Versions**: Update matrix in workflow files
 - **Coverage Threshold**: Modify `COVERAGE_THRESHOLD` in test.yml
 - **Tool Versions**: Update in workflow env sections
@@ -208,6 +234,7 @@ just build    # Build and verify
 ## 🏆 Best Practices Implemented
 
 ### GitHub Actions Best Practices
+
 - ✅ Concurrency control to prevent resource waste
 - ✅ Proper timeout management
 - ✅ Descriptive job and step names with emojis
@@ -216,6 +243,7 @@ just build    # Build and verify
 - ✅ Efficient caching strategies
 
 ### Go Development Best Practices
+
 - ✅ Multi-version compatibility testing
 - ✅ Race condition detection
 - ✅ Cross-platform build verification
@@ -224,6 +252,7 @@ just build    # Build and verify
 - ✅ Code quality enforcement
 
 ### CI/CD Pipeline Best Practices
+
 - ✅ Fail-fast on basic issues
 - ✅ Parallel execution for efficiency
 - ✅ Comprehensive reporting

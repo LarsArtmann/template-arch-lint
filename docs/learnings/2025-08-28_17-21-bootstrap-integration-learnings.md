@@ -6,44 +6,52 @@
 ## 🎯 Key Learnings
 
 ### 1. Ghost Systems Are Real and Dangerous
+
 - **Problem:** Started creating standalone troubleshooting scripts instead of integrating into bootstrap.sh
 - **Impact:** Creates maintenance overhead, split brain, and violates DRY principle
 - **Learning:** Always ask "should this be integrated into existing workflow?" before creating new tools
 
 ### 2. Self-Repairing Systems > External Tools
+
 - **Discovery:** Bootstrap.sh should be self-diagnosing and self-repairing, not rely on external scripts
 - **Pattern:** Modern installation scripts should include automatic retry logic, fallback methods, and diagnostic modes
 - **Implementation:** Use flags like `--diagnose`, `--fix`, `--retry` rather than separate scripts
 
 ### 3. One Way To Do It Principle
+
 - **Violation:** Creating multiple ways to solve bootstrap problems (bootstrap.sh + separate diagnostic tools)
 - **Correct Approach:** Enhance bootstrap.sh with integrated diagnostics and repair capabilities
 - **Result:** Users get one robust tool instead of multiple confusing options
 
 ### 4. Error Handling Architecture Patterns
+
 - **Current:** Basic error handling with cleanup_on_error function
-- **Enhancement Needed:** 
+- **Enhancement Needed:**
   - Progressive fallback strategies
   - Automatic retry with exponential backoff
   - Self-diagnosis mode that explains failures
   - Auto-repair mode that fixes common issues
 
 ### 5. Integration Over Isolation
+
 - **Anti-pattern:** Creating tools in isolation without considering existing ecosystem
 - **Best Practice:** Enhance existing tools (bootstrap.sh, justfile) rather than creating new ones
 - **Benefit:** Reduced cognitive load, unified user experience, easier maintenance
 
 ### 6. Diagnostic Information Should Be Built-In
+
 - **Insight:** Users don't want separate diagnostic tools - they want the main tool to tell them what's wrong
 - **Pattern:** Include verbose/debug modes in main tools
 - **Example:** `bootstrap.sh --diagnose` or `bootstrap.sh --verbose` vs separate `diagnose-environment.sh`
 
 ### 7. User Experience Over Technical Purity
+
 - **Learning:** Even technically correct solutions (separate diagnostic tools) can create poor UX
 - **Priority:** Unified, simple experience over technically elegant separation
 - **Application:** One command that works vs multiple commands that each solve part of the problem
 
 ### 8. Fail Fast vs Fail Smart
+
 - **Current:** Bootstrap fails fast and exits
 - **Enhancement:** Should fail smart - try alternatives, suggest fixes, auto-repair when possible
 - **Implementation:** Fallback chains for tool installation, multiple download mirrors, etc.

@@ -15,7 +15,7 @@ workdir: .
 
 # 🚨 VENDOR DEPENDENCY CONFIGURATION
 allow:
-  depOnAnyVendor: true  # Allow vendor dependencies (set to false for stricter control)
+  depOnAnyVendor: true # Allow vendor dependencies (set to false for stricter control)
 
   # ARCHITECTURAL DECISION: Enable Deep Scanning (STABLE in v1.14.0)
   #
@@ -91,7 +91,6 @@ components:
   test-helpers-domain-validation:
     in: internal/testhelpers/domain/validation/**
 
-
 # 🔒 DEPENDENCY RULES - Enforce Clean Architecture
 deps:
   # CENTRALIZED ERROR MANAGEMENT - Available to ALL components
@@ -99,25 +98,23 @@ deps:
     anyVendorDeps: true
     mayDependOn: []
 
-
-
   domain-entities:
     anyVendorDeps: true
     mayDependOn:
       - domain-values
-      - pkg-errors  # MUST use centralized errors
+      - pkg-errors # MUST use centralized errors
 
   domain-values:
     anyVendorDeps: true
     mayDependOn:
-      - pkg-errors  # MUST use centralized errors
+      - pkg-errors # MUST use centralized errors
 
   domain-repositories:
     anyVendorDeps: true
     mayDependOn:
       - domain-entities
       - domain-values
-      - pkg-errors  # MUST use centralized errors
+      - pkg-errors # MUST use centralized errors
 
   domain-services:
     anyVendorDeps: true
@@ -125,7 +122,7 @@ deps:
       - domain-entities
       - domain-repositories
       - domain-values
-      - pkg-errors  # MUST use centralized errors
+      - pkg-errors # MUST use centralized errors
 
   application-handlers:
     anyVendorDeps: true
@@ -134,21 +131,21 @@ deps:
       - domain-services
       - domain-repositories
       - domain-values
-      - sqlc-generated  # Use SQLC generated types for request/response
-      - pkg-errors  # MUST use centralized errors
+      - sqlc-generated # Use SQLC generated types for request/response
+      - pkg-errors # MUST use centralized errors
 
   # SQLC GENERATED CODE - Type-safe database models and queries
   sqlc-generated:
     anyVendorDeps: true
     mayDependOn:
-      - pkg-errors  # MUST use centralized errors
+      - pkg-errors # MUST use centralized errors
 
   # CONFIGURATION & STARTUP
   config:
     anyVendorDeps: true
     mayDependOn:
-      - domain-values  # Allow config to use domain value objects for validation
-      - pkg-errors    # MUST use centralized errors
+      - domain-values # Allow config to use domain value objects for validation
+      - pkg-errors # MUST use centralized errors
 
   internalinfrastructure:
     anyVendorDeps: true
@@ -156,8 +153,8 @@ deps:
       - domain-entities
       - domain-repositories
       - domain-values
-      - sqlc-generated  # Infrastructure implements and uses SQLC generated code
-      - pkg-errors  # MUST use centralized errors
+      - sqlc-generated # Infrastructure implements and uses SQLC generated code
+      - pkg-errors # MUST use centralized errors
 
   main:
     anyProjectDeps: true
@@ -179,10 +176,9 @@ deps:
     anyProjectDeps: true
     anyVendorDeps: true
 
-
 # 🌍 COMMON COMPONENTS - Available everywhere
 commonComponents:
-  - pkg-errors  # CENTRALIZED ERROR MANAGEMENT - MANDATORY
+  - pkg-errors # CENTRALIZED ERROR MANAGEMENT - MANDATORY
 
 # 🚫 EXCLUSION PATTERNS (glob patterns)
 exclude:
@@ -192,7 +188,7 @@ exclude:
   - "**/*_gen.go"
   - "**/*_templ.go"
   - "**/mock_*.go"
-  - "internal/infrastructure/db/**"  # SQLC generated code
+  - "internal/infrastructure/db/**" # SQLC generated code
 
   # Test data files only (exclude test helpers from directory exclusion)
   - "**/testdata/**"
@@ -265,9 +261,10 @@ exclude:
 #   while others use package entities_test (black-box)
 # - Standardize on black-box testing for consistency where possible
 excludeFiles:
-  - ".*_test\\.go$"         # All test files (_test.go suffix)
+  - ".*_test\\.go$" # All test files (_test.go suffix)
   - "integration_test\\.go$" # Integration test files
   - ".*_integration_test\\.go$" # Integration test variations
+
 
 # 📋 ARCHITECTURE VALIDATION RULES & DECISIONS
 #

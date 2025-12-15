@@ -19,12 +19,12 @@ rules:
     message: "Use explicit column names instead of SELECT *"
     rule: |
       query.sql.contains("SELECT *")
-      
+
   - name: "no-delete-without-where"
     message: "DELETE statements should include WHERE clauses"
     rule: |
       query.sql.contains("DELETE FROM") && !query.sql.contains("WHERE")
-      
+
   - name: "no-drop-table"
     message: "DROP TABLE statements are not allowed"
     rule: |
@@ -35,9 +35,9 @@ sql:
   # === SQLite3 CONFIGURATION ===
   - name: "sqlite"
     engine: "sqlite"
-    queries: 
+    queries:
       - "sql/sqlite/queries"
-    schema: 
+    schema:
       - "sql/sqlite/schema"
     strict_function_checks: true
     strict_order_by: true
@@ -50,7 +50,7 @@ sql:
         out: "internal/infrastructure/db"
         sql_package: "database/sql"
         build_tags: ""
-        
+
         # === CODE GENERATION OPTIONS ===
         emit_json_tags: true
         emit_db_tags: true
@@ -66,22 +66,22 @@ sql:
         emit_enum_valid_method: true
         emit_all_enum_values: true
         emit_sql_as_comment: true
-        
+
         # === NAMING AND STYLE OPTIONS ===
         json_tags_case_style: "camel"
         omit_unused_structs: true
         omit_sqlc_version: false
-        
+
         # === OUTPUT FILE CUSTOMIZATION ===
         output_models_file_name: "models.go"
         output_db_file_name: "db.go"
         output_batch_file_name: "batch.go"
-        
+
         # === TABLE NAME INFLECTION RULES ===
         inflection_exclude_table_names:
           - "migration"
           - "schema_version"
-        
+
         # === TYPE OVERRIDES ===
         overrides:
           - db_type: "TEXT"
@@ -101,7 +101,7 @@ sql:
             go_type: "float64"
           - db_type: "JSON"
             go_type: "json.RawMessage"
-            
+
         # === COLUMN RENAMING RULES ===
         rename:
           id: "ID"

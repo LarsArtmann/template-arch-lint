@@ -27,6 +27,7 @@ Thank you for your interest in contributing to **template-arch-lint**! This proj
 ## 🚀 **Quick Start for Contributors**
 
 ### 1. **Fork & Clone**
+
 ```bash
 # Fork on GitHub, then clone your fork
 git clone https://github.com/yourusername/template-arch-lint.git
@@ -37,6 +38,7 @@ git remote add upstream https://github.com/LarsArtmann/template-arch-lint.git
 ```
 
 ### 2. **Install Development Tools**
+
 ```bash
 # Install all required tools
 just install
@@ -50,6 +52,7 @@ just ci
 ```
 
 ### 3. **Create Feature Branch**
+
 ```bash
 # Create a descriptive branch name
 git checkout -b feature/add-performance-benchmarks
@@ -58,6 +61,7 @@ git checkout -b docs/architecture-decision-records
 ```
 
 ### 4. **Make Your Changes**
+
 ```bash
 # Follow our development workflow
 just format          # Format code
@@ -68,6 +72,7 @@ just ci              # Full validation
 ```
 
 ### 5. **Submit Pull Request**
+
 ```bash
 # Push to your fork
 git push origin feature/your-feature
@@ -85,30 +90,35 @@ git push origin feature/your-feature
 ### 🏆 **High-Impact Contributions**
 
 #### **1. 🏗️ Architecture Patterns**
+
 - **Event Sourcing Templates** - Add `.go-arch-lint.yml` configurations
 - **CQRS Patterns** - Command/Query separation enforcement
 - **Microservices Boundaries** - Service isolation rules
 - **Hexagonal Architecture** - Ports and adapters validation
 
 #### **2. 🔍 Linting Enhancements**
+
 - **New Linters Integration** - Research and add valuable linters
 - **Custom Rules** - Project-specific architectural rules
 - **Performance Optimizations** - Make linting faster
 - **False Positive Reduction** - Improve accuracy
 
 #### **3. 🧪 Testing Infrastructure**
+
 - **Property-Based Testing** - Add QuickCheck-style tests
 - **Mutation Testing** - Add go-mutesting integration
 - **Performance Benchmarks** - CPU, memory, and I/O benchmarks
 - **Integration Test Patterns** - End-to-end testing examples
 
 #### **4. 📚 Documentation & Education**
+
 - **Architecture Decision Records** - Document design decisions
 - **Video Tutorials** - Architecture enforcement walkthroughs
 - **Case Studies** - Real-world implementation examples
 - **Best Practices Guides** - Industry-specific recommendations
 
 #### **5. 🚀 DevOps & Automation**
+
 - **CI/CD Templates** - GitHub Actions, GitLab CI, Jenkins
 - **Docker Optimizations** - Multi-stage builds, security scanning
 - **Deployment Patterns** - Kubernetes, serverless configurations
@@ -117,18 +127,21 @@ git push origin feature/your-feature
 ### 💡 **Medium-Impact Contributions**
 
 #### **Bug Fixes & Improvements**
+
 - Fix linter configuration issues
 - Improve error messages and user experience
 - Optimize performance bottlenecks
 - Enhance cross-platform compatibility
 
 #### **Tool Integrations**
+
 - IDE plugins (VS Code, GoLand, Vim)
 - Pre-commit hook enhancements
 - Git hook automations
 - Build tool integrations
 
 #### **Community & Support**
+
 - Answer questions in Discussions
 - Review pull requests
 - Improve issue templates
@@ -137,18 +150,21 @@ git push origin feature/your-feature
 ### 🛠️ **Beginner-Friendly Contributions**
 
 #### **Documentation**
+
 - Fix typos and grammar
 - Improve code examples
 - Add missing documentation
 - Translate documentation
 
 #### **Examples & Demos**
+
 - Add more example projects
 - Create demo applications
 - Improve existing examples
 - Add edge case demonstrations
 
 #### **Testing**
+
 - Add test cases for edge scenarios
 - Improve test coverage
 - Add integration tests
@@ -159,6 +175,7 @@ git push origin feature/your-feature
 ## 🛠️ **Development Setup**
 
 ### **Prerequisites**
+
 ```bash
 # Required tools (auto-installed via `just install`)
 - Go 1.21+ (https://golang.org/dl/)
@@ -173,6 +190,7 @@ git push origin feature/your-feature
 ```
 
 ### **Environment Setup**
+
 ```bash
 # 1. Clone and setup
 git clone https://github.com/yourusername/template-arch-lint.git
@@ -190,6 +208,7 @@ just run
 ```
 
 ### **Development Workflow Commands**
+
 ```bash
 # 📝 Code Quality
 just format          # Format code (gofumpt + goimports)
@@ -228,6 +247,7 @@ just update-tools    # Update development tools
 ### **🏗️ Architecture Standards**
 
 #### **Clean Architecture Principles**
+
 ```go
 // ✅ GOOD: Domain entities with no infrastructure dependencies
 package entities
@@ -255,6 +275,7 @@ import "database/sql"  // Violates Clean Architecture
 ```
 
 #### **Dependency Inversion**
+
 ```go
 // ✅ GOOD: Repository interface in domain
 package repositories
@@ -279,12 +300,13 @@ func (r *sqlUserRepository) Save(ctx context.Context, user *entities.User) error
 ### **🔒 Type Safety Standards**
 
 #### **Forbidden Patterns**
+
 ```go
 // ❌ BANNED: interface{} erases type safety
 var data interface{}
 json.Unmarshal(body, &data)
 
-// ❌ BANNED: any erases type safety  
+// ❌ BANNED: any erases type safety
 func Process(input any) any {
     return input
 }
@@ -312,6 +334,7 @@ func ProcessUser(req UserRequest) (*User, error) {
 ### **🛡️ Error Handling Standards**
 
 #### **Error Wrapping & Context**
+
 ```go
 // ✅ GOOD: Proper error wrapping with context
 func (s *UserService) CreateUser(ctx context.Context, email string) (*User, error) {
@@ -345,6 +368,7 @@ func (s *UserService) CreateUser(ctx context.Context, email string) (*User, erro
 ### **📊 Complexity Standards**
 
 #### **Function Size Limits**
+
 ```go
 // ✅ GOOD: Function under 50 lines, single responsibility
 func (s *UserService) ValidateAndCreateUser(ctx context.Context, req CreateUserRequest) (*User, error) {
@@ -373,6 +397,7 @@ func (s *UserService) CreateUser(ctx context.Context, req CreateUserRequest) (*U
 ```
 
 #### **Cyclomatic Complexity Limits**
+
 ```go
 // ✅ GOOD: Complexity under 10, uses table-driven patterns
 func ValidateEmail(email string) error {
@@ -413,6 +438,7 @@ func ValidateEmail(email string) error {
 ### **📝 Documentation Standards**
 
 #### **Package Documentation**
+
 ```go
 // ✅ GOOD: Comprehensive package documentation
 // Package entities contains the core business entities for the user domain.
@@ -435,6 +461,7 @@ package entities
 ```
 
 #### **Function Documentation**
+
 ```go
 // ✅ GOOD: Complete function documentation
 // CreateUser creates a new user entity with validation and business rules.
@@ -477,6 +504,7 @@ func NewUser(id UserID, email string, name string) (*User, error) {
 ### **🎯 Testing Philosophy**
 
 #### **Test Pyramid**
+
 ```
            ╭─────────────╮
           ╱  E2E Tests    ╲     ← Few, expensive, realistic
@@ -490,6 +518,7 @@ func NewUser(id UserID, email string, name string) (*User, error) {
 ```
 
 #### **Testing Standards**
+
 - **70% Unit Tests**: Fast, isolated, cover business logic
 - **20% Integration Tests**: Component interactions, database operations
 - **10% End-to-End Tests**: Full user workflows
@@ -497,6 +526,7 @@ func NewUser(id UserID, email string, name string) (*User, error) {
 ### **🔧 Unit Testing Patterns**
 
 #### **Table-Driven Tests**
+
 ```go
 func TestUserValidation(t *testing.T) {
     tests := []struct {
@@ -540,6 +570,7 @@ func TestUserValidation(t *testing.T) {
 ```
 
 #### **BDD-Style Tests (Ginkgo/Gomega)**
+
 ```go
 var _ = Describe("User Entity", func() {
     Describe("Creating a new user", func() {
@@ -582,6 +613,7 @@ var _ = Describe("User Entity", func() {
 ### **🏗️ Integration Testing**
 
 #### **Repository Testing**
+
 ```go
 func TestSQLUserRepository(t *testing.T) {
     // Setup in-memory database for tests
@@ -609,6 +641,7 @@ func TestSQLUserRepository(t *testing.T) {
 ```
 
 #### **HTTP Handler Testing**
+
 ```go
 func TestUserHandler_CreateUser(t *testing.T) {
     // Setup
@@ -641,6 +674,7 @@ func TestUserHandler_CreateUser(t *testing.T) {
 ### **🎭 Test Helpers & Builders**
 
 #### **Test Data Builders**
+
 ```go
 // Builder pattern for test data
 type UserBuilder struct {
@@ -691,12 +725,14 @@ func TestUserService_CreateUser(t *testing.T) {
 ### **📋 Documentation Types**
 
 #### **1. API Documentation**
+
 - Use GoDoc format for all public APIs
 - Include examples for complex functions
 - Document error conditions and return values
 - Add usage examples for packages
 
 #### **2. Architecture Decision Records (ADRs)**
+
 ```markdown
 # ADR-001: Use Clean Architecture Pattern
 
@@ -717,6 +753,7 @@ We will use Clean Architecture with Domain-Driven Design principles.
 ```
 
 #### **3. Code Examples**
+
 - Every package should have working examples
 - Examples should demonstrate real use cases
 - Include both simple and complex scenarios
@@ -725,6 +762,7 @@ We will use Clean Architecture with Domain-Driven Design principles.
 ### **📝 Writing Guidelines**
 
 #### **Documentation Style**
+
 - Use clear, concise language
 - Write for developers at different experience levels
 - Include code examples for complex concepts
@@ -732,6 +770,7 @@ We will use Clean Architecture with Domain-Driven Design principles.
 - Add diagrams for architectural concepts
 
 #### **Code Comments**
+
 ```go
 // ✅ GOOD: Explains the "why" not just the "what"
 // validateBusinessRules ensures user data meets domain requirements.
@@ -753,6 +792,7 @@ func (u *User) validateBusinessRules() error {
 ## 🔄 **Pull Request Process**
 
 ### **📋 Pre-PR Checklist**
+
 ```bash
 # Before submitting your PR, ensure:
 □ Code follows all coding standards
@@ -765,6 +805,7 @@ func (u *User) validateBusinessRules() error {
 ```
 
 ### **📝 PR Template**
+
 When creating a PR, please use this template:
 
 ```markdown
@@ -810,6 +851,7 @@ Closes #456
 ### **🔍 Review Process**
 
 #### **Review Criteria**
+
 1. **Architecture Compliance**
    - Follows Clean Architecture principles
    - Respects domain boundaries
@@ -831,11 +873,13 @@ Closes #456
    - Integration tests verify component interactions
 
 #### **Review Timeline**
+
 - **Initial Response**: Within 24 hours
 - **Full Review**: Within 72 hours
 - **Follow-up**: Within 24 hours of updates
 
 ### **🚀 Merge Requirements**
+
 - ✅ All CI checks pass
 - ✅ At least one approving review from maintainer
 - ✅ All conversations resolved
@@ -849,6 +893,7 @@ Closes #456
 ### **🎯 Clean Architecture Principles**
 
 #### **Dependency Rule**
+
 ```
 Outer layers can depend on inner layers, never the reverse:
 
@@ -858,6 +903,7 @@ Infrastructure → Application → Domain
 #### **Layer Responsibilities**
 
 **Domain Layer (Core)**
+
 - Business entities and value objects
 - Domain services and business logic
 - Repository interfaces (contracts)
@@ -865,12 +911,14 @@ Infrastructure → Application → Domain
 - **NO** dependencies on infrastructure
 
 **Application Layer (Use Cases)**
+
 - Application services (orchestration)
 - Use case implementations
 - DTO mappings and validation
 - **CAN** depend on domain layer
 
 **Infrastructure Layer (Adapters)**
+
 - Repository implementations
 - External service integrations
 - Database access and persistence
@@ -879,6 +927,7 @@ Infrastructure → Application → Domain
 ### **🔧 Component Organization**
 
 #### **Package Structure**
+
 ```
 internal/
 ├── domain/                 # Core business logic
@@ -898,6 +947,7 @@ internal/
 ```
 
 #### **Naming Conventions**
+
 - **Packages**: lowercase, single word when possible
 - **Files**: lowercase with underscores (`user_service.go`)
 - **Types**: PascalCase (`UserService`)
@@ -912,6 +962,7 @@ internal/
 ### **🏆 Contributor Recognition**
 
 #### **Contributor Levels**
+
 1. **First-Time Contributor** 🌟
    - GitHub badge on profile
    - Welcome package with stickers
@@ -935,12 +986,14 @@ internal/
 ### **🎁 Rewards Program**
 
 #### **Contribution Types & Rewards**
+
 - **Bug Fixes**: GitHub sponsor shoutout + stickers
 - **New Features**: T-shirt + LinkedIn recommendation
 - **Documentation**: Certificate of contribution
 - **Major Contributions**: Hoodie + conference ticket sponsorship
 
 #### **Special Recognition**
+
 - **Monthly Contributor Award**: $100 gift card
 - **Annual Contributor Award**: Conference speaking slot + travel sponsorship
 - **Lifetime Achievement**: Custom trophy + permanent recognition
@@ -948,12 +1001,14 @@ internal/
 ### **📢 Community Involvement**
 
 #### **Communication Channels**
+
 - **GitHub Discussions**: Design discussions and Q&A
 - **Discord Server**: Real-time contributor chat
 - **Monthly Calls**: Contributor sync meetings
 - **Annual Summit**: In-person contributor meetup
 
 #### **Learning Opportunities**
+
 - **Mentorship Program**: Pair new contributors with experienced ones
 - **Workshop Sessions**: Architecture and Go best practices
 - **Code Review Sessions**: Learn from reviewing others' code
@@ -966,12 +1021,14 @@ internal/
 ### **🤔 Questions & Support**
 
 #### **Where to Ask**
+
 1. **GitHub Discussions**: Design questions, feature discussions
 2. **GitHub Issues**: Bug reports, feature requests
 3. **Discord #contributors**: Real-time help and chat
 4. **Email**: template-arch-lint@lars.software for private matters
 
 #### **Response Times**
+
 - **Discord**: Usually within a few hours during business hours
 - **GitHub Issues**: Within 24 hours for bugs, 72 hours for features
 - **Email**: Within 48 hours
@@ -979,16 +1036,19 @@ internal/
 ### **📚 Learning Resources**
 
 #### **Architecture & Design**
+
 - [Clean Architecture by Robert Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [Domain-Driven Design Quickly](https://www.infoq.com/minibooks/domain-driven-design-quickly/)
 - [Go Clean Architecture Examples](https://github.com/bxcodec/go-clean-arch)
 
 #### **Go Best Practices**
+
 - [Effective Go](https://golang.org/doc/effective_go.html)
 - [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
 - [Uber Go Style Guide](https://github.com/uber-go/guide/blob/master/style.md)
 
 #### **Testing in Go**
+
 - [Learn Go with Tests](https://quii.gitbook.io/learn-go-with-tests/)
 - [Advanced Go Testing](https://about.sourcegraph.com/go/advanced-testing-in-go)
 - [Table Driven Tests](https://github.com/golang/go/wiki/TableDrivenTests)
@@ -1005,4 +1065,4 @@ Together, we're building a future where architectural excellence and code qualit
 
 **Made with ❤️ by the Go community**
 
-*Last updated: $(date)*
+_Last updated: $(date)_

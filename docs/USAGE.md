@@ -7,11 +7,13 @@ This guide provides comprehensive instructions for using the Template Architectu
 ### Prerequisites
 
 **Required Tools:**
+
 - Go 1.21+ (tested with 1.21-1.24)
 - Just command runner (`brew install just` or `cargo install just`)
 - Git with recent version
 
 **Recommended Tools:**
+
 - Docker (for containerized development)
 - VS Code with Go extension
 - golangci-lint v2.0+
@@ -20,22 +22,26 @@ This guide provides comprehensive instructions for using the Template Architectu
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/LarsArtmann/template-arch-lint.git
    cd template-arch-lint
    ```
 
 2. **Install dependencies and tools:**
+
    ```bash
    just install
    ```
 
 3. **Build the project:**
+
    ```bash
    just build
    ```
 
 4. **Verify installation:**
+
    ```bash
    just test
    just lint
@@ -62,6 +68,7 @@ cp sqlc.yaml /path/to/your/project/  # if using sqlc
 ```
 
 **Key files to copy:**
+
 - `.go-arch-lint.yml` - Architecture boundary enforcement
 - `.golangci.yml` - 32+ linters with maximum strictness
 - `justfile` - Development workflow automation
@@ -74,6 +81,7 @@ Fork or use as template for new Go projects:
 
 1. **Use GitHub's template feature** (recommended)
 2. **Or fork the repository:**
+
    ```bash
    git clone https://github.com/LarsArtmann/template-arch-lint.git my-new-project
    cd my-new-project
@@ -82,6 +90,7 @@ Fork or use as template for new Go projects:
    ```
 
 3. **Customize for your project:**
+
    ```bash
    # Update module name in go.mod
    go mod edit -module github.com/yourname/your-project
@@ -103,7 +112,7 @@ just clean              # Clean build artifacts
 
 # 🧪 Testing
 just test               # Run all tests
-just test-unit          # Unit tests only  
+just test-unit          # Unit tests only
 just test-integration   # Integration tests only
 just test-race          # Race condition detection
 just coverage 80        # Coverage analysis with 80% threshold
@@ -140,7 +149,7 @@ just lint-arch
 
 ```bash
 # 🗄️ Database (SQLite with SQLC)
-just db-migrate         # Run database migrations  
+just db-migrate         # Run database migrations
 just db-reset           # Reset database
 just db-seed            # Populate with test data
 just sqlc-generate      # Generate type-safe SQL code
@@ -163,6 +172,7 @@ domain:
 ```
 
 **Key principles enforced:**
+
 - Domain layer is pure (no external dependencies)
 - Infrastructure depends on domain contracts
 - Value objects are immutable
@@ -198,7 +208,7 @@ internal/
 │
 ├── domain/                   # Domain layer (pure business logic)
 │   ├── entities/            # Business entities
-│   ├── services/            # Domain services  
+│   ├── services/            # Domain services
 │   ├── values/              # Value objects
 │   └── repositories/        # Repository interfaces
 │
@@ -212,6 +222,7 @@ internal/
 ### Technology Stack
 
 **Backend:**
+
 - **Go 1.21+** - Core language
 - **Gin** - HTTP web framework
 - **templ** - Type-safe HTML templates
@@ -220,6 +231,7 @@ internal/
 - **SQLC** - Type-safe SQL generation
 
 **Quality & Tooling:**
+
 - **golangci-lint v2** - Code quality (32+ linters)
 - **go-arch-lint** - Architecture boundaries
 - **Ginkgo/Gomega** - BDD testing
@@ -243,6 +255,7 @@ The project includes comprehensive CI/CD:
 ```
 
 **Features:**
+
 - ✅ Multi-version Go testing (1.21-1.24)
 - ✅ Architecture boundary validation
 - ✅ Code quality enforcement
@@ -255,13 +268,14 @@ The project includes comprehensive CI/CD:
 ### Quality Gates
 
 **Pre-commit hooks:**
+
 ```bash
 # Install pre-commit hooks
 pre-commit install
 
 # Runs automatically on git commit:
 # ✅ golangci-lint
-# ✅ go-arch-lint  
+# ✅ go-arch-lint
 # ✅ go fmt/goimports
 # ✅ templ formatting
 ```
@@ -291,9 +305,9 @@ just bench-baseline     # Create baseline
 just bench-compare      # Compare with baseline
 just bench-report       # Generate analysis report
 
-# 🎯 Specialized benchmarks  
+# 🎯 Specialized benchmarks
 just bench-cpu          # CPU performance
-just bench-memory       # Memory allocation  
+just bench-memory       # Memory allocation
 just bench-stress       # Stress testing
 just bench-profile      # With pprof integration
 ```
@@ -308,7 +322,7 @@ export APP_ENVIRONMENT=development
 export APP_SERVER_PORT=8080
 export APP_LOGGING_LEVEL=debug
 
-# Production  
+# Production
 export APP_ENVIRONMENT=production
 export APP_SERVER_PORT=80
 export APP_LOGGING_LEVEL=info
@@ -338,7 +352,7 @@ just dev                # Auto-reload on template changes
 # Template structure:
 templates/
 ├── components/         # Reusable components
-├── pages/             # Full page templates  
+├── pages/             # Full page templates
 └── layouts/           # Layout templates
 ```
 
@@ -363,11 +377,12 @@ The project demonstrates modern HTMX patterns:
 ### Linting Violations
 
 **Architecture violations:**
+
 ```bash
 # ❌ Error: domain cannot depend on infrastructure
 # Solution: Use dependency inversion - define interfaces in domain
 
-# ❌ Error: interface{} usage detected  
+# ❌ Error: interface{} usage detected
 # Solution: Use concrete types or generics
 
 # ❌ Error: Function too long (>50 lines)
@@ -375,12 +390,13 @@ The project demonstrates modern HTMX patterns:
 ```
 
 **Performance issues:**
+
 ```bash
 # 📊 Memory leaks detected
 just profile-heap       # Capture heap profile
 just bench-memory       # Check allocation patterns
 
-# 🖥️ CPU bottlenecks  
+# 🖥️ CPU bottlenecks
 just profile-cpu        # Capture CPU profile
 just bench-cpu          # Benchmark CPU-intensive operations
 ```
@@ -388,11 +404,12 @@ just bench-cpu          # Benchmark CPU-intensive operations
 ### Development Issues
 
 **Build problems:**
+
 ```bash
 # Dependency issues
 just clean && go mod download && just build
 
-# Template generation issues  
+# Template generation issues
 templ generate --watch
 
 # Database issues
@@ -420,6 +437,7 @@ just lint-strict                 # Maximum strictness mode
 ### Testing Patterns
 
 The project demonstrates:
+
 - **BDD testing** with Ginkgo/Gomega
 - **Table-driven tests** for value objects
 - **Integration tests** with real SQLite
@@ -429,18 +447,21 @@ The project demonstrates:
 ## 🎯 Next Steps
 
 ### For Learning
+
 1. Run `just lint` and fix violations to understand code quality rules
 2. Study the Clean Architecture implementation
 3. Experiment with HTMX patterns in templates
 4. Use performance profiling to optimize your code
 
 ### For Production Use
+
 1. Copy linting configurations to your existing projects
 2. Adapt the CI/CD pipeline to your needs
 3. Customize the architecture layers for your domain
 4. Set up monitoring and alerting based on the performance endpoints
 
-### For Contribution  
+### For Contribution
+
 1. Check `CONTRIBUTING.md` for development guidelines
 2. Run the full test suite: `just ci`
 3. Follow the established patterns and linting rules

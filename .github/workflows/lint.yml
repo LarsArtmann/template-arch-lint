@@ -6,9 +6,9 @@ name: 🔍 Code Quality & Architecture Validation
 
 on:
   push:
-    branches: [ master, main, develop ]
+    branches: [master, main, develop]
   pull_request:
-    branches: [ master, main, develop ]
+    branches: [master, main, develop]
   workflow_dispatch: # Allow manual triggering
 
 # Cancel in-progress runs on new pushes to same branch
@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # Tool versions - matches justfile configuration  
+  # Tool versions - matches justfile configuration
   GOLANGCI_VERSION: "v1.62.0" # Updated to v1.x for compatibility
   GO_ARCH_LINT_VERSION: "v1.12.0"
   GODEBUG: "gotypesalias=1" # Required for Go 1.23 generic type aliases
@@ -32,25 +32,25 @@ jobs:
     timeout-minutes: 5
 
     steps:
-    - name: 📥 Checkout Code
-      uses: actions/checkout@v4
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
 
-    - name: 🔍 Validate Workflow Files
-      run: |
-        echo "Validating GitHub workflows syntax..."
-        for file in .github/workflows/*.yml; do
-          echo "✓ Checking $file"
-          # Basic YAML syntax validation
-          python3 -c "import yaml; yaml.safe_load(open('$file'))"
-        done
+      - name: 🔍 Validate Workflow Files
+        run: |
+          echo "Validating GitHub workflows syntax..."
+          for file in .github/workflows/*.yml; do
+            echo "✓ Checking $file"
+            # Basic YAML syntax validation
+            python3 -c "import yaml; yaml.safe_load(open('$file'))"
+          done
 
-    - name: 📁 Check Critical Files
-      run: |
-        echo "Verifying required configuration files exist..."
-        test -f .golangci.yml && echo "✓ .golangci.yml found" || exit 1
-        test -f .go-arch-lint.yml && echo "✓ .go-arch-lint.yml found" || exit 1
-        test -f justfile && echo "✓ justfile found" || exit 1
-        test -f go.mod && echo "✓ go.mod found" || exit 1
+      - name: 📁 Check Critical Files
+        run: |
+          echo "Verifying required configuration files exist..."
+          test -f .golangci.yml && echo "✓ .golangci.yml found" || exit 1
+          test -f .go-arch-lint.yml && echo "✓ .go-arch-lint.yml found" || exit 1
+          test -f justfile && echo "✓ justfile found" || exit 1
+          test -f go.mod && echo "✓ go.mod found" || exit 1
 
   # ==============================================
   # Comprehensive linting across Go versions
@@ -64,112 +64,112 @@ jobs:
     strategy:
       fail-fast: false # Continue testing other versions even if one fails
       matrix:
-        go-version: ['1.21', '1.22', '1.23', '1.24']
+        go-version: ["1.21", "1.22", "1.23", "1.24"]
 
     steps:
-    - name: 📥 Checkout Code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0 # Full history for better analysis
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for better analysis
 
-    - name: 🏗️ Setup Go ${{ matrix.go-version }}
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ matrix.go-version }}
-        cache: true
-        cache-dependency-path: |
-          go.sum
-          go.mod
+      - name: 🏗️ Setup Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache: true
+          cache-dependency-path: |
+            go.sum
+            go.mod
 
-    - name: 📦 Verify Go Installation
-      run: |
-        go version
-        go env GOVERSION
-        go env GOOS
-        go env GOARCH
+      - name: 📦 Verify Go Installation
+        run: |
+          go version
+          go env GOVERSION
+          go env GOOS
+          go env GOARCH
 
-    - name: 📋 Download Dependencies
-      run: |
-        go mod download
-        go mod verify
+      - name: 📋 Download Dependencies
+        run: |
+          go mod download
+          go mod verify
 
-    - name: 🔧 Install Just Command Runner
-      uses: extractions/setup-just@v2
-      with:
-        just-version: '1.36.0'
+      - name: 🔧 Install Just Command Runner
+        uses: extractions/setup-just@v2
+        with:
+          just-version: "1.36.0"
 
-    - name: 📦 Install Linting Tools
-      run: |
-        echo "Installing golangci-lint ${GOLANGCI_VERSION}..."
-        go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_VERSION}
+      - name: 📦 Install Linting Tools
+        run: |
+          echo "Installing golangci-lint ${GOLANGCI_VERSION}..."
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_VERSION}
 
-        echo "Installing go-arch-lint ${GO_ARCH_LINT_VERSION}..."
-        go install github.com/fe3dback/go-arch-lint@${GO_ARCH_LINT_VERSION}
+          echo "Installing go-arch-lint ${GO_ARCH_LINT_VERSION}..."
+          go install github.com/fe3dback/go-arch-lint@${GO_ARCH_LINT_VERSION}
 
-        echo "Installing additional tools..."
-        go install golang.org/x/tools/cmd/goimports@latest
-        go install github.com/a-h/templ/cmd/templ@latest
-        
-        echo "Installing NilAway (Uber's nil panic prevention)..."
-        go install go.uber.org/nilaway/cmd/nilaway@latest
-        
-        echo "Installing go-licenses for license compliance..."
-        go install github.com/google/go-licenses@latest
+          echo "Installing additional tools..."
+          go install golang.org/x/tools/cmd/goimports@latest
+          go install github.com/a-h/templ/cmd/templ@latest
 
-        # Verify installations
-        golangci-lint version
-        go-arch-lint version
-        nilaway --version || echo "NilAway installed (no version flag)"
-        just --version
+          echo "Installing NilAway (Uber's nil panic prevention)..."
+          go install go.uber.org/nilaway/cmd/nilaway@latest
 
-    - name: 📁 Filename Verification
-      run: |
-        echo "🔍 Checking for problematic filenames..."
-        just lint-files
+          echo "Installing go-licenses for license compliance..."
+          go install github.com/google/go-licenses@latest
 
-    - name: 🏗️ Architecture Validation
-      run: |
-        echo "🔍 Validating architectural boundaries..."
-        just lint-arch
+          # Verify installations
+          golangci-lint version
+          go-arch-lint version
+          nilaway --version || echo "NilAway installed (no version flag)"
+          just --version
 
-    - name: 📝 Code Quality Analysis  
-      run: |
-        echo "🔍 Running comprehensive code quality checks..."
-        just lint-code
-        
-    - name: 🚫 NilAway Analysis
-      run: |
-        echo "🚫 Running Uber's NilAway for nil panic detection..."
-        just lint-nilaway || echo "⚠️ NilAway found potential issues (review recommended)"
-        
-    - name: ⚖️ License Compliance Check
-      run: |
-        echo "⚖️ Checking license compliance..."
-        just lint-licenses
+      - name: 📁 Filename Verification
+        run: |
+          echo "🔍 Checking for problematic filenames..."
+          just lint-files
 
-    - name: 🔧 Template Generation
-      run: |
-        echo "🔍 Generating templates to verify they compile..."
-        just templ
+      - name: 🏗️ Architecture Validation
+        run: |
+          echo "🔍 Validating architectural boundaries..."
+          just lint-arch
 
-    - name: 🚀 Build Verification
-      run: |
-        echo "🔍 Verifying project builds successfully..."
-        go build ./...
+      - name: 📝 Code Quality Analysis
+        run: |
+          echo "🔍 Running comprehensive code quality checks..."
+          just lint-code
 
-    - name: 📊 Generate Linting Reports
-      if: matrix.go-version == '1.24' # Only generate reports on latest version
-      run: |
-        echo "📊 Generating detailed reports..."
-        just report
+      - name: 🚫 NilAway Analysis
+        run: |
+          echo "🚫 Running Uber's NilAway for nil panic detection..."
+          just lint-nilaway || echo "⚠️ NilAway found potential issues (review recommended)"
 
-    - name: 📤 Upload Linting Reports
-      if: matrix.go-version == '1.24'
-      uses: actions/upload-artifact@v4
-      with:
-        name: lint-reports-${{ github.run_number }}
-        path: reports/
-        retention-days: 30
+      - name: ⚖️ License Compliance Check
+        run: |
+          echo "⚖️ Checking license compliance..."
+          just lint-licenses
+
+      - name: 🔧 Template Generation
+        run: |
+          echo "🔍 Generating templates to verify they compile..."
+          just templ
+
+      - name: 🚀 Build Verification
+        run: |
+          echo "🔍 Verifying project builds successfully..."
+          go build ./...
+
+      - name: 📊 Generate Linting Reports
+        if: matrix.go-version == '1.24' # Only generate reports on latest version
+        run: |
+          echo "📊 Generating detailed reports..."
+          just report
+
+      - name: 📤 Upload Linting Reports
+        if: matrix.go-version == '1.24'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-reports-${{ github.run_number }}
+          path: reports/
+          retention-days: 30
 
   # ==============================================
   # Security-focused linting
@@ -181,34 +181,34 @@ jobs:
     timeout-minutes: 10
 
     steps:
-    - name: 📥 Checkout Code
-      uses: actions/checkout@v4
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
 
-    - name: 🏗️ Setup Go 1.24
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24'
-        cache: true
-        cache-dependency-path: go.sum
+      - name: 🏗️ Setup Go 1.24
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache: true
+          cache-dependency-path: go.sum
 
-    - name: 🔧 Install Just and Tools
-      run: |
-        # Install just
-        curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
+      - name: 🔧 Install Just and Tools
+        run: |
+          # Install just
+          curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
 
-        # Install linting tools (updated for compatibility)
-        go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_VERSION}
+          # Install linting tools (updated for compatibility)
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_VERSION}
 
-    - name: 🔒 Security Linting
-      run: |
-        echo "🔒 Running security-focused analysis..."
-        just lint-security
+      - name: 🔒 Security Linting
+        run: |
+          echo "🔒 Running security-focused analysis..."
+          just lint-security
 
-    - name: 🛡️ Go Vulnerability Check
-      run: |
-        echo "🛡️ Checking for known vulnerabilities..."
-        go install golang.org/x/vuln/cmd/govulncheck@latest
-        govulncheck ./...
+      - name: 🛡️ Go Vulnerability Check
+        run: |
+          echo "🛡️ Checking for known vulnerabilities..."
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
 
   # ==============================================
   # Summary job that requires all linting to pass
@@ -220,12 +220,12 @@ jobs:
     timeout-minutes: 2
 
     steps:
-    - name: 🎉 All Linting Passed
-      run: |
-        echo "🎉 All linting checks completed successfully!"
-        echo "✅ Pre-flight checks passed"
-        echo "✅ Code quality validation passed across all Go versions"
-        echo "✅ Architecture boundaries validated"
-        echo "✅ Security analysis completed"
-        echo ""
-        echo "🚀 Code is ready for deployment!"
+      - name: 🎉 All Linting Passed
+        run: |
+          echo "🎉 All linting checks completed successfully!"
+          echo "✅ Pre-flight checks passed"
+          echo "✅ Code quality validation passed across all Go versions"
+          echo "✅ Architecture boundaries validated"
+          echo "✅ Security analysis completed"
+          echo ""
+          echo "🚀 Code is ready for deployment!"

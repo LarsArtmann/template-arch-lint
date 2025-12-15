@@ -28,7 +28,7 @@ This prompt systematically refactors Go applications following Domain-Driven Des
 
 2. Create a Pareto Analysis (80/20 Rule):
    - Identify the 1% of tasks that deliver 51% of value
-   - Identify the 4% of tasks that deliver 64% of value  
+   - Identify the 4% of tasks that deliver 64% of value
    - Identify the 20% of tasks that deliver 80% of value
    - Sort ALL tasks by (Impact × Customer Value) / Effort
 
@@ -46,20 +46,20 @@ This prompt systematically refactors Go applications following Domain-Driven Des
 
 5. Systematic Execution with Validation:
    - Fix critical compilation errors first (ghost systems)
-   - Fix failing tests early to enable quality validation  
+   - Fix failing tests early to enable quality validation
    - Make incremental commits after each self-contained change
    - Validate compilation after each major change
    - Use structured logging (charmbracelet/log) over fmt.Printf
 
 6. Architecture Documentation:
    - Create current architecture mermaid diagram
-   - Create improved architecture vision diagram  
+   - Create improved architecture vision diagram
    - Document architectural decisions and trade-offs
    - Generate learnings and improvement recommendations
 
 CRITICAL REQUIREMENTS:
 - Always read existing interfaces before implementing new ones
-- Understand value object APIs (.String() methods, validation patterns)  
+- Understand value object APIs (.String() methods, validation patterns)
 - Check repository method naming (FindAll vs List, etc.)
 - Test compilation frequently during refactoring
 - Run formatters/linters before committing
@@ -73,28 +73,32 @@ Execute systematically until 80% of architectural value is delivered!
 ## 🏗️ **IMPLEMENTATION CHECKLIST**
 
 ### **Phase 1: Analysis & Planning (20% effort → 30% value)**
+
 - [ ] **Brutal honesty assessment** of current architectural state
-- [ ] **File analysis** by size, complexity, SRP violations  
+- [ ] **File analysis** by size, complexity, SRP violations
 - [ ] **Test failure analysis** - understand why tests fail
 - [ ] **Linting violation inventory** - forbidigo, file size, complexity
 - [ ] **Pareto analysis creation** - identify high-impact changes
 - [ ] **Comprehensive execution plan** - 30-100min + 12min breakdown
 
 ### **Phase 2: Foundation Fixes (10% effort → 40% value)**
+
 - [ ] **Fix ghost systems** - compilation errors, broken integrations
-- [ ] **Type safety restoration** - consistent error handling  
+- [ ] **Type safety restoration** - consistent error handling
 - [ ] **Test suite stabilization** - fix failing tests first
 - [ ] **Linting compliance** - eliminate violations blocking quality gates
 
-### **Phase 3: Service Extraction (30% effort → 20% value)**  
+### **Phase 3: Service Extraction (30% effort → 20% value)**
+
 - [ ] **CQRS service separation** - extract query/command services
 - [ ] **Value object integration** - replace primitive obsession
 - [ ] **Repository interface cleanup** - standardize method naming
 - [ ] **Domain modeling improvements** - rich entities, proper boundaries
 
 ### **Phase 4: Infrastructure & Polish (40% effort → 10% value)**
+
 - [ ] **CLI framework implementation** - cobra for professional interface
-- [ ] **Caching layer** - performance optimization  
+- [ ] **Caching layer** - performance optimization
 - [ ] **Observability** - metrics, tracing, comprehensive logging
 - [ ] **Documentation & examples** - complete architectural guidance
 
@@ -103,20 +107,23 @@ Execute systematically until 80% of architectural value is delivered!
 ## 🎯 **EXPECTED OUTCOMES**
 
 ### **Architectural Quality**
+
 - **100% test pass rate** - stable foundation for development
-- **Zero linting violations** - professional code quality  
+- **Zero linting violations** - professional code quality
 - **Clean service boundaries** - CQRS separation, focused responsibilities
 - **Type safety throughout** - value objects, Result[T] patterns
 - **Professional infrastructure** - CLI, logging, configuration management
 
-### **Developer Experience**  
+### **Developer Experience**
+
 - **Faster feature development** - clean architecture enables rapid iteration
 - **Better debugging** - structured logging and proper error handling
-- **Easier testing** - focused services with clear responsibilities  
+- **Easier testing** - focused services with clear responsibilities
 - **Reduced cognitive load** - consistent patterns and abstractions
 
 ### **Business Value**
-- **Faster time-to-market** - reliable development workflow  
+
+- **Faster time-to-market** - reliable development workflow
 - **Lower maintenance costs** - clean architecture reduces technical debt
 - **Higher code quality** - automated validation prevents regression
 - **Better team productivity** - clear patterns and documentation
@@ -126,7 +133,7 @@ Execute systematically until 80% of architectural value is delivered!
 ## 🚨 **COMMON PITFALLS TO AVOID**
 
 1. **Ghost System Creation**: Always read existing interfaces before implementing
-2. **Value Object Confusion**: Understand .String() methods and type conversions  
+2. **Value Object Confusion**: Understand .String() methods and type conversions
 3. **Repository Method Assumptions**: Verify actual method names (FindAll vs List)
 4. **Large Change Commits**: Make incremental commits for easier debugging
 5. **Skipping Validation**: Test compilation after each significant change
@@ -137,15 +144,17 @@ Execute systematically until 80% of architectural value is delivered!
 ## 🔧 **TECHNICAL PATTERNS**
 
 ### **Error Handling Standardization**
+
 ```go
 // BEFORE: Mixed error types
 return fmt.Errorf("validation failed")
 
-// AFTER: Domain errors  
+// AFTER: Domain errors
 return errors.NewValidationError("field", "validation failed")
 ```
 
 ### **Value Object Integration**
+
 ```go
 // BEFORE: Primitive obsession
 func CreateUser(email string, name string) error
@@ -154,7 +163,8 @@ func CreateUser(email string, name string) error
 func CreateUser(email values.Email, name values.UserName) error
 ```
 
-### **CQRS Service Separation**  
+### **CQRS Service Separation**
+
 ```go
 // BEFORE: Mixed responsibilities
 type UserService struct { /* 500+ lines */ }
@@ -165,11 +175,12 @@ type UserCommandService interface { /* Write operations */ }
 ```
 
 ### **Functional Patterns with samber/lo**
+
 ```go
-// BEFORE: Imperative loops  
+// BEFORE: Imperative loops
 var emails []string
 for _, user := range users {
-    emails = append(emails, user.Email)  
+    emails = append(emails, user.Email)
 }
 
 // AFTER: Functional transformation

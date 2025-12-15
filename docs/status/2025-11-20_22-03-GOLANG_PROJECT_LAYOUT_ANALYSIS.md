@@ -1,9 +1,10 @@
 # GOLANG PROJECT LAYOUT ANALYSIS REPORT
+
 **Date:** 2025-11-20 22:03  
 **Updated:** 2025-11-20 (Go 1.25 Integration)  
 **Analysis Type:** Go Project Layout Standard Compliance + Modern Go Capabilities  
 **Repository:** template-arch-lint (Architecture Linting Template)  
-**Go Version Coverage:** 1.23, 1.24, 1.25 (Latest Features)  
+**Go Version Coverage:** 1.23, 1.24, 1.25 (Latest Features)
 
 ## 🎯 Executive Summary
 
@@ -14,12 +15,14 @@ This report analyzes the current project structure against the [Go Project Layou
 ### ✅ Strengths (What You're Doing Right)
 
 **Core Architecture (Score: 85/100)**
+
 - **`/cmd`** - Clean single entry point in `cmd/main.go` following best practices
 - **`/internal`** - Proper private application code with excellent domain/application/infrastructure separation
 - **`/pkg`** - Public error handling library with clear API boundaries
 - **Go Modules** - Proper `go.mod` and dependency management
 
 **Documentation & Tooling (Score: 92/100)**
+
 - **`/docs`** - Comprehensive documentation structure with ADRs, planning, and status tracking
 - **Justfile** - Modern task automation with 30+ commands for development workflow
 - **Testing Infrastructure** - Ginkgo/BDD with comprehensive test helpers and parallel execution
@@ -28,6 +31,7 @@ This report analyzes the current project structure against the [Go Project Layou
 ### ✅ Advanced Features Beyond Standard
 
 **Tooling Excellence**
+
 - **Architecture Enforcement** - `.go-arch-lint.yml` with strict dependency rules
 - **Code Quality** - `.golangci.yml` with 40+ linters including cutting-edge tools (NilAway, goleak)
 - **Custom Plugins** - Homegrown plugins for cmd-single-main enforcement and code duplication detection
@@ -37,6 +41,7 @@ This report analyzes the current project structure against the [Go Project Layou
 - **Advanced Testing Infrastructure** - Go 1.25 synctest for concurrent code testing
 
 **Modern Development Practices**
+
 - **Functional Programming** - Heavy use of samber/lo for Map/Filter/Reduce operations with Go 1.23+ iterator support
 - **Result Pattern** - Railway programming for error handling
 - **Value Objects** - Strong typing with Email, UserName, UserID validation
@@ -47,65 +52,82 @@ This report analyzes the current project structure against the [Go Project Layou
 ## 🚀 Modern Go Capabilities Integration (Go 1.23-1.25)
 
 ### Cutting-Edge Language Features
+
 **Iterator Support (Go 1.23+)**
+
 - **Custom Iterators**: Use `for-range` over functions with `func(func() bool)` patterns
 - **Enhanced Slices/Maps**: `slices.All()`, `maps.All()` for modern iteration patterns
 - **Functional Programming**: Seamless integration with samber/lo using native iterators
 - **Performance Gains**: Reduced memory allocation through iterator-based processing
 
 **Generic Type Aliases (Go 1.24+)**
+
 - **Cleaner Code**: Simplify complex generic type definitions
 - **Better Architecture**: More readable domain entities with generic type aliases
 - **Migration Path**: Gradual adoption of generic patterns in existing codebase
 
 ### Advanced Tooling & Build System
+
 **Go 1.24+ Tool Directives in go.mod**
+
 ```go
 // module go.mod
 tool golang.org/x/tools/cmd/stringer v1.2.0
 tool github.com/golangci/golangci-lint/cmd/golangci-lint v1.55.0
 tool github.com/sqlc-dev/sqlc/cmd/sqlc v1.26.0
 ```
+
 **Benefits:**
+
 - Eliminates `tools.go` blank import pattern
 - Automatic tool version management
 - Simplified CI/CD setup with `go install tool`
 - Better dependency tracking for build tools
 
 **JSON Build Output (Go 1.24+)**
+
 - **Structured Logging**: `go build -json` for machine-readable build output
 - **CI/CD Integration**: Better error parsing and reporting in pipelines
 - **Automated Workflows**: Enhanced GitHub Actions with structured build data
 
 ### Enhanced Testing Framework
+
 **Go 1.25 testing/synctest Package**
+
 - **Concurrent Testing**: Virtualized time for testing race conditions
 - **Deterministic Tests**: Eliminate flaky tests with time-dependent code
 - **Bubble Isolation**: Test concurrent patterns in isolated environments
 
 **Performance Benchmarking (Go 1.24+)**
+
 - **B.Loop() Method**: Faster, more precise benchmark iterations
 - **Context Management**: `T.Context()` and `B.Context()` for better test setup
 - **Directory Testing**: `T.Chdir()` for safe filesystem operations in tests
 
 ### Production-Ready Features
+
 **Container-Aware Runtime (Go 1.25)**
+
 - **Automatic GOMAXPROCS**: Respects cgroup CPU limits automatically
 - **Kubernetes Optimization**: Eliminates manual GOMAXPROCS configuration
 - **Resource Efficiency**: Dynamic adjustment to changing CPU quotas
 
 **Experimental Performance Options (Go 1.25)**
+
 - **Green Tea GC**: 10-40% reduction in GC overhead with `GOEXPERIMENT=greenteagc`
 - **JSON v2 Encoding**: Substantially better JSON performance with `GOEXPERIMENT=jsonv2`
 - **Weak Pointers**: Memory-efficient structures using `weak` package
 
 **Enhanced Security (Go 1.24+)**
+
 - **FIPS 140-3 Compliance**: Cryptographic operations meeting enterprise standards
 - **Filesystem Isolation**: `os.Root` type for secure directory operations
 - **Authentication**: `GOAUTH` environment variable for private module management
 
 ### Development Experience Improvements
+
 **Iterator Integration**
+
 ```go
 // Modern Go 1.23+ iteration with functional programming
 func (s *UserService) ProcessUsers() []UserDTO {
@@ -116,6 +138,7 @@ func (s *UserService) ProcessUsers() []UserDTO {
 ```
 
 **Tool Dependency Management**
+
 ```go
 // Eliminates need for tools.go with blank imports
 // go.mod
@@ -127,6 +150,7 @@ tool (
 ```
 
 **Enhanced Error Analysis**
+
 - **New Vet Analyzers**: `waitgroup`, `hostport`, `buildtag` improvements
 - **Version Safety**: Prevents using APIs too new for target Go version
 - **Build Constraints**: Better validation of platform-specific code
@@ -134,8 +158,10 @@ tool (
 ## 🟡 Missing Standard Directories (Priority: HIGH)
 
 ### 1. **`/api`** - API Definitions (CRITICAL)
+
 **Current State:** Missing entirely  
-**What Should Be Here:** 
+**What Should Be Here:**
+
 - OpenAPI/Swagger specifications for linting rule APIs
 - JSON schemas for configuration validation
 - Protocol definitions for extending the linter
@@ -145,8 +171,10 @@ tool (
 **Effort:** 2-4 hours (moderate impact)
 
 ### 2. **`/configs`** - Configuration Templates (CRITICAL)
+
 **Current State:** Configs scattered in root (`config.yaml`, `.go-arch-lint.yml`, `.golangci.yml`)  
 **What Should Be Here:**
+
 - `/configs/default.yaml` - Default linter configuration
 - `/configs/strict.yaml` - Maximum strictness settings
 - `/configs/templates/` - Ready-to-copy templates for different project types
@@ -156,8 +184,10 @@ tool (
 **Effort:** 1-2 hours (high impact)
 
 ### 3. **`/examples`** - Usage Examples (HIGH)
+
 **Current State:** `template-configs/` exists but not as proper examples  
 **What Should Be Here:**
+
 - `/examples/simple-project/` - Minimal Go project with linting setup
 - `/examples/monolith/` - Large monorepo example
 - `/examples/microservices/` - Microservices architecture example
@@ -167,8 +197,10 @@ tool (
 **Effort:** 4-8 hours (high impact)
 
 ### 4. **`/test`** - External Test Data (HIGH)
+
 **Current State:** Tests within `/internal` only  
 **What Should Be Here:**
+
 - `/test/testdata/` - Sample projects with various architectures
 - `/test/integration/` - End-to-end test scenarios
 - `/test/benchmarks/` - Performance test projects
@@ -180,14 +212,17 @@ tool (
 ## 🟡 Organization Issues (Priority: MEDIUM)
 
 ### 5. **`/plugins`** → **COMPLETED MOVED TO `/pkg/linter-plugins/`**
+
 **Previous State:** `/plugins/template-arch-lint/` with its own Go module  
 **Current State:** ✅ MOVED to `/pkg/linter-plugins/template-arch-lint/` for Go Project Layout compliance  
 **Completed:** 2025-11-20 - Module path updated to `github.com/LarsArtmann/template-arch-lint/pkg/linter-plugins/template-arch-lint`  
 **Updates:** Config files updated, documentation references migrated, public API properly exposed
 
 ### 6. **Missing `/build` Directory**
+
 **Current State:** CI/CD configurations scattered in `.github/workflows/`  
 **What Should Be Here:**
+
 - `/build/ci/` - CI configuration templates
 - `/build/package/` - Container/OS packaging scripts
 - `/build/release/` - Release automation scripts
@@ -196,8 +231,10 @@ tool (
 **Effort:** 2-3 hours (low impact)
 
 ### 7. **Missing `/tools` Directory**
+
 **Current State:** Supporting tools mixed with build scripts in `/scripts/`  
 **What Should Be Here:**
+
 - Tools that can import from `/pkg` and `/internal`
 - Development utilities separate from build automation
 - Code generation tools and analysis utilities
@@ -208,13 +245,16 @@ tool (
 ## 🔴 Minor Issues (Priority: LOW)
 
 ### 8. **SQL Organization**
+
 **Current State:** `/sql/sqlite/` (unnecessary double directory)  
 **Should Be:** `/sql/` with subdirectories if needed  
 **Effort:** 15 minutes (minimal)
 
 ### 9. **Missing `/deployments` Directory**
+
 **Current State:** No deployment examples  
 **Could Add:**
+
 - `/deployments/docker/` - Docker Compose examples
 - `/deployments/kubernetes/` - K8s deployment manifests
 - `/deployments/terraform/` - Infrastructure as code examples
@@ -223,20 +263,21 @@ tool (
 
 ## 📈 Compliance Analysis
 
-| Category | Current Score | Target Score | Gap | Go 1.25 Opportunities |
-|----------|---------------|--------------|-----|----------------------|
-| Core Structure | 85/100 | 98/100 | 13 points | Container-ready runtime, Generic type aliases |
-| Standard Directories | 55/100 | 95/100 | 40 points | Tool directives in go.mod |
-| Organization | 75/100 | 95/100 | 20 points | JSON build output, Enhanced tools |
-| Documentation | 90/100 | 98/100 | 8 points | Iterator patterns, Performance guides |
-| Tooling | 95/100 | 100/100 | 5 points | Go 1.25 experimental features |
-| **Overall** | **75/100** | **98/100** | **23 points** | **15 additional points from Go 1.25** |
+| Category             | Current Score | Target Score | Gap           | Go 1.25 Opportunities                         |
+| -------------------- | ------------- | ------------ | ------------- | --------------------------------------------- |
+| Core Structure       | 85/100        | 98/100       | 13 points     | Container-ready runtime, Generic type aliases |
+| Standard Directories | 55/100        | 95/100       | 40 points     | Tool directives in go.mod                     |
+| Organization         | 75/100        | 95/100       | 20 points     | JSON build output, Enhanced tools             |
+| Documentation        | 90/100        | 98/100       | 8 points      | Iterator patterns, Performance guides         |
+| Tooling              | 95/100        | 100/100      | 5 points      | Go 1.25 experimental features                 |
+| **Overall**          | **75/100**    | **98/100**   | **23 points** | **15 additional points from Go 1.25**         |
 
 ## 🚀 Priority Execution Plan
 
 ### Phase 1: Critical Missing Directories + Go 1.25 Integration (Impact: 60% → Score: 88/100)
+
 1. **Create `/api`** - Move and create API specifications (2-4 hours)
-2. **Create `/configs`** - Centralize configuration templates (1-2 hours)  
+2. **Create `/configs`** - Centralize configuration templates (1-2 hours)
 3. **Integrate Go 1.25 Tool Directives** - Replace tools.go with go.mod tool directives (1-2 hours)
 4. **Add JSON Build Output** - Enhance CI/CD with structured build data (1 hour)
 5. **Create `/examples`** - Restructure as proper usage examples (4-8 hours)
@@ -245,6 +286,7 @@ tool (
 **Phase 1 Total: 12-23 hours**
 
 ### Phase 2: Organization Improvements + Modern Go Features (Impact: 25% → Score: 95/100)
+
 5. **Move `/plugins` → `/pkg/linter-plugins/`** - Enable plugin extensibility (1-2 hours)
 6. **Create `/build`** - Reorganize CI/CD configurations with JSON output (2-3 hours)
 7. **Create `/tools`** - Separate supporting tools with Go 1.25 tool management (1-2 hours)
@@ -255,6 +297,7 @@ tool (
 **Phase 2 Total: 8-12 hours**
 
 ### Phase 3: Advanced Go Integration (Impact: 3% → Score: 98/100)
+
 11. **Add `/deployments`** - Deployment configuration examples (2-4 hours)
 12. **Update documentation** - Explain directory structure and Go 1.25 choices (2-3 hours)
 13. **Implement Experimental Features** - Green Tea GC, JSON v2 (2-3 hours)
@@ -279,6 +322,7 @@ tool (
 ### Your Project's Unique Value + Go 1.25 Advantage
 
 Your template repository goes **beyond** the standard in several key areas:
+
 - **Comprehensive linting rules** (40+ linters with custom plugins)
 - **Template configurations** (ready-to-copy for other projects)
 - **Architecture enforcement** (Clean Architecture + DDD patterns)
@@ -290,6 +334,7 @@ Your template repository goes **beyond** the standard in several key areas:
 ## 🎯 Recommendations
 
 ### Immediate Actions (This Week)
+
 1. **Integrate Go 1.25 Tool Directives** - Replace tools.go pattern immediately
 2. **Create `/configs`** - Quick win with immediate user benefit
 3. **Enable Container-Aware Runtime** - No-code performance improvement for deployments
@@ -297,6 +342,7 @@ Your template repository goes **beyond** the standard in several key areas:
 5. **Update README** - Document Go 1.25 modern features
 
 ### Short Term (Next Sprint)
+
 1. **Create `/examples`** - Transform `template-configs/` into proper examples
 2. **Create `/api`** - Document linting rule APIs
 3. **Add `/test`** - External test projects with synctest integration
@@ -304,6 +350,7 @@ Your template repository goes **beyond** the standard in several key areas:
 5. **JSON Build Output** - Enhance CI/CD with structured data
 
 ### Long Term (Next Quarter)
+
 1. **Complete organization** - Implement remaining Phase 2 improvements
 2. **Experimental Features** - Green Tea GC, JSON v2 adoption
 3. **Advanced Testing** - testing/synctest for concurrent code validation
@@ -313,6 +360,7 @@ Your template repository goes **beyond** the standard in several key areas:
 ## 🏆 Success Metrics
 
 **Before Implementation:**
+
 - User confusion finding configurations
 - Low discoverability of extension APIs
 - Limited real-world examples
@@ -320,6 +368,7 @@ Your template repository goes **beyond** the standard in several key areas:
 - Compliance score: 70/100
 
 **After Go 1.25 Integration:**
+
 - Modern Go 1.25 tooling with go.mod tool directives
 - Clear separation of concerns per Go standards
 - Easy discovery of APIs, configs, and examples

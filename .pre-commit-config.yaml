@@ -46,7 +46,7 @@ repos:
       - id: check-added-large-files
         name: "📏 Check large files"
         description: "Prevents committing large files (>500kB)"
-        args: ['--maxkb=500']
+        args: ["--maxkb=500"]
 
       # Security checks
       - id: detect-private-key
@@ -250,7 +250,7 @@ repos:
               exit 1
             fi
             echo "✅ No problematic filenames found"
-        files: '.*'
+        files: ".*"
         pass_filenames: false
         require_serial: true
 
@@ -288,8 +288,8 @@ ci:
 
     For more information, see https://pre-commit.ci
   autofix_prs: true
-  autoupdate_branch: ''
-  autoupdate_commit_msg: '🔄 [pre-commit.ci] pre-commit autoupdate'
+  autoupdate_branch: ""
+  autoupdate_commit_msg: "🔄 [pre-commit.ci] pre-commit autoupdate"
   autoupdate_schedule: weekly
   skip: []
   submodules: false

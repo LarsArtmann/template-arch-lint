@@ -3,14 +3,17 @@
 ## Line Length Management
 
 ### Overview
+
 This document establishes guidelines for managing line length in Go code to maintain readability while adhering to modern development practices.
 
 ### Line Length Limits
+
 - **Soft Limit**: 100 characters (preferred)
 - **Hard Limit**: 120 characters (enforced by linter)
 - **Comments**: 80 characters (for better readability)
 
 ### Rationale
+
 - Modern monitors can comfortably display 120+ characters
 - Allows for reasonable function signatures and struct definitions
 - Balances readability with practical coding needs
@@ -19,6 +22,7 @@ This document establishes guidelines for managing line length in Go code to main
 ## Line Breaking Strategies
 
 ### 1. Function Signatures
+
 ```go
 // Good - Parameters on new lines when needed
 func CreateUserWithCompleteProfile(
@@ -42,6 +46,7 @@ func CreateUserWithCompleteProfile(ctx context.Context, userDetails UserCreation
 ```
 
 ### 2. Struct Definitions
+
 ```go
 // Good - Readable field alignment
 type UserProfile struct {
@@ -73,6 +78,7 @@ type UserSettings struct {
 ```
 
 ### 3. Function Calls with Many Parameters
+
 ```go
 // Good - Named parameters pattern
 func processUserRegistration() error {
@@ -106,6 +112,7 @@ func processUserRegistration() error {
 ```
 
 ### 4. Chain Calls and Fluent Interfaces
+
 ```go
 // Good - Readable chaining
 user, err := userQuery.
@@ -129,10 +136,11 @@ user, err := query.First()
 ```
 
 ### 5. Conditional Statements
+
 ```go
 // Good - Break complex conditions
-isEligibleUser := user.IsActive() && 
-                 user.HasVerifiedEmail() && 
+isEligibleUser := user.IsActive() &&
+                 user.HasVerifiedEmail() &&
                  user.SubscriptionStatus == "premium"
 
 if isEligibleUser {
@@ -154,6 +162,7 @@ if user.IsActive() && user.HasVerifiedEmail() && user.SubscriptionStatus == "pre
 ```
 
 ### 6. String Concatenation and Formatting
+
 ```go
 // Good - Multi-line string formatting
 message := fmt.Sprintf(
@@ -178,15 +187,16 @@ Best regards,
 The Team
 `
 
-emailBody := fmt.Sprintf(emailTemplate, 
-    user.FirstName, 
-    user.Email, 
-    user.Username, 
+emailBody := fmt.Sprintf(emailTemplate,
+    user.FirstName,
+    user.Email,
+    user.Username,
     user.SubscriptionLevel,
 )
 ```
 
 ### 7. Error Messages
+
 ```go
 // Good - Readable error construction
 return fmt.Errorf(
@@ -217,6 +227,7 @@ if err != nil {
 ## Comments and Documentation
 
 ### Line Length for Comments
+
 ```go
 // Good - Comments under 80 characters
 // CreateUser creates a new user account with the provided details.
@@ -243,7 +254,9 @@ func ProcessUserRegistration(req RegistrationRequest) error {
 ## Tools and Automation
 
 ### Linting Configuration
+
 The project uses golangci-lint with line length enforcement:
+
 ```yaml
 linters-settings:
   lll:
@@ -252,7 +265,9 @@ linters-settings:
 ```
 
 ### Editor Configuration
+
 Recommended editor settings:
+
 ```
 # .editorconfig
 [*.go]
@@ -262,6 +277,7 @@ indent_style = tab
 ```
 
 ### Formatting Tools
+
 - Use `gofmt` for basic formatting
 - Use `goimports` for import organization
 - Use `golangci-lint` for comprehensive style checking
@@ -269,12 +285,14 @@ indent_style = tab
 ## Exceptions
 
 ### When to Exceed Line Limits
+
 1. **URLs and file paths** that cannot be broken
 2. **Generated code** that should not be manually modified
 3. **Test data** where breaking would reduce clarity
 4. **Regular expressions** where breaking affects readability
 
 ### Example Exceptions
+
 ```go
 // Acceptable - URL cannot be broken meaningfully
 const apiEndpoint = "https://api.example.com/v1/users/profile/detailed-information/with-preferences"

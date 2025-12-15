@@ -1,217 +1,217 @@
 version: "1.0"
 generated: 2025-08-18T11:26:34.496782+02:00
 project:
-    name: Template Architecture Lint
-    description: Enterprise-Grade Go Architecture & Code Quality Enforcement Template
-    type: cli-tool
-    language: go
-    keywords:
-        - architecture-linting
-        - go
-        - clean-architecture
-        - ddd
-        - enterprise
-        - template
-        - code-quality
-        - golangci-lint
-        - security
-    homepage: https://github.com/LarsArtmann/template-arch-lint
-    repository:
-        url: https://github.com/LarsArtmann/template-arch-lint
-        owner: LarsArtmann
-        name: template-arch-lint
-        branch: master
-    contact:
-        name: LarsArtmann
-        github: LarsArtmann
-    license:
-        type: MIT
-        file: LICENSE
-template:
-    type: intermediate
-    variant: default
-    sections:
-        - overview
-        - features
-        - installation
-        - usage
-        - development
-        - contributing
-        - license
-        - contact
-    include_toc: true
-    toc_depth: 3
-badges:
-    enabled: true
-    license: true
-    stars: true
-    forks: true
-    issues: true
-    build_status: true
-    coverage: true
-    style: flat
-content:
-    features:
-        - icon: 🏗️
-          title: Architecture Enforcement
-          description: Enforces Clean Architecture and DDD boundaries automatically with go-arch-lint
-        - icon: 🔒
-          title: Enterprise Security
-          description: 40+ linters including NilAway, gosec, and custom security rules
-        - icon: 🚨
-          title: Zero Tolerance Quality
-          description: Maximum strictness configuration with zero technical debt tolerance
-        - icon: 🤖
-          title: Complete Automation
-          description: Integrated CI/CD pipeline with pre-commit hooks and auto-fixing
-        - icon: 📊
-          title: Production Ready
-          description: Docker containerization, monitoring, and enterprise deployment patterns
-    usage:
-        examples:
-            - title: One-Liner Install (Recommended)
-              description: Install via automated script using git subtree
-              code: |
-                # One command to rule them all
-                curl -fsSL https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/scripts/install-lint-config.sh | bash
-                
-                # Then install tools and run
-                just install && just lint
-            - title: Manual Git Subtree
-              description: Pull only the essential linting files via subtree
-              code: |
-                # Create a subtree with only the config files
-                git subtree add --prefix=.lint-config https://github.com/LarsArtmann/template-arch-lint.git master --squash
-                
-                # Extract only what we need to project root
-                cp .lint-config/.go-arch-lint.yml .
-                cp .lint-config/.golangci.yml . 
-                cp .lint-config/justfile linting.just
-                
-                # Clean up the temporary directory
-                rm -rf .lint-config
-                
-                # Install and run
-                just install && just lint
-            - title: Sparse Checkout (Advanced)
-              description: Use git sparse-checkout for surgical file extraction
-              code: |
-                # Clone with sparse checkout (only specific files)
-                git clone --filter=blob:none --sparse https://github.com/LarsArtmann/template-arch-lint.git /tmp/template-lint
-                cd /tmp/template-lint
-                git sparse-checkout set .go-arch-lint.yml .golangci.yml justfile
-                
-                # Copy files to your project  
-                cp .go-arch-lint.yml .golangci.yml /path/to/your/project/
-                cp justfile /path/to/your/project/linting.just
-                cd /path/to/your/project && rm -rf /tmp/template-lint
-                
-                # Install and run
-                just install && just lint
-            - title: Direct Download
-              description: Simple curl-based approach
-              code: |
-                # Download only the essential files
-                curl -fsSL -o .go-arch-lint.yml "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/.go-arch-lint.yml"
-                curl -fsSL -o .golangci.yml "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/.golangci.yml"
-                curl -fsSL -o linting.just "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/justfile"
-                
-                # Install and run
-                just install && just lint
-    installation:
-        prerequisites:
-            - Go 1.23+ 
-            - Just command runner
-            - Git (for cloning repository)
-        methods:
-            - name: One-Liner Script (Recommended)
-              description: Automated installation using git subtree
-              commands:
-                - curl -fsSL https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/scripts/install-lint-config.sh | bash
-                - just install
-            - name: Manual Git Subtree
-              description: Pull only essential files via subtree, then clean up
-              commands:
-                - git subtree add --prefix=.lint-config https://github.com/LarsArtmann/template-arch-lint.git master --squash
-                - cp .lint-config/.go-arch-lint.yml .lint-config/.golangci.yml .
-                - cp .lint-config/justfile linting.just
-                - rm -rf .lint-config
-                - just install
-            - name: Sparse Checkout
-              description: Advanced git method for precise file extraction
-              commands:
-                - git clone --filter=blob:none --sparse https://github.com/LarsArtmann/template-arch-lint.git /tmp/template-lint
-                - cd /tmp/template-lint && git sparse-checkout set .go-arch-lint.yml .golangci.yml justfile
-                - cp .go-arch-lint.yml .golangci.yml justfile /path/to/your/project/
-                - cd /path/to/your/project && rm -rf /tmp/template-lint
-                - just install
-            - name: Direct Download
-              description: Simple curl-based file download
-              commands:
-                - for file in .go-arch-lint.yml .golangci.yml justfile; do curl -fsSL -o "$file" "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/$file"; done
-                - just install
-    development:
-        prerequisites:
-            - Go 1.23+
-            - Just command runner
-            - Git
-        setup:
-            - Clone the repository
-            - cd template-arch-lint
-            - just install
-            - go mod download
-        commands:
-            - name: lint
-              command: just lint
-              description: Run complete linting suite
-              category: quality
-            - name: lint-arch
-              command: just lint-arch
-              description: Architecture validation only
-              category: quality
-            - name: lint-nilaway
-              command: just lint-nilaway
-              description: Nil panic detection
-              category: security
-            - name: build
-              command: just build
-              description: Build the application
-              category: build
-            - name: test
-              command: just test
-              description: Run tests with coverage
-              category: test
-            - name: fix
-              command: just fix
-              description: Auto-fix formatting issues
-              category: quality
-    contributing:
-        enabled: true
-        guidelines:
-            - Follow the existing code style
-            - Add tests for new features
-            - Update documentation as needed
-            - Ensure all tests pass
-language_trends:
-    months: 12
-    bucket: readme-trends
-    update_frequency: weekly
-    chart_type: lines
-    show_legend: true
-    max_languages: 6
-github:
-    enabled: true
+  name: Template Architecture Lint
+  description: Enterprise-Grade Go Architecture & Code Quality Enforcement Template
+  type: cli-tool
+  language: go
+  keywords:
+    - architecture-linting
+    - go
+    - clean-architecture
+    - ddd
+    - enterprise
+    - template
+    - code-quality
+    - golangci-lint
+    - security
+  homepage: https://github.com/LarsArtmann/template-arch-lint
+  repository:
+    url: https://github.com/LarsArtmann/template-arch-lint
     owner: LarsArtmann
-    repository: t
-    default_branch: master
-    actions:
-        enabled: true
+    name: template-arch-lint
+    branch: master
+  contact:
+    name: LarsArtmann
+    github: LarsArtmann
+  license:
+    type: MIT
+    file: LICENSE
+template:
+  type: intermediate
+  variant: default
+  sections:
+    - overview
+    - features
+    - installation
+    - usage
+    - development
+    - contributing
+    - license
+    - contact
+  include_toc: true
+  toc_depth: 3
+badges:
+  enabled: true
+  license: true
+  stars: true
+  forks: true
+  issues: true
+  build_status: true
+  coverage: true
+  style: flat
+content:
+  features:
+    - icon: 🏗️
+      title: Architecture Enforcement
+      description: Enforces Clean Architecture and DDD boundaries automatically with go-arch-lint
+    - icon: 🔒
+      title: Enterprise Security
+      description: 40+ linters including NilAway, gosec, and custom security rules
+    - icon: 🚨
+      title: Zero Tolerance Quality
+      description: Maximum strictness configuration with zero technical debt tolerance
+    - icon: 🤖
+      title: Complete Automation
+      description: Integrated CI/CD pipeline with pre-commit hooks and auto-fixing
+    - icon: 📊
+      title: Production Ready
+      description: Docker containerization, monitoring, and enterprise deployment patterns
+  usage:
+    examples:
+      - title: One-Liner Install (Recommended)
+        description: Install via automated script using git subtree
+        code: |
+          # One command to rule them all
+          curl -fsSL https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/scripts/install-lint-config.sh | bash
+
+          # Then install tools and run
+          just install && just lint
+      - title: Manual Git Subtree
+        description: Pull only the essential linting files via subtree
+        code: |
+          # Create a subtree with only the config files
+          git subtree add --prefix=.lint-config https://github.com/LarsArtmann/template-arch-lint.git master --squash
+
+          # Extract only what we need to project root
+          cp .lint-config/.go-arch-lint.yml .
+          cp .lint-config/.golangci.yml . 
+          cp .lint-config/justfile linting.just
+
+          # Clean up the temporary directory
+          rm -rf .lint-config
+
+          # Install and run
+          just install && just lint
+      - title: Sparse Checkout (Advanced)
+        description: Use git sparse-checkout for surgical file extraction
+        code: |
+          # Clone with sparse checkout (only specific files)
+          git clone --filter=blob:none --sparse https://github.com/LarsArtmann/template-arch-lint.git /tmp/template-lint
+          cd /tmp/template-lint
+          git sparse-checkout set .go-arch-lint.yml .golangci.yml justfile
+
+          # Copy files to your project  
+          cp .go-arch-lint.yml .golangci.yml /path/to/your/project/
+          cp justfile /path/to/your/project/linting.just
+          cd /path/to/your/project && rm -rf /tmp/template-lint
+
+          # Install and run
+          just install && just lint
+      - title: Direct Download
+        description: Simple curl-based approach
+        code: |
+          # Download only the essential files
+          curl -fsSL -o .go-arch-lint.yml "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/.go-arch-lint.yml"
+          curl -fsSL -o .golangci.yml "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/.golangci.yml"
+          curl -fsSL -o linting.just "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/justfile"
+
+          # Install and run
+          just install && just lint
+  installation:
+    prerequisites:
+      - Go 1.23+
+      - Just command runner
+      - Git (for cloning repository)
+    methods:
+      - name: One-Liner Script (Recommended)
+        description: Automated installation using git subtree
+        commands:
+          - curl -fsSL https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/scripts/install-lint-config.sh | bash
+          - just install
+      - name: Manual Git Subtree
+        description: Pull only essential files via subtree, then clean up
+        commands:
+          - git subtree add --prefix=.lint-config https://github.com/LarsArtmann/template-arch-lint.git master --squash
+          - cp .lint-config/.go-arch-lint.yml .lint-config/.golangci.yml .
+          - cp .lint-config/justfile linting.just
+          - rm -rf .lint-config
+          - just install
+      - name: Sparse Checkout
+        description: Advanced git method for precise file extraction
+        commands:
+          - git clone --filter=blob:none --sparse https://github.com/LarsArtmann/template-arch-lint.git /tmp/template-lint
+          - cd /tmp/template-lint && git sparse-checkout set .go-arch-lint.yml .golangci.yml justfile
+          - cp .go-arch-lint.yml .golangci.yml justfile /path/to/your/project/
+          - cd /path/to/your/project && rm -rf /tmp/template-lint
+          - just install
+      - name: Direct Download
+        description: Simple curl-based file download
+        commands:
+          - for file in .go-arch-lint.yml .golangci.yml justfile; do curl -fsSL -o "$file" "https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master/$file"; done
+          - just install
+  development:
+    prerequisites:
+      - Go 1.23+
+      - Just command runner
+      - Git
+    setup:
+      - Clone the repository
+      - cd template-arch-lint
+      - just install
+      - go mod download
+    commands:
+      - name: lint
+        command: just lint
+        description: Run complete linting suite
+        category: quality
+      - name: lint-arch
+        command: just lint-arch
+        description: Architecture validation only
+        category: quality
+      - name: lint-nilaway
+        command: just lint-nilaway
+        description: Nil panic detection
+        category: security
+      - name: build
+        command: just build
+        description: Build the application
+        category: build
+      - name: test
+        command: just test
+        description: Run tests with coverage
+        category: test
+      - name: fix
+        command: just fix
+        description: Auto-fix formatting issues
+        category: quality
+  contributing:
+    enabled: true
+    guidelines:
+      - Follow the existing code style
+      - Add tests for new features
+      - Update documentation as needed
+      - Ensure all tests pass
+language_trends:
+  months: 12
+  bucket: readme-trends
+  update_frequency: weekly
+  chart_type: lines
+  show_legend: true
+  max_languages: 6
+github:
+  enabled: true
+  owner: LarsArtmann
+  repository: t
+  default_branch: master
+  actions:
+    enabled: true
 automation:
-    smart_updates: true
-    ignore_timestamp: true
-    update_schedule: 0 0 * * 1
-    commit_message: 'docs: update README.md [automated]'
-    create_pr: true
-    pr_title: 'docs: update README.md'
-    pr_body: Automated README update generated by template-readme
+  smart_updates: true
+  ignore_timestamp: true
+  update_schedule: 0 0 * * 1
+  commit_message: "docs: update README.md [automated]"
+  create_pr: true
+  pr_title: "docs: update README.md"
+  pr_body: Automated README update generated by template-readme
 formatting: {}

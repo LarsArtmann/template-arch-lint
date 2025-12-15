@@ -7,6 +7,7 @@ Your `.golangci.yml` configuration with `govet: enable-all: true` **DOES leverag
 ## How It Works
 
 When you set:
+
 ```yaml
 govet:
   enable-all: true
@@ -17,8 +18,9 @@ This enables ALL of these analyzers automatically:
 ### ✅ Currently Active (All 51 analyzers via govet)
 
 #### Type Safety & Correctness
+
 - **appends**: Detects single-variable appends
-- **assign**: Detects useless assignments  
+- **assign**: Detects useless assignments
 - **atomic**: Common sync/atomic mistakes
 - **atomicalign**: Non-64-bit-aligned atomic arguments
 - **bools**: Boolean operator mistakes
@@ -30,6 +32,7 @@ This enables ALL of these analyzers automatically:
 - **reflectvaluecompare**: Comparing reflect.Value with ==
 
 #### Control Flow & Concurrency
+
 - **ctrlflow**: Control-flow graph analysis
 - **defers**: Common defer mistakes
 - **loopclosure**: Loop variable capture bugs
@@ -41,6 +44,7 @@ This enables ALL of these analyzers automatically:
 - **waitgroup**: sync.WaitGroup misuse
 
 #### Formatting & Standards
+
 - **printf**: Printf format string errors
 - **slog**: Structured logging mistakes
 - **stringintconv**: String(int) conversions
@@ -48,15 +52,18 @@ This enables ALL of these analyzers automatically:
 - **timeformat**: Time format string errors
 
 #### Testing
+
 - **testinggoroutine**: t.Fatal in goroutines
 - **tests**: Test function naming/signatures
 
 #### HTTP & Network
+
 - **httpresponse**: HTTP response body not closed
 - **httpmux**: HTTP mux pattern conflicts
 - **hostport**: Invalid host:port combinations
 
-#### Memory & Performance  
+#### Memory & Performance
+
 - **fieldalignment**: Struct field alignment optimization (memory usage)
 - **shadow**: Variable shadowing
 - **shift**: Suspicious shift operations
@@ -66,6 +73,7 @@ This enables ALL of these analyzers automatically:
 - **unusedwrite**: Unused writes to variables
 
 #### Build & Assembly
+
 - **asmdecl**: Assembly/Go declaration mismatches
 - **buildssa**: SSA construction
 - **buildtag**: Build tag validation
@@ -76,6 +84,7 @@ This enables ALL of these analyzers automatically:
 - **stdversion**: Go version compatibility
 
 #### Utility Analyzers
+
 - **findcall**: Example analyzer (not useful in production)
 - **gofix**: go:fix inline directives
 - **inspect**: AST inspection framework
@@ -88,17 +97,20 @@ This enables ALL of these analyzers automatically:
 Your configuration also includes many **additional linters** not part of x/tools:
 
 ### Security & Safety
+
 - **gosec**: Security vulnerability scanning
 - **nilaway**: Uber's nil panic prevention (not in x/tools)
 - **wrapcheck**: Error wrapping enforcement
 
-### Code Quality  
+### Code Quality
+
 - **forbidigo**: Custom forbidden patterns (interface{}, panic, fmt.Print)
 - **revive**: 180+ additional rules
 - **gocritic**: 140+ opinionated checks
 - **staticcheck**: Extensive static analysis (includes all of x/tools plus more)
 
 ### Complexity & Architecture
+
 - **cyclop**: Cyclomatic complexity
 - **gocognit**: Cognitive complexity
 - **funlen**: Function length limits
@@ -107,6 +119,7 @@ Your configuration also includes many **additional linters** not part of x/tools
 - **gochecknoglobals**: No global variables
 
 ### Performance
+
 - **prealloc**: Slice preallocation optimization
 - **bodyclose**: HTTP body closure
 - **sqlclosecheck**: SQL resource management
@@ -116,6 +129,7 @@ Your configuration also includes many **additional linters** not part of x/tools
 ### You're Already Maximizing x/tools Coverage ✅
 
 With `govet: enable-all: true`, you have:
+
 - All 51 analyzers from golang.org/x/tools active
 - Plus 40+ additional linters for comprehensive coverage
 - Enterprise-grade strictness settings
@@ -125,7 +139,7 @@ With `govet: enable-all: true`, you have:
 While you have excellent coverage, consider these cutting-edge tools not yet in your config:
 
 1. **aligncheck** (via golangci-lint): Struct alignment for cache optimization
-2. **exhaustruct**: Ensure all struct fields are initialized  
+2. **exhaustruct**: Ensure all struct fields are initialized
 3. **gofmt** / **gofumpt**: Formatting enforcement (you use via `just fix`)
 4. **goheader**: License header enforcement
 5. **maintidx**: Maintainability index calculation
@@ -135,6 +149,7 @@ While you have excellent coverage, consider these cutting-edge tools not yet in 
 ### Performance Note
 
 Running all analyzers can be slow. Your current setup is optimal for CI/CD. For development, consider:
+
 ```bash
 just lint-code    # Faster subset for development
 just lint         # Full analysis for pre-commit

@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 🎯 What This Project IS and IS NOT
 
 ### ✅ **What This Project IS:**
+
 - **Go Linting Template**: Demonstrates enterprise-grade architecture and code quality enforcement
 - **Reference Implementation**: Shows Clean Architecture + DDD patterns in Go
 - **Configuration Library**: Provides `.go-arch-lint.yml`, `.golangci.yml`, and `justfile` for copy/paste use
@@ -12,20 +13,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Educational Resource**: Learn proper Go architecture boundaries and functional programming patterns
 
 ### ❌ **What This Project IS NOT:**
+
 - **Production Application**: Not meant for real business use - it's a template/demo
-- **Framework or Library**: Not installable via `go get` - copy configurations instead  
+- **Framework or Library**: Not installable via `go get` - copy configurations instead
 - **Enterprise Platform**: Despite having monitoring/Docker/K8s - these are demos of over-engineering
 - **Complex Business Domain**: User CRUD is intentionally simple to focus on architecture
 
 ### 🎯 **Core Purpose:**
+
 Copy the linting configurations (`.go-arch-lint.yml`, `.golangci.yml`, `justfile`) to your real projects to enforce architectural boundaries and code quality. The Go code demonstrates how to structure projects following these rules.
 
 ## 🏗️ High-Level Architecture Understanding
 
 ### Layer Structure (Dependency Flow: Infrastructure → Application → Domain)
+
 ```
 web/templates/          # Templ templates for server-side rendering
-├── components/         # Reusable UI components  
+├── components/         # Reusable UI components
 ├── layouts/           # Page layouts
 └── pages/             # Full page templates
 
@@ -37,7 +41,7 @@ internal/application/   # HTTP handlers & use case orchestration
 
 internal/domain/        # Pure business logic (NO external dependencies)
 ├── entities/          # Business entities (user.go with value objects)
-├── services/          # Domain services (user_service.go)  
+├── services/          # Domain services (user_service.go)
 ├── repositories/      # Repository interfaces (user_repository.go)
 ├── values/            # Value objects (email.go, username.go, user_id.go)
 ├── errors/            # Domain-specific errors
@@ -54,6 +58,7 @@ sql/
 ```
 
 ### Key Architectural Patterns Demonstrated
+
 - **Clean Architecture**: Strict dependency rules enforced by go-arch-lint
 - **Domain-Driven Design**: Rich domain entities with value objects
 - **Functional Programming**: Heavy use of samber/lo for Map/Filter/Reduce operations
@@ -65,13 +70,14 @@ sql/
 ## Essential Commands
 
 ### Core Development Commands
+
 ```bash
 # Installation & Setup
 just install              # Install ALL linting tools (golangci-lint, go-arch-lint, etc.)
 just install-hooks        # Install git pre-commit hooks (fast checks only)
 just install-hooks-full   # Install comprehensive pre-commit hooks (includes architecture)
 
-# Primary Workflow Commands  
+# Primary Workflow Commands
 just lint                 # Run ALL linters (architecture, code, security, dependencies)
 just fix                  # Auto-fix formatting issues and simple violations
 just test                 # Run all tests with coverage report
@@ -89,6 +95,7 @@ just lint-deps-advanced  # Advanced dependency vulnerability analysis
 ```
 
 ### Specialized Linting Commands
+
 ```bash
 # Architecture & Design
 just lint-arch           # Architecture boundary validation only
@@ -115,6 +122,7 @@ sqlc generate            # Generate type-safe SQL code
 ```
 
 ### Testing Commands
+
 ```bash
 # Single test or package
 go test ./internal/domain/services/ -v
@@ -137,35 +145,41 @@ go test ./internal/domain/services/ -bench=.
 ## Critical Linting Configuration
 
 ### Architecture Enforcement (`.go-arch-lint.yml`)
+
 - **Domain purity**: Domain layer cannot import infrastructure or application layers
 - **Dependency inversion**: Infrastructure depends on domain interfaces
 - **Clean architecture flow**: Infrastructure → Application → Domain
 
 ### CMD Single Main Enforcement (`lint-cmd-single`)
+
 - **Single Entry Point**: Enforces exactly one `main.go` file in `cmd/` directory
 - **Clean Architecture**: Prevents command proliferation and maintains single responsibility
 - **Actionable Errors**: Provides specific consolidation suggestions when violations are found
 - **Automated Validation**: Integrated into `just lint` pipeline for continuous enforcement
 
 **Examples:**
+
 ```bash
 just lint-cmd-single      # Check cmd/ single main constraint only
 just lint                 # Includes cmd/ validation in full linting pipeline
 ```
 
 **Violation Examples:**
+
 - ❌ Multiple main files: `cmd/server/main.go` + `cmd/cli/main.go`
 - ❌ No main files: Empty `cmd/` directory
 - ✅ Single main file: `cmd/server/main.go` only
 
 **Consolidation Suggestions:**
+
 - Use CLI frameworks like [Cobra](https://pkg.go.dev/github.com/spf13/cobra) for subcommands
 - Create single main with multiple modes: `server start`, `server migrate`
 - Move additional tools to separate packages/repositories
 
 **Future Enhancement**: This constraint will be available as a native golangci-lint plugin, providing deeper IDE integration and more sophisticated analysis. See `docs/planning/` for the plugin roadmap.
 
-### Code Quality Enforcement (`.golangci.yml`)  
+### Code Quality Enforcement (`.golangci.yml`)
+
 - **40+ linters enabled** including cutting-edge tools:
   - `nilaway`: Uber's nil panic prevention (2024-2025)
   - `godox`: TODO/FIXME/HACK detection
@@ -179,6 +193,7 @@ just lint                 # Includes cmd/ validation in full linting pipeline
 - **Line length**: Max 120 characters
 
 ### Security Scanning (Built-in Tools)
+
 - **10 custom security rules** for Go-specific vulnerabilities:
   - Hardcoded secrets detection
   - SQL injection prevention
@@ -190,6 +205,7 @@ just lint                 # Includes cmd/ validation in full linting pipeline
 ## Key Libraries and Patterns
 
 ### Core Dependencies
+
 - **gin**: HTTP web framework
 - **templ**: Type-safe HTML templates
 - **HTMX**: Progressive enhancement for web UI
@@ -202,15 +218,18 @@ just lint                 # Includes cmd/ validation in full linting pipeline
 ### Important Implementation Patterns
 
 #### Value Objects (`internal/domain/values/`)
+
 - Enforce validation and type safety at domain level
 - Examples: `Email`, `UserName`, `UserID` with business rules
 
 #### Repository Pattern
+
 - **Interfaces** in `internal/domain/repositories/`
 - **Implementations** in `internal/infrastructure/persistence/`
 - **In-memory versions** for testing
 
 #### Result Pattern (`internal/domain/shared/result.go`)
+
 - Functional error handling without exceptions
 - Chain operations with success/failure paths
 
@@ -236,12 +255,14 @@ docs/graphs/
 ```
 
 **Graph Types Explained:**
+
 - **Flow graphs** (`just graph`): Show execution flow (reverse dependency injection)
 - **DI graphs** (`just graph-di`): Show direct component dependencies
 - **Vendor graphs** (`just graph-vendor`): Include external library dependencies
 - **Focused graphs** (`just graph-component <name>`): Single component and its deps
 
 **Usage Examples:**
+
 ```bash
 # Generate all graphs (recommended for documentation)
 just graph-all
@@ -256,12 +277,14 @@ open docs/graphs/index.md  # See all available graphs
 ```
 
 #### Functional Programming with samber/lo
+
 - Heavy use of `lo.Map()`, `lo.Filter()`, `lo.Reduce()`
 - See `internal/domain/services/user_service.go` for examples
 
 ## Common Development Workflows
 
 ### Before Committing Code
+
 ```bash
 just lint        # Run all quality checks
 just fix         # Auto-fix formatting
@@ -269,6 +292,7 @@ just test        # Ensure tests pass
 ```
 
 ### Adding New Features
+
 ```bash
 just lint-arch   # Verify architecture compliance
 just lint-code   # Check code quality
@@ -276,6 +300,7 @@ just test        # Test your changes
 ```
 
 ### Security Review
+
 ```bash
 just security-audit  # Complete security scan
 cat gosec-report.json    # Review security findings
@@ -284,6 +309,7 @@ cat gosec-report.json    # Review security findings
 ## Architecture Violations You'll Encounter
 
 Common violations and their meanings:
+
 - `domain-entities cannot depend on infrastructure` - Keep domain pure
 - `🚨 BANNED: interface{} erases type safety` - Use specific types
 - `🚨 BANNED: panic() crashes programs` - Return errors instead
@@ -310,22 +336,26 @@ Common violations and their meanings:
 ## Project-Specific Notes
 
 ### SQLC Integration
+
 - Always run `sqlc generate` after modifying SQL files
 - Generated code goes to `internal/db/`
 - Custom type mappings configured in `sqlc.yaml`
 
 ### Templ Templates
+
 - Run `just templ` or `templ generate` after template changes
 - Templates in `web/templates/`
 - Type-safe HTML generation
 
 ### Testing Strategy
+
 - BDD tests with Ginkgo/Gomega
 - Test helpers in `internal/testhelpers/`
 - Builder pattern for test data
 - Parallel test execution enabled
 
 ### Error Handling
+
 - Domain errors in `internal/domain/errors/`
 - Result pattern for functional error handling
 - Standardized HTTP responses in `internal/application/http/`
@@ -333,6 +363,7 @@ Common violations and their meanings:
 ## Important Implementation Guidelines
 
 ### When Adding New Code
+
 1. Respect layer boundaries (domain must stay pure)
 2. Use value objects for domain primitives
 3. Prefer functional programming patterns with samber/lo
@@ -340,12 +371,14 @@ Common violations and their meanings:
 5. Run `just lint` before committing
 
 ### When Modifying Architecture
+
 1. Update `.go-arch-lint.yml` for new components
 2. Regenerate architecture graph with `just graph`
 3. Ensure no circular dependencies
 4. Maintain dependency inversion principle
 
 ### When Working with Database
+
 1. Write SQL in `sql/queries/`
 2. Run `sqlc generate` to create type-safe code
 3. Implement repository interfaces from domain layer
