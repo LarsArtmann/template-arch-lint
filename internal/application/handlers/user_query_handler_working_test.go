@@ -27,21 +27,21 @@ var _ = Describe("UserQueryHandler", func() {
 	var (
 		userQueryService services.UserQueryService
 		userQueryHandler *handlers.UserQueryHandler
-		router          *gin.Engine
-		userRepo        repositories.UserRepository
-		userService     *services.UserService
+		router           *gin.Engine
+		userRepo         repositories.UserRepository
+		userService      *services.UserService
 	)
 
 	BeforeEach(func() {
 		gin.SetMode(gin.TestMode)
 		router = gin.New()
-		
+
 		// Ensure both services use SAME repository instance
 		userRepo = repositories.NewInMemoryUserRepository()
 		userQueryService = services.NewUserQueryService(userRepo)
 		userService = services.NewUserService(userRepo)
 		userQueryHandler = handlers.NewUserQueryHandler(userQueryService)
-		
+
 		// Setup routes
 		router.GET("/users/:id", userQueryHandler.GetUser)
 		router.GET("/users", userQueryHandler.ListUsers)
@@ -57,12 +57,12 @@ var _ = Describe("UserQueryHandler", func() {
 		// Generate unique ID for each test user
 		userID, err := values.GenerateUserID()
 		Expect(err).ToNot(HaveOccurred())
-		
+
 		// Use SAME user service that shares repository
 		user, err := userService.CreateUser(context.Background(), userID, email, name)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(user).ToNot(BeNil())
-		
+
 		return userID.String()
 	}
 
@@ -70,15 +70,15 @@ var _ = Describe("UserQueryHandler", func() {
 		It("should persist data across service calls", func() {
 			// This test verifies repository instance sharing
 			userID := createTestUser("debug@example.com", "Debug User")
-			
+
 			// Verify user exists in repository
 			retrievedUserID, err := values.NewUserID(userID)
 			Expect(err).ToNot(HaveOccurred())
-			
+
 			retrievedUser, err := userQueryService.GetUser(context.Background(), retrievedUserID)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(retrievedUser).ToNot(BeNil())
-			
+
 			Expect(retrievedUser.ID.String()).To(Equal(userID))
 			Expect(retrievedUser.GetEmail().String()).To(Equal("debug@example.com"))
 			Expect(retrievedUser.GetUserName().String()).To(Equal("Debug User"))
@@ -89,13 +89,13 @@ var _ = Describe("UserQueryHandler", func() {
 		Context("when user exists", func() {
 			It("should return user with 200 status", func() {
 				userID := createTestUser("test@example.com", "Test User")
-				
+
 				req, _ := http.NewRequest("GET", "/users/"+userID, nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				
+
 				Expect(w.Code).To(Equal(http.StatusOK))
-				
+
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
@@ -108,9 +108,9 @@ var _ = Describe("UserQueryHandler", func() {
 				req, _ := http.NewRequest("GET", "/users/non-existent-id", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				
+
 				Expect(w.Code).To(Equal(http.StatusNotFound))
-				
+
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
@@ -123,9 +123,9 @@ var _ = Describe("UserQueryHandler", func() {
 				req, _ := http.NewRequest("GET", "/users/invalid@id", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				
+
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
-				
+
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
@@ -139,18 +139,18 @@ var _ = Describe("UserQueryHandler", func() {
 			It("should return all users with 200 status", func() {
 				createTestUser("test1@example.com", "User 1")
 				createTestUser("test2@example.com", "User 2")
-				
+
 				req, _ := http.NewRequest("GET", "/users", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				
+
 				Expect(w.Code).To(Equal(http.StatusOK))
-				
+
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("data"))
-				
+
 				data := response["data"].([]interface{})
 				Expect(len(data)).To(BeNumerically(">=", 2))
 			})
@@ -161,14 +161,14 @@ var _ = Describe("UserQueryHandler", func() {
 				req, _ := http.NewRequest("GET", "/users", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				
+
 				Expect(w.Code).To(Equal(http.StatusOK))
-				
+
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("data"))
-				
+
 				data := response["data"].([]interface{})
 				Expect(len(data)).To(Equal(0))
 			})
@@ -179,18 +179,18 @@ var _ = Describe("UserQueryHandler", func() {
 		Context("when user exists with email", func() {
 			It("should return user with 200 status", func() {
 				createTestUser("search@example.com", "Search User")
-				
+
 				req, _ := http.NewRequest("GET", "/users/search?email=search@example.com", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				
+
 				Expect(w.Code).To(Equal(http.StatusOK))
-				
+
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("data"))
-				
+
 				data := response["data"].([]interface{})
 				Expect(len(data)).To(Equal(1))
 			})
@@ -201,9 +201,9 @@ var _ = Describe("UserQueryHandler", func() {
 				req, _ := http.NewRequest("GET", "/users/search", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				
+
 				Expect(w.Code).To(Equal(http.StatusBadRequest))
-				
+
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
@@ -216,14 +216,14 @@ var _ = Describe("UserQueryHandler", func() {
 				req, _ := http.NewRequest("GET", "/users/search?email=nonexistent@example.com", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				
+
 				Expect(w.Code).To(Equal(http.StatusOK))
-				
+
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("data"))
-				
+
 				data := response["data"].([]interface{})
 				Expect(len(data)).To(Equal(0))
 			})
@@ -237,19 +237,19 @@ var _ = Describe("UserQueryHandler", func() {
 				for i := 1; i <= 5; i++ {
 					createTestUser("user"+strconv.Itoa(i)+"@example.com", "User "+strconv.Itoa(i))
 				}
-				
+
 				req, _ := http.NewRequest("GET", "/users/paginated?page=1&limit=3", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				
+
 				Expect(w.Code).To(Equal(http.StatusOK))
-				
+
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("data"))
 				Expect(response).To(HaveKey("pagination"))
-				
+
 				data := response["data"].([]interface{})
 				pagination := response["pagination"].(map[string]interface{})
 				Expect(len(data)).To(Equal(3))
@@ -264,14 +264,14 @@ var _ = Describe("UserQueryHandler", func() {
 				req, _ := http.NewRequest("GET", "/users/paginated", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
-				
+
 				Expect(w.Code).To(Equal(http.StatusOK))
-				
+
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(response).To(HaveKey("pagination"))
-				
+
 				pagination := response["pagination"].(map[string]interface{})
 				Expect(pagination["page"]).To(Equal(float64(1)))
 				Expect(pagination["limit"]).To(Equal(float64(10)))
