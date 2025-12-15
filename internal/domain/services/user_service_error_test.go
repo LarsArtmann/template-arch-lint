@@ -54,6 +54,12 @@ func NewFailingUserRepository() *FailingUserRepository {
 
 func (r *FailingUserRepository) Save(ctx context.Context, user *entities.User) error {
 	r.saveCallCount++
+
+	// Check context cancellation first
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+
 	if r.saveError != nil {
 		return r.saveError
 	}
@@ -62,6 +68,12 @@ func (r *FailingUserRepository) Save(ctx context.Context, user *entities.User) e
 
 func (r *FailingUserRepository) FindByID(ctx context.Context, id values.UserID) (*entities.User, error) {
 	r.findByIDCallCount++
+
+	// Check context cancellation first
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
+
 	if r.findByIDError != nil {
 		return nil, r.findByIDError
 	}
