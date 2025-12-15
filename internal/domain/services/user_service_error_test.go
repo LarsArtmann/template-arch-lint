@@ -451,7 +451,8 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				user, err := userService.CreateUser(ctx, id, "test@example.com", "Test User")
 
 				Expect(user).To(BeNil())
-				Expect(err).To(Equal(repositories.ErrUserAlreadyExists))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("failed to save user: user already exists"))
 			})
 		})
 	})
@@ -464,7 +465,8 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				activeUsers, err := userService.FilterActiveUsers(ctx)
 
 				Expect(activeUsers).To(BeNil())
-				Expect(err).To(Equal(sql.ErrConnDone))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("failed to list users: sql: connection is already closed"))
 			})
 		})
 
