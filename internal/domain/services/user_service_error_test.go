@@ -501,7 +501,7 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				result := userService.CreateUserWithResult(ctx, id, "test@example.com", "Test User")
 
 				Expect(result.IsError()).To(BeTrue())
-				Expect(result.Error()).To(Equal(sql.ErrConnDone))
+				Expect(result.Error().Error()).To(ContainSubstring("failed to save user: sql: connection is already closed"))
 			})
 		})
 
@@ -535,7 +535,8 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 
 				updatedUser, err := userService.UpdateUser(ctx, id, "new@example.com", "New Name")
 				Expect(updatedUser).To(BeNil())
-				Expect(err).To(Equal(sql.ErrConnDone))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("failed to get for update user: sql: connection is already closed"))
 
 				// Service should handle this gracefully without corruption
 				Expect(failingRepo.findByIDCallCount).To(Equal(1))
@@ -552,8 +553,13 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				user, err := userService.CreateUser(ctx, id, "test@example.com", "Test User")
 
 				Expect(user).To(BeNil())
-				Expect(err).To(Equal(customError))
-				Expect(err.Error()).To(Equal("custom database error"))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("failed to save user: custom database error"))
+
+				// Check that we can still access the original error
+				var internalErr *domainErrors.InternalError
+				Expect(errors.As(err, &internalErr)).To(BeTrue())
+				Expect(internalErr.Cause()).To(Equal(customError))
 			})
 		})
 	})
