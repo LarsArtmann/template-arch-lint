@@ -128,6 +128,15 @@ linters:
     - wastedassign # Wasted assignment detection
     - zerologlint # Zerolog usage validation
 
+    # 🛡️ HIGH-VALUE BUG PREVENTION (2025)
+    - exhaustruct # Ensure all struct fields are initialized
+    - errchkjson # Check JSON encoding/decoding error handling
+    - musttag # Enforce struct tags for JSON/XML/YAML marshaling
+    - forcetypeassert # Prevent unsafe type assertions that panic
+    - predeclared # Prevent shadowing of predeclared identifiers
+    - reassign # Detect unnecessary variable reassignments
+    - nlreturn # Enforce newline before return statements
+
 # 🔧 LINTER SETTINGS - Maximum strictness
 linters-settings:
   # 🚨 TYPE SAFETY & STRUCTURED LOGGING - ZERO TOLERANCE
@@ -144,13 +153,16 @@ linters-settings:
       # 🚫 ERROR CENTRALIZATION - Direct error creation outside pkg/errors
       - pattern: 'errors\.New\('
         msg: "🚨 BANNED: Direct error creation. Use pkg/errors predefined types instead"
-        # Allow in pkg/errors only
+        exclude-godoc-examples: true
+        exclude: "^github.com/cockroachdb/errors|^pkg/errors|internal/domain/errors"
       - pattern: 'fmt\.Errorf\('
         msg: "🚨 BANNED: Direct error formatting. Use pkg/errors predefined types instead"
-        # Allow in pkg/errors only
+        exclude-godoc-examples: true
+        exclude: "^github.com/cockroachdb/errors|^pkg/errors|internal/domain/errors"
       - pattern: 'error\(\s*{'
         msg: "🚨 BANNED: Anonymous error structs. Use pkg/errors Error type instead"
-        # Allow in pkg/errors only
+        exclude-godoc-examples: true
+        exclude: "^github.com/cockroachdb/errors|^pkg/errors|internal/domain/errors"
 
       # Basic print statement bans
       - pattern: '^fmt\.Print.*$'

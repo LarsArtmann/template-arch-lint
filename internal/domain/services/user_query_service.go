@@ -159,8 +159,8 @@ func (s *userQueryServiceImpl) GetUserStats(ctx context.Context) (map[string]int
 	domainCount := make(map[string]int)
 	for _, user := range users {
 		email := user.GetEmail().String()
-		if atIndex := strings.Index(email, "@"); atIndex != -1 {
-			domain := email[atIndex+1:]
+		if _, after, ok := strings.Cut(email, "@"); ok {
+			domain := after
 			domainCount[domain]++
 		}
 	}
@@ -184,8 +184,8 @@ func (s *userQueryServiceImpl) GetUsersWithFilters(ctx context.Context, filters 
 	filtered := lo.Filter(users, func(user *entities.User, _ int) bool {
 		if filters.Domain != nil && *filters.Domain != "" {
 			email := user.GetEmail().String()
-			if atIndex := strings.Index(email, "@"); atIndex != -1 {
-				domain := email[atIndex+1:]
+			if _, after, ok := strings.Cut(email, "@"); ok {
+				domain := after
 				if domain != *filters.Domain {
 					return false
 				}
@@ -233,8 +233,8 @@ func (s *userQueryServiceImpl) GetUsersByEmailDomains(ctx context.Context, domai
 
 	for _, user := range users {
 		email := user.GetEmail().String()
-		if atIndex := strings.Index(email, "@"); atIndex != -1 {
-			userDomain := strings.ToLower(email[atIndex+1:])
+		if _, after, ok := strings.Cut(email, "@"); ok {
+			userDomain := strings.ToLower(after)
 			if domainSet[userDomain] {
 				result[userDomain] = append(result[userDomain], user)
 			}
