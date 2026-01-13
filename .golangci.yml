@@ -1103,23 +1103,16 @@ linters-settings:
   exhaustruct:
     # Exclude structs from external libraries and generated code
     exclude:
-      - "std" # Standard library
-      - "encoding/json.*"
+      - "std" # Standard library (includes all stdlib packages)
+      - "net/http"
+      - "context"
+      - "time"
+      - "database/sql"
+      - "github.com/charmbracelet/log"
       - "github.com/.*"
       - "golang.org/x/.*"
       - "google.golang.org/.*"
       - "go.opentelemetry.io/.*"
-    # Specific struct exclusions (common false positives)
-    struct-exclusions:
-      - "http\\.Request"
-      - "http\\.Response"
-      - "context\\.Context"
-      - "time\\.Time"
-      - "net\\.http\\.Server"
-      - "net\\.http\\.Client"
-      - "database/sql\\.DB"
-      - "database/sql\\.Tx"
-      - "log\\.Options"
 
   # errchkjson - Check JSON encoding/decoding error handling
   errchkjson:
@@ -1217,7 +1210,7 @@ issues:
         - exhaustruct
 
     # Allow exhaustruct for standard library structs in main
-    - path: ^(main\.go|cmd/.+)$
+    - path: cmd/main\.go
       linters:
         - exhaustruct
 
