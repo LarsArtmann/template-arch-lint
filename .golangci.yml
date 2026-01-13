@@ -137,6 +137,13 @@ linters:
     - reassign # Detect unnecessary variable reassignments
     - nlreturn # Enforce newline before return statements
 
+# 🎨 FORMATTERS - Code formatting (auto-fixable)
+formatters:
+  enable:
+    - gofumpt # Stricter gofmt with additional rules
+    - goimports # Format imports and add missing ones
+  # Note: These are enabled but run separately via 'just fix' to avoid performance impact
+
 # 🔧 LINTER SETTINGS - Maximum strictness
 linters-settings:
   # 🚨 TYPE SAFETY & STRUCTURED LOGGING - ZERO TOLERANCE
@@ -1090,6 +1097,69 @@ linters-settings:
     suite-extra-assert-call:
       mode: remove
 
+  # 🆕 HIGH-VALUE BUG PREVENTION LINTER SETTINGS (2025)
+
+  # exhaustruct - Ensure all struct fields are initialized
+  exhaustruct:
+    # Exclude structs from external libraries and generated code
+    exclude:
+      - "std" # Standard library
+      - "encoding/json.*"
+      - "github.com/.*"
+      - "golang.org/x/.*"
+      - "google.golang.org/.*"
+      - "go.opentelemetry.io/.*"
+    # Specific struct exclusions (common false positives)
+    struct-exclusions:
+      - "http\\.Request"
+      - "http\\.Response"
+      - "context\\.Context"
+      - "time\\.Time"
+      - "net\\.http\\.Server"
+      - "net\\.http\\.Client"
+      - "database/sql\\.DB"
+      - "database/sql\\.Tx"
+      - "log\\.Options"
+
+  # errchkjson - Check JSON encoding/decoding error handling
+  errchkjson:
+    # Only check encoding/json functions, not third-party libraries
+    check-encoding-structures: true
+    check-no-exported-fields: false
+    check-strings: true
+
+  # musttag - Enforce struct tags for JSON/XML/YAML marshaling
+  musttag:
+    # Require tags for exported structs in certain packages
+    functions:
+      - go\.Marshal
+      - go\.Unmarshal
+      - \(.*\.Encoder\)\.Encode
+      - \(.*\.Decoder\)\.Decode
+
+  # forcetypeassert - Prevent unsafe type assertions that panic
+  forcetypeassert:
+    # Accept type assertions that are guaranteed to succeed
+    accept-assertions-to-const: true
+    ignore-test: true # Allow in tests for type checking
+
+  # predeclared - Prevent shadowing of predeclared identifiers
+  predeclared:
+    # Ignore specific contexts where shadowing is acceptable
+    ignore: ""
+
+  # reassign - Detect unnecessary variable reassignments
+  reassign:
+    # Patterns to ignore
+    patterns: []
+
+  # nlreturn - Enforce newline before return statements
+  nlreturn:
+    # Block size - minimum lines before requiring newline before return
+    block-size: 2
+    # Don't require newline if return is at the end of a small block
+    short-block: 3
+
 # 🚨 ISSUES CONFIGURATION
 # Note: Formatters (gofumpt, goimports) should be run separately via 'just fix'
 issues:
@@ -1138,6 +1208,33 @@ issues:
     - path: ".*_gen\\.go$|.*\\.pb\\.go$|.*_templ\\.go$"
       linters:
         - modernize
+
+    # 🆕 Exclusions for new bug prevention linters (2025)
+
+    # Allow partial struct initialization in tests and main
+    - path: (_test\.go|main\.go|cmd/.+)
+      linters:
+        - exhaustruct
+
+    # Allow exhaustruct for standard library structs in main
+    - path: ^(main\.go|cmd/.+)$
+      linters:
+        - exhaustruct
+
+    # Allow type assertions in tests
+    - path: _test\.go
+      linters:
+        - forcetypeassert
+
+    # Allow shorter blocks in tests
+    - path: _test\.go
+      linters:
+        - nlreturn
+
+    # Allow reassignment in certain contexts
+    - path: _test\.go
+      linters:
+        - reassign
 
   exclude-dirs:
     - vendor
