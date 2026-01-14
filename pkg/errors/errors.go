@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -215,6 +216,7 @@ func (e *InternalError) Error() string {
 	if e.cause != nil {
 		return fmt.Sprintf("%s: %v", e.message, e.cause)
 	}
+
 	return e.message
 }
 
@@ -255,7 +257,7 @@ func NewDatabaseError(operation string, cause error, retryable bool) *DatabaseEr
 			details: ErrorDetails{
 				Extra: map[string]string{
 					"operation": operation,
-					"retryable": fmt.Sprintf("%t", retryable),
+					"retryable": strconv.FormatBool(retryable),
 				},
 			},
 		},
@@ -296,7 +298,7 @@ func NewNetworkError(service string, cause error, retryable bool) *NetworkError 
 			details: ErrorDetails{
 				Extra: map[string]string{
 					"service":   service,
-					"retryable": fmt.Sprintf("%t", retryable),
+					"retryable": strconv.FormatBool(retryable),
 				},
 			},
 		},
@@ -361,6 +363,7 @@ func (e *ConfigurationError) IsRetryable() bool {
 // IsDomainError checks if an error is a domain error.
 func IsDomainError(err error) bool {
 	var domainErr DomainError
+
 	return errors.As(err, &domainErr)
 }
 
@@ -368,6 +371,7 @@ func IsDomainError(err error) bool {
 func AsValidationError(err error) (*ValidationError, bool) {
 	var ve *ValidationError
 	ok := errors.As(err, &ve)
+
 	return ve, ok
 }
 
@@ -375,6 +379,7 @@ func AsValidationError(err error) (*ValidationError, bool) {
 func AsNotFoundError(err error) (*NotFoundError, bool) {
 	var nfe *NotFoundError
 	ok := errors.As(err, &nfe)
+
 	return nfe, ok
 }
 
@@ -382,6 +387,7 @@ func AsNotFoundError(err error) (*NotFoundError, bool) {
 func AsConflictError(err error) (*ConflictError, bool) {
 	var ce *ConflictError
 	ok := errors.As(err, &ce)
+
 	return ce, ok
 }
 
@@ -389,6 +395,7 @@ func AsConflictError(err error) (*ConflictError, bool) {
 func AsInternalError(err error) (*InternalError, bool) {
 	var ie *InternalError
 	ok := errors.As(err, &ie)
+
 	return ie, ok
 }
 
@@ -396,6 +403,7 @@ func AsInternalError(err error) (*InternalError, bool) {
 func AsDatabaseError(err error) (*DatabaseError, bool) {
 	var de *DatabaseError
 	ok := errors.As(err, &de)
+
 	return de, ok
 }
 
@@ -403,6 +411,7 @@ func AsDatabaseError(err error) (*DatabaseError, bool) {
 func AsNetworkError(err error) (*NetworkError, bool) {
 	var ne *NetworkError
 	ok := errors.As(err, &ne)
+
 	return ne, ok
 }
 
@@ -410,12 +419,14 @@ func AsNetworkError(err error) (*NetworkError, bool) {
 func AsConfigurationError(err error) (*ConfigurationError, bool) {
 	var ce *ConfigurationError
 	ok := errors.As(err, &ce)
+
 	return ce, ok
 }
 
 // IsInfrastructureError checks if error is an infrastructure error.
 func IsInfrastructureError(err error) bool {
 	var infraErr InfrastructureError
+
 	return errors.As(err, &infraErr)
 }
 
@@ -446,7 +457,7 @@ func NewDomainNotFoundError(resource, id string) *NotFoundError {
 
 // NewDomainConflictError creates a new domain conflict error (alias for NewConflictError).
 func NewDomainConflictError(resource, reason string) *ConflictError {
-	return NewConflictError(fmt.Sprintf("%s conflict", resource), ErrorDetails{
+	return NewConflictError(resource+" conflict", ErrorDetails{
 		Extra: map[string]string{
 			"resource": resource,
 			"reason":   reason,
@@ -456,19 +467,36 @@ func NewDomainConflictError(resource, reason string) *ConflictError {
 
 // NewInfrastructureError creates a new infrastructure error based on the type.
 func NewInfrastructureError(resource, operation string, cause error) InfrastructureError {
+	resourceLower := strings.ToLower(resource)
+	operationLower := strings.ToLower(operation)
+
 	// Try to determine specific error type based on the context
-	if strings.Contains(strings.ToLower(resource), "database") || strings.Contains(strings.ToLower(operation), "query") || strings.Contains(strings.ToLower(operation), "insert") || strings.Contains(strings.ToLower(operation), "update") || strings.Contains(strings.ToLower(operation), "delete") {
+	if isDatabaseOperation(resourceLower, operationLower) {
 		return NewDatabaseError(operation, cause, false)
 	}
 
-	if strings.Contains(strings.ToLower(resource), "network") || strings.Contains(strings.ToLower(operation), "http") || strings.Contains(strings.ToLower(operation), "request") {
+	if isNetworkOperation(resourceLower, operationLower) {
 		return NewNetworkError(resource, cause, true)
 	}
 
-	if strings.Contains(strings.ToLower(resource), "config") || strings.Contains(strings.ToLower(operation), "configuration") {
+	if strings.Contains(resourceLower, "config") || strings.Contains(operationLower, "configuration") {
 		return NewConfigurationError(resource, cause.Error())
 	}
 
 	// Default to internal error
 	return NewInternalError(fmt.Sprintf("%s %s failed", resource, operation), cause)
+}
+
+func isDatabaseOperation(resource, operation string) bool {
+	return strings.Contains(resource, "database") ||
+		strings.Contains(operation, "query") ||
+		strings.Contains(operation, "insert") ||
+		strings.Contains(operation, "update") ||
+		strings.Contains(operation, "delete")
+}
+
+func isNetworkOperation(resource, operation string) bool {
+	return strings.Contains(resource, "network") ||
+		strings.Contains(operation, "http") ||
+		strings.Contains(operation, "request")
 }

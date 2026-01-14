@@ -3,8 +3,8 @@ package values
 
 import (
 	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"regexp"
 	"time"
 
@@ -24,7 +24,7 @@ func NewSessionToken(duration time.Duration) (SessionToken, error) {
 		return SessionToken{}, errors.NewInfrastructureError("session_token", "generate", err)
 	}
 
-	token := fmt.Sprintf("%x", bytes)
+	token := hex.EncodeToString(bytes)
 	expires := time.Now().Add(duration)
 
 	return SessionToken{
@@ -116,6 +116,7 @@ func (t *SessionToken) UnmarshalJSON(data []byte) error {
 	}
 
 	*t = token
+
 	return nil
 }
 

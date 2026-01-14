@@ -45,6 +45,7 @@ func (e Email) Domain() string {
 	if len(parts) != 2 {
 		return ""
 	}
+
 	return parts[1]
 }
 
@@ -54,6 +55,7 @@ func (e Email) LocalPart() string {
 	if len(parts) != 2 {
 		return ""
 	}
+
 	return parts[0]
 }
 
@@ -95,6 +97,7 @@ func validateEmailNotEmpty(email string) error {
 	if email == "" {
 		return errors.NewRequiredFieldError("email")
 	}
+
 	return nil
 }
 
@@ -105,6 +108,7 @@ func validateEmailLength(email string) error {
 	if len(email) < 5 {
 		return errors.NewValidationError("email", "email too short (min 5 characters)")
 	}
+
 	return nil
 }
 

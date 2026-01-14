@@ -53,6 +53,7 @@ func NewLogLevel(value string) (LogLevel, error) {
 	if err := normalized.Validate(); err != nil {
 		return "", err
 	}
+
 	return normalized, nil
 }
 
@@ -88,6 +89,7 @@ func (l LogLevel) ValidLevels() []string {
 	for i, level := range validLevels {
 		levels[i] = string(level)
 	}
+
 	return levels
 }
 
@@ -111,6 +113,7 @@ func (l LogLevel) Priority() int {
 	if priority, exists := getLogLevelHierarchy()[l]; exists {
 		return priority
 	}
+
 	return -1 // Invalid level
 }
 
@@ -142,6 +145,7 @@ func (l *LogLevel) UnmarshalText(text []byte) error {
 		return err
 	}
 	*l = level
+
 	return nil
 }
 

@@ -14,24 +14,25 @@ import (
 	pkgerrors "github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
-// UserQueryHandler handles read operations for users using CQRS pattern
+// UserQueryHandler handles read operations for users using CQRS pattern.
 type UserQueryHandler struct {
 	userQueryService services.UserQueryService
 }
 
-// NewUserQueryHandler creates a new user query handler
+// NewUserQueryHandler creates a new user query handler.
 func NewUserQueryHandler(userQueryService services.UserQueryService) *UserQueryHandler {
 	return &UserQueryHandler{
 		userQueryService: userQueryService,
 	}
 }
 
-// GetUser retrieves a user by ID using query service
+// GetUser retrieves a user by ID using query service.
 func (h *UserQueryHandler) GetUser(c *gin.Context) {
 	idParam := c.Param("id")
 	userID, err := values.NewUserID(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+
 		return
 	}
 
@@ -40,31 +41,35 @@ func (h *UserQueryHandler) GetUser(c *gin.Context) {
 		_, isNotFound := pkgerrors.AsNotFoundError(err)
 		if isNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
+
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
-// ListUsers retrieves all users using query service
+// ListUsers retrieves all users using query service.
 func (h *UserQueryHandler) ListUsers(c *gin.Context) {
 	users, err := h.userQueryService.ListUsers(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve users"})
+
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": users})
 }
 
-// SearchUsers searches for users by email using query service
+// SearchUsers searches for users by email using query service.
 func (h *UserQueryHandler) SearchUsers(c *gin.Context) {
 	email := c.Query("email")
 	if email == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Email query parameter is required"})
+
 		return
 	}
 
@@ -73,26 +78,30 @@ func (h *UserQueryHandler) SearchUsers(c *gin.Context) {
 		_, isNotFound := pkgerrors.AsNotFoundError(err)
 		if isNotFound {
 			c.JSON(http.StatusOK, gin.H{"data": []any{}})
+
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to search users"})
+
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": []*entities.User{user}})
 }
 
-// GetUsersByDomain retrieves users by email domain using query service
+// GetUsersByDomain retrieves users by email domain using query service.
 func (h *UserQueryHandler) GetUsersByDomain(c *gin.Context) {
 	domain := c.Param("domain")
 	if domain == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Domain parameter is required"})
+
 		return
 	}
 
 	users, err := h.userQueryService.ListUsers(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve users"})
+
 		return
 	}
 
@@ -102,31 +111,35 @@ func (h *UserQueryHandler) GetUsersByDomain(c *gin.Context) {
 		// Simple domain extraction - can be improved with proper regex
 		if strings.Contains(userEmail, "@") {
 			parts := strings.Split(userEmail, "@")
+
 			return len(parts) == 2 && parts[1] == domain
 		}
+
 		return false
 	})
 
 	c.JSON(http.StatusOK, gin.H{"data": filteredUsers})
 }
 
-// GetUserStats retrieves user statistics using query service
+// GetUserStats retrieves user statistics using query service.
 func (h *UserQueryHandler) GetUserStats(c *gin.Context) {
 	stats, err := h.userQueryService.GetUserStats(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user statistics"})
+
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": stats})
 }
 
-// GetActiveUsers retrieves active users using query service
+// GetActiveUsers retrieves active users using query service.
 func (h *UserQueryHandler) GetActiveUsers(c *gin.Context) {
 	// Use filters to get active users
 	users, err := h.userQueryService.ListUsers(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve active users"})
+
 		return
 	}
 
@@ -138,7 +151,7 @@ func (h *UserQueryHandler) GetActiveUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": activeUsers})
 }
 
-// GetUsersWithPagination retrieves users with pagination using query service
+// GetUsersWithPagination retrieves users with pagination using query service.
 func (h *UserQueryHandler) GetUsersWithPagination(c *gin.Context) {
 	// Parse pagination parameters
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -154,6 +167,7 @@ func (h *UserQueryHandler) GetUsersWithPagination(c *gin.Context) {
 	users, err := h.userQueryService.ListUsers(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve users"})
+
 		return
 	}
 
@@ -167,6 +181,7 @@ func (h *UserQueryHandler) GetUsersWithPagination(c *gin.Context) {
 			"data":       []*entities.User{},
 			"pagination": gin.H{"page": page, "limit": limit, "total": total},
 		})
+
 		return
 	}
 

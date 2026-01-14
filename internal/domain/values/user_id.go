@@ -90,6 +90,7 @@ func validateUserIDNotEmpty(id string) error {
 	if id == "" {
 		return errors.NewRequiredFieldError("user ID")
 	}
+
 	return nil
 }
 
@@ -101,6 +102,7 @@ func validateUserIDWhitespace(original, normalized string) error {
 	if strings.ContainsAny(normalized, " \t\n\r") {
 		return errors.NewValidationError("userID", "user ID cannot contain whitespace")
 	}
+
 	return nil
 }
 
@@ -111,6 +113,7 @@ func validateUserIDLength(id string) error {
 	if len(id) > 100 {
 		return errors.NewValidationError("userID", "user ID too long (maximum 100 characters)")
 	}
+
 	return nil
 }
 
@@ -120,6 +123,7 @@ func validateUserIDCharacters(id string) error {
 			return errors.NewValidationError("userID", "user ID can only contain letters, numbers, hyphens, and underscores")
 		}
 	}
+
 	return nil
 }
 
@@ -148,6 +152,7 @@ func (u *UserID) UnmarshalJSON(data []byte) error {
 	}
 
 	*u = userID
+
 	return nil
 }
 
@@ -160,6 +165,7 @@ func (u UserID) Value() (driver.Value, error) {
 func (u *UserID) Scan(value any) error {
 	if value == nil {
 		*u = UserID{}
+
 		return nil
 	}
 
@@ -170,6 +176,7 @@ func (u *UserID) Scan(value any) error {
 			return err
 		}
 		*u = userID
+
 		return nil
 	case []byte:
 		userID, err := NewUserID(string(v))
@@ -177,6 +184,7 @@ func (u *UserID) Scan(value any) error {
 			return err
 		}
 		*u = userID
+
 		return nil
 	default:
 		return errors.NewValidationError("user_id", fmt.Sprintf("cannot scan %T into UserID", value))

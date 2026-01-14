@@ -13,8 +13,6 @@ run:
   modules-download-mode: readonly
   allow-parallel-runners: true
   go: "1.25"
-  env:
-    - GODEBUG=gotypesalias=1
 
 # 🔥 LINTERS - Maximum enforcement (essential set)
 linters:
@@ -145,7 +143,7 @@ formatters:
   # Note: These are enabled but run separately via 'just fix' to avoid performance impact
 
 # 🔧 LINTER SETTINGS - Maximum strictness
-linters-settings:
+settings:
   # 🚨 TYPE SAFETY & STRUCTURED LOGGING - ZERO TOLERANCE
   forbidigo:
     forbid:
@@ -1159,12 +1157,6 @@ issues:
   max-issues-per-linter: 0
   max-same-issues: 0
 
-  exclude-use-default: false
-  exclude-rules-use-default: false
-
-  # Common false positives preset
-  exclude-dir-use-default: false
-
   exclude-rules:
     # Allow panics only in main/cmd
     - path: ^(main\.go|cmd/.+)$
@@ -1231,7 +1223,7 @@ issues:
 
   exclude-dirs:
     - vendor
-    - node_modules # Frontend dependencies
+    - node_modules
     - testdata
     - examples
     - docs
@@ -1248,6 +1240,4 @@ issues:
 
 # 📊 OUTPUT CONFIGURATION
 output:
-  print-issued-lines: true
-  print-linter-name: true
   sort-results: true

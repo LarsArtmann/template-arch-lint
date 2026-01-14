@@ -63,6 +63,7 @@ func (r *InMemoryUserRepository) FindByID(_ context.Context, id values.UserID) (
 
 	// Return a copy to prevent external modifications
 	userCopy := *user
+
 	return &userCopy, nil
 }
 
@@ -75,6 +76,7 @@ func (r *InMemoryUserRepository) FindByEmail(_ context.Context, email string) (*
 		if user.GetEmail().String() == email {
 			// Return a copy to prevent external modifications
 			userCopy := *user
+
 			return &userCopy, nil
 		}
 	}
@@ -91,6 +93,7 @@ func (r *InMemoryUserRepository) FindByUsername(_ context.Context, username stri
 		if user.GetUserName().String() == username {
 			// Return a copy to prevent external modifications
 			userCopy := *user
+
 			return &userCopy, nil
 		}
 	}
@@ -108,6 +111,7 @@ func (r *InMemoryUserRepository) Delete(_ context.Context, id values.UserID) err
 	}
 
 	delete(r.users, id)
+
 	return nil
 }
 

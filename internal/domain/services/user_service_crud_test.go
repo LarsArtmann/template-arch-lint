@@ -35,6 +35,7 @@ var _ = Describe("UserService CRUD Operations", func() {
 	createTestUserID := func(id string) values.UserID {
 		userID, err := values.NewUserID(id)
 		Expect(err).ToNot(HaveOccurred())
+
 		return userID
 	}
 

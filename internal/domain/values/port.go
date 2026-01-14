@@ -30,6 +30,7 @@ func NewPort(value int) (Port, error) {
 	if err := port.Validate(); err != nil {
 		return 0, err
 	}
+
 	return port, nil
 }
 
@@ -55,6 +56,7 @@ func (p Port) Validate() error {
 	if p > MaxPort {
 		return domainerrors.NewValidationError("port", fmt.Sprintf("port %d is too high, maximum is %d", p, MaxPort))
 	}
+
 	return nil
 }
 
@@ -86,6 +88,7 @@ func (p Port) IsEphemeral() bool {
 // IsDevelopment returns true if this is a common development port.
 func (p Port) IsDevelopment() bool {
 	developmentPorts := []Port{3000, 3001, 4200, 5000, 8000, 8080, 8443, 9000}
+
 	return slices.Contains(developmentPorts, p)
 }
 
@@ -101,5 +104,6 @@ func (p *Port) UnmarshalText(text []byte) error {
 		return err
 	}
 	*p = port
+
 	return nil
 }

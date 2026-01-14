@@ -23,6 +23,7 @@ func newMockRepositoryForBench() *mockRepositoryForBench {
 
 func (m *mockRepositoryForBench) Save(_ context.Context, user *entities.User) error {
 	m.users[user.ID.String()] = user
+
 	return nil
 }
 
@@ -31,6 +32,7 @@ func (m *mockRepositoryForBench) FindByID(_ context.Context, id values.UserID) (
 	if !exists {
 		return nil, repositories.ErrUserNotFound
 	}
+
 	return user, nil
 }
 
@@ -40,6 +42,7 @@ func (m *mockRepositoryForBench) FindByEmail(_ context.Context, email string) (*
 			return user, nil
 		}
 	}
+
 	return nil, repositories.ErrUserNotFound
 }
 
@@ -49,6 +52,7 @@ func (m *mockRepositoryForBench) FindByUsername(_ context.Context, username stri
 			return user, nil
 		}
 	}
+
 	return nil, repositories.ErrUserNotFound
 }
 
@@ -57,11 +61,13 @@ func (m *mockRepositoryForBench) List(_ context.Context) ([]*entities.User, erro
 	for _, user := range m.users {
 		users = append(users, user)
 	}
+
 	return users, nil
 }
 
 func (m *mockRepositoryForBench) Delete(_ context.Context, id values.UserID) error {
 	delete(m.users, id.String())
+
 	return nil
 }
 

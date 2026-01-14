@@ -9,6 +9,7 @@ func WrapServiceError(operation string, err error) error {
 	if err == nil {
 		return nil
 	}
+
 	return NewInternalError("failed to "+operation, err)
 }
 
@@ -17,6 +18,7 @@ func WrapRepoError(operation, entity string, err error) error {
 	if err == nil {
 		return nil
 	}
+
 	return NewInternalError(fmt.Sprintf("failed to %s %s", operation, entity), err)
 }
 
@@ -25,6 +27,7 @@ func WrapValidationError(entity string, err error) error {
 	if err == nil {
 		return nil
 	}
+
 	return NewValidationError(entity, fmt.Sprintf("validation failed: %v", err))
 }
 
@@ -33,5 +36,6 @@ func WrapBusinessRuleError(rule string, err error) error {
 	if err == nil {
 		return nil
 	}
+
 	return NewValidationError(rule, fmt.Sprintf("business rule validation failed: %v", err))
 }

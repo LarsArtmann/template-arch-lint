@@ -27,6 +27,7 @@ func NewUserHandler(userService *services.UserService) *UserHandler {
 func generateUserID() string {
 	bytes := make([]byte, 8)
 	rand.Read(bytes)
+
 	return hex.EncodeToString(bytes)
 }
 
@@ -42,6 +43,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 			"error":   "invalid_request_format",
 			"message": err.Error(),
 		})
+
 		return
 	}
 
@@ -53,6 +55,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 			"error":   "user_id_generation_failed",
 			"message": "Failed to generate user ID",
 		})
+
 		return
 	}
 
@@ -63,6 +66,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 			"error":   "user_creation_failed",
 			"message": "Failed to create user",
 		})
+
 		return
 	}
 
@@ -85,6 +89,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 			"error":   "invalid_user_id",
 			"message": "Invalid user ID format",
 		})
+
 		return
 	}
 
@@ -95,6 +100,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 			"error":   "user_not_found",
 			"message": "User not found",
 		})
+
 		return
 	}
 
@@ -117,6 +123,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 			"error":   "invalid_user_id",
 			"message": "Invalid user ID format",
 		})
+
 		return
 	}
 
@@ -130,6 +137,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 			"error":   "invalid_request_format",
 			"message": err.Error(),
 		})
+
 		return
 	}
 
@@ -140,6 +148,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 			"error":   "user_update_failed",
 			"message": "Failed to update user",
 		})
+
 		return
 	}
 
@@ -162,6 +171,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 			"error":   "invalid_user_id",
 			"message": "Invalid user ID format",
 		})
+
 		return
 	}
 
@@ -172,6 +182,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 			"error":   "user_deletion_failed",
 			"message": "Failed to delete user",
 		})
+
 		return
 	}
 

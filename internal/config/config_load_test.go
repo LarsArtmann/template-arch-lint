@@ -103,6 +103,7 @@ func runLoadConfigTest(t *testing.T, tt struct {
 	config, err := LoadConfig(tt.configPath)
 	if (err != nil) != tt.wantErr {
 		t.Errorf("LoadConfig() error = %v, wantErr %v", err, tt.wantErr)
+
 		return
 	}
 

@@ -39,6 +39,7 @@ var _ = Describe("UserService", func() {
 	createTestUserID := func(id string) values.UserID {
 		userID, err := values.NewUserID(id)
 		Expect(err).ToNot(HaveOccurred())
+
 		return userID
 	}
 
@@ -59,12 +60,14 @@ var _ = Describe("UserService", func() {
 		id := createTestUserID(userIDSuffix)
 		user, err := userService.CreateUser(ctx, id, email, name)
 		Expect(err).ToNot(HaveOccurred())
+
 		return user
 	}
 
 	// Additional test helpers to eliminate duplication
 	createTestUser := func(idSuffix, email, name string) (*entities.User, error) {
 		id := createTestUserID(idSuffix)
+
 		return userService.CreateUser(ctx, id, email, name)
 	}
 
@@ -464,6 +467,7 @@ var _ = Describe("UserService", func() {
 							id, err := values.NewUserID(fmt.Sprintf("concurrent-user-%d", index))
 							if err != nil {
 								results <- err
+
 								return
 							}
 							_, err = userService.CreateUser(ctx, id, email, name)

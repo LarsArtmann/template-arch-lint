@@ -4,7 +4,6 @@ package values
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
 	"slices"
 	"strings"
 
@@ -34,6 +33,7 @@ func AllUserStatuses() []UserStatus {
 // IsValid checks if the user status is valid.
 func (s UserStatus) IsValid() bool {
 	validStatuses := AllUserStatuses()
+
 	return slices.Contains(validStatuses, s)
 }
 
@@ -66,10 +66,11 @@ func (s *UserStatus) UnmarshalJSON(data []byte) error {
 
 	status := UserStatus(strings.ToLower(str))
 	if !status.IsValid() {
-		return errors.NewDomainValidationError("user_status", fmt.Sprintf("invalid status: %s", str))
+		return errors.NewDomainValidationError("user_status", "invalid status: "+str)
 	}
 
 	*s = status
+
 	return nil
 }
 
@@ -77,6 +78,7 @@ func (s *UserStatus) UnmarshalJSON(data []byte) error {
 func (s *UserStatus) Scan(value any) error {
 	if value == nil {
 		*s = UserStatusInactive
+
 		return nil
 	}
 
@@ -92,10 +94,11 @@ func (s *UserStatus) Scan(value any) error {
 
 	status := UserStatus(strings.ToLower(str))
 	if !status.IsValid() {
-		return errors.NewDomainValidationError("user_status", fmt.Sprintf("invalid status: %s", str))
+		return errors.NewDomainValidationError("user_status", "invalid status: "+str)
 	}
 
 	*s = status
+
 	return nil
 }
 
@@ -125,6 +128,7 @@ func AllUserRoles() []UserRole {
 // IsValid checks if the user role is valid.
 func (r UserRole) IsValid() bool {
 	validRoles := AllUserRoles()
+
 	return slices.Contains(validRoles, r)
 }
 
@@ -162,10 +166,11 @@ func (r *UserRole) UnmarshalJSON(data []byte) error {
 
 	role := UserRole(strings.ToLower(str))
 	if !role.IsValid() {
-		return errors.NewDomainValidationError("user_role", fmt.Sprintf("invalid role: %s", str))
+		return errors.NewDomainValidationError("user_role", "invalid role: "+str)
 	}
 
 	*r = role
+
 	return nil
 }
 
@@ -173,6 +178,7 @@ func (r *UserRole) UnmarshalJSON(data []byte) error {
 func (r *UserRole) Scan(value any) error {
 	if value == nil {
 		*r = UserRoleGuest
+
 		return nil
 	}
 
@@ -188,10 +194,11 @@ func (r *UserRole) Scan(value any) error {
 
 	role := UserRole(strings.ToLower(str))
 	if !role.IsValid() {
-		return errors.NewDomainValidationError("user_role", fmt.Sprintf("invalid role: %s", str))
+		return errors.NewDomainValidationError("user_role", "invalid role: "+str)
 	}
 
 	*r = role
+
 	return nil
 }
 

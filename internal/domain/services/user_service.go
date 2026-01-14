@@ -147,6 +147,7 @@ func (s *UserService) getUserForUpdate(ctx context.Context, id values.UserID) (*
 	if err != nil {
 		return nil, domainerrors.WrapRepoError("get for update", "user", err)
 	}
+
 	return user, nil
 }
 
@@ -178,6 +179,7 @@ func (s *UserService) checkEmailAvailability(ctx context.Context, email string) 
 	if existingUser != nil {
 		return repositories.ErrUserAlreadyExists
 	}
+
 	return nil
 }
 
@@ -187,6 +189,7 @@ func (s *UserService) validateNameUpdate(user *entities.User, name string) error
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -246,6 +249,7 @@ func (s *UserService) FilterActiveUsers(ctx context.Context) ([]*entities.User, 
 	activeUsers := lo.Filter(users, func(user *entities.User, _ int) bool {
 		// Business rule: Users created in the last 30 days are considered active
 		thirtyDaysAgo := time.Now().AddDate(0, 0, -30)
+
 		return user.Created.After(thirtyDaysAgo)
 	})
 
@@ -292,6 +296,7 @@ func (s *UserService) validateUserInputsResult(email, name string) mo.Result[str
 	if err := s.validateUserName(name); err != nil {
 		return mo.Err[struct{}](domainerrors.NewValidationError("name", err.Error()))
 	}
+
 	return mo.Ok(struct{}{})
 }
 
@@ -304,6 +309,7 @@ func (s *UserService) checkUserNotExistsResult(ctx context.Context, email string
 	if existingUser != nil {
 		return mo.Err[*entities.User](repositories.ErrUserAlreadyExists)
 	}
+
 	return mo.Ok[*entities.User](nil)
 }
 
@@ -375,6 +381,7 @@ func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) 
 	// Extract email domains using functional operations with lo.Ternary
 	domains := lo.Map(users, func(user *entities.User, _ int) string {
 		parts := strings.Split(user.GetEmail().String(), "@")
+
 		return lo.Ternary(len(parts) > 1, parts[1], "unknown")
 	})
 
@@ -388,6 +395,7 @@ func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) 
 		days := max(
 			// Ensure non-negative days
 			int(now.Sub(user.Created).Hours()/24), 0)
+
 		return acc + days
 	}, 0)
 
@@ -414,6 +422,7 @@ func (s *UserService) GetUsersWithFilters(ctx context.Context, filters UserFilte
 		domainStr := *filters.Domain
 		filteredUsers = lo.Filter(filteredUsers, func(user *entities.User, _ int) bool {
 			parts := strings.Split(user.GetEmail().String(), "@")
+
 			return len(parts) > 1 && parts[1] == domainStr
 		})
 	}
@@ -447,6 +456,7 @@ func (s *UserService) ValidateUserBatchWithEither(users []*entities.User) mo.Eit
 	if len(validationErrors) > 0 {
 		return mo.Left[[]error, []values.UserID](validationErrors)
 	}
+
 	return mo.Right[[]error, []values.UserID](validUsers)
 }
 
@@ -460,6 +470,7 @@ func (s *UserService) GetUsersByEmailDomains(ctx context.Context, domains []stri
 	// Group users by email domain using lo.GroupBy
 	usersByDomain := lo.GroupBy(users, func(user *entities.User) string {
 		parts := strings.Split(user.GetEmail().String(), "@")
+
 		return lo.Ternary(len(parts) > 1, parts[1], "unknown")
 	})
 
@@ -470,6 +481,7 @@ func (s *UserService) GetUsersByEmailDomains(ctx context.Context, domains []stri
 
 	filteredUsers := lo.PickBy(usersByDomain, func(domain string, _ []*entities.User) bool {
 		_, exists := requestedDomainsSet[domain]
+
 		return exists
 	})
 
@@ -520,6 +532,7 @@ func (s *UserService) validateNameNotEmpty(name string) error {
 	if name == "" {
 		return domainerrors.NewRequiredFieldError("name")
 	}
+
 	return nil
 }
 
@@ -530,6 +543,7 @@ func (s *UserService) validateNameLength(name string) error {
 	if len(name) > 100 {
 		return domainerrors.NewValidationError("name", "too long (max 100 characters)")
 	}
+
 	return nil
 }
 
@@ -537,6 +551,7 @@ func (s *UserService) validateNameWhitespace(name string) error {
 	if strings.TrimSpace(name) != name {
 		return domainerrors.NewValidationError("name", "cannot have leading or trailing spaces")
 	}
+
 	return nil
 }
 
@@ -546,5 +561,6 @@ func (s *UserService) validateNameContainsLetter(name string) error {
 			return nil
 		}
 	}
+
 	return domainerrors.NewValidationError("name", "must contain at least one letter")
 }

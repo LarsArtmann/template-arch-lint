@@ -90,7 +90,7 @@ var _ = Describe("UserQueryHandler", func() {
 			It("should return user with 200 status", func() {
 				userID := createTestUser("test@example.com", "Test User")
 
-				req, _ := http.NewRequest("GET", "/users/"+userID, nil)
+				req, _ := http.NewRequest(http.MethodGet, "/users/"+userID, nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 
@@ -105,7 +105,7 @@ var _ = Describe("UserQueryHandler", func() {
 
 		Context("when user does not exist", func() {
 			It("should return 404 status", func() {
-				req, _ := http.NewRequest("GET", "/users/non-existent-id", nil)
+				req, _ := http.NewRequest(http.MethodGet, "/users/non-existent-id", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 
@@ -120,7 +120,7 @@ var _ = Describe("UserQueryHandler", func() {
 
 		Context("when user ID is invalid", func() {
 			It("should return 400 status for invalid characters", func() {
-				req, _ := http.NewRequest("GET", "/users/invalid@id", nil)
+				req, _ := http.NewRequest(http.MethodGet, "/users/invalid@id", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 
@@ -140,7 +140,7 @@ var _ = Describe("UserQueryHandler", func() {
 				createTestUser("test1@example.com", "User 1")
 				createTestUser("test2@example.com", "User 2")
 
-				req, _ := http.NewRequest("GET", "/users", nil)
+				req, _ := http.NewRequest(http.MethodGet, "/users", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 
@@ -158,7 +158,7 @@ var _ = Describe("UserQueryHandler", func() {
 
 		Context("when no users exist", func() {
 			It("should return empty array with 200 status", func() {
-				req, _ := http.NewRequest("GET", "/users", nil)
+				req, _ := http.NewRequest(http.MethodGet, "/users", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 
@@ -170,7 +170,7 @@ var _ = Describe("UserQueryHandler", func() {
 				Expect(response).To(HaveKey("data"))
 
 				data := response["data"].([]any)
-				Expect(len(data)).To(Equal(0))
+				Expect(data).To(BeEmpty())
 			})
 		})
 	})
@@ -180,7 +180,7 @@ var _ = Describe("UserQueryHandler", func() {
 			It("should return user with 200 status", func() {
 				createTestUser("search@example.com", "Search User")
 
-				req, _ := http.NewRequest("GET", "/users/search?email=search@example.com", nil)
+				req, _ := http.NewRequest(http.MethodGet, "/users/search?email=search@example.com", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 
@@ -192,13 +192,13 @@ var _ = Describe("UserQueryHandler", func() {
 				Expect(response).To(HaveKey("data"))
 
 				data := response["data"].([]any)
-				Expect(len(data)).To(Equal(1))
+				Expect(data).To(HaveLen(1))
 			})
 		})
 
 		Context("when email parameter is missing", func() {
 			It("should return 400 status", func() {
-				req, _ := http.NewRequest("GET", "/users/search", nil)
+				req, _ := http.NewRequest(http.MethodGet, "/users/search", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 
@@ -213,7 +213,7 @@ var _ = Describe("UserQueryHandler", func() {
 
 		Context("when user does not exist with email", func() {
 			It("should return empty array with 200 status", func() {
-				req, _ := http.NewRequest("GET", "/users/search?email=nonexistent@example.com", nil)
+				req, _ := http.NewRequest(http.MethodGet, "/users/search?email=nonexistent@example.com", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 
@@ -225,7 +225,7 @@ var _ = Describe("UserQueryHandler", func() {
 				Expect(response).To(HaveKey("data"))
 
 				data := response["data"].([]any)
-				Expect(len(data)).To(Equal(0))
+				Expect(data).To(BeEmpty())
 			})
 		})
 	})
@@ -238,7 +238,7 @@ var _ = Describe("UserQueryHandler", func() {
 					createTestUser("user"+strconv.Itoa(i)+"@example.com", "User "+strconv.Itoa(i))
 				}
 
-				req, _ := http.NewRequest("GET", "/users/paginated?page=1&limit=3", nil)
+				req, _ := http.NewRequest(http.MethodGet, "/users/paginated?page=1&limit=3", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 
@@ -252,7 +252,7 @@ var _ = Describe("UserQueryHandler", func() {
 
 				data := response["data"].([]any)
 				pagination := response["pagination"].(map[string]any)
-				Expect(len(data)).To(Equal(3))
+				Expect(data).To(HaveLen(3))
 				Expect(pagination["page"]).To(Equal(float64(1)))
 				Expect(pagination["limit"]).To(Equal(float64(3)))
 				Expect(pagination["total"]).To(BeNumerically(">=", 5))
@@ -261,7 +261,7 @@ var _ = Describe("UserQueryHandler", func() {
 
 		Context("with default pagination parameters", func() {
 			It("should use default values", func() {
-				req, _ := http.NewRequest("GET", "/users/paginated", nil)
+				req, _ := http.NewRequest(http.MethodGet, "/users/paginated", nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 

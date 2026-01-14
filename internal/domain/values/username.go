@@ -135,6 +135,7 @@ func validateUsernameLength(normalized string) error {
 	if len(normalized) > 50 {
 		return errors.NewValidationError("username", "username too long (maximum 50 characters)")
 	}
+
 	return nil
 }
 
@@ -143,6 +144,7 @@ func validateUsernameWhitespace(username, normalized string) error {
 	if username != normalized {
 		return errors.NewValidationError("username", "username cannot have leading or trailing spaces")
 	}
+
 	return nil
 }
 
@@ -153,6 +155,7 @@ func validateUsernameCharacters(normalized string) error {
 			return errors.NewValidationError("username", "name can only contain letters, numbers, dots, hyphens, underscores, apostrophes, commas, and spaces")
 		}
 	}
+
 	return nil
 }
 
@@ -221,6 +224,7 @@ func validateHasLetter(normalized string) error {
 			return nil
 		}
 	}
+
 	return errors.NewValidationError("username", "username must contain at least one letter")
 }
 
@@ -230,6 +234,7 @@ func validateNotReserved(normalized string) error {
 	if reservedUsernames[lowercased] {
 		return errors.NewValidationError("username", fmt.Sprintf("name '%s' is reserved and cannot be used", normalized))
 	}
+
 	return nil
 }
 
@@ -240,5 +245,6 @@ func validateNotAllNumbers(normalized string) error {
 			return nil
 		}
 	}
+
 	return errors.NewValidationError("username", "username cannot be all numbers")
 }

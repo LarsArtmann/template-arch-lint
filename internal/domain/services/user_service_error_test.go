@@ -63,6 +63,7 @@ func (r *FailingUserRepository) Save(ctx context.Context, user *entities.User) e
 	if r.saveError != nil {
 		return r.saveError
 	}
+
 	return nil
 }
 
@@ -80,6 +81,7 @@ func (r *FailingUserRepository) FindByID(ctx context.Context, id values.UserID) 
 	if r.testUser != nil {
 		return r.testUser, nil
 	}
+
 	return nil, repositories.ErrUserNotFound
 }
 
@@ -88,6 +90,7 @@ func (r *FailingUserRepository) FindByEmail(ctx context.Context, email string) (
 	if r.findByEmailError != nil {
 		return nil, r.findByEmailError
 	}
+
 	return nil, repositories.ErrUserNotFound
 }
 
@@ -96,6 +99,7 @@ func (r *FailingUserRepository) Update(ctx context.Context, user *entities.User)
 	if r.updateError != nil {
 		return r.updateError
 	}
+
 	return nil
 }
 
@@ -104,6 +108,7 @@ func (r *FailingUserRepository) Delete(ctx context.Context, id values.UserID) er
 	if r.deleteError != nil {
 		return r.deleteError
 	}
+
 	return nil
 }
 
@@ -115,6 +120,7 @@ func (r *FailingUserRepository) List(ctx context.Context) ([]*entities.User, err
 	if r.testUser != nil {
 		return []*entities.User{r.testUser}, nil
 	}
+
 	return []*entities.User{}, nil
 }
 
@@ -123,6 +129,7 @@ func (r *FailingUserRepository) Count(ctx context.Context) (int, error) {
 	if r.countError != nil {
 		return 0, r.countError
 	}
+
 	return 0, nil
 }
 
@@ -131,6 +138,7 @@ func (r *FailingUserRepository) Exists(ctx context.Context, id values.UserID) (b
 	if r.existsError != nil {
 		return false, r.existsError
 	}
+
 	return false, nil
 }
 
@@ -139,6 +147,7 @@ func (r *FailingUserRepository) FindByUsername(ctx context.Context, username str
 	if r.findByUsernameErr != nil {
 		return nil, r.findByUsernameErr
 	}
+
 	return nil, repositories.ErrUserNotFound
 }
 
@@ -153,6 +162,7 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 	createTestUserID := func(id string) values.UserID {
 		userID, err := values.NewUserID(id)
 		Expect(err).ToNot(HaveOccurred())
+
 		return userID
 	}
 

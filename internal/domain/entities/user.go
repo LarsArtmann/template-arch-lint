@@ -44,6 +44,7 @@ func NewUser(id values.UserID, email, name string) (*User, error) {
 	}
 
 	now := time.Now()
+
 	return &User{
 		ID:       id,
 		Created:  now,
@@ -123,6 +124,7 @@ func (u *User) SetEmail(email string) error {
 	// Single source of truth - no synchronization needed
 	u.email = emailVO
 	u.Modified = time.Now()
+
 	return nil
 }
 
@@ -137,6 +139,7 @@ func (u *User) SetName(name string) error {
 	// Single source of truth - no synchronization needed
 	u.name = nameVO
 	u.Modified = time.Now()
+
 	return nil
 }
 
@@ -148,6 +151,7 @@ func (u *User) EmailDomain() string {
 // IsEmailValid checks if the user's email is valid.
 func (u *User) IsEmailValid() bool {
 	email := u.GetEmail()
+
 	return !email.IsEmpty()
 }
 
