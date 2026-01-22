@@ -108,7 +108,7 @@ just graph-component <name> # Generate focused component graph
 just graph-list-components   # List available components
 
 # Code Quality
-just lint-code           # Code quality linting (40+ linters)
+just lint-code           # Code quality linting (99+ linters)
 just lint-strict         # Maximum strictness mode
 just lint-files          # Filename compliance validation
 just lint-cycles         # Import cycle detection
@@ -180,7 +180,7 @@ just lint                 # Includes cmd/ validation in full linting pipeline
 
 ### Code Quality Enforcement (`.golangci.yml`)
 
-- **40+ linters enabled** including cutting-edge tools:
+- **99+ linters enabled** including cutting-edge tools:
   - `nilaway`: Uber's nil panic prevention (2024-2025)
   - `godox`: TODO/FIXME/HACK detection
   - `forbidigo`: Bans `interface{}`, `any`, `panic()`, and `fmt.Print*`
@@ -188,6 +188,10 @@ just lint                 # Includes cmd/ validation in full linting pipeline
   - `maligned`: Struct alignment optimization
   - `gochecknoinits`: No init functions
   - `gochecknoglobals`: No global variables
+  - `nilnil`: Prevent (nil, nil) return pattern bugs (2026)
+  - `exptostd`: Modernize code by replacing golang.org/x/exp with stdlib (2026)
+  - `gocheckcompilerdirectives`: Validate build tags and compiler directives (2026)
+  - `iotamixing`: Ensure clean const declarations with iota (2026)
 - **Function limits**: Max 50 lines, complexity 10
 - **File limits**: Max 400 lines per file
 - **Line length**: Max 120 characters
@@ -319,7 +323,7 @@ Common violations and their meanings:
 ## Important Configuration Files
 
 - **`.go-arch-lint.yml`**: Architecture boundary rules
-- **`.golangci.yml`**: 40+ linters configuration
+- **`.golangci.yml`**: 99+ linters configuration
 - **Built-in security**: gosec + govulncheck + NilAway (no external config needed)
 - **`justfile`**: Task automation (30+ commands)
 - **`sqlc.yaml`**: Type-safe SQL generation

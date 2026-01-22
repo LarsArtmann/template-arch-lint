@@ -135,6 +135,12 @@ linters:
     - reassign # Detect unnecessary variable reassignments
     - nlreturn # Enforce newline before return statements
 
+    # 🐛 CRITICAL BUG PREVENTION (2026)
+    - nilnil # Prevent (nil, nil) return pattern bugs
+    - exptostd # Modernize by replacing golang.org/x/exp with stdlib
+    - gocheckcompilerdirectives # Validate build tags and compiler directives
+    - iotamixing # Ensure clean const declarations with iota
+
 # 🎨 FORMATTERS - Code formatting (auto-fixable)
 formatters:
   enable:
@@ -1151,6 +1157,34 @@ linters-settings:
     # Don't require newline if return is at the end of a small block
     short-block: 3
 
+  # 🐛 CRITICAL BUG PREVENTION LINTER SETTINGS (2026)
+
+  # nilnil - Prevent (nil, nil) return pattern bugs
+  nilnil:
+    # Check functions with only two return values
+    only-two: true
+    # Detect opposite situation (non-nil error with valid value)
+    detect-opposite: false
+    # Check pointer, map, channel, function, interface types
+    checked-types:
+      - chan
+      - func
+      - iface
+      - map
+      - ptr
+
+  # exptostd - Modernize by replacing golang.org/x/exp with stdlib
+  exptostd:
+    # No additional settings available
+
+  # gocheckcompilerdirectives - Validate build tags and compiler directives
+  gocheckcompilerdirectives:
+    # No additional settings available
+
+  # iotamixing - Ensure clean const declarations with iota
+  iotamixing:
+    # No additional settings available
+
 # 🚨 ISSUES CONFIGURATION
 # Note: Formatters (gofumpt, goimports) should be run separately via 'just fix'
 issues:
@@ -1220,6 +1254,18 @@ issues:
     - path: _test\.go
       linters:
         - reassign
+
+    # 🆕 Exclusions for critical bug prevention linters (2026)
+
+    # Allow nilnil in tests and main (test helpers, etc.)
+    - path: (_test\.go|main\.go|cmd/.+)
+      linters:
+        - nilnil
+
+    # Allow exptostd in tests and main (may use exp packages for compatibility)
+    - path: (_test\.go|main\.go|cmd/.+)
+      linters:
+        - exptostd
 
   exclude-dirs:
     - vendor
