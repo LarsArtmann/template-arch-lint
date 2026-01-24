@@ -46,10 +46,10 @@
 ```yaml
 version: 3
 allow:
-  depOnAnyVendor: false  # 🚫 CRITICAL: No unlimited vendor deps
-  deepScan: true         # ✅ ENABLED: Comprehensive AST analysis
+  depOnAnyVendor: false # 🚫 CRITICAL: No unlimited vendor deps
+  deepScan: true # ✅ ENABLED: Comprehensive AST analysis
 
-vendors:                # 🔒 EXPLICIT: Only approved libraries
+vendors: # 🔒 EXPLICIT: Only approved libraries
   # HTTP Framework - gin (recommended over gorilla/mux, echo)
   gin:
     in: ["github.com/gin-gonic/gin"]
@@ -75,7 +75,7 @@ vendors:                # 🔒 EXPLICIT: Only approved libraries
 deps:
   # DOMAIN LAYER - Maximum Purity
   domain-entities:
-    canUse: [std]  # 🧹 ONLY: Standard library
+    canUse: [std] # 🧹 ONLY: Standard library
     mayDependOn: [domain-values, pkg-errors]
 
   # APPLICATION LAYER - Controlled External Dependencies
@@ -85,7 +85,7 @@ deps:
 
   # MAIN ENTRY POINT - Full Project Access
   main:
-    anyProjectDeps: true  # ✅ ALLOWED: Main can orchestrate everything
+    anyProjectDeps: true # ✅ ALLOWED: Main can orchestrate everything
     canUse: [std, fang, viper, samber_do, lipgloss, cpuid_v2, gin, charm_log]
 ```
 
@@ -231,7 +231,7 @@ domain-entities:
 
 # Application Layer - Controlled External Access
 application-handlers:
-  canUse: [std, gin, ginkgo, golang_jwt]  # Explicit whitelist
+  canUse: [std, gin, ginkgo, golang_jwt] # Explicit whitelist
   # Allows HTTP framework but maintains architectural boundaries
 ```
 
@@ -239,7 +239,8 @@ application-handlers:
 
 ```yaml
 allow:
-  deepScan: true  # AST-level analysis for comprehensive validation
+  deepScan: true # AST-level analysis for comprehensive validation
+
 
 # Benefits:
 # - Method call dependency detection

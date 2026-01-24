@@ -12,6 +12,7 @@
 **Objective:** Analyze available golangci-lint linters and recommend/enable high-value additions for enterprise-grade Go codebase.
 
 **Outcome:**
+
 - ✅ Analyzed 13 disabled linters comprehensively
 - ✅ Added 4 high-value linters to configuration
 - ✅ Updated linter count: 95 → 99 (+4)
@@ -21,6 +22,7 @@
 - ✅ No regressions introduced
 
 **Key Metrics:**
+
 - Total linters enabled: **99** (previously 95)
 - New bug-prevention linters: 4
 - Configuration validation: ✅ PASS
@@ -63,6 +65,7 @@
    - Value proposition for enterprise-grade projects
 
 **Research Methods:**
+
 - Official golangci-lint documentation
 - Linter repository documentation
 - Community discussions and issues
@@ -88,6 +91,7 @@
    - `/tmp/test_compilerdirs.go` - gocheckcompilerdirectives linter test
 
 2. Ran linters individually:
+
    ```bash
    golangci-lint run --enable-only <linter> <files>
    ```
@@ -104,12 +108,12 @@
 
 **Testing Results:**
 
-| Linter | Test Result | Bug Detected | False Positives |
-|---------|--------------|--------------|------------------|
-| nilnil | ✅ PASS | (nil, nil) pattern | None |
-| iotamixing | ✅ PASS | Mixed iota | None |
-| exptostd | ✅ PASS | exp package imports | None |
-| gocheckcompilerdirectives | ✅ PASS | Space in directive, typos | None |
+| Linter                    | Test Result | Bug Detected              | False Positives |
+| ------------------------- | ----------- | ------------------------- | --------------- |
+| nilnil                    | ✅ PASS     | (nil, nil) pattern        | None            |
+| iotamixing                | ✅ PASS     | Mixed iota                | None            |
+| exptostd                  | ✅ PASS     | exp package imports       | None            |
+| gocheckcompilerdirectives | ✅ PASS     | Space in directive, typos | None            |
 
 **Duration:** ~20 minutes of testing
 
@@ -124,6 +128,7 @@
 **Actions Taken:**
 
 1. Added 4 linters to enabled list:
+
    ```yaml
    # 🐛 CRITICAL BUG PREVENTION (2026)
    - nilnil # Prevent (nil, nil) return pattern bugs
@@ -135,16 +140,17 @@
 2. Configured linter settings:
 
    **nilnil Configuration:**
+
    ```yaml
    nilnil:
-     only-two: true           # Check functions with only two return values
-     detect-opposite: false    # Don't check (error, value) pattern
+     only-two: true # Check functions with only two return values
+     detect-opposite: false # Don't check (error, value) pattern
      checked-types:
-       - chan                # Channel types
-       - func                # Function types
-       - iface               # Interface types
-       - map                 # Map types
-       - ptr                 # Pointer types
+       - chan # Channel types
+       - func # Function types
+       - iface # Interface types
+       - map # Map types
+       - ptr # Pointer types
    ```
 
    **exptostd, gocheckcompilerdirectives, iotamixing:**
@@ -152,6 +158,7 @@
    - Use default configurations
 
 3. Added test/main exclusions:
+
    ```yaml
    # Allow nilnil in tests and main (test helpers, etc.)
    - path: (_test\.go|main\.go|cmd/.+)
@@ -203,6 +210,7 @@
    - Line 111: Changed "Code quality linting (40+ linters)" → "Code quality linting (99+ linters)"
 
 **Documentation Changes:**
+
 - Files modified: 1 (AGENTS.md)
 - Lines changed: ~8
 - Locations updated: 3
@@ -220,6 +228,7 @@
 **Actions Taken:**
 
 1. Ran full lint on cmd/main.go:
+
    ```bash
    golangci-lint run --config .golangci.yml cmd/main.go
    ```
@@ -243,14 +252,14 @@
 
 **Integration Test Results:**
 
-| Metric | Value | Status |
-|--------|--------|--------|
-| Configuration valid | ✅ | PASS |
-| New linters work | ✅ | PASS |
-| No regressions | ✅ | PASS |
-| Total linters | 99 | ✅ |
-| Expected issues | 8 | ✅ |
-| New linter issues | 0 | ✅ |
+| Metric              | Value | Status |
+| ------------------- | ----- | ------ |
+| Configuration valid | ✅    | PASS   |
+| New linters work    | ✅    | PASS   |
+| No regressions      | ✅    | PASS   |
+| Total linters       | 99    | ✅     |
+| Expected issues     | 8     | ✅     |
+| New linter issues   | 0     | ✅     |
 
 **Duration:** ~10 minutes
 
@@ -285,6 +294,7 @@ func getUser(id string) (*User, error) {
 ```
 
 **Value Proposition:**
+
 - **High-value**: Prevents runtime panics from nil checks on nil values
 - **Fast**: Minimal performance impact
 - **Auto-fixable**: ❌ No
@@ -294,6 +304,7 @@ func getUser(id string) (*User, error) {
   - Excluded in tests and main (test helpers)
 
 **Impact on Codebase:**
+
 - Current issues on cmd/main.go: 0
 - Expected issues in full codebase: Unknown (dependency issues prevent testing)
 - False positive rate: Low (test/main exclusions handle legitimate cases)
@@ -325,6 +336,7 @@ func cloneMap(m map[string]int) map[string]int {
 ```
 
 **Value Proposition:**
+
 - **High-value**: Reduces dependencies, uses stable optimized stdlib
 - **Fast**: Minimal performance impact
 - **Auto-fixable**: ✅ Yes
@@ -334,13 +346,14 @@ func cloneMap(m map[string]int) map[string]int {
 
 **Packages Replaced:**
 
-| golang.org/x/exp | Standard Library | Since |
-|------------------|-----------------|--------|
-| maps | maps | Go 1.21 |
-| slices | slices | Go 1.21 |
-| constraints | Built-in | Go 1.21 |
+| golang.org/x/exp | Standard Library | Since   |
+| ---------------- | ---------------- | ------- |
+| maps             | maps             | Go 1.21 |
+| slices           | slices           | Go 1.21 |
+| constraints      | Built-in         | Go 1.21 |
 
 **Impact on Codebase:**
+
 - Current issues on cmd/main.go: 0
 - Expected issues in full codebase: Unknown
 - False positive rate: Very low (only catches actual exp usage)
@@ -371,6 +384,7 @@ func cloneMap(m map[string]int) map[string]int {
 ```
 
 **Value Proposition:**
+
 - **Medium-value**: Prevents silently-ignored compiler directives
 - **Fast**: Minimal performance impact
 - **Auto-fixable**: ✅ Yes (remove space, fix typos)
@@ -379,12 +393,14 @@ func cloneMap(m map[string]int) map[string]int {
   - Validates against list of all valid Go directives
 
 **Valid Directives Checked:**
+
 - `go:build`, `go:embed`, `go:generate`
 - `go:linkname`, `go:nosplit`, `go:nowritebarrier`
 - `go:norace`, `go:noescape`, `go:systemstack`
 - And many others...
 
 **Impact on Codebase:**
+
 - Current issues on cmd/main.go: 0
 - Expected issues in full codebase: Low (good coding practices)
 - False positive rate: Very low (only catches actual format errors)
@@ -424,6 +440,7 @@ const (
 ```
 
 **Value Proposition:**
+
 - **Medium-value**: Improves code readability and maintainability
 - **Fast**: Minimal performance impact
 - **Auto-fixable**: ❌ No
@@ -432,6 +449,7 @@ const (
   - No exclusions (applies to all const declarations)
 
 **Impact on Codebase:**
+
 - Current issues on cmd/main.go: 0
 - Expected issues in full codebase: Unknown
 - False positive rate: Very low (idiomatic Go doesn't mix iotas)
@@ -449,10 +467,12 @@ const (
 **Reason:** Already covered by `gomodguard`
 
 **Analysis:**
+
 - `depguard`: Package-level import control (analyzes every Go file)
 - `gomodguard`: Module-level dependency control (analyzes go.mod only)
 
 **Why gomodguard is better for this project:**
+
 - Faster: Only reads go.mod, doesn't process every file
 - More features: Version constraints, module recommendations
 - Better suited: We need module-level blocking (deprecated packages, etc.)
@@ -466,15 +486,18 @@ const (
 **Reason:** Redundant with our `forbidigo` error creation rules
 
 **Analysis:**
+
 - `errname`: Enforces `Err` prefix for sentinel errors, `Error` suffix for error types
 - Our `forbidigo`: Bans direct `errors.New()` and `fmt.Errorf()` outside `internal/domain/errors`
 
 **Why forbidigo is sufficient:**
+
 - Already forces error creation through centralized domain errors
 - Domain error package ensures proper naming conventions
 - errname would be redundant noise
 
 **Current forbidigo rules:**
+
 ```yaml
 - pattern: 'errors\.New\('
   msg: "🚨 BANNED: Direct error creation. Use pkg/errors predefined types instead"
@@ -490,15 +513,18 @@ const (
 **Reason:** Redundant with our `forbidigo` error creation rules
 
 **Analysis:**
+
 - `err113`: Enforces proper error comparison (`errors.Is()`) and error wrapping
 - Our `forbidigo`: Bans direct error creation, forces wrapping via domain errors
 
 **Why forbidigo is sufficient:**
+
 - Already forces centralized error handling
 - Domain error types provide proper wrapping patterns
 - err113 would be redundant with our architecture
 
 **Current forbidigo rules:**
+
 ```yaml
 - pattern: 'errors\.New\('
   msg: "🚨 BANNED: Direct error creation. Use pkg/errors predefined types instead"
@@ -515,15 +541,18 @@ const (
 **Reason:** Already have `tparallel` (Ginkgo-specific)
 
 **Analysis:**
+
 - `paralleltest`: Standard library `testing.T.Parallel()` enforcement
 - `tparallel`: Ginkgo test framework parallelism enforcement
 
 **Why tparallel is better for this project:**
+
 - We use Ginkgo/Gomega, not standard testing
 - tparallel is Ginkgo-aware
 - paralleltest would flag all our tests
 
 **Current tparallel configuration:**
+
 ```yaml
 tparallel:
   ignore-missing: false
@@ -541,16 +570,19 @@ tparallel:
 **Reason:** Too opinionated, conflicts with idiomatic Go
 
 **Analysis:**
+
 - `noinlineerr`: Forbids `if err := doSomething(); err != nil` pattern
 - Idiomatic Go: Inline error handling is common and accepted
 
 **Why not to add:**
+
 - Goes against Go idioms that developers expect
 - Reduces code conciseness
 - Arguments both for and against are strong (no clear winner)
 - We value pragmatism over dogmatic enforcement
 
 **Example of conflict:**
+
 ```go
 // ❌ noinlineerr forbids this
 if err := doSomething(); err != nil {
@@ -573,11 +605,13 @@ if err != nil {
 **Reason:** Not valuable for template project without i18n needs
 
 **Analysis:**
+
 - `gosmopolitan`: Detects i18n/l10n anti-patterns
 - Monitors Unicode scripts (Chinese, Japanese, Korean, etc.)
 - Checks time.Local usage
 
 **Why not to add for this project:**
+
 - This is a template/demo, not production app
 - No i18n requirements in scope
 - Would be noise for internal documentation strings
@@ -592,11 +626,13 @@ if err != nil {
 **Reason:** File headers not critical for this use case
 
 **Analysis:**
+
 - `goheader`: Enforces copyright/license headers on all source files
 - Good for enterprise projects with legal requirements
 - Can be noisy for open-source templates
 
 **Why not to add:**
+
 - This is a template project for educational use
 - No legal requirement for copyright headers
 - Would add friction for contributors
@@ -611,18 +647,21 @@ if err != nil {
 **Reason:** Duplicate of `whitespace` linter
 
 **Analysis:**
+
 - `wsl`: Adds or removes empty lines (deprecated)
 - `wsl_v5`: Adds or removes empty lines (current version)
 - `whitespace`: Checks for unnecessary newlines at function/start/end
 
 **Why whitespace is sufficient:**
+
 - Already covers trailing whitespace and unnecessary newlines
 - wsl adds opinionated whitespace rules that may not fit our style
 - Redundant functionality
 
 **Current whitespace configuration:**
+
 ```yaml
-whitespace:  # Fast
+whitespace: # Fast
   # No additional settings available
 ```
 
@@ -635,10 +674,12 @@ whitespace:  # Fast
 **Reason:** Low impact, covered by other linters
 
 **Analysis:**
+
 - `asciicheck`: Checks for non-ASCII characters in identifiers
 - Catches Unicode characters in function/variable names
 
 **Why not to add:**
+
 - Low value: Non-ASCII identifiers are rare in Go
 - No current issues in codebase
 - Would be noise for international teams
@@ -653,10 +694,12 @@ whitespace:  # Fast
 **Reason:** Low impact, covered by other linters
 
 **Analysis:**
+
 - `dogsled`: Checks for too many blank identifiers in assignments
 - Example: `x, _, _, _, _ := f()` (4 blanks)
 
 **Why not to add:**
+
 - Low value: Rarely an actual problem
 - gocritic already has similar check with `dogsled` setting
 - Already configured in gocritic:
@@ -673,12 +716,12 @@ whitespace:  # Fast
 
 ### Linter Count Evolution
 
-| Version | Linter Count | Date | Notes |
-|----------|---------------|-------|-------|
-| Initial | ~40 | 2024 | Early configuration |
-| v2.0 | 85 | 2024-12 | First comprehensive setup |
-| v2.4 | 95 | 2025-01 | Added exhaustruct, errchkjson, etc. |
-| v2.8 | 99 | 2026-01-22 | Added nilnil, exptostd, gocheckcompilerdirectives, iotamixing |
+| Version | Linter Count | Date       | Notes                                                         |
+| ------- | ------------ | ---------- | ------------------------------------------------------------- |
+| Initial | ~40          | 2024       | Early configuration                                           |
+| v2.0    | 85           | 2024-12    | First comprehensive setup                                     |
+| v2.4    | 95           | 2025-01    | Added exhaustruct, errchkjson, etc.                           |
+| v2.8    | 99           | 2026-01-22 | Added nilnil, exptostd, gocheckcompilerdirectives, iotamixing |
 
 **Growth:** +59 linters from initial (+147.5% growth)
 
@@ -686,31 +729,31 @@ whitespace:  # Fast
 
 ### Linter Categories
 
-| Category | Linter Count | Percentage |
-|----------|---------------|------------|
-| Type Safety | 4 | 4.0% |
-| Error Handling | 3 | 3.0% |
-| Security | 9 | 9.1% |
-| Code Quality | 22 | 22.2% |
-| Modern Go | 5 | 5.1% |
-| Architecture | 8 | 8.1% |
-| Testing | 6 | 6.1% |
-| Bug Prevention | 10 | 10.1% |
-| Performance | 3 | 3.0% |
-| Formatting | 2 | 2.0% |
-| Dependency | 2 | 2.0% |
-| Misc | 25 | 25.3% |
-| **TOTAL** | **99** | **100%** |
+| Category       | Linter Count | Percentage |
+| -------------- | ------------ | ---------- |
+| Type Safety    | 4            | 4.0%       |
+| Error Handling | 3            | 3.0%       |
+| Security       | 9            | 9.1%       |
+| Code Quality   | 22           | 22.2%      |
+| Modern Go      | 5            | 5.1%       |
+| Architecture   | 8            | 8.1%       |
+| Testing        | 6            | 6.1%       |
+| Bug Prevention | 10           | 10.1%      |
+| Performance    | 3            | 3.0%       |
+| Formatting     | 2            | 2.0%       |
+| Dependency     | 2            | 2.0%       |
+| Misc           | 25           | 25.3%      |
+| **TOTAL**      | **99**       | **100%**   |
 
 ---
 
 ### Performance Impact
 
-| Linter Type | Count | Avg Runtime | Total Impact |
-|-------------|--------|-------------|--------------|
-| Fast | 75 | <1s each | ~75s |
-| Slow | 24 | ~5s each | ~120s |
-| **TOTAL** | **99** | - | **~195s** |
+| Linter Type | Count  | Avg Runtime | Total Impact |
+| ----------- | ------ | ----------- | ------------ |
+| Fast        | 75     | <1s each    | ~75s         |
+| Slow        | 24     | ~5s each    | ~120s        |
+| **TOTAL**   | **99** | -           | **~195s**    |
 
 **Actual runtime:** ~2-3 min (parallel execution)
 
@@ -718,13 +761,14 @@ whitespace:  # Fast
 
 ### Auto-Fix Coverage
 
-| Fix Type | Count | Percentage |
-|----------|--------|------------|
-| Auto-fixable | 42 | 42.4% |
-| Manual fix only | 57 | 57.6% |
-| **TOTAL** | **99** | **100%** |
+| Fix Type        | Count  | Percentage |
+| --------------- | ------ | ---------- |
+| Auto-fixable    | 42     | 42.4%      |
+| Manual fix only | 57     | 57.6%      |
+| **TOTAL**       | **99** | **100%**   |
 
 **Auto-fixable linters include:**
+
 - errorlint, canonicalheader, dupword, fatcontext, gocritic, govet
 - importas, intrange, mirror, misspell, nakedret, nlreturn
 - perfsprint, revive, sloglint, spancheck, usestdlibvars
@@ -741,6 +785,7 @@ whitespace:  # Fast
 **Bug Type:** Null pointer dereference from improper nil handling
 
 **Scenario:**
+
 ```go
 func findUser(id string) (*User, error) {
     user, err := db.Get(id)
@@ -759,11 +804,13 @@ fmt.Println(user.Name)  // PANIC: user is nil
 ```
 
 **Impact:**
+
 - Runtime panic (process crash)
 - Data corruption (continues with invalid state)
 - Difficult to debug (error check appears correct)
 
 **nilnil detection:**
+
 - Catches `(nil, nil)` return pattern at compile time
 - Forces explicit error values
 
@@ -774,6 +821,7 @@ fmt.Println(user.Name)  // PANIC: user is nil
 **Bug Type:** Using unstable or deprecated experimental packages
 
 **Scenario:**
+
 ```go
 import "golang.org/x/exp/maps"  // May break or change API
 
@@ -783,11 +831,13 @@ func cloneConfig(cfg map[string]string) map[string]string {
 ```
 
 **Impact:**
+
 - Code breaks on Go version updates
 - Dependency on unstable packages
 - Potential security vulnerabilities (unmaintained exp packages)
 
 **exptostd detection:**
+
 - Suggests stable stdlib alternatives
 - Modernizes codebase automatically
 
@@ -798,18 +848,21 @@ func cloneConfig(cfg map[string]string) map[string]string {
 **Bug Type:** Compiler directives ignored silently
 
 **Scenario:**
+
 ```go
 //go:generate mockgen -source=user.go -destination=mocks/user_mock.go
 // Missing: //go:build !windows (space error)
 ```
 
 **Impact:**
+
 - Code generation doesn't run
 - Missing mock files
 - Tests fail with cryptic errors
 - Hard to debug (directive silently ignored)
 
 **gocheckcompilerdirectives detection:**
+
 - Validates directive format
 - Catches typos and errors
 - Prevents silent failures
@@ -821,6 +874,7 @@ func cloneConfig(cfg map[string]string) map[string]string {
 **Bug Type:** Confusing constant declarations
 
 **Scenario:**
+
 ```go
 const (
     HTTP = iota  // 0
@@ -831,11 +885,13 @@ const (
 ```
 
 **Impact:**
+
 - Confusing constant values
 - Bugs from incorrect assumptions
 - Code review friction (unclear behavior)
 
 **iotamixing detection:**
+
 - Enforces clean iota usage
 - Separate blocks for different patterns
 - Clear, predictable constant values
@@ -860,12 +916,12 @@ const (
 
 ### Cost/Benefit Analysis
 
-| Linter | Setup Cost | Ongoing Cost | Bug Prevention Value | ROI |
-|--------|-------------|---------------|---------------------|-----|
-| nilnil | Low | None | High (critical bugs) | Very High |
-| exptostd | Low | None | Medium (stability) | High |
-| gocheckcompilerdirectives | Low | None | Medium (build issues) | High |
-| iotamixing | Low | None | Low (maintainability) | Medium |
+| Linter                    | Setup Cost | Ongoing Cost | Bug Prevention Value  | ROI       |
+| ------------------------- | ---------- | ------------ | --------------------- | --------- |
+| nilnil                    | Low        | None         | High (critical bugs)  | Very High |
+| exptostd                  | Low        | None         | Medium (stability)    | High      |
+| gocheckcompilerdirectives | Low        | None         | Medium (build issues) | High      |
+| iotamixing                | Low        | None         | Low (maintainability) | Medium    |
 
 **Overall ROI:** High - All linters provide value with minimal cost.
 
@@ -974,6 +1030,7 @@ const (
 ### Git Changes
 
 **Files to commit:**
+
 - `.golangci.yml` - Linter configuration
 - `AGENTS.md` - Documentation updates
 
@@ -1030,6 +1087,7 @@ const (
 ## 📊 STATISTICS
 
 **Time Invested:** ~2 hours
+
 - Research: 30 minutes
 - Testing: 20 minutes
 - Configuration: 15 minutes
@@ -1038,17 +1096,20 @@ const (
 - Report: 40 minutes
 
 **Issues Prevented:** 4 categories
+
 - Runtime nil pointer bugs
 - Dependency instability
 - Silent build failures
 - Maintainability issues
 
 **Code Quality:** Improved
+
 - Linter count: +4 (+4.2%)
 - Bug prevention: Enhanced
 - Code modernization: Enhanced
 
 **Documentation:** Updated
+
 - AGENTS.md: 3 locations
 - Configuration comments: Added
 - Migration guide: Needed (TODO)
@@ -1067,6 +1128,7 @@ The golangci-lint configuration has been successfully enhanced with 4 high-value
 4. **iotamixing** - Ensures clean, maintainable constant declarations
 
 **Impact:**
+
 - Increased linter count from 95 to 99 (+4.2%)
 - Enhanced bug prevention capabilities
 - Improved code modernization

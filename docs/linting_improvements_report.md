@@ -70,6 +70,7 @@
 ### ✅ Phase 3: Formatters Configuration
 
 #### Enabled Formatters
+
 - **gofumpt**: Stricter gofmt with additional formatting rules
 - **goimports**: Format imports and add missing ones automatically
 - **Note**: Formatters run separately via `just fix` to avoid performance impact
@@ -77,6 +78,7 @@
 ### ✅ Phase 4: forbidigo Error Rules Fixed
 
 #### Error Centralization Improvements
+
 - Fixed error creation bans to properly exclude:
   - github.com/cockroachdb/errors
   - pkg/errors
@@ -87,6 +89,7 @@
 ### ✅ Phase 5: Code Modernization
 
 #### strings.Cut() Pattern
+
 - Refactored 3 locations in user_query_service.go
 - Replaced strings.Index() with Go 1.18+ strings.Cut()
 - More idiomatic and safer string manipulation
@@ -98,11 +101,13 @@
 ### Total Issues: 499
 
 **New Linter Issues:**
+
 - exhaustruct: 19 (mostly cmd/main.go stdlib structs)
 - forcetypeassert: 7 (type assertions in domain layer)
 - nlreturn: 123 (style - many small functions)
 
 **Existing Issues:**
+
 - godox: 81 (TODO/FIXME/HACK comments)
 - wrapcheck: 33 (error wrapping - JSON marshaling in values)
 - varnamelen: 63 (variable name length)
@@ -119,28 +124,33 @@
 ## 🤔 REFLECTION: WHAT I FORGOT / COULD HAVE DONE BETTER
 
 ### 1. **Missing Linters - High Value**
+
 - ❌ **nilnil**: Detects redundant nil checks (code cleanup)
 - ❌ **exptostd**: Replaces golang.org/x/exp with stdlib (modernization)
 - ❌ **musttag**: Already added but could be more aggressive
 - ❌ **gochecksumtype**: Already enabled, but settings could be refined
 
 ### 2. **Configuration Improvements**
+
 - ❌ **Formatters not tested**: Added gofumpt/goimports but didn't run them
 - ❌ **Exclusion rules not validated**: Some exclusions don't work as expected
 - ❌ **Performance impact not measured**: 7 new linters = slower linting
 - ❌ **JSON schema validation**: `golangci-lint config verify` fails but config works
 
 ### 3. **Code Quality**
+
 - ❌ **Not fixing issues**: Added linters but didn't fix the 499 issues found
 - ❌ **No baseline**: Didn't establish issue baseline before adding linters
 - ❌ **No gradation**: Enabled all new linters at once (should be gradual)
 
 ### 4. **Documentation**
+
 - ❌ **AGENTS.md not updated**: Memory file doesn't reflect new linters
 - ❌ **No migration guide**: For team members adapting to new rules
 - ❌ **No examples**: For fixing common issues
 
 ### 5. **Type Safety**
+
 - ❌ **Not checking type models**: Could improve domain type safety
 - ❌ **Not reviewing value objects**: Could catch type safety issues
 - ❌ **Not checking generics usage**: New Go features could be better utilized
@@ -152,6 +162,7 @@
 ### Priority Matrix (Impact vs Effort)
 
 #### 🔴 CRITICAL - High Impact / Low Effort
+
 1. **Fix forcetypeassert issues (7)**
    - Make type assertions safe with comma-ok pattern
    - **Impact**: Prevents runtime panics
@@ -171,6 +182,7 @@
    - **Why**: Zero-effort wins, immediate improvement
 
 #### 🟡 HIGH PRIORITY - High Impact / Medium Effort
+
 4. **Fix exhaustruct issues in internal/ (15+ from 19)**
    - Add struct field initialization where missing
    - **Impact**: Prevents data corruption bugs
@@ -190,6 +202,7 @@
    - **Why**: Easy fixes, clear impact
 
 #### 🟢 MEDIUM PRIORITY - Medium Impact / Medium Effort
+
 7. **Fix funcorder issues (12)**
    - Reorder functions/methods per project conventions
    - **Impact**: Consistent code structure
@@ -215,6 +228,7 @@
     - **Why**: Documentation quality
 
 #### 🔵 LOW PRIORITY - Low Impact / High Effort
+
 11. **Fix nlreturn issues (123)**
     - Add newlines before return statements
     - **Impact**: Minor readability improvement
@@ -246,12 +260,13 @@
     - **Why**: DRY principle
 
 16. **Fix testpackage issues (5)**
-    - Move tests to separate _test packages
+    - Move tests to separate \_test packages
     - **Impact**: Better test isolation
     - **Effort**: 2-3 hours
     - **Why**: Test organization
 
 #### ⚪ OPTIONAL - Enhancement Opportunities
+
 17. **Add nilnil linter**
     - Detect redundant nil checks
     - **Impact**: Code cleanup
@@ -283,6 +298,7 @@
 ### Current Type System Analysis
 
 #### Value Objects (domain/values/)
+
 - **Email**: Type-safe email validation
 - **UserName**: Type-safe username validation
 - **UserID**: Type-safe user ID
@@ -300,7 +316,7 @@
    - Currently: Specific repository interfaces
    - **Improvement**: Generic repository with type parameters
    - **Benefit**: Less code duplication, type safety
-   - **Implementation**: 
+   - **Implementation**:
      ```go
      type Repository[T, ID any] interface {
          Get(ctx context.Context, id ID) (T, error)
@@ -314,13 +330,14 @@
    - **Improvement**: Add domain event publishing
    - **Benefit**: Decoupled architecture, event-driven
    - **Implementation**:
+
      ```go
      type Event interface {
          Type() string
          OccurredAt() time.Time
          AggregateID() string
      }
-     
+
      type UserCreated struct {
          UserID string
          Email string
@@ -332,6 +349,7 @@
    - **Improvement**: Use go-sumtype pattern
    - **Benefit**: Exhaustive checking, type safety
    - **Implementation**:
+
      ```go
      type UserStatus int
      const (
@@ -339,7 +357,7 @@
          UserStatusInactive
          UserStatusSuspended
      )
-     
+
      // With gochecksumtype for exhaustive checking
      ```
 
@@ -348,11 +366,12 @@
    - **Improvement**: Composable validation rules
    - **Benefit**: Reusable validation, clearer rules
    - **Implementation**:
+
      ```go
      type Validator[T any] interface {
          Validate(T) error
      }
-     
+
      func EmailValidator() Validator[string] { ... }
      func LengthValidator(min, max int) Validator[string] { ... }
      ```
@@ -362,6 +381,7 @@
 ## 📚 ESTABLISHED LIBS TO IMPROVE CODE
 
 ### 1. **samber/lo** (Already Used - Could Use More)
+
 - **Current**: Map, Filter used sparingly
 - **Improvement**: Use more functional patterns
   - `lo.Reduce()`: For aggregations
@@ -371,6 +391,7 @@
 - **Benefit**: More concise, safer code
 
 ### 2. **samber/do** (Already Used - Could Use More)
+
 - **Current**: Basic DI
 - **Improvement**: Advanced DI patterns
   - `do.MustNamed()`: For named services
@@ -379,6 +400,7 @@
 - **Benefit**: Better DI organization, clearer dependencies
 
 ### 3. **cockroachdb/errors** (Already Used - Could Use More)
+
 - **Current**: Basic error creation
 - **Improvement**: Advanced error patterns
   - `errors.Combine()`: For multiple errors
@@ -387,6 +409,7 @@
 - **Benefit**: Better error handling
 
 ### 4. **slog (stdlib)** (Already Used - Could Use More)
+
 - **Current**: Basic structured logging
 - **Improvement**: Advanced logging patterns
   - `slog.NewLogHandler()`: Custom handlers
@@ -395,6 +418,7 @@
 - **Benefit**: Better observability
 
 ### 5. **context.Context** (Already Used - Could Improve)
+
 - **Current**: Basic context passing
 - **Improvement**: Context patterns
   - `context.WithCancel()` for cancellation
@@ -404,6 +428,7 @@
 - **Benefit**: Better cancellation, timeouts
 
 ### 6. **generics (Go 1.18+)** (Already Used - Could Use More)
+
 - **Current**: Limited generic usage
 - **Improvement**: More generic patterns
   - Generic repositories (see above)
@@ -412,24 +437,28 @@
 - **Benefit**: Type safety, less code
 
 ### 7. **goleak** (Not Used - Should Add)
+
 - **Purpose**: Detect goroutine leaks
 - **Impact**: Critical for production
 - **Implementation**: Add to test suite
 - **Benefit**: Prevent resource leaks
 
 ### 8. **httptest** (Not Used - Should Add)
+
 - **Purpose**: HTTP handler testing
 - **Impact**: Better test coverage
 - **Implementation**: Integration tests for handlers
 - **Benefit**: More reliable HTTP code
 
 ### 9. **sqlmock** (Not Used - Should Add)
+
 - **Purpose**: Mock database in tests
 - **Impact**: Better test isolation
 - **Implementation**: Replace in-memory repos with mocks
 - **Benefit**: Test database logic without DB
 
 ### 10. **testify/suite** (Not Used - Should Consider)
+
 - **Purpose**: Test suite organization
 - **Impact**: Better test structure
 - **Implementation**: Group related tests
@@ -440,33 +469,40 @@
 ## 🚨 KNOWN ISSUES & LIMITATIONS
 
 ### 1. golangci-lint config verify Failures
+
 **Issue**: `golangci-lint config verify` reports errors but config works
 **Status**: JSON schema validation too strict for v2.8.0
 **Workaround**: Ignore verify errors, use `golangci-lint run` for validation
 **Resolution**: Monitor golangci-lint issue tracker for schema updates
 
 ### 2. exhaustruct Exclusions Not Working
+
 **Issue**: cmd/main.go shows warnings for stdlib structs despite exclusions
 **Status**: May be golangci-lint v2.8.0 bug
-**Workaround**: 
+**Workaround**:
+
 - Option A: Disable exhaustruct for cmd/
 - Option B: Initialize all struct fields in cmd/main.go
 - Option C: Wait for golangci-lint fix
-**Resolution**: File issue with golangci-lint
+  **Resolution**: File issue with golangci-lint
 
 ### 3. Performance Impact
+
 **Issue**: 7 new linters increase linting time
 **Status**: Expected, acceptable
 **Mitigation**:
+
 - Run specific linters during development
 - Run full suite in CI/CD
 - Use --fast flag for quick checks
 - Consider caching with golangci-lint-action
 
 ### 4. High Issue Count
+
 **Issue**: 499 issues after adding new linters
 **Status**: Expected, gradual improvement needed
 **Mitigation**:
+
 - Fix high-impact issues first
 - Add issue baseline in CI/CD
 - Gradual enforcement of new rules
@@ -477,24 +513,28 @@
 ## 🎯 RECOMMENDATIONS
 
 ### Immediate (Next Sprint)
+
 1. **Fix forcetypeassert issues** - Runtime safety critical
 2. **Fix wrapcheck in value objects** - Error handling critical
 3. **Run formatters** - Zero-effort win
 4. **Update AGENTS.md** - Document new linters
 
 ### Short Term (Next 2-3 Sprints)
+
 5. **Fix exhaustruct in internal/** - Data integrity critical
 6. **Fix mnd issues** - Code quality important
 7. **Add goleak** - Prevent goroutine leaks
 8. **Add httptest** - Better HTTP testing
 
 ### Medium Term (Next Quarter)
+
 9. **Implement generic repositories** - Reduce duplication
 10. **Add domain events** - Event-driven architecture
 11. **Fix nlreturn/varnamelen** - Code style
 12. **Add sqlmock** - Better DB testing
 
 ### Long Term (Next 6 Months)
+
 13. **Implement validation combinators** - Reusable validation
 14. **Add sum types with gochecksumtype** - Type safety
 15. **Migrate all issues** - Clean codebase
@@ -505,6 +545,7 @@
 ## 📊 IMPACT SUMMARY
 
 ### Achievements ✅
+
 - ✅ 7 new high-value bug prevention linters added
 - ✅ Comprehensive linter settings configured
 - ✅ Formatters enabled (gofumpt, goimports)
@@ -515,6 +556,7 @@
 - ✅ Pre-commit hooks passing
 
 ### Metrics 📈
+
 - **Linters**: +7 (90 → 97 total linters)
 - **Issues**: +499 (baseline for improvement)
 - **Coverage**: New safety checks for:
@@ -527,6 +569,7 @@
   - Code style (nlreturn)
 
 ### Quality Improvements 🎯
+
 - **Bug Prevention**: 4 new safety-critical linters
 - **Code Quality**: 2 new code quality linters
 - **Style**: 1 new code style linter
@@ -534,6 +577,7 @@
 - **Error Handling**: Improved forbidigo rules
 
 ### Technical Debt 📉
+
 - **Added**: 499 issues (new linters discovered existing issues)
 - **Prioritized**: High-impact issues identified
 - **Plan**: Comprehensive execution plan created
@@ -544,6 +588,7 @@
 ## 🔮 FUTURE ENHANCEMENTS
 
 ### Linter Categories to Explore
+
 1. **Performance Linters**
    - prealloc (already enabled)
    - govet -shadow
@@ -572,6 +617,7 @@
    - funlen (already enabled)
 
 ### Advanced Features
+
 1. **Linting as Code**
    - Store linter config in version control
    - Track linting metrics over time
@@ -597,11 +643,13 @@
 ## 📚 REFERENCES
 
 ### golangci-lint Documentation
+
 - https://golangci-lint.run/
 - https://github.com/golangci/golangci-lint/
 - https://golangci-lint.run/usage/configuration/
 
 ### Linter Documentation
+
 - https://github.com/kkHAIKE/contextcheck
 - https://github.com/GaijinEntertainment/go-exhaustruct
 - https://github.com/ashanbrown/forbidigo
@@ -610,11 +658,13 @@
 - https://github.com/alexkohler/nakedret
 
 ### Go Best Practices
+
 - https://github.com/golang/go/wiki/CodeReviewComments
 - https://go.dev/doc/effective_go
 - https://golangci-lint.run/usage/linters/
 
 ### Architectural Patterns
+
 - https://github.com/ant6950/go-arch-lint
 - https://github.com/golang-standards/project-layout
 - https://github.com/ThreeDotsLabs/wild-workspaces-go

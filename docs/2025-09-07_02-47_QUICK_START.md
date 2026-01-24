@@ -144,8 +144,8 @@ just lint-cmd-single # CMD single main.go enforcement
 ```yaml
 # In .golangci.yml, modify these settings:
 funlen:
-  lines: 50        # Increase for larger functions
-  statements: 30   # Increase for more statements
+  lines: 50 # Increase for larger functions
+  statements: 30 # Increase for more statements
 
 cyclop:
   max-complexity: 10 # Increase for more complex logic
@@ -154,7 +154,7 @@ revive:
   rules:
     - name: file-length-limit
       arguments:
-        - max: 400   # Increase for larger files
+        - max: 400 # Increase for larger files
 ```
 
 ### Add Project-Specific Rules

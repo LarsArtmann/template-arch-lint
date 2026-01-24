@@ -789,22 +789,27 @@ func (s *UserRegistrationService) RegisterUser(ctx context.Context, req Registra
 ## Status: Accepted
 
 ## Context
+
 We need to ensure domain business logic remains pure and testable
 without external dependencies.
 
 ## Decision
+
 Domain layer (entities, services, value objects) cannot import:
+
 - Infrastructure packages (database, HTTP, external APIs)
 - Framework-specific code (gin, echo, etc.)
 - Implementation details
 
 ## Consequences
+
 - ✅ Domain logic is framework-agnostic and easily testable
 - ✅ Business rules are centralized and consistent
 - ❌ Requires dependency inversion patterns
 - ❌ More initial setup complexity
 
 ## Enforcement
+
 - go-arch-lint configuration prevents violations
 - CI/CD pipeline blocks merges with violations
 - Code review checklist includes architecture compliance

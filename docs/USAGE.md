@@ -362,14 +362,17 @@ The project demonstrates modern HTMX patterns:
 
 ```html
 <!-- Dynamic user list with search -->
-<div hx-get="/users/search" hx-trigger="keyup changed delay:500ms"
-     hx-target="#user-list" hx-swap="outerHTML">
-    <input type="search" name="query" placeholder="Search users...">
+<div
+  hx-get="/users/search"
+  hx-trigger="keyup changed delay:500ms"
+  hx-target="#user-list"
+  hx-swap="outerHTML"
+>
+  <input type="search" name="query" placeholder="Search users..." />
 </div>
 
 <!-- Inline editing -->
-<div hx-get="/users/123/edit-inline" hx-trigger="click"
-     hx-swap="outerHTML">Edit User</div>
+<div hx-get="/users/123/edit-inline" hx-trigger="click" hx-swap="outerHTML">Edit User</div>
 ```
 
 ## 🚨 Common Issues & Solutions

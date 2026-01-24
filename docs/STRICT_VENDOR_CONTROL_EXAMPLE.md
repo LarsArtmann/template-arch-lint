@@ -11,15 +11,15 @@ This demonstrates how to achieve **strict vendor dependency control** without us
 ```yaml
 # Problems: Unlimited vendor dependencies
 allow:
-  depOnAnyVendor: true  # ❌ DANGEROUS: Allows ANY vendor library
+  depOnAnyVendor: true # ❌ DANGEROUS: Allows ANY vendor library
 
 deps:
   domain-services:
-    anyVendorDeps: true    # ❌ UNRESTRICTED: Can import any external library
+    anyVendorDeps: true # ❌ UNRESTRICTED: Can import any external library
     mayDependOn: [...]
 
   application-handlers:
-    anyVendorDeps: true    # ❌ UNRESTRICTED: No vendor control
+    anyVendorDeps: true # ❌ UNRESTRICTED: No vendor control
     mayDependOn: [...]
 ```
 
@@ -36,8 +36,8 @@ deps:
 ```yaml
 # Solution: Strict vendor control
 allow:
-  depOnAnyVendor: false  # ✅ SECURE: No unlimited vendor dependencies
-  deepScan: true         # ✅ COMPREHENSIVE: AST analysis enabled
+  depOnAnyVendor: false # ✅ SECURE: No unlimited vendor dependencies
+  deepScan: true # ✅ COMPREHENSIVE: AST analysis enabled
 
 # Explicit vendor library approval based on library-policy.yaml
 vendors:
@@ -52,11 +52,11 @@ vendors:
 
 deps:
   domain-services:
-    canUse: [std, x_errgroup, samber_lo, samber_mo]  # ✅ CONTROLLED
+    canUse: [std, x_errgroup, samber_lo, samber_mo] # ✅ CONTROLLED
     mayDependOn: [...]
 
   application-handlers:
-    canUse: [std, gin, ginkgo, golang_jwt, casbin, charm_log]  # ✅ CONTROLLED
+    canUse: [std, gin, ginkgo, golang_jwt, casbin, charm_log] # ✅ CONTROLLED
     mayDependOn: [...]
 ```
 
@@ -150,8 +150,8 @@ OK - No warnings found
 ```yaml
 version: 3
 allow:
-  depOnAnyVendor: false  # ❌ DISABLE unlimited vendor deps
-  deepScan: true         # ✅ ENABLE comprehensive analysis
+  depOnAnyVendor: false # ❌ DISABLE unlimited vendor deps
+  deepScan: true # ✅ ENABLE comprehensive analysis
 ```
 
 ### 2. Define Approved Vendors
@@ -176,11 +176,11 @@ vendors:
 ```yaml
 deps:
   domain-entities:
-    canUse: [std]  # Only standard library
+    canUse: [std] # Only standard library
     mayDependOn: [domain-values, pkg-errors]
 
   application-handlers:
-    canUse: [std, gin, ginkgo]  # Approved vendors only
+    canUse: [std, gin, ginkgo] # Approved vendors only
     mayDependOn: [domain-entities, domain-services]
 ```
 

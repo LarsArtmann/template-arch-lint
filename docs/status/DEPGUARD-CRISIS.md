@@ -10,7 +10,7 @@ The `.golangci.yml` references a `"Main"` depguard rule that doesn't exist, caus
 # Current .golangci.yml lines 779-788
 depguard:
   rules:
-    main:  # ← This rule is used
+    main: # ← This rule is used
       list-mode: allow
       # ... allowlist entries
 

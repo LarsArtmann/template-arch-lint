@@ -52,10 +52,10 @@
 ```yaml
 # ✅ WORKING APPROACH
 allow:
-  - github.com/LarsArtmann/template-arch-lint/internal/application/handlers  # ✅ SPECIFIC MATCHES
-  - github.com/LarsArtmann/template-arch-lint/internal/domain/services     # ✅ SPECIFIC MATCHES
-  - github.com/LarsArtmann/template-arch-lint/internal/domain/values      # ✅ SPECIFIC MATCHES
-  - github.com/LarsArtmann/template-arch-lint/pkg/errors               # ✅ SPECIFIC MATCHES
+  - github.com/LarsArtmann/template-arch-lint/internal/application/handlers # ✅ SPECIFIC MATCHES
+  - github.com/LarsArtmann/template-arch-lint/internal/domain/services # ✅ SPECIFIC MATCHES
+  - github.com/LarsArtmann/template-arch-lint/internal/domain/values # ✅ SPECIFIC MATCHES
+  - github.com/LarsArtmann/template-arch-lint/pkg/errors # ✅ SPECIFIC MATCHES
 ```
 
 ### 2. CONFIGURATION STABILITY:
@@ -65,12 +65,12 @@ allow:
 depguard:
   rules:
     main:
-      list-mode: allow    # ✅ FLEXIBLE MODE
+      list-mode: allow # ✅ FLEXIBLE MODE
       files:
-        - "!**/*_test.go"  # ✅ EXCLUDE TESTS
-      allow:              # ✅ EXPLICIT ALLOW LIST
-      deny:               # ✅ SECURITY BLOCKS
-    tests:              # ✅ SEPARATE TEST RULE
+        - "!**/*_test.go" # ✅ EXCLUDE TESTS
+      allow: # ✅ EXPLICIT ALLOW LIST
+      deny: # ✅ SECURITY BLOCKS
+    tests: # ✅ SEPARATE TEST RULE
 ```
 
 ### 3. SYSTEMATIC METHODOLOGY SUCCESS:

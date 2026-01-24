@@ -43,7 +43,7 @@ The analysis revealed a fundamental architectural trade-off:
 pkg-errors:
   in: pkg/errors/**
 commonComponents:
-  - pkg-errors  # ENFORCED CENTRALIZATION
+  - pkg-errors # ENFORCED CENTRALIZATION
 ```
 
 **Benefits:**

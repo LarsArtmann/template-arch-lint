@@ -247,14 +247,14 @@ data, err := os.ReadFile(file)  // Must check!
 ```yaml
 linters:
   enable:
-    - nilaway        # Nil panic prevention
-    - godox          # TODO detection
-    - forbidigo      # Banned patterns
+    - nilaway # Nil panic prevention
+    - godox # TODO detection
+    - forbidigo # Banned patterns
     # ... 37 more linters
 
 linters-settings:
   funlen:
-    lines: 50        # Max function length
+    lines: 50 # Max function length
   lll:
     line-length: 120 # Max line length
   godox:
@@ -522,7 +522,7 @@ Security patterns are handled by built-in tools (gosec + NilAway):
 ```yaml
 rules:
   - id: custom-api-key-pattern
-    pattern: "APIKey = \"...\""
+    pattern: 'APIKey = "..."'
     message: "Hardcoded API key detected"
     severity: ERROR
 ```

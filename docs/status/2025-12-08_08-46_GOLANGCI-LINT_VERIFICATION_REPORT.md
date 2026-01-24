@@ -110,10 +110,11 @@ FILES AFFECTED:
    ```yaml
    allow:
      - $gostd
-     - github.com/LarsArtmann/template-arch-lint/pkg/errors  # ADD THIS
+     - github.com/LarsArtmann/template-arch-lint/pkg/errors # ADD THIS
    ```
 
 2. **Resolve embeddedstructfieldcheck**
+
    ```go
    // Add empty lines after embedded fields in pkg/errors
    type ValidationError struct {

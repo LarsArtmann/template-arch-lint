@@ -71,8 +71,8 @@ func run(pass *analysis.Pass) (interface{}, error) {
 ```yaml
 version: "2"
 plugins:
-  - module: 'github.com/LarsArtmann/golangci-cmd-single-main'
-    import: 'github.com/LarsArtmann/golangci-cmd-single-main/pkg/cmdsingle'
+  - module: "github.com/LarsArtmann/golangci-cmd-single-main"
+    import: "github.com/LarsArtmann/golangci-cmd-single-main/pkg/cmdsingle"
 
 linters:
   enable:

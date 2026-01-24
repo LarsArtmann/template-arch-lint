@@ -47,8 +47,8 @@ This directory contains the CI/CD workflows for automated building, testing, and
 ## Environment Variables
 
 ```yaml
-GO_VERSION: '1.24.0'
-GOLANGCI_LINT_VERSION: 'v2.3.1'
+GO_VERSION: "1.24.0"
+GOLANGCI_LINT_VERSION: "v2.3.1"
 REGISTRY: ghcr.io
 IMAGE_NAME: ${{ github.repository }}
 ```
@@ -57,13 +57,13 @@ IMAGE_NAME: ${{ github.repository }}
 
 ```yaml
 permissions:
-  contents: read          # Repository access
-  security-events: write  # Security scan results
-  pull-requests: write    # PR comments and checks
-  checks: write          # Check suite results
-  packages: write        # Container registry publishing
-  attestations: write    # Build provenance attestations
-  id-token: write        # OIDC token for signing
+  contents: read # Repository access
+  security-events: write # Security scan results
+  pull-requests: write # PR comments and checks
+  checks: write # Check suite results
+  packages: write # Container registry publishing
+  attestations: write # Build provenance attestations
+  id-token: write # OIDC token for signing
 ```
 
 ## Image Tags Generated

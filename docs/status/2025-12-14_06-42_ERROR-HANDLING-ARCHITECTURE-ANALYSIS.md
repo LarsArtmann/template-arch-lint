@@ -31,7 +31,7 @@ The project currently implements **flat error centralization**:
 pkg-errors:
   in: pkg/errors/**
 commonComponents:
-  - pkg-errors  # CENTRALIZED ERROR MANAGEMENT - MANDATORY
+  - pkg-errors # CENTRALIZED ERROR MANAGEMENT - MANDATORY
 ```
 
 **Key Characteristics:**

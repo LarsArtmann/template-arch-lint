@@ -49,12 +49,12 @@
 depguard:
   rules:
     main:
-      list-mode: allow  # NOT strict!
+      list-mode: allow # NOT strict!
       files:
         - "!**/*_test.go"
       allow:
         - $gostd
-        - github.com/LarsArtmann/template-arch-lint/  # SINGLE PREFIX!
+        - github.com/LarsArtmann/template-arch-lint/ # SINGLE PREFIX!
         # + external dependencies
     tests:
       list-mode: allow

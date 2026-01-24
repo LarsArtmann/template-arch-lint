@@ -69,7 +69,7 @@ Successfully integrated `durationcheck` linter into the `.golangci.yml` configur
 
 ```yaml
 # Added to .golangci.yml at line 46
-- durationcheck  # Duration multiplication safety
+- durationcheck # Duration multiplication safety
 ```
 
 ### Linter Behavior

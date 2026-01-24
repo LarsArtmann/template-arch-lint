@@ -62,9 +62,9 @@ linters-settings:
 
 ```yaml
 # Critical version relationships discovered:
-version: 1          # golangci-lint config format (not 2!)
-GOLANGCI_VERSION: "v1.62.0"  # Tool version (not v2.x)
-GODEBUG: "gotypesalias=1"    # Required for Go 1.23 generic type aliases
+version: 1 # golangci-lint config format (not 2!)
+GOLANGCI_VERSION: "v1.62.0" # Tool version (not v2.x)
+GODEBUG: "gotypesalias=1" # Required for Go 1.23 generic type aliases
 ```
 
 **Learning**: Configuration format version ≠ tool version. Always validate compatibility matrices.
@@ -92,14 +92,14 @@ GODEBUG: "gotypesalias=1"    # Required for Go 1.23 generic type aliases
 ```yaml
 govet:
   enable:
-    - fieldalignment  # Only 1 analyzer active
+    - fieldalignment # Only 1 analyzer active
 ```
 
 **After**: Comprehensive coverage
 
 ```yaml
 govet:
-  enable-all: true  # 30+ analyzers activated
+  enable-all: true # 30+ analyzers activated
   # Includes: atomic, assign, bools, buildtag, cgocall, composites, copylocks,
   # errorsas, fieldalignment, findcall, framepointer, httpresponse, ifaceassert,
   # loopclosure, lostcancel, nilfunc, printf, shift, sigchanyzer, sortslice,
@@ -309,8 +309,8 @@ docker-dev:
 
 ```yaml
 # Updated for modern tool versions:
-GOLANGCI_VERSION: "v1.62.0"  # Updated from v2.3.1 (incorrect)
-GODEBUG: "gotypesalias=1"     # Added for Go 1.23 support
+GOLANGCI_VERSION: "v1.62.0" # Updated from v2.3.1 (incorrect)
+GODEBUG: "gotypesalias=1" # Added for Go 1.23 support
 ```
 
 **Tool Installation Improvements**:

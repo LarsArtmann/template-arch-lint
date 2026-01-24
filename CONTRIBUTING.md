@@ -739,12 +739,15 @@ func TestUserService_CreateUser(t *testing.T) {
 ## Status: Accepted
 
 ## Context
+
 We need a way to organize code that scales from small teams to enterprise applications while maintaining testability and flexibility.
 
 ## Decision
+
 We will use Clean Architecture with Domain-Driven Design principles.
 
 ## Consequences
+
 - ✅ Better testability through dependency inversion
 - ✅ Framework independence
 - ✅ Clear separation of concerns
@@ -810,9 +813,11 @@ When creating a PR, please use this template:
 
 ```markdown
 ## Description
+
 Brief description of what this PR does and why.
 
 ## Type of Change
+
 - [ ] Bug fix (non-breaking change that fixes an issue)
 - [ ] New feature (non-breaking change that adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
@@ -821,25 +826,30 @@ Brief description of what this PR does and why.
 - [ ] Code refactoring
 
 ## Related Issues
+
 Fixes #123
 Closes #456
 
 ## Testing
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated
 - [ ] Manual testing completed
 - [ ] All tests pass
 
 ## Documentation
+
 - [ ] Code comments updated
 - [ ] README.md updated (if applicable)
 - [ ] API documentation updated
 - [ ] Architecture docs updated (if applicable)
 
 ## Screenshots/Demos
+
 (If applicable, add screenshots or demo videos)
 
 ## Checklist
+
 - [ ] Code follows project style guidelines
 - [ ] Self-review of code completed
 - [ ] Code is commented where necessary

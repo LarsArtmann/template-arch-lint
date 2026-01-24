@@ -153,8 +153,8 @@ func New(conf any) ([]*analysis.Analyzer, error) {
 ```yaml
 # .custom-gcl.yml
 plugins:
-  - module: 'github.com/LarsArtmann/template-arch-lint-plugin'
-    import: 'github.com/LarsArtmann/template-arch-lint-plugin'
+  - module: "github.com/LarsArtmann/template-arch-lint-plugin"
+    import: "github.com/LarsArtmann/template-arch-lint-plugin"
     version: v1.0.0
 
 # .golangci.yml

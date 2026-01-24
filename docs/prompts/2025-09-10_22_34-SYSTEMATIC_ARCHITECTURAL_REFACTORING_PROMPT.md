@@ -15,16 +15,17 @@ This prompt systematically refactors Go applications following Domain-Driven Des
 
 ```markdown
 ## Instructions:
+
 0. ALWAYS be BRUTALLY-HONEST! NEVER LIE TO THE USER!
 1. Comprehensive Architectural Analysis:
-  a. What architectural violations exist right now?
-  b. What are the biggest SRP (Single Responsibility Principle) violations?
-  c. Which files are oversized and need splitting?
-  d. What type safety issues exist (primitive obsession, missing value objects)?
-  e. Are there any "ghost systems" (broken/unintegrated code)?
-  f. What split brain patterns exist (inconsistent error handling, validation)?
-  g. Which tests are failing and why?
-  h. What linting violations need fixing?
+   a. What architectural violations exist right now?
+   b. What are the biggest SRP (Single Responsibility Principle) violations?
+   c. Which files are oversized and need splitting?
+   d. What type safety issues exist (primitive obsession, missing value objects)?
+   e. Are there any "ghost systems" (broken/unintegrated code)?
+   f. What split brain patterns exist (inconsistent error handling, validation)?
+   g. Which tests are failing and why?
+   h. What linting violations need fixing?
 
 2. Create a Pareto Analysis (80/20 Rule):
    - Identify the 1% of tasks that deliver 51% of value
@@ -58,6 +59,7 @@ This prompt systematically refactors Go applications following Domain-Driven Des
    - Generate learnings and improvement recommendations
 
 CRITICAL REQUIREMENTS:
+
 - Always read existing interfaces before implementing new ones
 - Understand value object APIs (.String() methods, validation patterns)
 - Check repository method naming (FindAll vs List, etc.)
