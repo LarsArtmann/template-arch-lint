@@ -130,7 +130,6 @@ require (
 	github.com/golangci/revgrep v0.8.0 // indirect
 	github.com/golangci/swaggoswag v0.0.0-20250504205917-77f2aca3143e // indirect
 	github.com/golangci/unconvert v0.0.0-20250410112200-a129a6e6413e // indirect
-	github.com/google/capslock v0.3.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-licenses v1.6.0 // indirect
 	github.com/google/licenseclassifier v0.0.0-20210722185704-3043a050f148 // indirect
@@ -268,7 +267,7 @@ require (
 	golang.org/x/crypto v0.47.0 // indirect
 	golang.org/x/exp v0.0.0-20260112195511-716be5621a96 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20251002181428-27f1f14c8bb9 // indirect
-	golang.org/x/image v0.3.0 // indirect
+	golang.org/x/image v0.18.0 // indirect
 	golang.org/x/mod v0.32.0 // indirect
 	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
