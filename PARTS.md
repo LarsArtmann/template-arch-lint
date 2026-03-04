@@ -9,13 +9,13 @@
 
 This document analyzes components within `template-arch-lint` that could be extracted as standalone libraries/SDKs. Each component is evaluated against existing alternatives in the Go ecosystem to determine unique value and extraction viability.
 
-| Component | Extract? | Unique Value | Recommendation |
-|-----------|----------|--------------|----------------|
-| `pkg/errors` | **No** | Low | Use `cockroachdb/errors` + `samber/mo` Result |
-| `pkg/linter-plugins` | **Yes** | High | Extract as `go-arch-linters` |
-| `template-configs/` | **No** | Medium | Keep as copy-paste templates |
-| `internal/domain/values` | **No** | Low | Use `go-playground/validator` |
-| `internal/testhelpers` | **No** | None | Too sparse, not ready |
+| Component                | Extract? | Unique Value | Recommendation                                |
+| ------------------------ | -------- | ------------ | --------------------------------------------- |
+| `pkg/errors`             | **No**   | Low          | Use `cockroachdb/errors` + `samber/mo` Result |
+| `pkg/linter-plugins`     | **Yes**  | High         | Extract as `go-arch-linters`                  |
+| `template-configs/`      | **No**   | Medium       | Keep as copy-paste templates                  |
+| `internal/domain/values` | **No**   | Low          | Use `go-playground/validator`                 |
+| `internal/testhelpers`   | **No**   | None         | Too sparse, not ready                         |
 
 ---
 
@@ -26,6 +26,7 @@ This document analyzes components within `template-arch-lint` that could be extr
 **Location:** `pkg/errors/errors.go` (502 lines)
 
 **Features:**
+
 - Typed error codes: `ValidationError`, `NotFoundError`, `ConflictError`, `InternalError`, `DatabaseError`, `NetworkError`, `ConfigurationError`
 - `DomainError` and `InfrastructureError` interfaces
 - `ErrorDetails` struct with field, resource, ID, value, reason, extra
@@ -35,12 +36,12 @@ This document analyzes components within `template-arch-lint` that could be extr
 
 ### Existing Alternatives
 
-| Library | Stars | Features | Gaps |
-|---------|-------|----------|------|
-| `cockroachdb/errors` | 1.5k+ | Stack traces, error wrapping, PII-safe details, domains, HTTP code wrappers | No built-in HTTP status mapping |
-| `samber/oops` | 500+ | Context, assertion, stack traces, source fragments | Newer, less battle-tested |
-| `samber/mo` Result | 2k+ | Functional Result[T] type, Either, Option | Not error-specific, functional pattern |
-| `larsartmann/uniflow` | - | Railway Oriented Programming, errors as values | Private/personal project |
+| Library               | Stars | Features                                                                    | Gaps                                   |
+| --------------------- | ----- | --------------------------------------------------------------------------- | -------------------------------------- |
+| `cockroachdb/errors`  | 1.5k+ | Stack traces, error wrapping, PII-safe details, domains, HTTP code wrappers | No built-in HTTP status mapping        |
+| `samber/oops`         | 500+  | Context, assertion, stack traces, source fragments                          | Newer, less battle-tested              |
+| `samber/mo` Result    | 2k+   | Functional Result[T] type, Either, Option                                   | Not error-specific, functional pattern |
+| `larsartmann/uniflow` | -     | Railway Oriented Programming, errors as values                              | Private/personal project               |
 
 ### Comparison Analysis
 
@@ -91,6 +92,7 @@ func WithHTTPStatus(err error, code int) HTTPError {
 > Use `larsartmann/uniflow` or `cockroachdb/errors`.
 
 **Action:** Replace `pkg/errors` with:
+
 1. `cockroachdb/errors` for error creation and wrapping
 2. `samber/mo` Result[T] for functional error handling
 3. Add thin HTTP status wrapper if needed
@@ -105,31 +107,33 @@ func WithHTTPStatus(err error, code int) HTTPError {
 
 **Analyzers:**
 
-| Analyzer | Purpose | Lines |
-|----------|---------|-------|
-| `filename-validator` | Validates Go file naming conventions | ~60 |
-| `cmd-single-main` | Enforces exactly one main.go in cmd/ | ~80 |
-| `import-cycle-detector` | Detects circular dependencies via AST | ~100 |
-| `code-duplication-detector` | Finds duplicate code blocks | ~90 |
+| Analyzer                    | Purpose                               | Lines |
+| --------------------------- | ------------------------------------- | ----- |
+| `filename-validator`        | Validates Go file naming conventions  | ~60   |
+| `cmd-single-main`           | Enforces exactly one main.go in cmd/  | ~80   |
+| `import-cycle-detector`     | Detects circular dependencies via AST | ~100  |
+| `code-duplication-detector` | Finds duplicate code blocks           | ~90   |
 
 **Technical Details:**
+
 - Uses `golang.org/x/tools/go/analysis` framework
 - Compatible with golangci-lint v2 plugin system
 - Entry point: `func New(conf any) ([]*analysis.Analyzer, error)`
 
 ### Existing Alternatives
 
-| Tool | Purpose | Gaps |
-|------|---------|------|
-| `go-arch-lint` | Architecture boundary enforcement | No cmd-single-main, no duplication detection |
-| `arch-go` | Architecture testing (newer) | Limited adoption, different approach |
-| `dupl` | Code duplication detection | No integration with our other analyzers |
-| `goimports` | Import management | No cycle detection |
-| Google's custom plugins | `sliceofpointers`, `fmtpercentv` | Different focus, not architecture |
+| Tool                    | Purpose                           | Gaps                                         |
+| ----------------------- | --------------------------------- | -------------------------------------------- |
+| `go-arch-lint`          | Architecture boundary enforcement | No cmd-single-main, no duplication detection |
+| `arch-go`               | Architecture testing (newer)      | Limited adoption, different approach         |
+| `dupl`                  | Code duplication detection        | No integration with our other analyzers      |
+| `goimports`             | Import management                 | No cycle detection                           |
+| Google's custom plugins | `sliceofpointers`, `fmtpercentv`  | Different focus, not architecture            |
 
 ### Plugin Ecosystem Analysis
 
 From Sourcegraph research:
+
 - **Google/go-github** maintains custom golangci-lint plugins
 - Plugin pattern: `github.com/golangci/plugin-module-register/register`
 - Few public architecture-focused plugins exist
@@ -151,6 +155,7 @@ From Sourcegraph research:
 **EXTRACT as `go-arch-linters`.**
 
 **Proposed Structure:**
+
 ```
 github.com/larsartmann/go-arch-linters/
 ├── cmd-single-main/       # Single entry point enforcement
@@ -162,11 +167,13 @@ github.com/larsartmann/go-arch-linters/
 ```
 
 **Distribution Options:**
+
 1. **Custom golangci-lint binary**: `golangci-lint custom` with `.custom-gcl.yml`
 2. **Go plugin**: `.so` file loaded at runtime
 3. **Module import**: Direct analyzer use in tests
 
 **Action:**
+
 1. Extract to standalone repository
 2. Add comprehensive documentation
 3. Provide example `.custom-gcl.yml`
@@ -181,6 +188,7 @@ github.com/larsartmann/go-arch-linters/
 **Location:** `template-configs/`
 
 **Files:**
+
 - `.go-arch-lint.yml` (348 lines) — Architecture boundary rules
 - `.golangci.yml` (131 lines) — 99+ linters configuration
 - `justfile` (1153 lines) — Task automation commands
@@ -189,12 +197,12 @@ github.com/larsartmann/go-arch-linters/
 
 ### Existing Alternatives
 
-| Approach | Examples | Tradeoffs |
-|----------|----------|-----------|
-| **Copy-paste configs** | Our approach | Simple, no versioning issues, requires manual sync |
-| **Shared config package** | `golangci-lint` shared configs | Versioning, but limited flexibility |
-| **Config inheritance** | Some linters support | Complex, harder to debug |
-| **Renovate/Dependabot** | Auto-update configs | Only works if configs are packages |
+| Approach                  | Examples                       | Tradeoffs                                          |
+| ------------------------- | ------------------------------ | -------------------------------------------------- |
+| **Copy-paste configs**    | Our approach                   | Simple, no versioning issues, requires manual sync |
+| **Shared config package** | `golangci-lint` shared configs | Versioning, but limited flexibility                |
+| **Config inheritance**    | Some linters support           | Complex, harder to debug                           |
+| **Renovate/Dependabot**   | Auto-update configs            | Only works if configs are packages                 |
 
 ### Comparison Analysis
 
@@ -226,12 +234,14 @@ The value is in the **content** of the configs, not a library.
 **Do NOT extract as library.** Keep as copy-paste templates.
 
 **Rationale:**
+
 1. Configs need project-specific customization
 2. Linter versions change; pinning causes conflicts
 3. Architecture rules are project-specific
 4. Justfile commands vary by project
 
 **Action:**
+
 1. Keep `template-configs/` as reference
 2. Add `README.md` explaining copy-paste process
 3. Document sync process for updates
@@ -246,11 +256,13 @@ The value is in the **content** of the configs, not a library.
 **Location:** `internal/domain/values/`
 
 **Examples:**
+
 - `email.go` (185 lines) — Email value object with comprehensive validation
 - `username.go` — UserName value object
 - `user_id.go` — UserID value object
 
 **Pattern:**
+
 ```go
 type Email struct {
     value string
@@ -266,12 +278,12 @@ func NewEmail(email string) (Email, error) {
 
 ### Existing Alternatives
 
-| Library | Approach | Features |
-|---------|----------|----------|
-| `go-playground/validator` | Struct tags | 100+ validators, custom validators, cross-field |
-| `ozzo-validation` | Fluent API | Conditional validation, built-in rules |
-| `asaskevich/govalidator` | Struct tags + functions | String validators, sanitizers |
-| `samber/mo` | Functional types | Option[T], Result[T], Either[L,R] |
+| Library                   | Approach                | Features                                        |
+| ------------------------- | ----------------------- | ----------------------------------------------- |
+| `go-playground/validator` | Struct tags             | 100+ validators, custom validators, cross-field |
+| `ozzo-validation`         | Fluent API              | Conditional validation, built-in rules          |
+| `asaskevich/govalidator`  | Struct tags + functions | String validators, sanitizers                   |
+| `samber/mo`               | Functional types        | Option[T], Result[T], Either[L,R]               |
 
 ### Comparison Analysis
 
@@ -313,9 +325,11 @@ samber/mo Option[T]:
 **Do NOT extract.** Use existing validation libraries.
 
 **Per `HOW_TO_GOLANG.md`:**
+
 > Use `go-playground/validator` for non-Huma code.
 
 **Alternative approach:**
+
 ```go
 // Instead of custom value objects, use:
 type Email struct {
@@ -343,18 +357,19 @@ func NewEmail(email string) (Email, error) {
 
 ### Existing Alternatives
 
-| Library | Features |
-|---------|----------|
-| `onsi/ginkgo/v2` | BDD testing, parallel execution, reporters |
-| `onsi/gomega` | Rich matchers, async assertions |
-| `testcontainers-go` | Integration testing with real dependencies |
-| `data-dog/go-sqlmock` | Database mocking |
+| Library               | Features                                   |
+| --------------------- | ------------------------------------------ |
+| `onsi/ginkgo/v2`      | BDD testing, parallel execution, reporters |
+| `onsi/gomega`         | Rich matchers, async assertions            |
+| `testcontainers-go`   | Integration testing with real dependencies |
+| `data-dog/go-sqlmock` | Database mocking                           |
 
 ### Recommendation
 
 **Do NOT extract.** Not ready for extraction.
 
 **Action:**
+
 1. Develop testing utilities as needed
 2. Use Ginkgo/Gomega per `HOW_TO_GOLANG.md`
 3. Consider extracting only when mature
@@ -365,19 +380,19 @@ func NewEmail(email string) (Email, error) {
 
 ### Immediate Actions
 
-| Priority | Action | Effort | Impact |
-|----------|--------|--------|--------|
-| 1 | Extract `pkg/linter-plugins` → `go-arch-linters` | Medium | High |
-| 2 | Replace `pkg/errors` with `cockroachdb/errors` | Low | Medium |
-| 3 | Document `template-configs/` copy-paste process | Low | Medium |
+| Priority | Action                                           | Effort | Impact |
+| -------- | ------------------------------------------------ | ------ | ------ |
+| 1        | Extract `pkg/linter-plugins` → `go-arch-linters` | Medium | High   |
+| 2        | Replace `pkg/errors` with `cockroachdb/errors`   | Low    | Medium |
+| 3        | Document `template-configs/` copy-paste process  | Low    | Medium |
 
 ### Future Considerations
 
-| Component | Condition for Extraction |
-|-----------|--------------------------|
-| `pkg/errors` | If HTTP status wrapper becomes reusable across 3+ projects |
-| `internal/domain/values` | If generic value object builder pattern emerges |
-| `internal/testhelpers` | When mature with 5+ reusable utilities |
+| Component                | Condition for Extraction                                   |
+| ------------------------ | ---------------------------------------------------------- |
+| `pkg/errors`             | If HTTP status wrapper becomes reusable across 3+ projects |
+| `internal/domain/values` | If generic value object builder pattern emerges            |
+| `internal/testhelpers`   | When mature with 5+ reusable utilities                     |
 
 ---
 
@@ -385,13 +400,13 @@ func NewEmail(email string) (Email, error) {
 
 Per `HOW_TO_GOLANG.md`, the following libraries should be used instead of custom implementations:
 
-| Category | Required Library | Replaces |
-|----------|-----------------|----------|
-| Error Handling | `cockroachdb/errors`, `larsartmann/uniflow` | `pkg/errors` |
-| Functional Types | `samber/lo`, `samber/mo` | Custom patterns |
-| Validation | `go-playground/validator` | Custom validators |
-| Testing | `onsi/ginkgo/v2`, `onsi/gomega` | `testify` (banned) |
-| DI | `samber/do/v2` | Manual DI |
+| Category         | Required Library                            | Replaces           |
+| ---------------- | ------------------------------------------- | ------------------ |
+| Error Handling   | `cockroachdb/errors`, `larsartmann/uniflow` | `pkg/errors`       |
+| Functional Types | `samber/lo`, `samber/mo`                    | Custom patterns    |
+| Validation       | `go-playground/validator`                   | Custom validators  |
+| Testing          | `onsi/ginkgo/v2`, `onsi/gomega`             | `testify` (banned) |
+| DI               | `samber/do/v2`                              | Manual DI          |
 
 ---
 

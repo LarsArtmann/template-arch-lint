@@ -37,6 +37,21 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 		return userID
 	}
 
+	createTestUsers := func(service *services.UserService, ctx context.Context, count int, idPrefix, emailPrefix, namePrefix string) []values.UserID {
+		userIDs := make([]values.UserID, count)
+		for i := range count {
+			id := createTestUserID(fmt.Sprintf("%s-%d", idPrefix, i))
+			email := fmt.Sprintf("%s%d@example.com", emailPrefix, i)
+			name := fmt.Sprintf("%s %d", namePrefix, i)
+
+			_, err := service.CreateUser(ctx, id, email, name)
+			Expect(err).ToNot(HaveOccurred())
+			userIDs[i] = id
+		}
+
+		return userIDs
+	}
+
 	BeforeEach(func() {
 		ctx = context.Background()
 		userRepo = repositories.NewInMemoryUserRepository()
@@ -297,16 +312,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				const numUsers = 10
 
 				// Create multiple users
-				userIDs := make([]values.UserID, numUsers)
-				for i := range numUsers {
-					id := createTestUserID(fmt.Sprintf("multi-update-user-%d", i))
-					email := fmt.Sprintf("multi%d@example.com", i)
-					name := fmt.Sprintf("Multi User %d", i)
-
-					_, err := userService.CreateUser(ctx, id, email, name)
-					Expect(err).ToNot(HaveOccurred())
-					userIDs[i] = id
-				}
+				userIDs := createTestUsers(userService, ctx, numUsers, "multi-update-user", "multi", "Multi User")
 
 				var wg sync.WaitGroup
 				results := make(chan error, numUsers)
@@ -398,16 +404,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				const numUsers = 8
 
 				// Create multiple users
-				userIDs := make([]values.UserID, numUsers)
-				for i := range numUsers {
-					id := createTestUserID(fmt.Sprintf("multi-delete-user-%d", i))
-					email := fmt.Sprintf("multidelete%d@example.com", i)
-					name := fmt.Sprintf("Multi Delete User %d", i)
-
-					_, err := userService.CreateUser(ctx, id, email, name)
-					Expect(err).ToNot(HaveOccurred())
-					userIDs[i] = id
-				}
+				userIDs := createTestUsers(userService, ctx, numUsers, "multi-delete-user", "multidelete", "Multi Delete User")
 
 				var wg sync.WaitGroup
 				results := make(chan error, numUsers)

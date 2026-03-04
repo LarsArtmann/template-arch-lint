@@ -66,6 +66,37 @@ var _ = Describe("UserQueryHandler", func() {
 		return userID.String()
 	}
 
+	// Helper function to test empty array response with 200 status
+	expectEmptyArrayResponse := func(urlPath string) {
+		req, _ := http.NewRequest(http.MethodGet, urlPath, nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		Expect(w.Code).To(Equal(http.StatusOK))
+
+		var response map[string]any
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(response).To(HaveKey("data"))
+
+		data := response["data"].([]any)
+		Expect(data).To(BeEmpty())
+	}
+
+	// Helper function to test 400 Bad Request error response
+	expectBadRequestResponse := func(urlPath string) {
+		req, _ := http.NewRequest(http.MethodGet, urlPath, nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		Expect(w.Code).To(Equal(http.StatusBadRequest))
+
+		var response map[string]any
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(response).To(HaveKey("error"))
+	}
+
 	Describe("Repository Sharing Debug", func() {
 		It("should persist data across service calls", func() {
 			// This test verifies repository instance sharing
@@ -120,16 +151,7 @@ var _ = Describe("UserQueryHandler", func() {
 
 		Context("when user ID is invalid", func() {
 			It("should return 400 status for invalid characters", func() {
-				req, _ := http.NewRequest(http.MethodGet, "/users/invalid@id", nil)
-				w := httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-
-				Expect(w.Code).To(Equal(http.StatusBadRequest))
-
-				var response map[string]any
-				err := json.Unmarshal(w.Body.Bytes(), &response)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(response).To(HaveKey("error"))
+				expectBadRequestResponse("/users/invalid@id")
 			})
 		})
 	})
@@ -158,19 +180,7 @@ var _ = Describe("UserQueryHandler", func() {
 
 		Context("when no users exist", func() {
 			It("should return empty array with 200 status", func() {
-				req, _ := http.NewRequest(http.MethodGet, "/users", nil)
-				w := httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-
-				Expect(w.Code).To(Equal(http.StatusOK))
-
-				var response map[string]any
-				err := json.Unmarshal(w.Body.Bytes(), &response)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(response).To(HaveKey("data"))
-
-				data := response["data"].([]any)
-				Expect(data).To(BeEmpty())
+				expectEmptyArrayResponse("/users")
 			})
 		})
 	})
@@ -198,34 +208,13 @@ var _ = Describe("UserQueryHandler", func() {
 
 		Context("when email parameter is missing", func() {
 			It("should return 400 status", func() {
-				req, _ := http.NewRequest(http.MethodGet, "/users/search", nil)
-				w := httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-
-				Expect(w.Code).To(Equal(http.StatusBadRequest))
-
-				var response map[string]any
-				err := json.Unmarshal(w.Body.Bytes(), &response)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(response).To(HaveKey("error"))
+				expectBadRequestResponse("/users/search")
 			})
 		})
 
 		Context("when user does not exist with email", func() {
 			It("should return empty array with 200 status", func() {
-				req, _ := http.NewRequest(http.MethodGet, "/users/search?email=nonexistent@example.com", nil)
-				w := httptest.NewRecorder()
-				router.ServeHTTP(w, req)
-
-				Expect(w.Code).To(Equal(http.StatusOK))
-
-				var response map[string]any
-				err := json.Unmarshal(w.Body.Bytes(), &response)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(response).To(HaveKey("data"))
-
-				data := response["data"].([]any)
-				Expect(data).To(BeEmpty())
+				expectEmptyArrayResponse("/users/search?email=nonexistent@example.com")
 			})
 		})
 	})

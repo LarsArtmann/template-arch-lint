@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"net/http"
 
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	"github.com/charmbracelet/log"
@@ -29,6 +30,17 @@ func generateUserID() string {
 	rand.Read(bytes)
 
 	return hex.EncodeToString(bytes)
+}
+
+// userToJSON converts a user entity to a JSON response map.
+func userToJSON(user *entities.User) gin.H {
+	return gin.H{
+		"id":        user.ID.String(),
+		"email":     user.GetEmail().String(),
+		"name":      user.GetUserName().String(),
+		"createdAt": user.GetCreatedAt(),
+		"updatedAt": user.GetUpdatedAt(),
+	}
 }
 
 // CreateUser handles user creation requests.
@@ -104,13 +116,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"id":        user.ID.String(),
-		"email":     user.GetEmail().String(),
-		"name":      user.GetUserName().String(),
-		"createdAt": user.GetCreatedAt(),
-		"updatedAt": user.GetUpdatedAt(),
-	})
+	c.JSON(http.StatusOK, userToJSON(user))
 }
 
 // UpdateUser handles user update requests.
@@ -152,13 +158,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"id":        user.ID.String(),
-		"email":     user.GetEmail().String(),
-		"name":      user.GetUserName().String(),
-		"createdAt": user.GetCreatedAt(),
-		"updatedAt": user.GetUpdatedAt(),
-	})
+	c.JSON(http.StatusOK, userToJSON(user))
 }
 
 // DeleteUser handles user deletion requests.

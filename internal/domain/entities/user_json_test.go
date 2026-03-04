@@ -109,62 +109,38 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 			gomega.Expect(unmarshaledUser.Modified).To(gomega.Equal(expectedModified))
 		})
 
-		ginkgo.It("should return validation error for invalid email in JSON", func() {
-			// Given - JSON with invalid email
-			jsonInput := `{
+		ginkgo.DescribeTable("should return validation error for invalid field in JSON",
+			func(jsonInput, expectedField string) {
+				// When
+				var unmarshaledUser User
+				err := json.Unmarshal([]byte(jsonInput), &unmarshaledUser)
+
+				// Then
+				gomega.Expect(err).To(gomega.HaveOccurred())
+				gomega.Expect(err.Error()).To(gomega.ContainSubstring(expectedField))
+			},
+			ginkgo.Entry("invalid email", `{
 				"id": "user-invalid",
 				"email": "not-an-email",
 				"name": "InvalidUser",
 				"created": "2023-03-01T10:00:00Z",
 				"modified": "2023-03-02T11:00:00Z"
-			}`
-
-			// When
-			var unmarshaledUser User
-			err := json.Unmarshal([]byte(jsonInput), &unmarshaledUser)
-
-			// Then
-			gomega.Expect(err).To(gomega.HaveOccurred())
-			gomega.Expect(err.Error()).To(gomega.ContainSubstring("email"))
-		})
-
-		ginkgo.It("should return validation error for invalid user ID in JSON", func() {
-			// Given - JSON with empty user ID
-			jsonInput := `{
+			}`, "email"),
+			ginkgo.Entry("invalid user ID", `{
 				"id": "",
 				"email": "valid@example.com",
 				"name": "ValidUser",
 				"created": "2023-03-01T10:00:00Z",
 				"modified": "2023-03-02T11:00:00Z"
-			}`
-
-			// When
-			var unmarshaledUser User
-			err := json.Unmarshal([]byte(jsonInput), &unmarshaledUser)
-
-			// Then
-			gomega.Expect(err).To(gomega.HaveOccurred())
-			gomega.Expect(err.Error()).To(gomega.ContainSubstring("user ID"))
-		})
-
-		ginkgo.It("should return validation error for invalid name in JSON", func() {
-			// Given - JSON with empty name
-			jsonInput := `{
+			}`, "user ID"),
+			ginkgo.Entry("invalid name", `{
 				"id": "user-valid",
 				"email": "valid@example.com",
 				"name": "",
 				"created": "2023-03-01T10:00:00Z",
 				"modified": "2023-03-02T11:00:00Z"
-			}`
-
-			// When
-			var unmarshaledUser User
-			err := json.Unmarshal([]byte(jsonInput), &unmarshaledUser)
-
-			// Then
-			gomega.Expect(err).To(gomega.HaveOccurred())
-			gomega.Expect(err.Error()).To(gomega.ContainSubstring("name"))
-		})
+			}`, "name"),
+		)
 
 		ginkgo.It("should handle malformed JSON gracefully", func() {
 			// Given - Malformed JSON

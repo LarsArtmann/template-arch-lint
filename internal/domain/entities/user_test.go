@@ -52,45 +52,32 @@ var _ = ginkgo.Describe("User Entity", func() {
 		})
 
 		ginkgo.Context("with invalid parameters", func() {
-			ginkgo.It("should return error when ID is empty", func() {
-				// When
-				user, err := NewUserFromStrings("", "test@example.com", "TestUser")
+			type validationTestCase struct {
+				description   string
+				id            string
+				email         string
+				name          string
+				errorContains string
+			}
 
-				// Then
-				gomega.Expect(err).To(gomega.HaveOccurred())
-				gomega.Expect(err.Error()).To(gomega.ContainSubstring("user ID"))
-				gomega.Expect(user).To(gomega.BeNil())
-			})
+			validationTestCases := []validationTestCase{
+				{"should return error when ID is empty", "", "test@example.com", "TestUser", "user ID"},
+				{"should return error when email is empty", "user-123", "", "TestUser", "email"},
+				{"should return error when name is empty", "user-123", "test@example.com", "", "name"},
+				{"should return error when email is invalid", "user-123", "invalid-email", "TestUser", "email"},
+			}
 
-			ginkgo.It("should return error when email is empty", func() {
-				// When
-				user, err := NewUserFromStrings("user-123", "", "TestUser")
+			for _, tc := range validationTestCases {
+				ginkgo.It(tc.description, func() {
+					// When
+					user, err := NewUserFromStrings(tc.id, tc.email, tc.name)
 
-				// Then
-				gomega.Expect(err).To(gomega.HaveOccurred())
-				gomega.Expect(err.Error()).To(gomega.ContainSubstring("email"))
-				gomega.Expect(user).To(gomega.BeNil())
-			})
-
-			ginkgo.It("should return error when name is empty", func() {
-				// When
-				user, err := NewUserFromStrings("user-123", "test@example.com", "")
-
-				// Then
-				gomega.Expect(err).To(gomega.HaveOccurred())
-				gomega.Expect(err.Error()).To(gomega.ContainSubstring("name"))
-				gomega.Expect(user).To(gomega.BeNil())
-			})
-
-			ginkgo.It("should return error when email is invalid", func() {
-				// When
-				user, err := NewUserFromStrings("user-123", "invalid-email", "TestUser")
-
-				// Then
-				gomega.Expect(err).To(gomega.HaveOccurred())
-				gomega.Expect(err.Error()).To(gomega.ContainSubstring("email"))
-				gomega.Expect(user).To(gomega.BeNil())
-			})
+					// Then
+					gomega.Expect(err).To(gomega.HaveOccurred())
+					gomega.Expect(err.Error()).To(gomega.ContainSubstring(tc.errorContains))
+					gomega.Expect(user).To(gomega.BeNil())
+				})
+			}
 		})
 
 		ginkgo.Context("edge cases", func() {
