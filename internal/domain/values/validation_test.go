@@ -339,6 +339,25 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 	})
 
 	Describe("🛡️ Security Validation", func() {
+		// Helper function to test that malicious inputs are rejected by all value types.
+		expectSecurityInputRejection := func(inputs []string, attackType string) {
+			for _, input := range inputs {
+				// Try in email
+				email, err := values.NewEmail(input)
+				Expect(err).To(HaveOccurred(), "should reject %s in email: %s", attackType, input)
+				Expect(email.String()).To(BeEmpty())
+
+				// Try in name
+				name, err := values.NewUserName(input)
+				Expect(err).To(HaveOccurred(), "should reject %s in name: %s", attackType, input)
+				Expect(name.String()).To(BeEmpty())
+
+				// Try in ID
+				id, err := values.NewUserID(input)
+				Expect(err).To(HaveOccurred(), "should reject %s in ID: %s", attackType, input)
+				Expect(id.String()).To(BeEmpty())
+			}
+		}
 		Context("injection attack prevention", func() {
 			It("should reject SQL injection attempts", func() {
 				maliciousInputs := []string{
@@ -349,22 +368,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 					"'; INSERT INTO users VALUES ('hacker'); --",
 				}
 
-				for _, maliciousInput := range maliciousInputs {
-					// Try in email
-					email, err := values.NewEmail(maliciousInput)
-					Expect(err).To(HaveOccurred(), "should reject SQL injection in email: %s", maliciousInput)
-					Expect(email.String()).To(BeEmpty())
-
-					// Try in name
-					name, err := values.NewUserName(maliciousInput)
-					Expect(err).To(HaveOccurred(), "should reject SQL injection in name: %s", maliciousInput)
-					Expect(name.String()).To(BeEmpty())
-
-					// Try in ID
-					id, err := values.NewUserID(maliciousInput)
-					Expect(err).To(HaveOccurred(), "should reject SQL injection in ID: %s", maliciousInput)
-					Expect(id.String()).To(BeEmpty())
-				}
+				expectSecurityInputRejection(maliciousInputs, "SQL injection")
 			})
 
 			It("should reject XSS attempts", func() {
@@ -376,22 +380,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 					"&lt;script&gt;alert('xss')&lt;/script&gt;",
 				}
 
-				for _, xssInput := range xssInputs {
-					// Try in email (will likely fail format validation anyway)
-					email, err := values.NewEmail(xssInput)
-					Expect(err).To(HaveOccurred(), "should reject XSS in email: %s", xssInput)
-					Expect(email.String()).To(BeEmpty())
-
-					// Try in name
-					name, err := values.NewUserName(xssInput)
-					Expect(err).To(HaveOccurred(), "should reject XSS in name: %s", xssInput)
-					Expect(name.String()).To(BeEmpty())
-
-					// Try in ID
-					id, err := values.NewUserID(xssInput)
-					Expect(err).To(HaveOccurred(), "should reject XSS in ID: %s", xssInput)
-					Expect(id.String()).To(BeEmpty())
-				}
+				expectSecurityInputRejection(xssInputs, "XSS")
 			})
 
 			It("should reject path traversal attempts", func() {
