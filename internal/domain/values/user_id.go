@@ -2,191 +2,71 @@
 package values
 
 import (
-	"crypto/rand"
-	"database/sql/driver"
-	"encoding/json"
-	"fmt"
-	"strings"
-
-	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/ids"
 )
 
-// UserID represents a unique user identifier value object.
-type UserID struct {
-	value string
-}
+// UserID is a type alias for the branded UserID from the ids package.
+//
+// DEPRECATED: Use ids.UserID directly. This alias is maintained for backward
+// compatibility during migration. Will be removed in a future version.
+//
+// The new UserID provides:
+//   - Compile-time type safety (cannot mix UserID with SessionID)
+//   - Built-in JSON, SQL, and binary serialization
+//   - Zero-allocation operations
+//   - Generic ID capabilities via go-composable-business-types/id
+//
+// Example migration:
+//
+//	// Old (custom struct):
+//	import "github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+//	userID, err := values.NewUserID("user-123")
+//
+//	// New (branded type):
+//	import "github.com/LarsArtmann/template-arch-lint/internal/domain/ids"
+//	userID, err := ids.NewUserID("user-123")
+//
+// See internal/domain/ids/ids.go for the new implementation.
+type UserID = ids.UserID
 
 // NewUserID creates a new UserID value object with validation.
+//
+// DEPRECATED: Use ids.NewUserID instead.
 func NewUserID(id string) (UserID, error) {
-	if err := validateUserIDFormat(id); err != nil {
-		return UserID{}, err
-	}
-
-	return UserID{
-		value: strings.TrimSpace(id),
-	}, nil
+	return ids.NewUserID(id)
 }
 
 // GenerateUserID creates a new random UserID.
+//
+// DEPRECATED: Use ids.GenerateUserID instead.
 func GenerateUserID() (UserID, error) {
-	// Generate a random ID using crypto/rand for security
-	bytes := make([]byte, 16)
-	if _, err := rand.Read(bytes); err != nil {
-		return UserID{}, errors.NewInternalError("failed to generate random ID", err)
-	}
-
-	// Convert to hex string with user prefix
-	id := fmt.Sprintf("user_%x", bytes)
-
-	return UserID{
-		value: id,
-	}, nil
+	return ids.GenerateUserID()
 }
 
-// String returns the string representation of the user ID.
-func (u UserID) String() string {
-	return u.value
-}
-
-// StringValue returns the user ID value for database storage.
-func (u UserID) StringValue() string {
-	return u.value
-}
-
-// Equals compares two UserID value objects.
-func (u UserID) Equals(other UserID) bool {
-	return u.value == other.value
+// MustGenerateUserID creates a new UserID or panics on failure.
+//
+// DEPRECATED: Use ids.MustGenerateUserID instead.
+func MustGenerateUserID() UserID {
+	return ids.MustGenerateUserID()
 }
 
 // IsEmpty checks if the user ID is empty.
-func (u UserID) IsEmpty() bool {
-	return u.value == ""
+// This is a backward-compatibility wrapper around IsZero().
+//
+// DEPRECATED: Use id.IsZero() instead.
+func IsEmpty(id UserID) bool {
+	return id.IsZero()
 }
 
-// IsGenerated checks if this looks like a generated ID.
-func (u UserID) IsGenerated() bool {
-	return strings.HasPrefix(u.value, "user_") && len(u.value) == 37 // "user_" + 32 hex chars
+// Equals compares two UserID value objects.
+// This is a backward-compatibility wrapper.
+//
+// DEPRECATED: Use id.Equal() instead.
+func Equals(a, b UserID) bool {
+	return a.Equal(b)
 }
 
-// validateUserIDFormat enforces business rules for user ID validation.
-func validateUserIDFormat(id string) error {
-	if err := validateUserIDNotEmpty(id); err != nil {
-		return err
-	}
-
-	normalized := strings.TrimSpace(id)
-	if err := validateUserIDWhitespace(id, normalized); err != nil {
-		return err
-	}
-
-	if err := validateUserIDLength(normalized); err != nil {
-		return err
-	}
-
-	return validateUserIDCharacters(normalized)
-}
-
-func validateUserIDNotEmpty(id string) error {
-	if id == "" {
-		return errors.NewRequiredFieldError("user ID")
-	}
-
-	return nil
-}
-
-func validateUserIDWhitespace(original, normalized string) error {
-	if original != normalized {
-		return errors.NewValidationError("userID", "user ID cannot have leading or trailing spaces")
-	}
-
-	if strings.ContainsAny(normalized, " \t\n\r") {
-		return errors.NewValidationError("userID", "user ID cannot contain whitespace")
-	}
-
-	return nil
-}
-
-func validateUserIDLength(id string) error {
-	if len(id) < 2 {
-		return errors.NewValidationError("userID", "user ID too short (minimum 2 characters)")
-	}
-	if len(id) > 100 {
-		return errors.NewValidationError("userID", "user ID too long (maximum 100 characters)")
-	}
-
-	return nil
-}
-
-func validateUserIDCharacters(id string) error {
-	for _, char := range id {
-		if !isValidUserIDChar(char) {
-			return errors.NewValidationError("userID", "user ID can only contain letters, numbers, hyphens, and underscores")
-		}
-	}
-
-	return nil
-}
-
-func isValidUserIDChar(char rune) bool {
-	return (char >= 'a' && char <= 'z') ||
-		(char >= 'A' && char <= 'Z') ||
-		(char >= '0' && char <= '9') ||
-		char == '-' || char == '_'
-}
-
-// MarshalJSON implements the json.Marshaler interface.
-func (u UserID) MarshalJSON() ([]byte, error) {
-	return json.Marshal(u.value)
-}
-
-// UnmarshalJSON implements the json.Unmarshaler interface.
-func (u *UserID) UnmarshalJSON(data []byte) error {
-	var value string
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-
-	userID, err := NewUserID(value)
-	if err != nil {
-		return err
-	}
-
-	*u = userID
-
-	return nil
-}
-
-// Value implements the driver.Valuer interface for database storage.
-func (u UserID) Value() (driver.Value, error) {
-	return u.value, nil
-}
-
-// Scan implements the sql.Scanner interface for database retrieval.
-func (u *UserID) Scan(value any) error {
-	if value == nil {
-		*u = UserID{}
-
-		return nil
-	}
-
-	switch v := value.(type) {
-	case string:
-		userID, err := NewUserID(v)
-		if err != nil {
-			return err
-		}
-		*u = userID
-
-		return nil
-	case []byte:
-		userID, err := NewUserID(string(v))
-		if err != nil {
-			return err
-		}
-		*u = userID
-
-		return nil
-	default:
-		return errors.NewValidationError("user_id", fmt.Sprintf("cannot scan %T into UserID", value))
-	}
+// IsGenerated reports whether id appears to be a generated UserID.
+func IsGenerated(id UserID) bool {
+	return ids.IsGeneratedUserID(id)
 }

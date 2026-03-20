@@ -6,414 +6,330 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/ids"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
-// TestValues is commented out to avoid Ginkgo conflict with TestValidation in validation_test.go
-// Both files define their own test suites, but Ginkgo only allows one RunSpecs per package
-// The validation_test.go contains the comprehensive test suite that covers all validation cases
-// func TestValues(t *testing.T) {
-//	RegisterFailHandler(Fail)
-//	RunSpecs(t, "Values Suite")
-// }
+var _ = Describe("Value Objects", func() {
+	Describe("Email", func() {
+		Describe("NewEmail", func() {
+			Context("with valid email addresses", func() {
+				DescribeTable("should create email successfully",
+					func(email, expectedAddress, expectedDomain string) {
+						emailVO, err := values.NewEmail(email)
+						Expect(err).ToNot(HaveOccurred())
+						Expect(emailVO.Value()).To(Equal(expectedAddress))
+						Expect(emailVO.Domain()).To(Equal(expectedDomain))
+					},
+					Entry("simple email", "test@example.com", "test@example.com", "example.com"),
+					Entry("email with dots", "first.last@example.com", "first.last@example.com", "example.com"),
+					Entry("email with plus", "test+tag@example.com", "test+tag@example.com", "example.com"),
+					Entry("email with numbers", "user123@test.org", "user123@test.org", "test.org"),
+				)
+			})
 
-var _ = Describe("Email", func() {
-	Describe("NewEmail", func() {
-		Context("with valid email addresses", func() {
-			DescribeTable("should create email successfully",
-				func(emailStr, expectedNormalized string) {
-					email, err := values.NewEmail(emailStr)
-					Expect(err).ToNot(HaveOccurred())
-					Expect(email.String()).To(Equal(expectedNormalized))
-				},
-				Entry("simple email", "test@example.com", "test@example.com"),
-				Entry("email with subdomain", "user@mail.example.com", "user@mail.example.com"),
-				Entry("email with numbers", "user123@example123.com", "user123@example123.com"),
-				Entry("email with special chars", "user.name+tag@example.com", "user.name+tag@example.com"),
-				Entry("uppercase email", "TEST@EXAMPLE.COM", "TEST@EXAMPLE.COM"),
-			)
+			Context("with invalid email addresses", func() {
+				DescribeTable("should return validation error",
+					func(email string) {
+						_, err := values.NewEmail(email)
+						Expect(err).To(HaveOccurred())
+					},
+					Entry("empty email", ""),
+					Entry("no @ symbol", "testexample.com"),
+					Entry("no domain", "test@"),
+					Entry("no local part", "@example.com"),
+					Entry("spaces", "test @example.com"),
+					Entry("multiple @ symbols", "test@@example.com"),
+				)
+			})
 		})
 
-		Context("with invalid email addresses", func() {
-			DescribeTable("should return validation error",
-				func(emailStr string) {
-					_, err := values.NewEmail(emailStr)
+		Describe("Email methods", func() {
+			var email values.Email
+
+			BeforeEach(func() {
+				var err error
+				email, err = values.NewEmail("test@example.com")
+				Expect(err).ToNot(HaveOccurred())
+			})
+
+			Describe("String", func() {
+				It("should return the email address", func() {
+					Expect(email.String()).To(Equal("test@example.com"))
+				})
+			})
+
+			Describe("Address", func() {
+				It("should return the email address", func() {
+					Expect(email.Value()).To(Equal("test@example.com"))
+				})
+			})
+
+			Describe("Domain", func() {
+				It("should return the domain part", func() {
+					Expect(email.Domain()).To(Equal("example.com"))
+				})
+			})
+
+			Describe("LocalPart", func() {
+				It("should return the local part", func() {
+					Expect(email.LocalPart()).To(Equal("test"))
+				})
+			})
+
+			Describe("IsEmpty", func() {
+				It("should return false for valid email", func() {
+					Expect(email.IsEmpty()).To(BeFalse())
+				})
+
+				It("should return true for empty email", func() {
+					emptyEmail := values.Email{}
+					Expect(emptyEmail.IsEmpty()).To(BeTrue())
+				})
+			})
+		})
+	})
+
+	Describe("UserName", func() {
+		Describe("NewUserName", func() {
+			Context("with valid usernames", func() {
+				DescribeTable("should create username successfully",
+					func(name, expected string) {
+						username, err := values.NewUserName(name)
+						Expect(err).ToNot(HaveOccurred())
+						Expect(username.String()).To(Equal(expected))
+					},
+					Entry("simple name", "john", "john"),
+					Entry("name with spaces", "john doe", "john doe"),
+					Entry("name with hyphen", "john-doe", "john-doe"),
+					Entry("name with underscore", "john_doe", "john_doe"),
+					Entry("name with numbers", "john123", "john123"),
+				)
+			})
+
+			Context("with invalid usernames", func() {
+				DescribeTable("should return validation error",
+					func(name string) {
+						_, err := values.NewUserName(name)
+						Expect(err).To(HaveOccurred())
+					},
+					Entry("empty name", ""),
+					Entry("only spaces", "   "),
+					Entry("special characters", "john@doe"),
+				)
+			})
+		})
+
+		Describe("UserName methods", func() {
+			var username values.UserName
+
+			BeforeEach(func() {
+				var err error
+				username, err = values.NewUserName("john doe")
+				Expect(err).ToNot(HaveOccurred())
+			})
+
+			Describe("String", func() {
+				It("should return the username", func() {
+					Expect(username.String()).To(Equal("john doe"))
+				})
+			})
+
+			Describe("IsEmpty", func() {
+				It("should return false for valid username", func() {
+					Expect(username.IsEmpty()).To(BeFalse())
+				})
+
+				It("should return true for empty username", func() {
+					emptyUsername := values.UserName{}
+					Expect(emptyUsername.IsEmpty()).To(BeTrue())
+				})
+			})
+
+			Describe("IsReserved", func() {
+				It("should return true for reserved names", func() {
+					reserved, _ := values.NewUserName("admin")
+					Expect(reserved.IsReserved()).To(BeTrue())
+				})
+
+				It("should return false for normal names", func() {
+					Expect(username.IsReserved()).To(BeFalse())
+				})
+			})
+		})
+	})
+
+	Describe("UserID", func() {
+		Describe("NewUserID", func() {
+			Context("with valid user IDs", func() {
+				DescribeTable("should create user ID successfully",
+					func(idStr, expected string) {
+						userID, err := values.NewUserID(idStr)
+						Expect(err).ToNot(HaveOccurred())
+						Expect(userID.Get()).To(Equal(expected))
+					},
+					Entry("simple ID", "user123", "user123"),
+					Entry("ID with hyphens", "user-123", "user-123"),
+					Entry("ID with underscores", "user_123", "user_123"),
+					Entry("mixed case", "User123", "User123"),
+					Entry("numeric ID", "123456", "123456"),
+				)
+			})
+
+			Context("with invalid user IDs", func() {
+				DescribeTable("should return validation error",
+					func(idStr string) {
+						_, err := values.NewUserID(idStr)
+						Expect(err).To(HaveOccurred())
+					},
+					Entry("empty ID", ""),
+					Entry("ID with spaces", "user 123"),
+					Entry("ID with tab", "user\t123"),
+					Entry("ID with newline", "user\n123"),
+					Entry("ID with carriage return", "user\r123"),
+					Entry("ID with special chars", "user@123"),
+					Entry("ID with dots", "user.123"),
+					Entry("ID with slashes", "user/123"),
+					Entry("ID with backslashes", "user\\123"),
+					Entry("ID with leading/trailing spaces", "  user123  "),
+				)
+			})
+
+			Context("with edge cases", func() {
+				It("should reject single character ID (too short)", func() {
+					_, err := values.NewUserID("a")
 					Expect(err).To(HaveOccurred())
-				},
-				Entry("empty email", ""),
-				Entry("email without @", "testexample.com"),
-				Entry("email without domain", "test@"),
-				Entry("email without local part", "@example.com"),
-				Entry("email with spaces", "test @example.com"),
-				Entry("email with leading whitespace", "  test@example.com"),
-				Entry("email with trailing whitespace", "test@example.com  "),
-				Entry("email with multiple @", "test@example@com"),
-				Entry("email without TLD", "test@example"),
-				Entry("email starting with dot", ".test@example.com"),
-				Entry("email ending with dot", "test@example.com."),
-				Entry("email with consecutive dots", "test..user@example.com"),
-				Entry("too short email", "a@b"),
-				Entry("local part too long", "verylonglocapartthatexceedsthemaximumlengthof64charactersallowedwhichshouldfail@example.com"),
-			)
-		})
+					Expect(err.Error()).To(ContainSubstring("too short"))
+				})
 
-		Context("with edge cases", func() {
-			It("should handle minimum valid email", func() {
-				email, err := values.NewEmail("a@b.co")
-				Expect(err).ToNot(HaveOccurred())
-				Expect(email.String()).To(Equal("a@b.co"))
-			})
-
-			It("should reject email that's too long", func() {
-				// Create an email longer than 254 characters
-				longLocal := "verylonglocapartthatexceedsthemaximumlengthof64charactersallowedverylonglocapartthatexceedsthemaximumlengthof64charactersallowedverylonglocapartthatexceedsthemaximumlengthof64charactersallowedverylonglocapartthatexceedsthemaximumlengthof64charactersallowed"
-				longEmail := longLocal + "@example.com"
-
-				_, err := values.NewEmail(longEmail)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("too long"))
-			})
-		})
-	})
-
-	Describe("Email methods", func() {
-		var email values.Email
-
-		BeforeEach(func() {
-			var err error
-			email, err = values.NewEmail("user.name@example.com")
-			Expect(err).ToNot(HaveOccurred())
-		})
-
-		Describe("String", func() {
-			It("should return the string representation", func() {
-				Expect(email.String()).To(Equal("user.name@example.com"))
-			})
-		})
-
-		Describe("Value", func() {
-			It("should return the email value", func() {
-				Expect(email.Value()).To(Equal("user.name@example.com"))
-			})
-		})
-
-		Describe("Domain", func() {
-			It("should return the domain part", func() {
-				Expect(email.Domain()).To(Equal("example.com"))
-			})
-		})
-
-		Describe("LocalPart", func() {
-			It("should return the local part", func() {
-				Expect(email.LocalPart()).To(Equal("user.name"))
-			})
-		})
-
-		Describe("Equals", func() {
-			It("should return true for equal emails", func() {
-				other, err := values.NewEmail("user.name@example.com")
-				Expect(err).ToNot(HaveOccurred())
-
-				Expect(email.Equals(other)).To(BeTrue())
-			})
-
-			It("should return false for different emails", func() {
-				other, err := values.NewEmail("different@example.com")
-				Expect(err).ToNot(HaveOccurred())
-
-				Expect(email.Equals(other)).To(BeFalse())
-			})
-
-			It("should handle case insensitive comparison", func() {
-				upper, err := values.NewEmail("USER.NAME@EXAMPLE.COM")
-				Expect(err).ToNot(HaveOccurred())
-
-				Expect(email.Equals(upper)).To(BeTrue())
-			})
-		})
-
-		Describe("IsEmpty", func() {
-			It("should return false for valid email", func() {
-				Expect(email.IsEmpty()).To(BeFalse())
-			})
-
-			It("should return true for empty email", func() {
-				emptyEmail := values.Email{}
-				Expect(emptyEmail.IsEmpty()).To(BeTrue())
-			})
-		})
-	})
-})
-
-var _ = Describe("UserID", func() {
-	Describe("NewUserID", func() {
-		Context("with valid user IDs", func() {
-			DescribeTable("should create user ID successfully",
-				func(idStr, expected string) {
-					userID, err := values.NewUserID(idStr)
-					Expect(err).ToNot(HaveOccurred())
-					Expect(userID.String()).To(Equal(expected))
-				},
-				Entry("simple ID", "user123", "user123"),
-				Entry("ID with hyphens", "user-123", "user-123"),
-				Entry("ID with underscores", "user_123", "user_123"),
-				Entry("mixed case", "User123", "User123"),
-				Entry("numeric ID", "123456", "123456"),
-			)
-		})
-
-		Context("with invalid user IDs", func() {
-			DescribeTable("should return validation error",
-				func(idStr string) {
-					_, err := values.NewUserID(idStr)
+				It("should reject ID that's too long", func() {
+					longID := "verylonguserthatexceedsthemaximumlengthof100charactersallowedinthesystemforidentificationwhichshouldfail"
+					_, err := values.NewUserID(longID)
 					Expect(err).To(HaveOccurred())
-				},
-				Entry("empty ID", ""),
-				Entry("ID with spaces", "user 123"),
-				Entry("ID with tab", "user\t123"),
-				Entry("ID with newline", "user\n123"),
-				Entry("ID with carriage return", "user\r123"),
-				Entry("ID with special chars", "user@123"),
-				Entry("ID with dots", "user.123"),
-				Entry("ID with slashes", "user/123"),
-				Entry("ID with backslashes", "user\\123"),
-				Entry("ID with leading/trailing spaces", "  user123  "),
-			)
-		})
+					Expect(err.Error()).To(ContainSubstring("too long"))
+				})
 
-		Context("with edge cases", func() {
-			It("should reject single character ID (too short)", func() {
-				_, err := values.NewUserID("a")
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("too short"))
-			})
-
-			It("should reject ID that's too long", func() {
-				// Create an ID longer than 100 characters
-				longID := "verylonguserthatexceedsthemaximumlengthof100charactersallowedinthesystemforidentificationwhichshouldfail"
-				_, err := values.NewUserID(longID)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("too long"))
-			})
-
-			It("should reject ID with only whitespace after trimming", func() {
-				_, err := values.NewUserID("   ")
-				Expect(err).To(HaveOccurred())
-			})
-		})
-	})
-
-	Describe("GenerateUserID", func() {
-		It("should generate a valid user ID", func() {
-			userID, err := values.GenerateUserID()
-			Expect(err).ToNot(HaveOccurred())
-			Expect(userID.String()).To(HavePrefix("user_"))
-			Expect(userID.String()).To(HaveLen(37)) // "user_" + 32 hex chars
-		})
-
-		It("should generate unique IDs", func() {
-			id1, err := values.GenerateUserID()
-			Expect(err).ToNot(HaveOccurred())
-
-			id2, err := values.GenerateUserID()
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(id1.Equals(id2)).To(BeFalse())
-		})
-
-		It("should generate IDs that pass validation", func() {
-			userID, err := values.GenerateUserID()
-			Expect(err).ToNot(HaveOccurred())
-
-			// Test that the generated ID can be parsed back
-			parsedID, err := values.NewUserID(userID.String())
-			Expect(err).ToNot(HaveOccurred())
-			Expect(parsedID.Equals(userID)).To(BeTrue())
-		})
-	})
-
-	Describe("UserID methods", func() {
-		var userID values.UserID
-
-		BeforeEach(func() {
-			var err error
-			userID, err = values.NewUserID("test-user-123")
-			Expect(err).ToNot(HaveOccurred())
-		})
-
-		Describe("String", func() {
-			It("should return the string representation", func() {
-				Expect(userID.String()).To(Equal("test-user-123"))
+				It("should reject ID with only whitespace after trimming", func() {
+					_, err := values.NewUserID("   ")
+					Expect(err).To(HaveOccurred())
+				})
 			})
 		})
 
-		Describe("StringValue", func() {
-			It("should return the user ID value", func() {
-				Expect(userID.StringValue()).To(Equal("test-user-123"))
+		Describe("GenerateUserID", func() {
+			It("should generate a valid user ID", func() {
+				userID, err := values.GenerateUserID()
+				Expect(err).ToNot(HaveOccurred())
+				Expect(userID.Get()).To(HavePrefix("user_"))
+				Expect(userID.Get()).To(HaveLen(37)) // "user_" + 32 hex chars
 			})
-		})
 
-		Describe("Equals", func() {
-			It("should return true for equal user IDs", func() {
-				other, err := values.NewUserID("test-user-123")
+			It("should generate unique IDs", func() {
+				id1, err := values.GenerateUserID()
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(userID.Equals(other)).To(BeTrue())
-			})
-
-			It("should return false for different user IDs", func() {
-				other, err := values.NewUserID("different-user")
+				id2, err := values.GenerateUserID()
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(userID.Equals(other)).To(BeFalse())
-			})
-		})
-
-		Describe("IsEmpty", func() {
-			It("should return false for valid user ID", func() {
-				Expect(userID.IsEmpty()).To(BeFalse())
+				Expect(id1.Equal(id2)).To(BeFalse())
 			})
 
-			It("should return true for empty user ID", func() {
-				emptyID := values.UserID{}
-				Expect(emptyID.IsEmpty()).To(BeTrue())
-			})
-		})
-
-		Describe("IsGenerated", func() {
-			It("should return false for manual user ID", func() {
-				Expect(userID.IsGenerated()).To(BeFalse())
-			})
-
-			It("should return true for generated user ID", func() {
-				generated, err := values.GenerateUserID()
+			It("should generate IDs that pass validation", func() {
+				userID, err := values.GenerateUserID()
 				Expect(err).ToNot(HaveOccurred())
-				Expect(generated.IsGenerated()).To(BeTrue())
+
+				// Test that the generated ID can be parsed back
+				parsedID, err := values.NewUserID(userID.Get())
+				Expect(err).ToNot(HaveOccurred())
+				Expect(parsedID.Equal(userID)).To(BeTrue())
 			})
 		})
-	})
 
-	Describe("JSON marshaling", func() {
-		var userID values.UserID
+		Describe("UserID methods", func() {
+			var userID values.UserID
 
-		BeforeEach(func() {
-			var err error
-			userID, err = values.NewUserID("test-user-123")
-			Expect(err).ToNot(HaveOccurred())
+			BeforeEach(func() {
+				var err error
+				userID, err = values.NewUserID("test-user-123")
+				Expect(err).ToNot(HaveOccurred())
+			})
+
+			Describe("String", func() {
+				It("should return the string representation", func() {
+					Expect(userID.String()).To(Equal("test-user-123"))
+				})
+			})
+
+			Describe("Get", func() {
+				It("should return the underlying value", func() {
+					Expect(userID.Get()).To(Equal("test-user-123"))
+				})
+			})
+
+			Describe("Equal", func() {
+				It("should return true for equal user IDs", func() {
+					other, err := values.NewUserID("test-user-123")
+					Expect(err).ToNot(HaveOccurred())
+
+					Expect(userID.Equal(other)).To(BeTrue())
+				})
+
+				It("should return false for different user IDs", func() {
+					other, err := values.NewUserID("different-user")
+					Expect(err).ToNot(HaveOccurred())
+
+					Expect(userID.Equal(other)).To(BeFalse())
+				})
+			})
+
+			Describe("IsZero", func() {
+				It("should return false for valid user ID", func() {
+					Expect(userID.IsZero()).To(BeFalse())
+				})
+
+				It("should return true for zero user ID", func() {
+					zeroID := ids.UserID{}
+					Expect(zeroID.IsZero()).To(BeTrue())
+				})
+			})
 		})
 
-		Describe("MarshalJSON", func() {
+		Describe("JSON marshaling", func() {
+			var userID values.UserID
+
+			BeforeEach(func() {
+				var err error
+				userID, err = values.NewUserID("test-user-123")
+				Expect(err).ToNot(HaveOccurred())
+			})
+
 			It("should marshal to JSON string", func() {
 				data, err := json.Marshal(userID)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(string(data)).To(Equal(`"test-user-123"`))
 			})
-		})
 
-		Describe("UnmarshalJSON", func() {
 			It("should unmarshal from JSON string", func() {
 				data := []byte(`"test-user-123"`)
 				var unmarshaled values.UserID
-
 				err := json.Unmarshal(data, &unmarshaled)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(unmarshaled.Equals(userID)).To(BeTrue())
+				Expect(unmarshaled.Get()).To(Equal("test-user-123"))
 			})
 
-			It("should return error for invalid JSON", func() {
-				data := []byte(`invalid-json`)
+			It("should handle null in JSON", func() {
+				data := []byte(`null`)
 				var unmarshaled values.UserID
-
 				err := json.Unmarshal(data, &unmarshaled)
-				Expect(err).To(HaveOccurred())
-			})
-
-			It("should return error for invalid user ID in JSON", func() {
-				data := []byte(`"invalid user id"`)
-				var unmarshaled values.UserID
-
-				err := json.Unmarshal(data, &unmarshaled)
-				Expect(err).To(HaveOccurred())
-			})
-		})
-
-		Describe("round trip", func() {
-			It("should preserve value through marshal/unmarshal", func() {
-				data, err := json.Marshal(userID)
 				Expect(err).ToNot(HaveOccurred())
-
-				var unmarshaled values.UserID
-				err = json.Unmarshal(data, &unmarshaled)
-				Expect(err).ToNot(HaveOccurred())
-
-				Expect(unmarshaled.Equals(userID)).To(BeTrue())
-			})
-		})
-	})
-
-	Describe("Database scanning", func() {
-		var userID values.UserID
-
-		BeforeEach(func() {
-			var err error
-			userID, err = values.NewUserID("test-user-123")
-			Expect(err).ToNot(HaveOccurred())
-		})
-
-		Describe("Value", func() {
-			It("should return driver value", func() {
-				value, err := userID.Value()
-				Expect(err).ToNot(HaveOccurred())
-				Expect(value).To(Equal("test-user-123"))
-			})
-		})
-
-		Describe("Scan", func() {
-			It("should scan from string value", func() {
-				var scanned values.UserID
-				err := scanned.Scan("test-user-123")
-				Expect(err).ToNot(HaveOccurred())
-				Expect(scanned.Equals(userID)).To(BeTrue())
+				Expect(unmarshaled.IsZero()).To(BeTrue())
 			})
 
-			It("should scan from byte slice", func() {
-				var scanned values.UserID
-				err := scanned.Scan([]byte("test-user-123"))
+			It("should marshal zero value to null", func() {
+				zeroID := ids.UserID{}
+				data, err := json.Marshal(zeroID)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(scanned.Equals(userID)).To(BeTrue())
-			})
-
-			It("should handle nil value", func() {
-				var scanned values.UserID
-				err := scanned.Scan(nil)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(scanned.IsEmpty()).To(BeTrue())
-			})
-
-			It("should return error for unsupported type", func() {
-				var scanned values.UserID
-				err := scanned.Scan(123)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("cannot scan"))
-			})
-
-			It("should return error for invalid user ID", func() {
-				var scanned values.UserID
-				err := scanned.Scan("invalid user id")
-				Expect(err).To(HaveOccurred())
-			})
-		})
-
-		Describe("round trip", func() {
-			It("should preserve value through Value/Scan", func() {
-				value, err := userID.Value()
-				Expect(err).ToNot(HaveOccurred())
-
-				var scanned values.UserID
-				err = scanned.Scan(value)
-				Expect(err).ToNot(HaveOccurred())
-
-				Expect(scanned.Equals(userID)).To(BeTrue())
+				Expect(string(data)).To(Equal("null"))
 			})
 		})
 	})

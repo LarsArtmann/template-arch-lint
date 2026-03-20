@@ -39,7 +39,7 @@ func NewUser(id values.UserID, email, name string) (*User, error) {
 		return nil, errors.NewValidationError("name", err.Error())
 	}
 
-	if id.IsEmpty() {
+	if id.IsZero() {
 		return nil, errors.NewRequiredFieldError("user ID")
 	}
 
@@ -69,7 +69,7 @@ func NewUserFromStrings(id, email, name string) (*User, error) {
 // Validate ensures the user is in a valid state using value objects.
 // REFACTORED: Split brain eliminated - direct validation of value objects with no performance overhead.
 func (u *User) Validate() error {
-	if u.ID.IsEmpty() {
+	if u.ID.IsZero() {
 		return errors.NewRequiredFieldError("user ID")
 	}
 

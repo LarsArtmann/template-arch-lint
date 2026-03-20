@@ -60,7 +60,7 @@ func (s *userQueryServiceImpl) GetUser(ctx context.Context, id values.UserID) (*
 	// TODO: Add validation for user ID format
 	// TODO: Consider adding authorization checks
 
-	if id.IsEmpty() {
+	if id.IsZero() {
 		return nil, domainerrors.NewValidationError("userID", "user ID cannot be empty")
 	}
 
