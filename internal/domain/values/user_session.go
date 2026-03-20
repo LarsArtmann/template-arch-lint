@@ -48,11 +48,17 @@ func NewSessionTokenFromValue(value string, expires time.Time) (SessionToken, er
 // validateSessionToken validates session token format.
 func validateSessionToken(token string) error {
 	if len(token) < 32 {
-		return errors.NewDomainValidationError("session_token", "token too short (minimum 32 characters)")
+		return errors.NewDomainValidationError(
+			"session_token",
+			"token too short (minimum 32 characters)",
+		)
 	}
 
 	if len(token) > 256 {
-		return errors.NewDomainValidationError("session_token", "token too long (maximum 256 characters)")
+		return errors.NewDomainValidationError(
+			"session_token",
+			"token too long (maximum 256 characters)",
+		)
 	}
 
 	// Should be hexadecimal characters only
@@ -62,7 +68,10 @@ func validateSessionToken(token string) error {
 	}
 
 	if !matched {
-		return errors.NewDomainValidationError("session_token", "token must contain only hexadecimal characters")
+		return errors.NewDomainValidationError(
+			"session_token",
+			"token must contain only hexadecimal characters",
+		)
 	}
 
 	return nil

@@ -40,9 +40,12 @@ func runCodeDuplicationDetection(pass *analysis.Pass) (interface{}, error) {
 	for _, group := range duplicates {
 		if len(group) > 1 {
 			first := group[0]
-			pass.Reportf(first.StartPos,
+			pass.Reportf(
+				first.StartPos,
 				"CODE_DUPLICATION: Duplicated code block (%d tokens) found in %d locations. Consider extracting to a function.",
-				first.Tokens, len(group))
+				first.Tokens,
+				len(group),
+			)
 
 			for i, block := range group[1:] {
 				if i < 3 { // Limit to first 3 duplicates to avoid spam
@@ -58,7 +61,12 @@ func runCodeDuplicationDetection(pass *analysis.Pass) (interface{}, error) {
 }
 
 // extractCodeBlocks extracts analyzable code blocks from a file
-func extractCodeBlocks(pass *analysis.Pass, file *ast.File, filename string, minTokens int) []CodeBlock {
+func extractCodeBlocks(
+	pass *analysis.Pass,
+	file *ast.File,
+	filename string,
+	minTokens int,
+) []CodeBlock {
 	var blocks []CodeBlock
 
 	ast.Inspect(file, func(n ast.Node) bool {
@@ -91,7 +99,12 @@ func extractCodeBlocks(pass *analysis.Pass, file *ast.File, filename string, min
 }
 
 // createCodeBlock creates a code block for duplication analysis
-func createCodeBlock(pass *analysis.Pass, node ast.Node, filename string, minTokens int) *CodeBlock {
+func createCodeBlock(
+	pass *analysis.Pass,
+	node ast.Node,
+	filename string,
+	minTokens int,
+) *CodeBlock {
 	if node == nil {
 		return nil
 	}

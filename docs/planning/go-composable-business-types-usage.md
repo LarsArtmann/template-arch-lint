@@ -41,6 +41,7 @@ func GenerateSessionID() (SessionID, error)
 ```
 
 **Key Features:**
+
 - **Compile-time type safety**: Cannot accidentally mix `UserID` and `SessionID`
 - **Built-in serialization**: JSON, SQL, Binary, Text, Gob support
 - **Zero-allocation operations**: ~1-2ns overhead
@@ -63,19 +64,20 @@ func NewUserID(id string) (UserID, error) {
 ```
 
 **Migration Path:**
+
 - Old code continues to work with deprecation warnings
 - New code should import `internal/domain/ids` directly
 - Full migration can happen incrementally
 
 ### 4. API Changes
 
-| Old (Custom Struct) | New (Branded Type) |
-|---------------------|-------------------|
-| `userID.IsEmpty()` | `userID.IsZero()` |
-| `userID.Equals(other)` | `userID.Equal(other)` |
-| `userID.StringValue()` | `userID.Get()` |
-| `userID.IsGenerated()` | `ids.IsGeneratedUserID(userID)` |
-| `values.GenerateUserID()` | `ids.GenerateUserID()` |
+| Old (Custom Struct)       | New (Branded Type)              |
+| ------------------------- | ------------------------------- |
+| `userID.IsEmpty()`        | `userID.IsZero()`               |
+| `userID.Equals(other)`    | `userID.Equal(other)`           |
+| `userID.StringValue()`    | `userID.Get()`                  |
+| `userID.IsGenerated()`    | `ids.IsGeneratedUserID(userID)` |
+| `values.GenerateUserID()` | `ids.GenerateUserID()`          |
 
 ### 5. Files Modified
 
@@ -138,6 +140,7 @@ type ProductID = id.ID[ProductBrand, string]
 ## Test Results
 
 ### New `ids` Package Tests
+
 ```
 === RUN   TestIDs
 Ran 16 of 16 Specs in 0.001 seconds
@@ -145,6 +148,7 @@ SUCCESS! -- 16 Passed | 0 Failed | 0 Pending | 0 Skipped
 ```
 
 ### Domain Tests Status
+
 - `internal/domain/ids`: ✅ All 16 tests pass
 - `internal/domain/values`: ⚠️ 203/204 pass (1 unrelated failure in UserName.IsReserved)
 - `internal/domain/entities`: Build errors from test file using old API
@@ -242,38 +246,38 @@ The implementation aligns with Clean Architecture and DDD principles while reduc
 
 ### Types
 
-| Type | Description |
-|------|-------------|
-| `ids.UserID` | Branded identifier for users |
+| Type            | Description                     |
+| --------------- | ------------------------------- |
+| `ids.UserID`    | Branded identifier for users    |
 | `ids.SessionID` | Branded identifier for sessions |
 
 ### Constructors
 
-| Function | Description |
-|----------|-------------|
-| `NewUserID(value string) (UserID, error)` | Create with validation |
-| `GenerateUserID() (UserID, error)` | Generate random ID |
-| `MustGenerateUserID() UserID` | Generate or panic |
-| `NewSessionID(value string) (SessionID, error)` | Create session ID |
-| `GenerateSessionID() (SessionID, error)` | Generate random session ID |
+| Function                                        | Description                |
+| ----------------------------------------------- | -------------------------- |
+| `NewUserID(value string) (UserID, error)`       | Create with validation     |
+| `GenerateUserID() (UserID, error)`              | Generate random ID         |
+| `MustGenerateUserID() UserID`                   | Generate or panic          |
+| `NewSessionID(value string) (SessionID, error)` | Create session ID          |
+| `GenerateSessionID() (SessionID, error)`        | Generate random session ID |
 
 ### Methods (from library)
 
-| Method | Description |
-|--------|-------------|
-| `Get() string` | Get underlying value |
-| `IsZero() bool` | Check if zero value |
-| `Equal(other UserID) bool` | Compare equality |
-| `Compare(other UserID) int` | Compare ordering (-1, 0, 1) |
-| `String() string` | String representation |
-| `MarshalJSON() ([]byte, error)` | JSON serialization |
-| `UnmarshalJSON([]byte) error` | JSON deserialization |
-| `Value() (driver.Value, error)` | SQL driver value |
-| `Scan(interface{}) error` | SQL scanning |
+| Method                          | Description                 |
+| ------------------------------- | --------------------------- |
+| `Get() string`                  | Get underlying value        |
+| `IsZero() bool`                 | Check if zero value         |
+| `Equal(other UserID) bool`      | Compare equality            |
+| `Compare(other UserID) int`     | Compare ordering (-1, 0, 1) |
+| `String() string`               | String representation       |
+| `MarshalJSON() ([]byte, error)` | JSON serialization          |
+| `UnmarshalJSON([]byte) error`   | JSON deserialization        |
+| `Value() (driver.Value, error)` | SQL driver value            |
+| `Scan(interface{}) error`       | SQL scanning                |
 
 ### Helper Functions
 
-| Function | Description |
-|----------|-------------|
-| `IsGeneratedUserID(id UserID) bool` | Check if generated format |
+| Function                                  | Description               |
+| ----------------------------------------- | ------------------------- |
+| `IsGeneratedUserID(id UserID) bool`       | Check if generated format |
 | `IsGeneratedSessionID(id SessionID) bool` | Check if generated format |

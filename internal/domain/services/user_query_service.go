@@ -38,7 +38,10 @@ type UserQueryService interface {
 	GetUsersWithFilters(ctx context.Context, filters UserFilters) ([]*entities.User, error)
 
 	// GetUsersByEmailDomains retrieves users grouped by their email domains.
-	GetUsersByEmailDomains(ctx context.Context, domains []string) (map[string][]*entities.User, error)
+	GetUsersByEmailDomains(
+		ctx context.Context,
+		domains []string,
+	) (map[string][]*entities.User, error)
 }
 
 // userQueryServiceImpl implements UserQueryService interface.
@@ -54,7 +57,10 @@ func NewUserQueryService(userRepo repositories.UserRepository) UserQueryService 
 }
 
 // GetUser retrieves a user by their unique identifier.
-func (s *userQueryServiceImpl) GetUser(ctx context.Context, id values.UserID) (*entities.User, error) {
+func (s *userQueryServiceImpl) GetUser(
+	ctx context.Context,
+	id values.UserID,
+) (*entities.User, error) {
 	// TODO: Add caching layer for frequently accessed users
 	// TODO: Add metrics tracking for query performance
 	// TODO: Add validation for user ID format
@@ -73,7 +79,10 @@ func (s *userQueryServiceImpl) GetUser(ctx context.Context, id values.UserID) (*
 }
 
 // GetUserByEmail retrieves a user by their email address.
-func (s *userQueryServiceImpl) GetUserByEmail(ctx context.Context, email string) (*entities.User, error) {
+func (s *userQueryServiceImpl) GetUserByEmail(
+	ctx context.Context,
+	email string,
+) (*entities.User, error) {
 	// TODO: Add email validation using Email value object
 	// TODO: Add caching by email for performance
 	// TODO: Add rate limiting for email lookups
@@ -121,7 +130,10 @@ func (s *userQueryServiceImpl) GetUserEmailsWithResult(ctx context.Context) mo.R
 }
 
 // FindUserByEmailOption finds a user by email using Option pattern.
-func (s *userQueryServiceImpl) FindUserByEmailOption(ctx context.Context, email string) mo.Option[*entities.User] {
+func (s *userQueryServiceImpl) FindUserByEmailOption(
+	ctx context.Context,
+	email string,
+) mo.Option[*entities.User] {
 	// TODO: Add email validation using Email value object
 	// TODO: Add caching support
 	// TODO: Add audit logging for security compliance
@@ -170,7 +182,10 @@ func (s *userQueryServiceImpl) GetUserStats(ctx context.Context) (map[string]int
 }
 
 // GetUsersWithFilters retrieves users based on provided filters.
-func (s *userQueryServiceImpl) GetUsersWithFilters(ctx context.Context, filters UserFilters) ([]*entities.User, error) {
+func (s *userQueryServiceImpl) GetUsersWithFilters(
+	ctx context.Context,
+	filters UserFilters,
+) ([]*entities.User, error) {
 	// TODO: Add database-level filtering for better performance
 	// TODO: Add validation for filter parameters
 	// TODO: Add support for complex filter combinations
@@ -207,7 +222,10 @@ func (s *userQueryServiceImpl) GetUsersWithFilters(ctx context.Context, filters 
 }
 
 // GetUsersByEmailDomains retrieves users grouped by their email domains.
-func (s *userQueryServiceImpl) GetUsersByEmailDomains(ctx context.Context, domains []string) (map[string][]*entities.User, error) {
+func (s *userQueryServiceImpl) GetUsersByEmailDomains(
+	ctx context.Context,
+	domains []string,
+) (map[string][]*entities.User, error) {
 	// TODO: Add database-level domain filtering for performance
 	// TODO: Add domain validation
 	// TODO: Add support for wildcard domain matching

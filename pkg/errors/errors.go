@@ -479,7 +479,8 @@ func NewInfrastructureError(resource, operation string, cause error) Infrastruct
 		return NewNetworkError(resource, cause, true)
 	}
 
-	if strings.Contains(resourceLower, "config") || strings.Contains(operationLower, "configuration") {
+	if strings.Contains(resourceLower, "config") ||
+		strings.Contains(operationLower, "configuration") {
 		return NewConfigurationError(resource, cause.Error())
 	}
 

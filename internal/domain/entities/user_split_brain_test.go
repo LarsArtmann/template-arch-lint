@@ -20,8 +20,12 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 
 		ginkgo.It("should demonstrate split brain ELIMINATED - single value object access", func() {
 			// REFACTORED: Only value object access works - split brain eliminated
-			gomega.Expect(user.GetEmail().Value()).To(gomega.Equal("test@example.com")) // Value object only
-			gomega.Expect(user.GetUserName().Value()).To(gomega.Equal("TestUser"))      // Value object only
+			gomega.Expect(user.GetEmail().Value()).
+				To(gomega.Equal("test@example.com"))
+				// Value object only
+			gomega.Expect(user.GetUserName().Value()).
+				To(gomega.Equal("TestUser"))
+			// Value object only
 
 			// FIXED: Only ONE way to access data - through value objects
 			// user.Email would not compile - field is private
@@ -34,38 +38,50 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// REFACTORED: Only value object updated - no synchronization needed
-			gomega.Expect(user.GetEmail().Value()).To(gomega.Equal("new@example.com")) // Value object updated
+			gomega.Expect(user.GetEmail().Value()).
+				To(gomega.Equal("new@example.com"))
+			// Value object updated
 
 			// FIXED: Single source of truth - no manual synchronization required
 			// user.Email field doesn't exist anymore
 		})
 
-		ginkgo.It("should demonstrate lazy initialization ELIMINATED - direct value object access", func() {
-			// Given - Create user properly through constructor
-			directUser, err := NewUserFromStrings("user-123", "direct@example.com", "DirectUser")
-			gomega.Expect(err).ToNot(gomega.HaveOccurred())
+		ginkgo.It(
+			"should demonstrate lazy initialization ELIMINATED - direct value object access",
+			func() {
+				// Given - Create user properly through constructor
+				directUser, err := NewUserFromStrings(
+					"user-123",
+					"direct@example.com",
+					"DirectUser",
+				)
+				gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-			// REFACTORED: No lazy initialization - value objects created once during construction
-			email1 := directUser.GetEmail()
-			email2 := directUser.GetEmail()
+				// REFACTORED: No lazy initialization - value objects created once during construction
+				email1 := directUser.GetEmail()
+				email2 := directUser.GetEmail()
 
-			// Both calls return the same value object efficiently - no repeated validation
-			gomega.Expect(email1.Value()).To(gomega.Equal("direct@example.com"))
-			gomega.Expect(email2.Value()).To(gomega.Equal("direct@example.com"))
-		})
+				// Both calls return the same value object efficiently - no repeated validation
+				gomega.Expect(email1.Value()).To(gomega.Equal("direct@example.com"))
+				gomega.Expect(email2.Value()).To(gomega.Equal("direct@example.com"))
+			},
+		)
 
-		ginkgo.It("should demonstrate type safety ENFORCED - no direct field access possible", func() {
-			// REFACTORED: Direct field assignment is impossible - fields are private
-			// user.email = "invalid-email-format"  // Would not compile - field is private
-			// user.name = ""                       // Would not compile - field is private
+		ginkgo.It(
+			"should demonstrate type safety ENFORCED - no direct field access possible",
+			func() {
+				// REFACTORED: Direct field assignment is impossible - fields are private
+				// user.email = "invalid-email-format"  // Would not compile - field is private
+				// user.name = ""                       // Would not compile - field is private
 
-			// Type safety enforced - only validated setters can modify state
-			err := user.SetEmail("invalid-email-format")
-			gomega.Expect(err).To(gomega.HaveOccurred()) // Validation happens in setter
+				// Type safety enforced - only validated setters can modify state
+				err := user.SetEmail("invalid-email-format")
+				gomega.Expect(err).To(gomega.HaveOccurred()) // Validation happens in setter
 
-			// User remains in valid state - invalid updates are rejected
-			gomega.Expect(user.Validate()).To(gomega.Succeed()) // Still valid
-		})
+				// User remains in valid state - invalid updates are rejected
+				gomega.Expect(user.Validate()).To(gomega.Succeed()) // Still valid
+			},
+		)
 	})
 
 	ginkgo.Describe("ACHIEVED BEHAVIOR AFTER SPLIT BRAIN FIX", func() {
@@ -162,9 +178,15 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// VERIFIED: These are the ONLY ways to access data:
-			gomega.Expect(user.ID.String()).To(gomega.Equal("user-123"))                // UserID value object
-			gomega.Expect(user.GetEmail().Value()).To(gomega.Equal("test@example.com")) // Email value object
-			gomega.Expect(user.GetUserName().Value()).To(gomega.Equal("TestUser"))      // UserName value object
+			gomega.Expect(user.ID.String()).
+				To(gomega.Equal("user-123"))
+				// UserID value object
+			gomega.Expect(user.GetEmail().Value()).
+				To(gomega.Equal("test@example.com"))
+				// Email value object
+			gomega.Expect(user.GetUserName().Value()).
+				To(gomega.Equal("TestUser"))
+			// UserName value object
 
 			// CONFIRMED: Direct field access does not exist:
 			// user.Email    // Does not compile - field is private
@@ -192,7 +214,8 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// Should produce clean JSON without value object complexity
-			gomega.Expect(string(jsonBytes)).To(gomega.ContainSubstring("\"email\":\"test@example.com\""))
+			gomega.Expect(string(jsonBytes)).
+				To(gomega.ContainSubstring("\"email\":\"test@example.com\""))
 			gomega.Expect(string(jsonBytes)).To(gomega.ContainSubstring("\"name\":\"TestUser\""))
 		})
 	})

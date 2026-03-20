@@ -51,10 +51,16 @@ func NewPortFromString(value string) (Port, error) {
 // Validate checks if the port is within valid range.
 func (p Port) Validate() error {
 	if p < MinPort {
-		return domainerrors.NewValidationError("port", fmt.Sprintf("port %d is too low, minimum is %d", p, MinPort))
+		return domainerrors.NewValidationError(
+			"port",
+			fmt.Sprintf("port %d is too low, minimum is %d", p, MinPort),
+		)
 	}
 	if p > MaxPort {
-		return domainerrors.NewValidationError("port", fmt.Sprintf("port %d is too high, maximum is %d", p, MaxPort))
+		return domainerrors.NewValidationError(
+			"port",
+			fmt.Sprintf("port %d is too high, maximum is %d", p, MaxPort),
+		)
 	}
 
 	return nil

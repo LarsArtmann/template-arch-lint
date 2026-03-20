@@ -76,7 +76,9 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 						localSuccessCount := 0
 
 						for u := range numUsersPerGoroutine {
-							id := createTestUserID(fmt.Sprintf("concurrent-user-g%d-u%d", goroutineID, u))
+							id := createTestUserID(
+								fmt.Sprintf("concurrent-user-g%d-u%d", goroutineID, u),
+							)
 							email := fmt.Sprintf("user-g%d-u%d@example.com", goroutineID, u)
 							name := fmt.Sprintf("User G%d U%d", goroutineID, u)
 
@@ -256,7 +258,12 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 			// Create a test user for updating
 			id := createTestUserID("update-test-user")
 			var err error
-			testUser, err = userService.CreateUser(ctx, id, "update@example.com", "Update Test User")
+			testUser, err = userService.CreateUser(
+				ctx,
+				id,
+				"update@example.com",
+				"Update Test User",
+			)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -312,7 +319,14 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				const numUsers = 10
 
 				// Create multiple users
-				userIDs := createTestUsers(userService, ctx, numUsers, "multi-update-user", "multi", "Multi User")
+				userIDs := createTestUsers(
+					userService,
+					ctx,
+					numUsers,
+					"multi-update-user",
+					"multi",
+					"Multi User",
+				)
 
 				var wg sync.WaitGroup
 				results := make(chan error, numUsers)
@@ -342,8 +356,12 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				for i := range numUsers {
 					user, err := userService.GetUser(ctx, userIDs[i])
 					Expect(err).ToNot(HaveOccurred())
-					Expect(user.GetEmail().String()).To(Equal(fmt.Sprintf("updated-multi%d@example.com", i)))
-					Expect(user.GetUserName().String()).To(Equal(fmt.Sprintf("Updated Multi User %d", i)))
+					Expect(
+						user.GetEmail().String(),
+					).To(Equal(fmt.Sprintf("updated-multi%d@example.com", i)))
+					Expect(
+						user.GetUserName().String(),
+					).To(Equal(fmt.Sprintf("Updated Multi User %d", i)))
 				}
 			})
 		})
@@ -389,7 +407,9 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 
 				// Should have exactly one success and the rest "not found"
 				Expect(successCount).To(Equal(1), "should delete exactly once")
-				Expect(notFoundCount).To(Equal(numDeleters-1), "should get not found for subsequent attempts")
+				Expect(
+					notFoundCount,
+				).To(Equal(numDeleters-1), "should get not found for subsequent attempts")
 				Expect(otherErrorCount).To(Equal(0), "should not have other errors")
 
 				// Verify user no longer exists
@@ -404,7 +424,14 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				const numUsers = 8
 
 				// Create multiple users
-				userIDs := createTestUsers(userService, ctx, numUsers, "multi-delete-user", "multidelete", "Multi Delete User")
+				userIDs := createTestUsers(
+					userService,
+					ctx,
+					numUsers,
+					"multi-delete-user",
+					"multidelete",
+					"Multi Delete User",
+				)
 
 				var wg sync.WaitGroup
 				results := make(chan error, numUsers)
@@ -556,7 +583,9 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 						defer wg.Done()
 
 						for op := range operationsPerGoroutine {
-							id := createTestUserID(fmt.Sprintf("load-test-g%d-op%d", goroutineID, op))
+							id := createTestUserID(
+								fmt.Sprintf("load-test-g%d-op%d", goroutineID, op),
+							)
 							email := fmt.Sprintf("load%d-%d@example.com", goroutineID, op)
 							name := fmt.Sprintf("Load Test User %d-%d", goroutineID, op)
 
@@ -586,7 +615,9 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 
 				// Performance should be reasonable (this is a basic smoke test)
 				operationsPerSecond := float64(totalOps) / duration.Seconds()
-				Expect(operationsPerSecond).To(BeNumerically(">", 100), "should handle at least 100 ops/sec")
+				Expect(
+					operationsPerSecond,
+				).To(BeNumerically(">", 100), "should handle at least 100 ops/sec")
 
 				By(fmt.Sprintf("Completed %d operations in %v (%.2f ops/sec)",
 					totalOps, duration, operationsPerSecond))

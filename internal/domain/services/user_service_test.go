@@ -340,7 +340,12 @@ var _ = Describe("UserService", func() {
 				It("should return error result", func() {
 					id := createTestUserID("test-user-1")
 
-					result := userService.CreateUserWithResult(ctx, id, "invalid-email", defaultTestName)
+					result := userService.CreateUserWithResult(
+						ctx,
+						id,
+						"invalid-email",
+						defaultTestName,
+					)
 
 					Expect(result.IsError()).To(BeTrue())
 					_, isValidationError := errors.AsValidationError(result.Error())
@@ -387,7 +392,8 @@ var _ = Describe("UserService", func() {
 
 	Describe("🧪 Edge Cases and Complex Business Logic", func() {
 		Describe("Email Validation Edge Cases", func() {
-			DescribeTable("should handle complex email validation scenarios",
+			DescribeTable(
+				"should handle complex email validation scenarios",
 				func(email string, shouldSucceed bool, description string) {
 					id := createTestUserID("edge-case-user")
 					user, err := userService.CreateUser(ctx, id, email, "Test User")
@@ -403,26 +409,102 @@ var _ = Describe("UserService", func() {
 						Expect(isValidationError).To(BeTrue(), description)
 					}
 				},
-				Entry("Valid email with subdomain", "user@mail.example.com", true, "should accept subdomain emails"),
-				Entry("Valid email with plus addressing", "user+tag@example.com", true, "should accept plus addressing"),
-				Entry("Valid email with dots", "first.last@example.com", true, "should accept dots in local part"),
-				Entry("Valid email with numbers", "user123@example.com", true, "should accept numbers"),
-				Entry("Valid email with hyphens", "user-name@example.com", true, "should accept hyphens"),
-				Entry("Invalid email - no @", "userexample.com", false, "should reject email without @"),
-				Entry("Invalid email - multiple @", "user@@example.com", false, "should reject multiple @ symbols"),
-				Entry("Invalid email - no domain", "user@", false, "should reject email without domain"),
-				Entry("Invalid email - no local part", "@example.com", false, "should reject email without local part"),
-				Entry("Invalid email - spaces", "user @example.com", false, "should reject emails with spaces"),
-				Entry("Invalid email - special chars", "user<>@example.com", false, "should reject invalid special characters"),
-				Entry("Invalid email - consecutive dots", "user..name@example.com", false, "should reject consecutive dots"),
-				Entry("Invalid email - starts with dot", ".user@example.com", false, "should reject starting with dot"),
-				Entry("Invalid email - ends with dot", "user.@example.com", false, "should reject ending with dot"),
-				Entry("Invalid email - too long local", strings.Repeat("a", 65)+"@example.com", false, "should reject overly long local part"),
+				Entry(
+					"Valid email with subdomain",
+					"user@mail.example.com",
+					true,
+					"should accept subdomain emails",
+				),
+				Entry(
+					"Valid email with plus addressing",
+					"user+tag@example.com",
+					true,
+					"should accept plus addressing",
+				),
+				Entry(
+					"Valid email with dots",
+					"first.last@example.com",
+					true,
+					"should accept dots in local part",
+				),
+				Entry(
+					"Valid email with numbers",
+					"user123@example.com",
+					true,
+					"should accept numbers",
+				),
+				Entry(
+					"Valid email with hyphens",
+					"user-name@example.com",
+					true,
+					"should accept hyphens",
+				),
+				Entry(
+					"Invalid email - no @",
+					"userexample.com",
+					false,
+					"should reject email without @",
+				),
+				Entry(
+					"Invalid email - multiple @",
+					"user@@example.com",
+					false,
+					"should reject multiple @ symbols",
+				),
+				Entry(
+					"Invalid email - no domain",
+					"user@",
+					false,
+					"should reject email without domain",
+				),
+				Entry(
+					"Invalid email - no local part",
+					"@example.com",
+					false,
+					"should reject email without local part",
+				),
+				Entry(
+					"Invalid email - spaces",
+					"user @example.com",
+					false,
+					"should reject emails with spaces",
+				),
+				Entry(
+					"Invalid email - special chars",
+					"user<>@example.com",
+					false,
+					"should reject invalid special characters",
+				),
+				Entry(
+					"Invalid email - consecutive dots",
+					"user..name@example.com",
+					false,
+					"should reject consecutive dots",
+				),
+				Entry(
+					"Invalid email - starts with dot",
+					".user@example.com",
+					false,
+					"should reject starting with dot",
+				),
+				Entry(
+					"Invalid email - ends with dot",
+					"user.@example.com",
+					false,
+					"should reject ending with dot",
+				),
+				Entry(
+					"Invalid email - too long local",
+					strings.Repeat("a", 65)+"@example.com",
+					false,
+					"should reject overly long local part",
+				),
 			)
 		})
 
 		Describe("Name Validation Edge Cases", func() {
-			DescribeTable("should handle complex name validation scenarios",
+			DescribeTable(
+				"should handle complex name validation scenarios",
 				func(name string, shouldSucceed bool, description string) {
 					id := createTestUserID("name-edge-case")
 					user, err := userService.CreateUser(ctx, id, defaultTestEmail, name)
@@ -438,18 +520,58 @@ var _ = Describe("UserService", func() {
 						Expect(isValidationError).To(BeTrue(), description)
 					}
 				},
-				Entry("Valid name with spaces", "John Doe", true, "should accept names with spaces"),
+				Entry(
+					"Valid name with spaces",
+					"John Doe",
+					true,
+					"should accept names with spaces",
+				),
 				Entry("Valid name with apostrophe", "O'Connor", true, "should accept apostrophes"),
 				Entry("Valid name with hyphen", "Mary-Jane", true, "should accept hyphens"),
 				Entry("Valid name with accents", "José", true, "should accept accented characters"),
-				Entry("Valid long name", "Christopher Alexander", true, "should accept reasonably long names"),
-				Entry("Invalid name - too short", "A", false, "should reject single character names"),
+				Entry(
+					"Valid long name",
+					"Christopher Alexander",
+					true,
+					"should accept reasonably long names",
+				),
+				Entry(
+					"Invalid name - too short",
+					"A",
+					false,
+					"should reject single character names",
+				),
 				Entry("Invalid name - empty", "", false, "should reject empty names"),
-				Entry("Invalid name - only spaces", "   ", false, "should reject names with only spaces"),
-				Entry("Invalid name - only numbers", "123", false, "should reject names with only numbers"),
-				Entry("Invalid name - special chars", "John@Doe", false, "should reject invalid special characters"),
-				Entry("Invalid name - excessive length", strings.Repeat("John ", 20), false, "should reject excessively long names"),
-				Entry("Invalid name - leading/trailing spaces", " John Doe ", false, "should handle names with leading/trailing spaces"),
+				Entry(
+					"Invalid name - only spaces",
+					"   ",
+					false,
+					"should reject names with only spaces",
+				),
+				Entry(
+					"Invalid name - only numbers",
+					"123",
+					false,
+					"should reject names with only numbers",
+				),
+				Entry(
+					"Invalid name - special chars",
+					"John@Doe",
+					false,
+					"should reject invalid special characters",
+				),
+				Entry(
+					"Invalid name - excessive length",
+					strings.Repeat("John ", 20),
+					false,
+					"should reject excessively long names",
+				),
+				Entry(
+					"Invalid name - leading/trailing spaces",
+					" John Doe ",
+					false,
+					"should handle names with leading/trailing spaces",
+				),
 			)
 		})
 
@@ -508,8 +630,12 @@ var _ = Describe("UserService", func() {
 
 						// Verify consistency
 						Expect(updatedUser.ID).To(Equal(user.ID), "ID should remain constant")
-						Expect(updatedUser.Created).To(BeTemporally("~", originalCreated, time.Second), "creation time should not change")
-						Expect(updatedUser.Modified).To(BeTemporally(">", updatedUser.Created), "modified should be after created")
+						Expect(
+							updatedUser.Created,
+						).To(BeTemporally("~", originalCreated, time.Second), "creation time should not change")
+						Expect(
+							updatedUser.Modified,
+						).To(BeTemporally(">", updatedUser.Created), "modified should be after created")
 
 						// Update reference for next iteration
 						user = updatedUser
@@ -591,7 +717,10 @@ var _ = Describe("UserService", func() {
 					Expect(stats["active"]).To(Equal(5))
 					Expect(stats["domains"]).To(Equal(4)) // gmail, yahoo, outlook, company
 					Expect(stats["avg_days_since_registration"]).To(BeNumerically(">=", 0))
-					Expect(stats["avg_days_since_registration"]).To(BeNumerically("<", 1)) // All recent
+					Expect(
+						stats["avg_days_since_registration"],
+					).To(BeNumerically("<", 1))
+					// All recent
 				})
 
 				It("should calculate accurate averages with precision", func() {

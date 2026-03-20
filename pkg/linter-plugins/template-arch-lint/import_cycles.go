@@ -47,7 +47,11 @@ func getPackageImports(pkg *types.Package) []string {
 }
 
 // findCycle uses DFS to detect import cycles
-func findCycle(currentPkg, targetPkg string, visited, recStack map[string]bool, path []string) []string {
+func findCycle(
+	currentPkg, targetPkg string,
+	visited, recStack map[string]bool,
+	path []string,
+) []string {
 	// Add current package to path
 	path = append(path, currentPkg)
 

@@ -142,7 +142,10 @@ func validateUsernameLength(normalized string) error {
 // validateUsernameWhitespace checks for leading/trailing whitespace.
 func validateUsernameWhitespace(username, normalized string) error {
 	if username != normalized {
-		return errors.NewValidationError("username", "username cannot have leading or trailing spaces")
+		return errors.NewValidationError(
+			"username",
+			"username cannot have leading or trailing spaces",
+		)
 	}
 
 	return nil
@@ -152,7 +155,10 @@ func validateUsernameWhitespace(username, normalized string) error {
 func validateUsernameCharacters(normalized string) error {
 	for _, char := range normalized {
 		if !isValidUsernameChar(char) {
-			return errors.NewValidationError("username", "name can only contain letters, numbers, dots, hyphens, underscores, apostrophes, commas, and spaces")
+			return errors.NewValidationError(
+				"username",
+				"name can only contain letters, numbers, dots, hyphens, underscores, apostrophes, commas, and spaces",
+			)
 		}
 	}
 
@@ -166,7 +172,8 @@ func isValidUsernameChar(char rune) bool {
 
 // isASCIIAlphanumeric checks if character is ASCII letter or digit.
 func isASCIIAlphanumeric(char rune) bool {
-	return (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || (char >= '0' && char <= '9')
+	return (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') ||
+		(char >= '0' && char <= '9')
 }
 
 // isAllowedPunctuation checks if character is allowed punctuation.
@@ -185,16 +192,25 @@ func validateUsernameEdges(normalized string) error {
 	lastChar := normalized[len(normalized)-1]
 
 	if firstChar == '.' || firstChar == '-' || firstChar == '_' {
-		return errors.NewValidationError("username", "name cannot start with dot, hyphen, or underscore")
+		return errors.NewValidationError(
+			"username",
+			"name cannot start with dot, hyphen, or underscore",
+		)
 	}
 
 	if lastChar == '.' || lastChar == '-' || lastChar == '_' {
-		return errors.NewValidationError("username", "name cannot end with dot, hyphen, or underscore")
+		return errors.NewValidationError(
+			"username",
+			"name cannot end with dot, hyphen, or underscore",
+		)
 	}
 
 	if strings.Contains(normalized, "..") || strings.Contains(normalized, "--") ||
 		strings.Contains(normalized, "__") {
-		return errors.NewValidationError("username", "name cannot contain consecutive dots, hyphens, or underscores")
+		return errors.NewValidationError(
+			"username",
+			"name cannot contain consecutive dots, hyphens, or underscores",
+		)
 	}
 
 	return nil
@@ -232,7 +248,10 @@ func validateHasLetter(normalized string) error {
 func validateNotReserved(normalized string) error {
 	lowercased := strings.ToLower(strings.ReplaceAll(normalized, " ", ""))
 	if reservedUsernames[lowercased] {
-		return errors.NewValidationError("username", fmt.Sprintf("name '%s' is reserved and cannot be used", normalized))
+		return errors.NewValidationError(
+			"username",
+			fmt.Sprintf("name '%s' is reserved and cannot be used", normalized),
+		)
 	}
 
 	return nil

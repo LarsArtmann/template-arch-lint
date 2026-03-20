@@ -135,7 +135,10 @@ func setDefaults(_ *Config) {
 	viper.SetDefault("logging.output", "stdout")
 
 	// JWT defaults
-	viper.SetDefault("jwt.secret_key", "your-super-secret-jwt-key-minimum-32-characters-long-for-security")
+	viper.SetDefault(
+		"jwt.secret_key",
+		"your-super-secret-jwt-key-minimum-32-characters-long-for-security",
+	)
 	viper.SetDefault("jwt.access_token_expiry", 24*time.Hour)
 	viper.SetDefault("jwt.refresh_token_expiry", 7*24*time.Hour)
 	viper.SetDefault("jwt.issuer", "template-arch-lint")

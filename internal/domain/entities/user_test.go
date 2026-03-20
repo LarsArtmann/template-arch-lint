@@ -61,10 +61,28 @@ var _ = ginkgo.Describe("User Entity", func() {
 			}
 
 			validationTestCases := []validationTestCase{
-				{"should return error when ID is empty", "", "test@example.com", "TestUser", "user ID"},
+				{
+					"should return error when ID is empty",
+					"",
+					"test@example.com",
+					"TestUser",
+					"user ID",
+				},
 				{"should return error when email is empty", "user-123", "", "TestUser", "email"},
-				{"should return error when name is empty", "user-123", "test@example.com", "", "name"},
-				{"should return error when email is invalid", "user-123", "invalid-email", "TestUser", "email"},
+				{
+					"should return error when name is empty",
+					"user-123",
+					"test@example.com",
+					"",
+					"name",
+				},
+				{
+					"should return error when email is invalid",
+					"user-123",
+					"invalid-email",
+					"TestUser",
+					"email",
+				},
 			}
 
 			for _, tc := range validationTestCases {
@@ -99,7 +117,11 @@ var _ = ginkgo.Describe("User Entity", func() {
 				longStringValue := string(longString)
 
 				// When - This should fail due to validation
-				user, err := NewUserFromStrings("user-123", longStringValue+"@example.com", longStringValue)
+				user, err := NewUserFromStrings(
+					"user-123",
+					longStringValue+"@example.com",
+					longStringValue,
+				)
 
 				// Then - Should fail validation for overly long email/name
 				gomega.Expect(err).To(gomega.HaveOccurred())
@@ -176,11 +198,17 @@ var _ = ginkgo.Describe("User Entity", func() {
 				// Given - Create user with valid ID and email but zero value name
 				userID, _ := values.NewUserID("user-123")
 				// Create user via constructor to properly set private fields
-				user, err := NewUser(userID, "test@example.com", "") // Empty name will fail validation
+				user, err := NewUser(
+					userID,
+					"test@example.com",
+					"",
+				) // Empty name will fail validation
 
 				// When - User creation should fail for empty name
 				gomega.Expect(err).To(gomega.HaveOccurred())
-				gomega.Expect(user).To(gomega.BeNil()) // User should be nil when validation fails during construction
+				gomega.Expect(user).
+					To(gomega.BeNil())
+				// User should be nil when validation fails during construction
 			})
 		})
 

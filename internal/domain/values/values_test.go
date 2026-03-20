@@ -14,7 +14,8 @@ var _ = Describe("Value Objects", func() {
 	Describe("Email", func() {
 		Describe("NewEmail", func() {
 			Context("with valid email addresses", func() {
-				DescribeTable("should create email successfully",
+				DescribeTable(
+					"should create email successfully",
 					func(email, expectedAddress, expectedDomain string) {
 						emailVO, err := values.NewEmail(email)
 						Expect(err).ToNot(HaveOccurred())
@@ -22,8 +23,18 @@ var _ = Describe("Value Objects", func() {
 						Expect(emailVO.Domain()).To(Equal(expectedDomain))
 					},
 					Entry("simple email", "test@example.com", "test@example.com", "example.com"),
-					Entry("email with dots", "first.last@example.com", "first.last@example.com", "example.com"),
-					Entry("email with plus", "test+tag@example.com", "test+tag@example.com", "example.com"),
+					Entry(
+						"email with dots",
+						"first.last@example.com",
+						"first.last@example.com",
+						"example.com",
+					),
+					Entry(
+						"email with plus",
+						"test+tag@example.com",
+						"test+tag@example.com",
+						"example.com",
+					),
 					Entry("email with numbers", "user123@test.org", "user123@test.org", "test.org"),
 				)
 			})

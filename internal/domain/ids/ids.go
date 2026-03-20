@@ -142,7 +142,9 @@ func validateUserID(id string) error {
 
 	for _, char := range normalized {
 		if !isValidIDChar(char) {
-			return newValidationError("user ID can only contain letters, numbers, hyphens, and underscores")
+			return newValidationError(
+				"user ID can only contain letters, numbers, hyphens, and underscores",
+			)
 		}
 	}
 

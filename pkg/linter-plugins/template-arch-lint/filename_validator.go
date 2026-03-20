@@ -25,9 +25,11 @@ func runFilenameValidation(pass *analysis.Pass) (interface{}, error) {
 
 		// Validate filename pattern
 		if !validFilenameRegex.MatchString(filename) {
-			pass.Reportf(file.Pos(),
+			pass.Reportf(
+				file.Pos(),
 				"filename %q does not follow Go naming conventions. Use lowercase with underscores: example_service.go",
-				filename)
+				filename,
+			)
 		}
 
 		// Check for common anti-patterns

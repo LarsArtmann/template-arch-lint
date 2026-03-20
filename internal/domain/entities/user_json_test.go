@@ -61,7 +61,11 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 
 		ginkgo.It("should handle special characters in email and name", func() {
 			// Given
-			specialUser, err := NewUserFromStrings("user-456", "test+special@sub.domain.com", "José María")
+			specialUser, err := NewUserFromStrings(
+				"user-456",
+				"test+special@sub.domain.com",
+				"José María",
+			)
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			// When
@@ -174,8 +178,10 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 
 			// Then - Data should be identical
 			gomega.Expect(roundtrip.ID.String()).To(gomega.Equal(original.ID.String()))
-			gomega.Expect(roundtrip.GetEmail().String()).To(gomega.Equal(original.GetEmail().String()))
-			gomega.Expect(roundtrip.GetUserName().String()).To(gomega.Equal(original.GetUserName().String()))
+			gomega.Expect(roundtrip.GetEmail().String()).
+				To(gomega.Equal(original.GetEmail().String()))
+			gomega.Expect(roundtrip.GetUserName().String()).
+				To(gomega.Equal(original.GetUserName().String()))
 			gomega.Expect(roundtrip.Created).To(gomega.Equal(original.Created))
 			gomega.Expect(roundtrip.Modified).To(gomega.Equal(original.Modified))
 

@@ -190,7 +190,11 @@ var _ = Describe("UserQueryHandler", func() {
 			It("should return user with 200 status", func() {
 				createTestUser("search@example.com", "Search User")
 
-				req, _ := http.NewRequest(http.MethodGet, "/users/search?email=search@example.com", nil)
+				req, _ := http.NewRequest(
+					http.MethodGet,
+					"/users/search?email=search@example.com",
+					nil,
+				)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 

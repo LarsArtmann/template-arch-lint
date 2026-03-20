@@ -19,7 +19,8 @@ func TestValidation(t *testing.T) {
 var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 	Describe("📧 Email Validation", func() {
 		Context("with valid email addresses", func() {
-			DescribeTable("should accept valid email formats",
+			DescribeTable(
+				"should accept valid email formats",
 				func(emailStr, description string) {
 					email, err := values.NewEmail(emailStr)
 					Expect(err).ToNot(HaveOccurred(), description)
@@ -27,28 +28,47 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 				},
 				Entry("standard email", "user@example.com", "basic email format"),
 				Entry("email with subdomain", "user@mail.example.com", "subdomain support"),
-				Entry("email with plus addressing", "user+tag@example.com", "plus addressing support"),
-				Entry("email with dots in local part", "first.last@example.com", "dots in local part"),
+				Entry(
+					"email with plus addressing",
+					"user+tag@example.com",
+					"plus addressing support",
+				),
+				Entry(
+					"email with dots in local part",
+					"first.last@example.com",
+					"dots in local part",
+				),
 				Entry("email with numbers", "user123@example.com", "numeric characters"),
 				Entry("email with hyphens", "user-name@example.com", "hyphen support"),
 				Entry("email with underscore", "user_name@example.com", "underscore support"),
 				Entry("short domain", "user@a.co", "minimal domain"),
-				Entry("long local part", strings.Repeat("a", 60)+"@example.com", "maximum reasonable local part"),
-				Entry("multiple subdomains", "user@mail.support.example.com", "multiple subdomain levels"),
+				Entry(
+					"long local part",
+					strings.Repeat("a", 60)+"@example.com",
+					"maximum reasonable local part",
+				),
+				Entry(
+					"multiple subdomains",
+					"user@mail.support.example.com",
+					"multiple subdomain levels",
+				),
 				Entry("international domain", "user@example.co.uk", "country code domains"),
 				Entry("numeric domain", "user@123.456.789.012", "numeric IP-like domain"),
 			)
 		})
 
 		Context("with invalid email addresses", func() {
-			DescribeTable("should reject invalid email formats",
+			DescribeTable(
+				"should reject invalid email formats",
 				func(emailStr, description string) {
 					email, err := values.NewEmail(emailStr)
 					Expect(email.String()).To(BeEmpty(), description)
 					Expect(err).To(HaveOccurred(), description)
 
 					_, isValidationError := errors.AsValidationError(err)
-					Expect(isValidationError).To(BeTrue(), "should be validation error: %s", description)
+					Expect(
+						isValidationError,
+					).To(BeTrue(), "should be validation error: %s", description)
 				},
 				Entry("empty email", "", "empty string"),
 				Entry("only spaces", "   ", "whitespace only"),
@@ -63,10 +83,18 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 				Entry("space in domain", "user@example .com", "space in domain"),
 				Entry("leading space", " user@example.com", "leading whitespace"),
 				Entry("trailing space", "user@example.com ", "trailing whitespace"),
-				Entry("consecutive dots in local", "user..name@example.com", "consecutive dots in local part"),
+				Entry(
+					"consecutive dots in local",
+					"user..name@example.com",
+					"consecutive dots in local part",
+				),
 				Entry("starting dot in local", ".user@example.com", "starting dot in local part"),
 				Entry("ending dot in local", "user.@example.com", "ending dot in local part"),
-				Entry("consecutive dots in domain", "user@example..com", "consecutive dots in domain"),
+				Entry(
+					"consecutive dots in domain",
+					"user@example..com",
+					"consecutive dots in domain",
+				),
 				Entry("starting dot in domain", "user@.example.com", "starting dot in domain"),
 				Entry("ending dot in domain", "user@example.com.", "ending dot in domain"),
 				Entry("invalid characters", "user<>@example.com", "invalid special characters"),
@@ -74,9 +102,21 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 				Entry("quotes", "user\"name\"@example.com", "quotation marks"),
 				Entry("backslash", "user\\name@example.com", "backslash character"),
 				Entry("pipe character", "user|name@example.com", "pipe character"),
-				Entry("too long local part", strings.Repeat("a", 65)+"@example.com", "excessively long local part"),
-				Entry("too long domain", "user@"+strings.Repeat("a", 250)+".com", "excessively long domain"),
-				Entry("too long overall", strings.Repeat("a", 200)+"@"+strings.Repeat("b", 200)+".com", "excessively long overall"),
+				Entry(
+					"too long local part",
+					strings.Repeat("a", 65)+"@example.com",
+					"excessively long local part",
+				),
+				Entry(
+					"too long domain",
+					"user@"+strings.Repeat("a", 250)+".com",
+					"excessively long domain",
+				),
+				Entry(
+					"too long overall",
+					strings.Repeat("a", 200)+"@"+strings.Repeat("b", 200)+".com",
+					"excessively long overall",
+				),
 				Entry("unicode in local", "üser@example.com", "unicode in local part"),
 				Entry("unicode in domain", "user@exämple.com", "unicode in domain"),
 				Entry("tab character", "user\t@example.com", "tab character"),
@@ -144,7 +184,9 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 					Expect(err).To(HaveOccurred(), description)
 
 					_, isValidationError := errors.AsValidationError(err)
-					Expect(isValidationError).To(BeTrue(), "should be validation error: %s", description)
+					Expect(
+						isValidationError,
+					).To(BeTrue(), "should be validation error: %s", description)
 				},
 				Entry("empty name", "", "empty string"),
 				Entry("only spaces", "   ", "whitespace only"),
@@ -236,7 +278,9 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 					Expect(err).To(HaveOccurred(), description)
 
 					_, isValidationError := errors.AsValidationError(err)
-					Expect(isValidationError).To(BeTrue(), "should be validation error: %s", description)
+					Expect(
+						isValidationError,
+					).To(BeTrue(), "should be validation error: %s", description)
 				},
 				Entry("empty ID", "", "empty string"),
 				Entry("only spaces", "   ", "whitespace only"),
@@ -394,7 +438,9 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 				for _, pathInput := range pathTraversalInputs {
 					// Try in ID (most likely to be used in file paths)
 					id, err := values.NewUserID(pathInput)
-					Expect(err).To(HaveOccurred(), "should reject path traversal in ID: %s", pathInput)
+					Expect(
+						err,
+					).To(HaveOccurred(), "should reject path traversal in ID: %s", pathInput)
 					Expect(id.String()).To(BeEmpty())
 				}
 			})

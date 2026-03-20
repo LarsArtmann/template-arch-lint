@@ -69,7 +69,12 @@ var _ = Describe("UserService CRUD Operations", func() {
 		Context("when user exists", func() {
 			It("should return the user", func() {
 				id := createTestUserID("test-user-1")
-				createdUser, err := userService.CreateUser(ctx, id, defaultTestEmail, defaultTestName)
+				createdUser, err := userService.CreateUser(
+					ctx,
+					id,
+					defaultTestEmail,
+					defaultTestName,
+				)
 				Expect(err).ToNot(HaveOccurred())
 
 				retrievedUser, err := userService.GetUser(ctx, id)
@@ -95,7 +100,12 @@ var _ = Describe("UserService CRUD Operations", func() {
 		Context("with valid data", func() {
 			It("should update user successfully", func() {
 				id := createTestUserID("test-user-1")
-				createdUser, err := userService.CreateUser(ctx, id, defaultTestEmail, defaultTestName)
+				createdUser, err := userService.CreateUser(
+					ctx,
+					id,
+					defaultTestEmail,
+					defaultTestName,
+				)
 				Expect(err).ToNot(HaveOccurred())
 
 				newEmail := "updated@example.com"

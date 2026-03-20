@@ -27,7 +27,10 @@ func (m *mockRepositoryForBench) Save(_ context.Context, user *entities.User) er
 	return nil
 }
 
-func (m *mockRepositoryForBench) FindByID(_ context.Context, id values.UserID) (*entities.User, error) {
+func (m *mockRepositoryForBench) FindByID(
+	_ context.Context,
+	id values.UserID,
+) (*entities.User, error) {
 	user, exists := m.users[id.String()]
 	if !exists {
 		return nil, repositories.ErrUserNotFound
@@ -36,7 +39,10 @@ func (m *mockRepositoryForBench) FindByID(_ context.Context, id values.UserID) (
 	return user, nil
 }
 
-func (m *mockRepositoryForBench) FindByEmail(_ context.Context, email string) (*entities.User, error) {
+func (m *mockRepositoryForBench) FindByEmail(
+	_ context.Context,
+	email string,
+) (*entities.User, error) {
 	for _, user := range m.users {
 		if user.GetEmail().String() == email {
 			return user, nil
@@ -46,7 +52,10 @@ func (m *mockRepositoryForBench) FindByEmail(_ context.Context, email string) (*
 	return nil, repositories.ErrUserNotFound
 }
 
-func (m *mockRepositoryForBench) FindByUsername(_ context.Context, username string) (*entities.User, error) {
+func (m *mockRepositoryForBench) FindByUsername(
+	_ context.Context,
+	username string,
+) (*entities.User, error) {
 	for _, user := range m.users {
 		if user.GetUserName().String() == username {
 			return user, nil

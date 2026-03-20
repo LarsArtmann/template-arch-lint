@@ -52,7 +52,10 @@ func (r *InMemoryUserRepository) Save(_ context.Context, user *entities.User) er
 }
 
 // FindByID retrieves a user by their unique identifier.
-func (r *InMemoryUserRepository) FindByID(_ context.Context, id values.UserID) (*entities.User, error) {
+func (r *InMemoryUserRepository) FindByID(
+	_ context.Context,
+	id values.UserID,
+) (*entities.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -68,7 +71,10 @@ func (r *InMemoryUserRepository) FindByID(_ context.Context, id values.UserID) (
 }
 
 // FindByEmail retrieves a user by their email address.
-func (r *InMemoryUserRepository) FindByEmail(_ context.Context, email string) (*entities.User, error) {
+func (r *InMemoryUserRepository) FindByEmail(
+	_ context.Context,
+	email string,
+) (*entities.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -85,7 +91,10 @@ func (r *InMemoryUserRepository) FindByEmail(_ context.Context, email string) (*
 }
 
 // FindByUsername retrieves a user by their username (name field).
-func (r *InMemoryUserRepository) FindByUsername(_ context.Context, username string) (*entities.User, error) {
+func (r *InMemoryUserRepository) FindByUsername(
+	_ context.Context,
+	username string,
+) (*entities.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 

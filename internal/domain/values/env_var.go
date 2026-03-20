@@ -86,9 +86,17 @@ func AllEnvVars() []EnvVar {
 // Category returns the configuration category for this environment variable.
 func (e EnvVar) Category() string {
 	switch e {
-	case EnvServerPort, EnvServerHost, EnvServerReadTimeout, EnvServerWriteTimeout, EnvServerIdleTimeout:
+	case EnvServerPort,
+		EnvServerHost,
+		EnvServerReadTimeout,
+		EnvServerWriteTimeout,
+		EnvServerIdleTimeout:
 		return "server"
-	case EnvDatabaseDriver, EnvDatabaseDSN, EnvDatabaseMaxOpenConns, EnvDatabaseMaxIdleConns, EnvDatabaseConnMaxLifetime:
+	case EnvDatabaseDriver,
+		EnvDatabaseDSN,
+		EnvDatabaseMaxOpenConns,
+		EnvDatabaseMaxIdleConns,
+		EnvDatabaseConnMaxLifetime:
 		return "database"
 	case EnvLoggingLevel, EnvLoggingFormat, EnvLoggingOutput:
 		return "logging"
