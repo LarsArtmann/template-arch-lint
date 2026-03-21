@@ -8,6 +8,15 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
+// Email validation constraints.
+const (
+	emailMaxLength     = 254
+	emailMinLength     = 5
+	emailLocalPartMax  = 64
+	emailDomainMax     = 253
+	emailExpectedParts = 2
+)
+
 // Email represents a validated email address value object.
 type Email struct {
 	value string
@@ -42,7 +51,7 @@ func (e Email) Value() string {
 // Domain returns the domain part of the email.
 func (e Email) Domain() string {
 	parts := strings.Split(e.value, "@")
-	if len(parts) != 2 {
+	if len(parts) != emailExpectedParts {
 		return ""
 	}
 
@@ -52,7 +61,7 @@ func (e Email) Domain() string {
 // LocalPart returns the local part of the email (before @).
 func (e Email) LocalPart() string {
 	parts := strings.Split(e.value, "@")
-	if len(parts) != 2 {
+	if len(parts) != emailExpectedParts {
 		return ""
 	}
 
@@ -102,10 +111,10 @@ func validateEmailNotEmpty(email string) error {
 }
 
 func validateEmailLength(email string) error {
-	if len(email) > 254 {
+	if len(email) > emailMaxLength {
 		return errors.NewValidationError("email", "email too long (max 254 characters)")
 	}
-	if len(email) < 5 {
+	if len(email) < emailMinLength {
 		return errors.NewValidationError("email", "email too short (min 5 characters)")
 	}
 
@@ -130,7 +139,7 @@ func validateEmailBasicFormat(email string) error {
 
 func validateEmailParts(email string) error {
 	parts := strings.Split(email, "@")
-	if len(parts) != 2 {
+	if len(parts) != emailExpectedParts {
 		return errors.NewValidationError("email", "email must contain exactly one @ symbol")
 	}
 
@@ -147,7 +156,7 @@ func validateEmailLocalPart(localPart string) error {
 	if len(localPart) == 0 {
 		return errors.NewValidationError("email", "email local part cannot be empty")
 	}
-	if len(localPart) > 64 {
+	if len(localPart) > emailLocalPartMax {
 		return errors.NewValidationError("email", "email local part too long (max 64 characters)")
 	}
 
@@ -166,7 +175,7 @@ func validateEmailDomain(domain string) error {
 	if len(domain) == 0 {
 		return errors.NewValidationError("email", "email domain cannot be empty")
 	}
-	if len(domain) > 253 {
+	if len(domain) > emailDomainMax {
 		return errors.NewValidationError("email", "email domain too long (max 253 characters)")
 	}
 	if !strings.Contains(domain, ".") {

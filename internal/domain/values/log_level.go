@@ -11,6 +11,16 @@ import (
 // LogLevel represents a valid logging level with business rules validation.
 type LogLevel string
 
+// Log level priority values for comparison.
+const (
+	logLevelPriorityDebug = iota
+	logLevelPriorityInfo
+	logLevelPriorityWarn
+	logLevelPriorityError
+	logLevelPriorityFatal
+	logLevelPriorityPanic
+)
+
 // Valid log levels following standard logging practices.
 const (
 	LogLevelDebug LogLevel = "debug"
@@ -24,12 +34,12 @@ const (
 // getLogLevelHierarchy returns the log level hierarchy for comparison.
 func getLogLevelHierarchy() map[LogLevel]int {
 	return map[LogLevel]int{
-		LogLevelDebug: 0,
-		LogLevelInfo:  1,
-		LogLevelWarn:  2,
-		LogLevelError: 3,
-		LogLevelFatal: 4,
-		LogLevelPanic: 5,
+		LogLevelDebug: logLevelPriorityDebug,
+		LogLevelInfo:  logLevelPriorityInfo,
+		LogLevelWarn:  logLevelPriorityWarn,
+		LogLevelError: logLevelPriorityError,
+		LogLevelFatal: logLevelPriorityFatal,
+		LogLevelPanic: logLevelPriorityPanic,
 	}
 }
 

@@ -34,6 +34,13 @@ import (
 	"github.com/larsartmann/go-composable-business-types/id"
 )
 
+// ID generation and validation constraints.
+const (
+	idByteLength = 16
+	idMinLength  = 2
+	idMaxLength  = 100
+)
+
 // Brand types provide compile-time distinctness for different entity IDs.
 // These are phantom types - they have no runtime representation.
 
@@ -67,7 +74,7 @@ func NewUserID(value string) (UserID, error) {
 // GenerateUserID creates a new randomly generated UserID.
 // Uses crypto/rand for security. Format: "user_<32 hex chars>"
 func GenerateUserID() (UserID, error) {
-	bytes := make([]byte, 16)
+	bytes := make([]byte, idByteLength)
 	if _, err := rand.Read(bytes); err != nil {
 		return UserID{}, fmt.Errorf("failed to generate random ID: %w", err)
 	}
@@ -97,7 +104,7 @@ func NewSessionID(value string) (SessionID, error) {
 
 // GenerateSessionID creates a new randomly generated SessionID.
 func GenerateSessionID() (SessionID, error) {
-	bytes := make([]byte, 16)
+	bytes := make([]byte, idByteLength)
 	if _, err := rand.Read(bytes); err != nil {
 		return SessionID{}, fmt.Errorf("failed to generate session ID: %w", err)
 	}
@@ -132,11 +139,11 @@ func validateUserID(id string) error {
 		return newValidationError("user ID cannot contain whitespace")
 	}
 
-	if len(normalized) < 2 {
+	if len(normalized) < idMinLength {
 		return newValidationError("user ID too short (minimum 2 characters)")
 	}
 
-	if len(normalized) > 100 {
+	if len(normalized) > idMaxLength {
 		return newValidationError("user ID too long (maximum 100 characters)")
 	}
 
@@ -161,11 +168,11 @@ func validateSessionID(id string) error {
 		return newValidationError("session ID cannot have leading or trailing whitespace")
 	}
 
-	if len(normalized) < 2 {
+	if len(normalized) < idMinLength {
 		return newValidationError("session ID too short (minimum 2 characters)")
 	}
 
-	if len(normalized) > 100 {
+	if len(normalized) > idMaxLength {
 		return newValidationError("session ID too long (maximum 100 characters)")
 	}
 

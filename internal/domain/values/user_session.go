@@ -11,6 +11,13 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
+// Session token constraints.
+const (
+	sessionTokenByteLength = 32
+	sessionTokenMinLength  = 32
+	sessionTokenMaxLength  = 256
+)
+
 // SessionToken represents a user session token.
 type SessionToken struct {
 	value   string
@@ -19,7 +26,7 @@ type SessionToken struct {
 
 // NewSessionToken creates a new session token with expiration.
 func NewSessionToken(duration time.Duration) (SessionToken, error) {
-	bytes := make([]byte, 32)
+	bytes := make([]byte, sessionTokenByteLength)
 	if _, err := rand.Read(bytes); err != nil {
 		return SessionToken{}, errors.NewInfrastructureError("session_token", "generate", err)
 	}
@@ -47,14 +54,14 @@ func NewSessionTokenFromValue(value string, expires time.Time) (SessionToken, er
 
 // validateSessionToken validates session token format.
 func validateSessionToken(token string) error {
-	if len(token) < 32 {
+	if len(token) < sessionTokenMinLength {
 		return errors.NewDomainValidationError(
 			"session_token",
 			"token too short (minimum 32 characters)",
 		)
 	}
 
-	if len(token) > 256 {
+	if len(token) > sessionTokenMaxLength {
 		return errors.NewDomainValidationError(
 			"session_token",
 			"token too long (maximum 256 characters)",

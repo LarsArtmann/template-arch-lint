@@ -13,6 +13,22 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
+// Configuration defaults.
+const (
+	defaultServerReadTimeout         = 5 * time.Second
+	defaultServerWriteTimeout        = 10 * time.Second
+	defaultServerIdleTimeout         = 120 * time.Second
+	defaultGracefulShutdownTimeout   = 30 * time.Second
+	defaultDatabaseMaxOpenConns      = 25
+	defaultDatabaseMaxIdleConns      = 25
+	defaultDatabaseConnMaxLifetime   = 5 * time.Minute
+	defaultDatabaseConnMaxIdleTime   = 5 * time.Minute
+	defaultAccessTokenExpiry         = 24 * time.Hour
+	defaultRefreshTokenExpiry        = 7 * 24 * time.Hour
+	defaultSecurityMaxRequestSize    = 10 * 1024 * 1024 // 10MB
+	defaultSecurityRateLimitRequests = 100
+)
+
 // Config represents the application configuration.
 type Config struct {
 	Server   ServerConfig   `mapstructure:"server"   validate:"required"`
@@ -116,18 +132,18 @@ func setDefaults(_ *Config) {
 	// Server defaults
 	viper.SetDefault("server.host", "localhost")
 	viper.SetDefault("server.port", values.DefaultHTTPPort)
-	viper.SetDefault("server.read_timeout", 5*time.Second)
-	viper.SetDefault("server.write_timeout", 10*time.Second)
-	viper.SetDefault("server.idle_timeout", 120*time.Second)
-	viper.SetDefault("server.graceful_shutdown_timeout", 30*time.Second)
+	viper.SetDefault("server.read_timeout", defaultServerReadTimeout)
+	viper.SetDefault("server.write_timeout", defaultServerWriteTimeout)
+	viper.SetDefault("server.idle_timeout", defaultServerIdleTimeout)
+	viper.SetDefault("server.graceful_shutdown_timeout", defaultGracefulShutdownTimeout)
 
 	// Database defaults
 	viper.SetDefault("database.driver", "sqlite3")
 	viper.SetDefault("database.dsn", "./app.db")
-	viper.SetDefault("database.max_open_conns", 25)
-	viper.SetDefault("database.max_idle_conns", 25)
-	viper.SetDefault("database.conn_max_lifetime", 5*time.Minute)
-	viper.SetDefault("database.conn_max_idle_time", 5*time.Minute)
+	viper.SetDefault("database.max_open_conns", defaultDatabaseMaxOpenConns)
+	viper.SetDefault("database.max_idle_conns", defaultDatabaseMaxIdleConns)
+	viper.SetDefault("database.conn_max_lifetime", defaultDatabaseConnMaxLifetime)
+	viper.SetDefault("database.conn_max_idle_time", defaultDatabaseConnMaxIdleTime)
 
 	// Logging defaults
 	viper.SetDefault("logging.level", values.DefaultLogLevel())
@@ -139,8 +155,8 @@ func setDefaults(_ *Config) {
 		"jwt.secret_key",
 		"your-super-secret-jwt-key-minimum-32-characters-long-for-security",
 	)
-	viper.SetDefault("jwt.access_token_expiry", 24*time.Hour)
-	viper.SetDefault("jwt.refresh_token_expiry", 7*24*time.Hour)
+	viper.SetDefault("jwt.access_token_expiry", defaultAccessTokenExpiry)
+	viper.SetDefault("jwt.refresh_token_expiry", defaultRefreshTokenExpiry)
 	viper.SetDefault("jwt.issuer", "template-arch-lint")
 	viper.SetDefault("jwt.algorithm", "HS256")
 
@@ -150,9 +166,9 @@ func setDefaults(_ *Config) {
 	viper.SetDefault("security.enable_hsts", false) // Disabled by default for development
 	viper.SetDefault("security.enable_csp", true)
 	viper.SetDefault("security.csp_report_uri", "")
-	viper.SetDefault("security.max_request_size", 10*1024*1024) // 10MB
+	viper.SetDefault("security.max_request_size", defaultSecurityMaxRequestSize) // 10MB
 	viper.SetDefault("security.rate_limit_enabled", false)
-	viper.SetDefault("security.rate_limit_requests", 100)
+	viper.SetDefault("security.rate_limit_requests", defaultSecurityRateLimitRequests)
 	viper.SetDefault("security.rate_limit_window", time.Minute)
 }
 

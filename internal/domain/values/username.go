@@ -50,6 +50,12 @@ var reservedUsernames = map[string]bool{
 	"marketing":  true,
 }
 
+// Username length constraints.
+const (
+	usernameMinLength = 2
+	usernameMaxLength = 50
+)
+
 // NewUserName creates a new UserName value object with validation.
 func NewUserName(username string) (UserName, error) {
 	if err := validateUserNameFormat(username); err != nil {
@@ -129,11 +135,17 @@ func validateUserNameFormat(username string) error {
 
 // validateUsernameLength checks length constraints.
 func validateUsernameLength(normalized string) error {
-	if len(normalized) < 2 {
-		return errors.NewValidationError("username", "username too short (minimum 2 characters)")
+	if len(normalized) < usernameMinLength {
+		return errors.NewValidationError(
+			"username",
+			fmt.Sprintf("username too short (minimum %d characters)", usernameMinLength),
+		)
 	}
-	if len(normalized) > 50 {
-		return errors.NewValidationError("username", "username too long (maximum 50 characters)")
+	if len(normalized) > usernameMaxLength {
+		return errors.NewValidationError(
+			"username",
+			fmt.Sprintf("username too long (maximum %d characters)", usernameMaxLength),
+		)
 	}
 
 	return nil

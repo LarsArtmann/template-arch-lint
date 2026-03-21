@@ -89,3 +89,5 @@ tests/
 
 # Architecture graphs (can be regenerated)
 *-arch-lint-graph.svg
+# Dependencies
+node_modules/

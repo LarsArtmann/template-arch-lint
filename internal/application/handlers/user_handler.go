@@ -12,6 +12,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ID generation constants.
+const userIDByteLength = 8
+
 // UserHandler handles HTTP requests for user management.
 type UserHandler struct {
 	userService *services.UserService
@@ -26,7 +29,7 @@ func NewUserHandler(userService *services.UserService) *UserHandler {
 
 // generateUserID generates a new random user ID.
 func generateUserID() string {
-	bytes := make([]byte, 8)
+	bytes := make([]byte, userIDByteLength)
 	rand.Read(bytes)
 
 	return hex.EncodeToString(bytes)

@@ -22,6 +22,13 @@ const (
 	defaultServerPort = 8080
 )
 
+const (
+	defaultServerReadTimeout  = 15 * time.Second
+	defaultServerWriteTimeout = 15 * time.Second
+	defaultServerIdleTimeout  = 60 * time.Second
+	defaultGracefulTimeout    = 30 * time.Second
+)
+
 func main() {
 	// Initialize structured logger with enterprise configuration
 	logger := log.NewWithOptions(os.Stdout, log.Options{
@@ -47,9 +54,9 @@ func main() {
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", defaultServerPort),
 		Handler:      router,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
+		ReadTimeout:  defaultServerReadTimeout,
+		WriteTimeout: defaultServerWriteTimeout,
+		IdleTimeout:  defaultServerIdleTimeout,
 	}
 
 	// Start server in goroutine
@@ -68,7 +75,7 @@ func main() {
 
 	logger.Info("🛑 Shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultGracefulTimeout)
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {

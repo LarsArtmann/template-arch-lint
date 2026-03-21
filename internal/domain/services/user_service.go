@@ -30,6 +30,14 @@ import (
 	"github.com/samber/mo"
 )
 
+// Validation constraints.
+const (
+	userActiveDays        = 30
+	emailMaxLengthService = 254
+	nameMaxLengthService  = 100
+	hoursPerDay           = 24
+)
+
 // TODO: TYPE SAFETY - Replace *string with proper value objects (DomainName value object)
 // TODO: SPECIFICATION PATTERN - Replace with UserSpecification interface for complex filtering
 // TODO: BUILDER PATTERN - Add UserFiltersBuilder for better API design
@@ -271,7 +279,7 @@ func (s *UserService) FilterActiveUsers(ctx context.Context) ([]*entities.User, 
 	// Functional operations using samber/lo
 	activeUsers := lo.Filter(users, func(user *entities.User, _ int) bool {
 		// Business rule: Users created in the last 30 days are considered active
-		thirtyDaysAgo := time.Now().AddDate(0, 0, -30)
+		thirtyDaysAgo := time.Now().AddDate(0, 0, -userActiveDays)
 
 		return user.Created.After(thirtyDaysAgo)
 	})
@@ -411,7 +419,7 @@ func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) 
 	stats["total"] = len(users)
 
 	// Count active users (created in last 30 days) using functional operations
-	thirtyDaysAgo := time.Now().AddDate(0, 0, -30)
+	thirtyDaysAgo := time.Now().AddDate(0, 0, -userActiveDays)
 	activeCount := lo.CountBy(users, func(user *entities.User) bool {
 		return user.Created.After(thirtyDaysAgo)
 	})
@@ -433,7 +441,7 @@ func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) 
 	totalDays := lo.Reduce(users, func(acc int, user *entities.User, _ int) int {
 		days := max(
 			// Ensure non-negative days
-			int(now.Sub(user.Created).Hours()/24), 0)
+			int(now.Sub(user.Created).Hours())/hoursPerDay, 0)
 
 		return acc + days
 	}, 0)
@@ -471,7 +479,7 @@ func (s *UserService) GetUsersWithFilters(
 
 	// Filter by active status if specified
 	if filters.Active != nil && *filters.Active {
-		thirtyDaysAgo := time.Now().AddDate(0, 0, -30)
+		thirtyDaysAgo := time.Now().AddDate(0, 0, -userActiveDays)
 		filteredUsers = lo.Filter(filteredUsers, func(user *entities.User, _ int) bool {
 			return user.Created.After(thirtyDaysAgo)
 		})
@@ -546,7 +554,7 @@ func (s *UserService) validateEmail(email string) error {
 		return domainerrors.NewValidationError("email", "must be a valid email address")
 	}
 
-	if len(email) > 254 {
+	if len(email) > emailMaxLengthService {
 		return domainerrors.NewValidationError("email", "too long (max 254 characters)")
 	}
 
@@ -587,7 +595,7 @@ func (s *UserService) validateNameLength(name string) error {
 	if len(name) < 2 {
 		return domainerrors.NewValidationError("name", "too short (min 2 characters)")
 	}
-	if len(name) > 100 {
+	if len(name) > nameMaxLengthService {
 		return domainerrors.NewValidationError("name", "too long (max 100 characters)")
 	}
 
