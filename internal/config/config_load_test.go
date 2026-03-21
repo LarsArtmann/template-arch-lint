@@ -76,12 +76,16 @@ func getLoadConfigTestCases() []struct {
 // setupTestEnvironment sets up and cleans up environment variables for testing.
 func setupTestEnvironment(t *testing.T, envVars map[string]string) {
 	t.Helper()
+
 	for key, value := range envVars {
-		if err := os.Setenv(key, value); err != nil {
+		err := os.Setenv(key, value)
+		if err != nil {
 			t.Fatalf("Failed to set environment variable %s: %v", key, err)
 		}
+
 		t.Cleanup(func() {
-			if err := os.Unsetenv(key); err != nil {
+			err := os.Unsetenv(key)
+			if err != nil {
 				t.Errorf("Failed to unset environment variable %s: %v", key, err)
 			}
 		})
@@ -120,6 +124,7 @@ func validateLoadConfigResult(t *testing.T, config *Config, expectPort int, expe
 	if err != nil {
 		t.Fatalf("Invalid expected port %d: %v", expectPort, err)
 	}
+
 	if config.Server.Port != expectedPort {
 		t.Errorf("LoadConfig() port = %v, want %v", config.Server.Port, expectedPort)
 	}
@@ -128,6 +133,7 @@ func validateLoadConfigResult(t *testing.T, config *Config, expectPort int, expe
 	if err != nil {
 		t.Fatalf("Invalid expected log level '%s': %v", expectLevel, err)
 	}
+
 	if config.Logging.Level != expectedLevel {
 		t.Errorf("LoadConfig() level = %v, want %v", config.Logging.Level, expectedLevel)
 	}

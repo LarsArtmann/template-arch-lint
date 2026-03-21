@@ -60,7 +60,8 @@ func (s UserStatus) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements json.Unmarshaler interface.
 func (s *UserStatus) UnmarshalJSON(data []byte) error {
 	var str string
-	if err := json.Unmarshal(data, &str); err != nil {
+	err := json.Unmarshal(data, &str)
+	if err != nil {
 		return err
 	}
 
@@ -83,6 +84,7 @@ func (s *UserStatus) Scan(value any) error {
 	}
 
 	var str string
+
 	switch v := value.(type) {
 	case string:
 		str = v
@@ -160,7 +162,8 @@ func (r UserRole) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements json.Unmarshaler interface.
 func (r *UserRole) UnmarshalJSON(data []byte) error {
 	var str string
-	if err := json.Unmarshal(data, &str); err != nil {
+	err := json.Unmarshal(data, &str)
+	if err != nil {
 		return err
 	}
 
@@ -183,6 +186,7 @@ func (r *UserRole) Scan(value any) error {
 	}
 
 	var str string
+
 	switch v := value.(type) {
 	case string:
 		str = v

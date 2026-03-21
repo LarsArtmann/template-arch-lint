@@ -150,6 +150,7 @@ func testDomainErrorIdentification(t *testing.T, errors testErrorTypes) {
 	if !IsDomainError(errors.validation) {
 		t.Error("Expected validation error to be a domain error")
 	}
+
 	if !IsDomainError(errors.notFound) {
 		t.Error("Expected not found error to be a domain error")
 	}
@@ -162,6 +163,7 @@ func testValidationErrorAssertions(t *testing.T, errors testErrorTypes) {
 	if ve, ok := AsValidationError(errors.validation); !ok || ve != errors.validation {
 		t.Error("Expected validation error assertion to succeed")
 	}
+
 	if _, ok := AsValidationError(errors.notFound); ok {
 		t.Error("Expected validation error assertion to fail for not found error")
 	}
@@ -174,6 +176,7 @@ func testNotFoundErrorAssertions(t *testing.T, errors testErrorTypes) {
 	if nfe, ok := AsNotFoundError(errors.notFound); !ok || nfe != errors.notFound {
 		t.Error("Expected not found error assertion to succeed")
 	}
+
 	if _, ok := AsNotFoundError(errors.validation); ok {
 		t.Error("Expected not found error assertion to fail for validation error")
 	}
@@ -186,6 +189,7 @@ func testConflictErrorAssertions(t *testing.T, errors testErrorTypes) {
 	if ce, ok := AsConflictError(errors.conflict); !ok || ce != errors.conflict {
 		t.Error("Expected conflict error assertion to succeed")
 	}
+
 	if _, ok := AsConflictError(errors.validation); ok {
 		t.Error("Expected conflict error assertion to fail for validation error")
 	}
@@ -198,6 +202,7 @@ func testInternalErrorAssertions(t *testing.T, errors testErrorTypes) {
 	if ie, ok := AsInternalError(errors.internal); !ok || ie != errors.internal {
 		t.Error("Expected internal error assertion to succeed")
 	}
+
 	if _, ok := AsInternalError(errors.validation); ok {
 		t.Error("Expected internal error assertion to fail for validation error")
 	}

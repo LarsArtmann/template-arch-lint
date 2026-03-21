@@ -29,6 +29,7 @@ func NewUserQueryHandler(userQueryService services.UserQueryService) *UserQueryH
 // GetUser retrieves a user by ID using query service.
 func (h *UserQueryHandler) GetUser(c *gin.Context) {
 	idParam := c.Param("id")
+
 	userID, err := values.NewUserID(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
@@ -44,6 +45,7 @@ func (h *UserQueryHandler) GetUser(c *gin.Context) {
 
 			return
 		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
 
 		return
@@ -81,6 +83,7 @@ func (h *UserQueryHandler) SearchUsers(c *gin.Context) {
 
 			return
 		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to search users"})
 
 		return

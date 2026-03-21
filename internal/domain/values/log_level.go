@@ -60,7 +60,8 @@ func NewLogLevel(value string) (LogLevel, error) {
 	// Normalize input - convert to lowercase and trim whitespace
 	normalized := LogLevel(strings.ToLower(strings.TrimSpace(value)))
 
-	if err := normalized.Validate(); err != nil {
+	err := normalized.Validate()
+	if err != nil {
 		return "", err
 	}
 
@@ -95,6 +96,7 @@ func (l LogLevel) String() string {
 // ValidLevels returns a slice of all valid log level strings.
 func (l LogLevel) ValidLevels() []string {
 	validLevels := getValidLogLevels()
+
 	levels := make([]string, len(validLevels))
 	for i, level := range validLevels {
 		levels[i] = string(level)
@@ -154,6 +156,7 @@ func (l *LogLevel) UnmarshalText(text []byte) error {
 	if err != nil {
 		return err
 	}
+
 	*l = level
 
 	return nil

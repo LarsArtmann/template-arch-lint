@@ -81,6 +81,7 @@ func (r *FailingUserRepository) FindByID(
 	if r.findByIDError != nil {
 		return nil, r.findByIDError
 	}
+
 	if r.testUser != nil {
 		return r.testUser, nil
 	}
@@ -123,6 +124,7 @@ func (r *FailingUserRepository) List(ctx context.Context) ([]*entities.User, err
 	if r.listError != nil {
 		return nil, r.listError
 	}
+
 	if r.testUser != nil {
 		return []*entities.User{r.testUser}, nil
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -62,7 +63,9 @@ func main() {
 	// Start server in goroutine
 	go func() {
 		logger.Info("🚀 Starting HTTP server", "port", defaultServerPort)
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+
+		err := server.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Error("❌ Server failed to start", "error", err)
 			os.Exit(exitCodeFailure)
 		}
@@ -78,7 +81,8 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultGracefulTimeout)
 	defer cancel()
 
-	if err := server.Shutdown(ctx); err != nil {
+	err := server.Shutdown(ctx)
+	if err != nil {
 		logger.Error("❌ Server forced to shutdown", "error", err)
 		os.Exit(exitCodeFailure)
 	}

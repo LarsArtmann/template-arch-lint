@@ -60,6 +60,7 @@ var _ = Describe("Value Objects", func() {
 
 			BeforeEach(func() {
 				var err error
+
 				email, err = values.NewEmail("test@example.com")
 				Expect(err).ToNot(HaveOccurred())
 			})
@@ -136,6 +137,7 @@ var _ = Describe("Value Objects", func() {
 
 			BeforeEach(func() {
 				var err error
+
 				username, err = values.NewUserName("john doe")
 				Expect(err).ToNot(HaveOccurred())
 			})
@@ -158,9 +160,9 @@ var _ = Describe("Value Objects", func() {
 			})
 
 			Describe("IsReserved", func() {
-				It("should return true for reserved names", func() {
-					reserved, _ := values.NewUserName("admin")
-					Expect(reserved.IsReserved()).To(BeTrue())
+				It("should prevent creating reserved names", func() {
+					_, err := values.NewUserName("admin")
+					Expect(err).To(HaveOccurred())
 				})
 
 				It("should return false for normal names", func() {
@@ -261,6 +263,7 @@ var _ = Describe("Value Objects", func() {
 
 			BeforeEach(func() {
 				var err error
+
 				userID, err = values.NewUserID("test-user-123")
 				Expect(err).ToNot(HaveOccurred())
 			})
@@ -310,6 +313,7 @@ var _ = Describe("Value Objects", func() {
 
 			BeforeEach(func() {
 				var err error
+
 				userID, err = values.NewUserID("test-user-123")
 				Expect(err).ToNot(HaveOccurred())
 			})
@@ -322,7 +326,9 @@ var _ = Describe("Value Objects", func() {
 
 			It("should unmarshal from JSON string", func() {
 				data := []byte(`"test-user-123"`)
+
 				var unmarshaled values.UserID
+
 				err := json.Unmarshal(data, &unmarshaled)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(unmarshaled.Get()).To(Equal("test-user-123"))
@@ -330,7 +336,9 @@ var _ = Describe("Value Objects", func() {
 
 			It("should handle null in JSON", func() {
 				data := []byte(`null`)
+
 				var unmarshaled values.UserID
+
 				err := json.Unmarshal(data, &unmarshaled)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(unmarshaled.IsZero()).To(BeTrue())

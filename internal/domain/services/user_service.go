@@ -93,6 +93,7 @@ func (s *UserService) CreateUser(
 	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) {
 		return nil, domainerrors.NewInternalError("failed to check existing user", err)
 	}
+
 	if existingUser != nil {
 		return nil, repositories.ErrUserAlreadyExists
 	}
@@ -175,7 +176,8 @@ func (s *UserService) validateUserUpdates(
 	user *entities.User,
 	email, name string,
 ) error {
-	if err := s.validateEmailUpdate(ctx, user, email); err != nil {
+	err := s.validateEmailUpdate(ctx, user, email)
+	if err != nil {
 		return err
 	}
 
@@ -191,7 +193,8 @@ func (s *UserService) validateEmailUpdate(
 		return nil
 	}
 
-	if err := s.validateEmail(email); err != nil {
+	err := s.validateEmail(email)
+	if err != nil {
 		return err
 	}
 
@@ -203,6 +206,7 @@ func (s *UserService) checkEmailAvailability(ctx context.Context, email string) 
 	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) {
 		return domainerrors.WrapServiceError("check existing email", err)
 	}
+
 	if existingUser != nil {
 		return repositories.ErrUserAlreadyExists
 	}
@@ -212,7 +216,8 @@ func (s *UserService) checkEmailAvailability(ctx context.Context, email string) 
 
 func (s *UserService) validateNameUpdate(user *entities.User, name string) error {
 	if name != user.GetUserName().String() {
-		if err := s.validateUserName(name); err != nil {
+		err := s.validateUserName(name)
+		if err != nil {
 			return err
 		}
 	}
@@ -225,15 +230,18 @@ func (s *UserService) applyUserUpdates(
 	user *entities.User,
 	email, name string,
 ) (*entities.User, error) {
-	if err := user.SetEmail(email); err != nil {
+	err := user.SetEmail(email)
+	if err != nil {
 		return nil, domainerrors.WrapServiceError("set email", err)
 	}
 
-	if err := user.SetName(name); err != nil {
+	err := user.SetName(name)
+	if err != nil {
 		return nil, domainerrors.WrapServiceError("set name", err)
 	}
 
-	if err := s.userRepo.Save(ctx, user); err != nil {
+	err := s.userRepo.Save(ctx, user)
+	if err != nil {
 		return nil, domainerrors.WrapRepoError("save updated", "user", err)
 	}
 
@@ -325,10 +333,13 @@ func (s *UserService) CreateUserWithResult(
 
 // validateUserInputsResult validates user inputs using Result pattern.
 func (s *UserService) validateUserInputsResult(email, name string) mo.Result[struct{}] {
-	if err := s.validateEmail(email); err != nil {
+	err := s.validateEmail(email)
+	if err != nil {
 		return mo.Err[struct{}](domainerrors.NewValidationError("email", err.Error()))
 	}
-	if err := s.validateUserName(name); err != nil {
+
+	err := s.validateUserName(name)
+	if err != nil {
 		return mo.Err[struct{}](domainerrors.NewValidationError("name", err.Error()))
 	}
 
@@ -346,6 +357,7 @@ func (s *UserService) checkUserNotExistsResult(
 			domainerrors.NewInternalError("failed to check existing user", err),
 		)
 	}
+
 	if existingUser != nil {
 		return mo.Err[*entities.User](repositories.ErrUserAlreadyExists)
 	}
@@ -497,7 +509,8 @@ func (s *UserService) ValidateUserBatchWithEither(
 	validationErrors := make([]error, 0)
 
 	lo.ForEach(users, func(user *entities.User, _ int) {
-		if err := user.Validate(); err != nil {
+		err := user.Validate()
+		if err != nil {
 			validationErrors = append(validationErrors, err)
 		} else {
 			validUsers = append(validUsers, user.ID)
@@ -568,15 +581,18 @@ func (s *UserService) validateEmail(email string) error {
 
 // validateUserName enforces business rules for display name validation.
 func (s *UserService) validateUserName(name string) error {
-	if err := s.validateNameNotEmpty(name); err != nil {
+	err := s.validateNameNotEmpty(name)
+	if err != nil {
 		return err
 	}
 
-	if err := s.validateNameLength(name); err != nil {
+	err := s.validateNameLength(name)
+	if err != nil {
 		return err
 	}
 
-	if err := s.validateNameWhitespace(name); err != nil {
+	err := s.validateNameWhitespace(name)
+	if err != nil {
 		return err
 	}
 
@@ -595,6 +611,7 @@ func (s *UserService) validateNameLength(name string) error {
 	if len(name) < 2 {
 		return domainerrors.NewValidationError("name", "too short (min 2 characters)")
 	}
+
 	if len(name) > nameMaxLengthService {
 		return domainerrors.NewValidationError("name", "too long (max 100 characters)")
 	}

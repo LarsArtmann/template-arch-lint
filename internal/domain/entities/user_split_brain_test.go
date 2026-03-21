@@ -14,6 +14,7 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 
 		ginkgo.BeforeEach(func() {
 			var err error
+
 			user, err = NewUserFromStrings("user-123", "test@example.com", "TestUser")
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 		})
@@ -88,7 +89,6 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 		ginkgo.It("should use ONLY value objects for domain logic", func() {
 			// ACHIEVED: User entity has ONLY value object fields
 			// No more user.Email string field - only private user.email values.Email
-
 			user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
@@ -111,6 +111,7 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			var jsonMap map[string]any
+
 			err = json.Unmarshal(jsonBytes, &jsonMap)
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
@@ -131,6 +132,7 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 			}`
 
 			var user User
+
 			err := json.Unmarshal([]byte(jsonInput), &user)
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
@@ -157,7 +159,6 @@ var _ = ginkgo.Describe("User Split Brain Behavior", func() {
 		ginkgo.It("should eliminate lazy initialization overhead", func() {
 			// TARGET: Value objects created once during construction
 			// No repeated validation on every getter call
-
 			user, err := NewUserFromStrings("user-123", "test@example.com", "TestUser")
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 

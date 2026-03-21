@@ -370,6 +370,7 @@ func IsDomainError(err error) bool {
 // AsValidationError attempts to cast error to ValidationError.
 func AsValidationError(err error) (*ValidationError, bool) {
 	var ve *ValidationError
+
 	ok := errors.As(err, &ve)
 
 	return ve, ok
@@ -378,6 +379,7 @@ func AsValidationError(err error) (*ValidationError, bool) {
 // AsNotFoundError attempts to cast error to NotFoundError.
 func AsNotFoundError(err error) (*NotFoundError, bool) {
 	var nfe *NotFoundError
+
 	ok := errors.As(err, &nfe)
 
 	return nfe, ok
@@ -386,6 +388,7 @@ func AsNotFoundError(err error) (*NotFoundError, bool) {
 // AsConflictError attempts to cast error to ConflictError.
 func AsConflictError(err error) (*ConflictError, bool) {
 	var ce *ConflictError
+
 	ok := errors.As(err, &ce)
 
 	return ce, ok
@@ -394,6 +397,7 @@ func AsConflictError(err error) (*ConflictError, bool) {
 // AsInternalError attempts to cast error to InternalError.
 func AsInternalError(err error) (*InternalError, bool) {
 	var ie *InternalError
+
 	ok := errors.As(err, &ie)
 
 	return ie, ok
@@ -402,6 +406,7 @@ func AsInternalError(err error) (*InternalError, bool) {
 // AsDatabaseError attempts to cast error to DatabaseError.
 func AsDatabaseError(err error) (*DatabaseError, bool) {
 	var de *DatabaseError
+
 	ok := errors.As(err, &de)
 
 	return de, ok
@@ -410,6 +415,7 @@ func AsDatabaseError(err error) (*DatabaseError, bool) {
 // AsNetworkError attempts to cast error to NetworkError.
 func AsNetworkError(err error) (*NetworkError, bool) {
 	var ne *NetworkError
+
 	ok := errors.As(err, &ne)
 
 	return ne, ok
@@ -418,6 +424,7 @@ func AsNetworkError(err error) (*NetworkError, bool) {
 // AsConfigurationError attempts to cast error to ConfigurationError.
 func AsConfigurationError(err error) (*ConfigurationError, bool) {
 	var ce *ConfigurationError
+
 	ok := errors.As(err, &ce)
 
 	return ce, ok

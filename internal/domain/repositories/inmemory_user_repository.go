@@ -26,12 +26,14 @@ func NewInMemoryUserRepository() UserRepository {
 }
 
 // Save persists a user entity.
+// Thread-safe: checks email uniqueness atomically within the write lock.
 func (r *InMemoryUserRepository) Save(_ context.Context, user *entities.User) error {
 	if user == nil {
 		return errors.NewValidationError("user", "user cannot be nil")
 	}
 
-	if err := user.Validate(); err != nil {
+	err := user.Validate()
+	if err != nil {
 		return err
 	}
 
@@ -42,6 +44,13 @@ func (r *InMemoryUserRepository) Save(_ context.Context, user *entities.User) er
 	if _, exists := r.users[user.ID]; exists {
 		// Update existing user's modified time
 		user.Modified = time.Now()
+	} else {
+		// For new users, check email uniqueness atomically
+		for _, existingUser := range r.users {
+			if existingUser.GetEmail().String() == user.GetEmail().String() {
+				return ErrUserAlreadyExists
+			}
+		}
 	}
 
 	// Create a copy to avoid external modifications

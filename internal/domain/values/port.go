@@ -27,7 +27,8 @@ const (
 // NewPort creates a new Port with validation.
 func NewPort(value int) (Port, error) {
 	port := Port(value)
-	if err := port.Validate(); err != nil {
+	err := port.Validate()
+	if err != nil {
 		return 0, err
 	}
 
@@ -56,6 +57,7 @@ func (p Port) Validate() error {
 			fmt.Sprintf("port %d is too low, minimum is %d", p, MinPort),
 		)
 	}
+
 	if p > MaxPort {
 		return domainerrors.NewValidationError(
 			"port",
@@ -109,6 +111,7 @@ func (p *Port) UnmarshalText(text []byte) error {
 	if err != nil {
 		return err
 	}
+
 	*p = port
 
 	return nil

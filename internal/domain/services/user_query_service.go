@@ -65,7 +65,6 @@ func (s *userQueryServiceImpl) GetUser(
 	// TODO: Add metrics tracking for query performance
 	// TODO: Add validation for user ID format
 	// TODO: Consider adding authorization checks
-
 	if id.IsZero() {
 		return nil, domainerrors.NewValidationError("userID", "user ID cannot be empty")
 	}
@@ -87,7 +86,6 @@ func (s *userQueryServiceImpl) GetUserByEmail(
 	// TODO: Add caching by email for performance
 	// TODO: Add rate limiting for email lookups
 	// TODO: Consider case-insensitive email matching
-
 	if email == "" {
 		return nil, domainerrors.NewValidationError("email", "email cannot be empty")
 	}
@@ -107,7 +105,6 @@ func (s *userQueryServiceImpl) ListUsers(ctx context.Context) ([]*entities.User,
 	// TODO: Add filtering capabilities
 	// TODO: Add caching for frequently accessed lists
 	// TODO: Consider streaming for very large result sets
-
 	return s.userRepo.List(ctx)
 }
 
@@ -116,7 +113,6 @@ func (s *userQueryServiceImpl) GetUserEmailsWithResult(ctx context.Context) mo.R
 	// TODO: Optimize with direct email query instead of fetching full users
 	// TODO: Add email deduplication logic
 	// TODO: Add email format validation
-
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
 		return mo.Err[[]string](domainerrors.WrapRepoError("list for emails", "user", err))
@@ -137,7 +133,6 @@ func (s *userQueryServiceImpl) FindUserByEmailOption(
 	// TODO: Add email validation using Email value object
 	// TODO: Add caching support
 	// TODO: Add audit logging for security compliance
-
 	if email == "" {
 		return mo.None[*entities.User]()
 	}
@@ -157,7 +152,6 @@ func (s *userQueryServiceImpl) GetUserStats(ctx context.Context) (map[string]int
 	// TODO: Add caching for expensive statistics calculations
 	// TODO: Add real-time vs cached statistics options
 	// TODO: Add date range filtering for statistics
-
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
 		return nil, domainerrors.WrapRepoError("list for stats", "user", err)
@@ -169,6 +163,7 @@ func (s *userQueryServiceImpl) GetUserStats(ctx context.Context) (map[string]int
 
 	// Calculate domain distribution
 	domainCount := make(map[string]int)
+
 	for _, user := range users {
 		email := user.GetEmail().String()
 		if _, after, ok := strings.Cut(email, "@"); ok {
@@ -176,6 +171,7 @@ func (s *userQueryServiceImpl) GetUserStats(ctx context.Context) (map[string]int
 			domainCount[domain]++
 		}
 	}
+
 	stats["unique_domains"] = len(domainCount)
 
 	return stats, nil
@@ -190,7 +186,6 @@ func (s *userQueryServiceImpl) GetUsersWithFilters(
 	// TODO: Add validation for filter parameters
 	// TODO: Add support for complex filter combinations
 	// TODO: Add filter result caching
-
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
 		return nil, domainerrors.WrapRepoError("list for filtering", "user", err)
@@ -230,7 +225,6 @@ func (s *userQueryServiceImpl) GetUsersByEmailDomains(
 	// TODO: Add domain validation
 	// TODO: Add support for wildcard domain matching
 	// TODO: Add result caching by domain combinations
-
 	if len(domains) == 0 {
 		return map[string][]*entities.User{}, nil
 	}

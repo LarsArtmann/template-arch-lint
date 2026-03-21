@@ -58,7 +58,8 @@ const (
 
 // NewUserName creates a new UserName value object with validation.
 func NewUserName(username string) (UserName, error) {
-	if err := validateUserNameFormat(username); err != nil {
+	err := validateUserNameFormat(username)
+	if err != nil {
 		return UserName{}, err
 	}
 
@@ -110,23 +111,28 @@ func validateUserNameFormat(username string) error {
 
 	normalized := strings.TrimSpace(username)
 
-	if err := validateUsernameLength(normalized); err != nil {
+	err := validateUsernameLength(normalized)
+	if err != nil {
 		return err
 	}
 
-	if err := validateUsernameWhitespace(username, normalized); err != nil {
+	err := validateUsernameWhitespace(username, normalized)
+	if err != nil {
 		return err
 	}
 
-	if err := validateUsernameCharacters(normalized); err != nil {
+	err := validateUsernameCharacters(normalized)
+	if err != nil {
 		return err
 	}
 
-	if err := validateUsernameEdges(normalized); err != nil {
+	err := validateUsernameEdges(normalized)
+	if err != nil {
 		return err
 	}
 
-	if err := validateUsernameContent(normalized); err != nil {
+	err := validateUsernameContent(normalized)
+	if err != nil {
 		return err
 	}
 
@@ -141,6 +147,7 @@ func validateUsernameLength(normalized string) error {
 			fmt.Sprintf("username too short (minimum %d characters)", usernameMinLength),
 		)
 	}
+
 	if len(normalized) > usernameMaxLength {
 		return errors.NewValidationError(
 			"username",
@@ -230,15 +237,18 @@ func validateUsernameEdges(normalized string) error {
 
 // validateUsernameContent validates username content rules (letters, reserved names, numbers).
 func validateUsernameContent(normalized string) error {
-	if err := validateHasLetter(normalized); err != nil {
+	err := validateHasLetter(normalized)
+	if err != nil {
 		return err
 	}
 
-	if err := validateNotReserved(normalized); err != nil {
+	err := validateNotReserved(normalized)
+	if err != nil {
 		return err
 	}
 
-	if err := validateNotAllNumbers(normalized); err != nil {
+	err := validateNotAllNumbers(normalized)
+	if err != nil {
 		return err
 	}
 

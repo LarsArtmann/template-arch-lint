@@ -129,6 +129,7 @@ func BenchmarkCreateUser(b *testing.B) {
 // BenchmarkGetUser measures user retrieval performance.
 func BenchmarkGetUser(b *testing.B) {
 	const userCount = 1000
+
 	service, ctx := setupBenchmarkService(b, userCount)
 
 	b.ReportAllocs()
@@ -174,6 +175,7 @@ func BenchmarkListUsers(b *testing.B) {
 // BenchmarkUpdateUser measures user update performance.
 func BenchmarkUpdateUser(b *testing.B) {
 	const userCount = 1000
+
 	service, ctx := setupBenchmarkService(b, userCount)
 
 	b.ReportAllocs()
@@ -210,6 +212,7 @@ func BenchmarkDeleteUser(b *testing.B) {
 // BenchmarkFilterActiveUsers measures functional filtering performance.
 func BenchmarkFilterActiveUsers(b *testing.B) {
 	const userCount = 10000
+
 	service, ctx := setupBenchmarkService(b, userCount)
 
 	b.ReportAllocs()
@@ -253,6 +256,7 @@ func BenchmarkGetUserStats(b *testing.B) {
 // BenchmarkGetUsersByEmailDomains measures domain filtering performance.
 func BenchmarkGetUsersByEmailDomains(b *testing.B) {
 	const userCount = 10000
+
 	service, ctx := setupBenchmarkService(b, userCount)
 
 	domains := []string{"example.com", "test.com", "demo.com"}
@@ -270,6 +274,7 @@ func BenchmarkGetUsersByEmailDomains(b *testing.B) {
 // BenchmarkConcurrentOperations measures performance under concurrent load.
 func BenchmarkConcurrentOperations(b *testing.B) {
 	const userCount = 1000
+
 	service, ctx := setupBenchmarkService(b, userCount)
 
 	b.ResetTimer()
@@ -297,6 +302,7 @@ func BenchmarkConcurrentOperations(b *testing.B) {
 				// Stats operation
 				_, _ = service.GetUserStats(ctx)
 			}
+
 			i++
 		}
 	})

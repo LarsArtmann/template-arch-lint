@@ -42,7 +42,8 @@ func NewSessionToken(duration time.Duration) (SessionToken, error) {
 
 // NewSessionTokenFromValue creates a session token from existing value.
 func NewSessionTokenFromValue(value string, expires time.Time) (SessionToken, error) {
-	if err := validateSessionToken(value); err != nil {
+	err := validateSessionToken(value)
+	if err != nil {
 		return SessionToken{}, err
 	}
 
@@ -200,6 +201,7 @@ func (a *AuditTrail) AddMetadata(key, value string) {
 	if a.metadata == nil {
 		a.metadata = make(map[string]string)
 	}
+
 	a.metadata[key] = value
 }
 
@@ -236,7 +238,8 @@ func (a *AuditTrail) UnmarshalJSON(data []byte) error {
 		Metadata  map[string]string `json:"metadata"`
 	}
 
-	if err := json.Unmarshal(data, &audit); err != nil {
+	err := json.Unmarshal(data, &audit)
+	if err != nil {
 		return err
 	}
 

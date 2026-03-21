@@ -97,6 +97,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 // GetUser handles user retrieval requests.
 func (h *UserHandler) GetUser(c *gin.Context) {
 	idStr := c.Param("id")
+
 	userID, err := values.NewUserID(idStr)
 	if err != nil {
 		log.Error("Invalid user ID format", "error", err)
@@ -125,6 +126,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 // UpdateUser handles user update requests.
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	idStr := c.Param("id")
+
 	userID, err := values.NewUserID(idStr)
 	if err != nil {
 		log.Error("Invalid user ID format", "error", err)
@@ -167,6 +169,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 // DeleteUser handles user deletion requests.
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	idStr := c.Param("id")
+
 	userID, err := values.NewUserID(idStr)
 	if err != nil {
 		log.Error("Invalid user ID format", "error", err)

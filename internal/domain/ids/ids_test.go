@@ -98,6 +98,7 @@ var _ = Describe("UserID", func() {
 
 		It("unmarshals from string", func() {
 			var userID ids.UserID
+
 			err := json.Unmarshal([]byte(`"user-123"`), &userID)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(userID.Get()).To(Equal("user-123"))
@@ -105,6 +106,7 @@ var _ = Describe("UserID", func() {
 
 		It("marshals zero value to null", func() {
 			var zero ids.UserID
+
 			data, err := json.Marshal(zero)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(string(data)).To(Equal("null"))

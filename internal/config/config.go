@@ -104,17 +104,20 @@ func LoadConfig(configPath string) (*Config, error) {
 	setDefaults(config)
 
 	// Configure viper
-	if err := configureViper(configPath); err != nil {
+	err := configureViper(configPath)
+	if err != nil {
 		return nil, errors.NewInternalError("failed to configure viper", err)
 	}
 
 	// Unmarshal configuration
-	if err := viper.Unmarshal(config); err != nil {
+	err := viper.Unmarshal(config)
+	if err != nil {
 		return nil, errors.NewInternalError("failed to unmarshal configuration", err)
 	}
 
 	// Validate configuration
-	if err := validateConfig(config); err != nil {
+	err := validateConfig(config)
+	if err != nil {
 		return nil, errors.NewValidationError("config", fmt.Sprintf("validation errors: %v", err))
 	}
 
@@ -182,7 +185,9 @@ func configureViper(configPath string) error {
 	// File configuration (optional)
 	if configPath != "" {
 		viper.SetConfigFile(configPath)
-		if err := viper.ReadInConfig(); err != nil {
+
+		err := viper.ReadInConfig()
+		if err != nil {
 			return errors.NewInternalError("failed to read config file", err)
 		}
 	}
@@ -195,21 +200,25 @@ func validateConfig(config *Config) error {
 	validate := validator.New()
 
 	// Register custom validators
-	if err := validate.RegisterValidation("valid_environment", validateEnvironment); err != nil {
+	err := validate.RegisterValidation("valid_environment", validateEnvironment)
+	if err != nil {
 		return errors.NewInternalError("failed to register environment validator", err)
 	}
 
 	// Validate struct with validator tags
-	if err := validate.Struct(config); err != nil {
+	err := validate.Struct(config)
+	if err != nil {
 		return err
 	}
 
 	// Additional domain-specific validation
-	if err := config.Server.Port.Validate(); err != nil {
+	err := config.Server.Port.Validate()
+	if err != nil {
 		return errors.NewValidationError("server_port", fmt.Sprintf("validation failed: %v", err))
 	}
 
-	if err := config.Logging.Level.Validate(); err != nil {
+	err := config.Logging.Level.Validate()
+	if err != nil {
 		return errors.NewValidationError("logging_level", fmt.Sprintf("validation failed: %v", err))
 	}
 

@@ -323,6 +323,7 @@ var _ = Describe("UserService", func() {
 				It("should create user successfully", func() {
 					id, err := values.NewUserID("test-user-1")
 					Expect(err).ToNot(HaveOccurred())
+
 					email := "test@example.com"
 					name := "Test User"
 
@@ -405,6 +406,7 @@ var _ = Describe("UserService", func() {
 					} else {
 						Expect(err).To(HaveOccurred(), description)
 						Expect(user).To(BeNil(), description)
+
 						_, isValidationError := errors.AsValidationError(err)
 						Expect(isValidationError).To(BeTrue(), description)
 					}
@@ -516,6 +518,7 @@ var _ = Describe("UserService", func() {
 					} else {
 						Expect(err).To(HaveOccurred(), description)
 						Expect(user).To(BeNil(), description)
+
 						_, isValidationError := errors.AsValidationError(err)
 						Expect(isValidationError).To(BeTrue(), description)
 					}
@@ -592,6 +595,7 @@ var _ = Describe("UserService", func() {
 
 								return
 							}
+
 							_, err = userService.CreateUser(ctx, id, email, name)
 							results <- err
 						}(i)
@@ -599,6 +603,7 @@ var _ = Describe("UserService", func() {
 
 					// Collect results
 					var successCount, errorCount int
+
 					for range 5 {
 						err := <-results
 						if err == nil {

@@ -64,7 +64,8 @@ type SessionID = id.ID[SessionBrand, string]
 // NewUserID creates a new UserID with validation.
 // Returns an error if the ID format is invalid.
 func NewUserID(value string) (UserID, error) {
-	if err := validateUserID(value); err != nil {
+	err := validateUserID(value)
+	if err != nil {
 		return UserID{}, err
 	}
 
@@ -72,7 +73,7 @@ func NewUserID(value string) (UserID, error) {
 }
 
 // GenerateUserID creates a new randomly generated UserID.
-// Uses crypto/rand for security. Format: "user_<32 hex chars>"
+// Uses crypto/rand for security. Format: "user_<32 hex chars>".
 func GenerateUserID() (UserID, error) {
 	bytes := make([]byte, idByteLength)
 	if _, err := rand.Read(bytes); err != nil {
@@ -95,7 +96,8 @@ func MustGenerateUserID() UserID {
 
 // NewSessionID creates a new SessionID with validation.
 func NewSessionID(value string) (SessionID, error) {
-	if err := validateSessionID(value); err != nil {
+	err := validateSessionID(value)
+	if err != nil {
 		return SessionID{}, err
 	}
 
@@ -124,7 +126,6 @@ func MustGenerateSessionID() SessionID {
 
 // Validation functions.
 
-//nolint:funlen // Validation logic is inherently sequential
 func validateUserID(id string) error {
 	if id == "" {
 		return newValidationError("user ID is required")

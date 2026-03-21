@@ -14,6 +14,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 
 	ginkgo.BeforeEach(func() {
 		var err error
+
 		user, err = NewUserFromStrings("user-123", "test@example.com", "TestUser")
 		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
@@ -33,6 +34,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 
 			// Parse back to verify structure
 			var jsonMap map[string]any
+
 			err = json.Unmarshal(jsonBytes, &jsonMap)
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
@@ -75,6 +77,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			var jsonMap map[string]any
+
 			err = json.Unmarshal(jsonBytes, &jsonMap)
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
@@ -96,6 +99,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 
 			// When
 			var unmarshaledUser User
+
 			err := json.Unmarshal([]byte(jsonInput), &unmarshaledUser)
 
 			// Then
@@ -109,6 +113,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 			// Verify timestamps
 			expectedCreated := time.Date(2023, 3, 1, 10, 0, 0, 0, time.UTC)
 			expectedModified := time.Date(2023, 3, 2, 11, 0, 0, 0, time.UTC)
+
 			gomega.Expect(unmarshaledUser.Created).To(gomega.Equal(expectedCreated))
 			gomega.Expect(unmarshaledUser.Modified).To(gomega.Equal(expectedModified))
 		})
@@ -117,6 +122,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 			func(jsonInput, expectedField string) {
 				// When
 				var unmarshaledUser User
+
 				err := json.Unmarshal([]byte(jsonInput), &unmarshaledUser)
 
 				// Then
@@ -156,6 +162,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 
 			// When
 			var unmarshaledUser User
+
 			err := json.Unmarshal([]byte(jsonInput), &unmarshaledUser)
 
 			// Then
@@ -173,6 +180,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 			var roundtrip User
+
 			err = json.Unmarshal(jsonBytes, &roundtrip)
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
@@ -202,6 +210,7 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 			}`
 
 			var unmarshaledUser User
+
 			err := json.Unmarshal([]byte(jsonInput), &unmarshaledUser)
 			gomega.Expect(err).ToNot(gomega.HaveOccurred())
 

@@ -402,6 +402,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 				Expect(id.String()).To(BeEmpty())
 			}
 		}
+
 		Context("injection attack prevention", func() {
 			It("should reject SQL injection attempts", func() {
 				maliciousInputs := []string{
