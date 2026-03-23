@@ -110,13 +110,13 @@ func LoadConfig(configPath string) (*Config, error) {
 	}
 
 	// Unmarshal configuration
-	err := viper.Unmarshal(config)
+	err = viper.Unmarshal(config)
 	if err != nil {
 		return nil, errors.NewInternalError("failed to unmarshal configuration", err)
 	}
 
 	// Validate configuration
-	err := validateConfig(config)
+	err = validateConfig(config)
 	if err != nil {
 		return nil, errors.NewValidationError("config", fmt.Sprintf("validation errors: %v", err))
 	}
@@ -206,18 +206,18 @@ func validateConfig(config *Config) error {
 	}
 
 	// Validate struct with validator tags
-	err := validate.Struct(config)
+	err = validate.Struct(config)
 	if err != nil {
 		return err
 	}
 
 	// Additional domain-specific validation
-	err := config.Server.Port.Validate()
+	err = config.Server.Port.Validate()
 	if err != nil {
 		return errors.NewValidationError("server_port", fmt.Sprintf("validation failed: %v", err))
 	}
 
-	err := config.Logging.Level.Validate()
+	err = config.Logging.Level.Validate()
 	if err != nil {
 		return errors.NewValidationError("logging_level", fmt.Sprintf("validation failed: %v", err))
 	}

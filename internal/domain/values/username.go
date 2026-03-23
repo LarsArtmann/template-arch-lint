@@ -116,22 +116,22 @@ func validateUserNameFormat(username string) error {
 		return err
 	}
 
-	err := validateUsernameWhitespace(username, normalized)
+	err = validateUsernameWhitespace(username, normalized)
 	if err != nil {
 		return err
 	}
 
-	err := validateUsernameCharacters(normalized)
+	err = validateUsernameCharacters(normalized)
 	if err != nil {
 		return err
 	}
 
-	err := validateUsernameEdges(normalized)
+	err = validateUsernameEdges(normalized)
 	if err != nil {
 		return err
 	}
 
-	err := validateUsernameContent(normalized)
+	err = validateUsernameContent(normalized)
 	if err != nil {
 		return err
 	}
@@ -242,12 +242,12 @@ func validateUsernameContent(normalized string) error {
 		return err
 	}
 
-	err := validateNotReserved(normalized)
+	err = validateNotReserved(normalized)
 	if err != nil {
 		return err
 	}
 
-	err := validateNotAllNumbers(normalized)
+	err = validateNotAllNumbers(normalized)
 	if err != nil {
 		return err
 	}

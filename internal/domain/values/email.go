@@ -93,12 +93,12 @@ func validateEmailFormat(email string) error {
 
 	normalized := strings.ToLower(email)
 
-	err := validateEmailLength(normalized)
+	err = validateEmailLength(normalized)
 	if err != nil {
 		return err
 	}
 
-	err := validateEmailBasicFormat(normalized)
+	err = validateEmailBasicFormat(normalized)
 	if err != nil {
 		return err
 	}

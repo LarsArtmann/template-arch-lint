@@ -235,12 +235,12 @@ func (s *UserService) applyUserUpdates(
 		return nil, domainerrors.WrapServiceError("set email", err)
 	}
 
-	err := user.SetName(name)
+	err = user.SetName(name)
 	if err != nil {
 		return nil, domainerrors.WrapServiceError("set name", err)
 	}
 
-	err := s.userRepo.Save(ctx, user)
+	err = s.userRepo.Save(ctx, user)
 	if err != nil {
 		return nil, domainerrors.WrapRepoError("save updated", "user", err)
 	}
@@ -338,7 +338,7 @@ func (s *UserService) validateUserInputsResult(email, name string) mo.Result[str
 		return mo.Err[struct{}](domainerrors.NewValidationError("email", err.Error()))
 	}
 
-	err := s.validateUserName(name)
+	err = s.validateUserName(name)
 	if err != nil {
 		return mo.Err[struct{}](domainerrors.NewValidationError("name", err.Error()))
 	}
@@ -586,12 +586,12 @@ func (s *UserService) validateUserName(name string) error {
 		return err
 	}
 
-	err := s.validateNameLength(name)
+	err = s.validateNameLength(name)
 	if err != nil {
 		return err
 	}
 
-	err := s.validateNameWhitespace(name)
+	err = s.validateNameWhitespace(name)
 	if err != nil {
 		return err
 	}
