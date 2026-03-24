@@ -8,15 +8,7 @@ DO NOT EDIT MANUALLY - Changes will be overwritten
 
 # Template Architecture Lint
 
-[![CI Status](https://img.shields.io/github/actions/workflow/status/LarsArtmann/t/ci.yml?style=flat-square&branch=main)](https://github.com/LarsArtmann/t/actions)
-
-[![Coverage](https://img.shields.io/codecov/c/github/LarsArtmann/t?style=flat-square)](https://codecov.io/gh/LarsArtmann/t) [![Go Report Card](https://goreportcard.com/badge/github.com/LarsArtmann/t)](https://goreportcard.com/report/github.com/LarsArtmann/t)
-
-[![GitHub Stars](https://img.shields.io/github/stars/LarsArtmann/t?style=flat-square)](https://github.com/LarsArtmann/t) [![GitHub Forks](https://img.shields.io/github/forks/LarsArtmann/t?style=flat-square)](https://github.com/LarsArtmann/t) [![GitHub Issues](https://img.shields.io/github/issues/LarsArtmann/t?style=flat-square)](https://github.com/LarsArtmann/t/issues)
-
-[![Go Reference](https://pkg.go.dev/badge/github.com/LarsArtmann/t)](https://pkg.go.dev/github.com/LarsArtmann/t) [![License](https://img.shields.io/github/license/LarsArtmann/t?style=flat-square)](https://github.com/LarsArtmann/t/blob/main/LICENSE) ![Go Version](https://img.shields.io/github/go-mod/go-version/LarsArtmann/t?style=flat-square)
-
-Enterprise-Grade Go Architecture & Code Quality Enforcement Template
+**Copy-paste configuration files for enterprise-grade Go linting.** This is NOT a library to install—it's a template to copy from.
 
 ## Table of Contents
 
@@ -31,9 +23,16 @@ Enterprise-Grade Go Architecture & Code Quality Enforcement Template
 
 ## Overview
 
-This project creates professional README templates by analyzing patterns from real-world projects and implementing best practices for documentation. It provides a Go-based generator that creates hierarchical templates for different project types and complexity levels.
+A **reference implementation** and **configuration template** demonstrating:
 
-## 🚨 **THE REAL VALUE: COPY THESE CONFIGS TO YOUR PROJECT!** 🚨
+- **Clean Architecture** enforced by `go-arch-lint`
+- **99+ linters** via `golangci-lint` with maximum strictness
+- **Zero-tolerance quality**: magic numbers, banned patterns (`interface{}`, `any`, `panic()`), complexity limits
+- **Security scanning**: gosec, govulncheck, NilAway (80% panic reduction)
+
+The Go code showcases proper architecture boundaries—copy these configs to your real projects.
+
+## 🎯 THE VALUE: COPY THESE 3 FILES TO YOUR PROJECT
 
 **This is NOT a library to install - it's a template to copy from!**
 

@@ -52,6 +52,8 @@ components:
 
   domain-values:
     in: internal/domain/values/**
+  domain-ids:
+    in: internal/domain/ids/**
   domain-repositories:
     in: internal/domain/repositories/**
   domain-services:
@@ -107,7 +109,8 @@ deps:
   domain-values:
     anyVendorDeps: true
     mayDependOn:
-      - pkg-errors # MUST use centralized errors
+      - domain-ids  # IDs are fundamental domain primitives
+      - pkg-errors  # MUST use centralized errors
 
   domain-repositories:
     anyVendorDeps: true

@@ -6,12 +6,14 @@ package sqlite
 
 import (
 	"time"
+
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/ids"
 )
 
 type Users struct {
-	ID        string    `db:"id" json:"id"`
-	Email     string    `db:"email" json:"email"`
-	Name      string    `db:"name" json:"name"`
-	CreatedAt time.Time `db:"created_at" json:"createdAt"`
-	UpdatedAt time.Time `db:"updated_at" json:"updatedAt"`
+	ID        ids.UserID `db:"id" json:"id"`
+	Email     string     `db:"email" json:"email"`
+	Name      string     `db:"name" json:"name"`
+	CreatedAt time.Time  `db:"created_at" json:"createdAt"`
+	UpdatedAt time.Time  `db:"updated_at" json:"updatedAt"`
 }

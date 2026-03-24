@@ -84,6 +84,9 @@ sql:
 
         # === TYPE OVERRIDES ===
         overrides:
+          # Users table ID column - strong type
+          - column: "users.id"
+            go_type: "github.com/LarsArtmann/template-arch-lint/internal/domain/ids.UserID"
           - db_type: "TEXT"
             go_type: "string"
             nullable: false

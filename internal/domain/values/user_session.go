@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/ids"
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
@@ -139,7 +140,7 @@ func (t *SessionToken) UnmarshalJSON(data []byte) error {
 
 // AuditTrail represents an audit trail entry.
 type AuditTrail struct {
-	userID    string
+	userID    ids.UserID
 	action    string
 	resource  string
 	timestamp time.Time
@@ -149,7 +150,7 @@ type AuditTrail struct {
 }
 
 // NewAuditTrail creates a new audit trail entry.
-func NewAuditTrail(userID, action, resource, ip, userAgent string) AuditTrail {
+func NewAuditTrail(userID ids.UserID, action, resource, ip, userAgent string) AuditTrail {
 	return AuditTrail{
 		userID:    userID,
 		action:    action,
@@ -162,7 +163,7 @@ func NewAuditTrail(userID, action, resource, ip, userAgent string) AuditTrail {
 }
 
 // UserID returns the user ID from audit trail.
-func (a AuditTrail) UserID() string {
+func (a AuditTrail) UserID() ids.UserID {
 	return a.userID
 }
 
@@ -216,7 +217,7 @@ func (a AuditTrail) MarshalJSON() ([]byte, error) {
 		UserAgent string            `json:"user_agent"`
 		Metadata  map[string]string `json:"metadata"`
 	}{
-		UserID:    a.userID,
+		UserID:    a.userID.String(),
 		Action:    a.action,
 		Resource:  a.resource,
 		Timestamp: a.timestamp,
@@ -243,7 +244,12 @@ func (a *AuditTrail) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	a.userID = audit.UserID
+	userID, err := ids.NewUserID(audit.UserID)
+	if err != nil {
+		return errors.NewValidationError("user_id", err.Error())
+	}
+
+	a.userID = userID
 	a.action = audit.Action
 	a.resource = audit.Resource
 	a.timestamp = audit.Timestamp

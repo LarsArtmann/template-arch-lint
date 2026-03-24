@@ -6,6 +6,8 @@ package sqlite
 
 import (
 	"context"
+
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/ids"
 )
 
 type Querier interface {
@@ -18,11 +20,11 @@ type Querier interface {
 	//DeleteUser
 	//
 	//  DELETE FROM users WHERE id = ?
-	DeleteUser(ctx context.Context, id string) error
+	DeleteUser(ctx context.Context, id ids.UserID) error
 	//GetUser
 	//
 	//  SELECT id, email, name, created_at, updated_at FROM users WHERE id = ? LIMIT 1
-	GetUser(ctx context.Context, id string) (*Users, error)
+	GetUser(ctx context.Context, id ids.UserID) (*Users, error)
 	//GetUserByEmail
 	//
 	//  SELECT id, email, name, created_at, updated_at FROM users WHERE email = ? LIMIT 1
