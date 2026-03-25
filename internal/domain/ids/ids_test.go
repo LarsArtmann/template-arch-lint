@@ -63,17 +63,16 @@ var _ = Describe("UserID", func() {
 	})
 
 	Describe("Equal", func() {
-		It("returns true for same value", func() {
-			id1, _ := ids.NewUserID("user-123")
-			id2, _ := ids.NewUserID("user-123")
-			Expect(id1.Equal(id2)).To(BeTrue())
-		})
-
-		It("returns false for different values", func() {
-			id1, _ := ids.NewUserID("user-123")
-			id2, _ := ids.NewUserID("user-456")
-			Expect(id1.Equal(id2)).To(BeFalse())
-		})
+		DescribeTable(
+			"should return expected result",
+			func(id1Str, id2Str string, expected bool) {
+				id1, _ := ids.NewUserID(id1Str)
+				id2, _ := ids.NewUserID(id2Str)
+				Expect(id1.Equal(id2)).To(Equal(expected))
+			},
+			Entry("same value returns true", "user-123", "user-123", true),
+			Entry("different values return false", "user-123", "user-456", false),
+		)
 	})
 
 	Describe("IsZero", func() {

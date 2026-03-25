@@ -13,6 +13,7 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
+	servicestesthelpers "github.com/LarsArtmann/template-arch-lint/internal/domain/services/testhelpers"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
@@ -24,12 +25,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 	)
 
 	// Test helper functions
-	createTestUserID := func(id string) values.UserID {
-		userID, err := values.NewUserID(id)
-		Expect(err).ToNot(HaveOccurred())
-
-		return userID
-	}
+	createTestUserID := servicestesthelpers.CreateTestUserID
 
 	createTestUsers := func(service *services.UserService, ctx context.Context, count int, idPrefix, emailPrefix, namePrefix string) []values.UserID {
 		userIDs := make([]values.UserID, count)
@@ -45,6 +41,13 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 		}
 
 		return userIDs
+	}
+
+	createTestUserForService := func(service *services.UserService, ctx context.Context, idSuffix, email, name string) *entities.User {
+		id := createTestUserID(idSuffix)
+		user, err := service.CreateUser(ctx, id, email, name)
+		Expect(err).ToNot(HaveOccurred())
+		return user
 	}
 
 	BeforeEach(func() {
@@ -182,13 +185,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 		var testUser *entities.User
 
 		BeforeEach(func() {
-			// Create a test user first
-			id := createTestUserID("read-test-user")
-
-			var err error
-
-			testUser, err = userService.CreateUser(ctx, id, "read@example.com", "Read Test User")
-			Expect(err).ToNot(HaveOccurred())
+			testUser = createTestUserForService(userService, ctx, "read-test-user", "read@example.com", "Read Test User")
 		})
 
 		Context("with concurrent GetUser calls", func() {
@@ -270,18 +267,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 		var testUser *entities.User
 
 		BeforeEach(func() {
-			// Create a test user for updating
-			id := createTestUserID("update-test-user")
-
-			var err error
-
-			testUser, err = userService.CreateUser(
-				ctx,
-				id,
-				"update@example.com",
-				"Update Test User",
-			)
-			Expect(err).ToNot(HaveOccurred())
+			testUser = createTestUserForService(userService, ctx, "update-test-user", "update@example.com", "Update Test User")
 		})
 
 		Context("with concurrent updates to same user", func() {

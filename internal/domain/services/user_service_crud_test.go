@@ -8,7 +8,7 @@ import (
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	servicestesthelpers "github.com/LarsArtmann/template-arch-lint/internal/domain/services/testhelpers"
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
@@ -26,12 +26,7 @@ var _ = Describe("UserService CRUD Operations", func() {
 	})
 
 	// Test helper functions
-	createTestUserID := func(id string) values.UserID {
-		userID, err := values.NewUserID(id)
-		Expect(err).ToNot(HaveOccurred())
-
-		return userID
-	}
+	createTestUserID := servicestesthelpers.CreateTestUserID
 
 	defaultTestEmail := "test@example.com"
 	defaultTestName := "Test User"

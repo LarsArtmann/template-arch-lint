@@ -157,7 +157,7 @@ func (s *UserService) UpdateUser(
 	id values.UserID,
 	email, name string,
 ) (*entities.User, error) {
-	user, err := s.getUserForUpdate(ctx, id)
+	user, err := s.GetUser(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -169,17 +169,21 @@ func (s *UserService) UpdateUser(
 	return s.applyUserUpdates(ctx, user, email, name)
 }
 
-// TODO: PERFORMANCE - Consider caching frequently accessed users.
-func (s *UserService) getUserForUpdate(
-	ctx context.Context,
-	id values.UserID,
-) (*entities.User, error) {
-	user, err := s.userRepo.FindByID(ctx, id)
-	if err != nil {
-		return nil, domainerrors.WrapRepoError("get for update", "user", err, id.String())
-	}
+// validateNameUpdate(user *entities.User, name string) error {
+// 	if name != user.GetUserName().String() {
+// 		err := s.validateUserName(name)
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
+//
+// 	return nil
+// }
 
-	return user, nil
+func extractEmails(users []*entities.User) []string {
+	return lo.Map(users, func(user *entities.User, _ int) string {
+		return user.GetEmail().String()
+	})
 }
 
 func (s *UserService) validateUserUpdates(
@@ -317,9 +321,7 @@ func (s *UserService) GetUserEmailsWithResult(ctx context.Context) mo.Result[[]s
 	}
 
 	// Functional operation: extract emails
-	emails := lo.Map(users, func(user *entities.User, _ int) string {
-		return user.GetEmail().String()
-	})
+	emails := extractEmails(users)
 
 	return mo.Ok(emails)
 }

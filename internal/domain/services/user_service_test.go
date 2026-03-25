@@ -14,6 +14,7 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
+	servicestesthelpers "github.com/LarsArtmann/template-arch-lint/internal/domain/services/testhelpers"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
@@ -37,18 +38,21 @@ var _ = Describe("UserService", func() {
 	})
 
 	// Test helper functions
-	createTestUserID := func(id string) values.UserID {
-		userID, err := values.NewUserID(id)
-		Expect(err).ToNot(HaveOccurred())
-
-		return userID
-	}
+	createTestUserID := servicestesthelpers.CreateTestUserID
 
 	assertValidationError := func(user *entities.User, err error) {
 		Expect(user).To(BeNil())
 		Expect(err).To(HaveOccurred())
 		_, isValidationError := errors.AsValidationError(err)
 		Expect(isValidationError).To(BeTrue())
+	}
+
+	assertValidationErrorWithDescription := func(user *entities.User, err error, description string) {
+		Expect(err).To(HaveOccurred(), description)
+		Expect(user).To(BeNil(), description)
+
+		_, isValidationError := errors.AsValidationError(err)
+		Expect(isValidationError).To(BeTrue(), description)
 	}
 
 	createUserAndExpectValidationError := func(email, name string) {
@@ -97,31 +101,27 @@ var _ = Describe("UserService", func() {
 		})
 
 		Context("with invalid email", func() {
-			It("should return validation error for empty email", func() {
-				createUserAndExpectValidationError("", "Test User")
-			})
-
-			It("should return validation error for invalid email format", func() {
-				createUserAndExpectValidationError("invalid-email", "Test User")
-			})
-
-			It("should return validation error for email with spaces", func() {
-				createUserAndExpectValidationError("test @example.com", "Test User")
-			})
+			DescribeTable(
+				"should return validation error",
+				func(email string) {
+					createUserAndExpectValidationError(email, "Test User")
+				},
+				Entry("empty email", ""),
+				Entry("invalid email format", "invalid-email"),
+				Entry("email with spaces", "test @example.com"),
+			)
 		})
 
 		Context("with invalid name", func() {
-			It("should return validation error for empty name", func() {
-				createUserAndExpectValidationError("test@example.com", "")
-			})
-
-			It("should return validation error for too short name", func() {
-				createUserAndExpectValidationError("test@example.com", "A")
-			})
-
-			It("should return validation error for name without letters", func() {
-				createUserAndExpectValidationError("test@example.com", "123")
-			})
+			DescribeTable(
+				"should return validation error",
+				func(name string) {
+					createUserAndExpectValidationError("test@example.com", name)
+				},
+				Entry("empty name", ""),
+				Entry("too short name", "A"),
+				Entry("name without letters", "123"),
+			)
 		})
 
 		Context("when user already exists", func() {
@@ -370,24 +370,16 @@ var _ = Describe("UserService", func() {
 				})
 			})
 
-			Context("when user does not exist", func() {
-				It("should return None", func() {
-					email := "nonexistent@example.com"
-
-					option := userService.FindUserByEmailOption(ctx, email)
-
-					Expect(option.IsAbsent()).To(BeTrue())
-				})
-			})
-
-			Context("with invalid email", func() {
-				It("should return None", func() {
-					email := "invalid-email"
-
-					option := userService.FindUserByEmailOption(ctx, email)
-
-					Expect(option.IsAbsent()).To(BeTrue())
-				})
+			Context("with nonexistent or invalid email", func() {
+				DescribeTable(
+					"should return None",
+					func(email string) {
+						option := userService.FindUserByEmailOption(ctx, email)
+						Expect(option.IsAbsent()).To(BeTrue())
+					},
+					Entry("nonexistent email", "nonexistent@example.com"),
+					Entry("invalid email format", "invalid-email"),
+				)
 			})
 		})
 	})
@@ -405,11 +397,7 @@ var _ = Describe("UserService", func() {
 						Expect(user).ToNot(BeNil(), description)
 						Expect(user.GetEmail().String()).To(Equal(email), description)
 					} else {
-						Expect(err).To(HaveOccurred(), description)
-						Expect(user).To(BeNil(), description)
-
-						_, isValidationError := errors.AsValidationError(err)
-						Expect(isValidationError).To(BeTrue(), description)
+						assertValidationErrorWithDescription(user, err, description)
 					}
 				},
 				Entry(
@@ -517,11 +505,7 @@ var _ = Describe("UserService", func() {
 						Expect(user).ToNot(BeNil(), description)
 						Expect(user.GetUserName().String()).To(Equal(name), description)
 					} else {
-						Expect(err).To(HaveOccurred(), description)
-						Expect(user).To(BeNil(), description)
-
-						_, isValidationError := errors.AsValidationError(err)
-						Expect(isValidationError).To(BeTrue(), description)
+						assertValidationErrorWithDescription(user, err, description)
 					}
 				},
 				Entry(

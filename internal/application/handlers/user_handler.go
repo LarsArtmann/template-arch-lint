@@ -35,6 +35,24 @@ func generateUserID() string {
 	return hex.EncodeToString(bytes)
 }
 
+// errorResponse sends a standardized JSON error response.
+func errorResponse(c *gin.Context, status int, errCode, message string) {
+	c.JSON(status, gin.H{
+		"error":   errCode,
+		"message": message,
+	})
+}
+
+// bindRequest binds and validates JSON request body.
+func bindRequest[T any](c *gin.Context, req *T) bool {
+	if err := c.ShouldBindJSON(req); err != nil {
+		log.Error("Invalid request format", "error", err)
+		errorResponse(c, http.StatusBadRequest, "invalid_request_format", err.Error())
+		return false
+	}
+	return true
+}
+
 // userToJSON converts a user entity to a JSON response map.
 func userToJSON(user *entities.User) gin.H {
 	return gin.H{
@@ -52,71 +70,50 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		Email string `binding:"required,email"         json:"email"`
 		Name  string `binding:"required,min=2,max=100" json:"name"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Error("Invalid request format", "error", err)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "invalid_request_format",
-			"message": err.Error(),
-		})
-
+	if !bindRequest(c, &req) {
 		return
 	}
 
-	// Generate new user ID
 	userID, err := values.NewUserID(generateUserID())
 	if err != nil {
 		log.Error("Failed to generate user ID", "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "user_id_generation_failed",
-			"message": "Failed to generate user ID",
-		})
-
+		errorResponse(c, http.StatusInternalServerError, "user_id_generation_failed", "Failed to generate user ID")
 		return
 	}
 
 	user, err := h.userService.CreateUser(c.Request.Context(), userID, req.Email, req.Name)
 	if err != nil {
 		log.Error("Failed to create user", "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "user_creation_failed",
-			"message": "Failed to create user",
-		})
-
+		errorResponse(c, http.StatusInternalServerError, "user_creation_failed", "Failed to create user")
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"id":        user.ID.String(),
-		"email":     user.GetEmail().String(),
-		"name":      user.GetUserName().String(),
-		"createdAt": user.GetCreatedAt(),
-		"updatedAt": user.GetUpdatedAt(),
-	})
+	c.JSON(http.StatusCreated, userToJSON(user))
+}
+
+// parseUserID extracts and validates user ID from URL parameter.
+func parseUserID(c *gin.Context) (values.UserID, bool) {
+	idStr := c.Param("id")
+	userID, err := values.NewUserID(idStr)
+	if err != nil {
+		log.Error("Invalid user ID format", "error", err)
+		errorResponse(c, http.StatusBadRequest, "invalid_user_id", "Invalid user ID format")
+		return values.UserID{}, false
+	}
+	return userID, true
 }
 
 // GetUser handles user retrieval requests.
 func (h *UserHandler) GetUser(c *gin.Context) {
-	idStr := c.Param("id")
-
-	userID, err := values.NewUserID(idStr)
-	if err != nil {
-		log.Error("Invalid user ID format", "error", err)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "invalid_user_id",
-			"message": "Invalid user ID format",
-		})
-
+	userID, ok := parseUserID(c)
+	if !ok {
 		return
 	}
 
 	user, err := h.userService.GetUser(c.Request.Context(), userID)
 	if err != nil {
 		log.Error("Failed to get user", "error", err)
-		c.JSON(http.StatusNotFound, gin.H{
-			"error":   "user_not_found",
-			"message": "User not found",
-		})
-
+		errorResponse(c, http.StatusNotFound, "user_not_found", "User not found")
 		return
 	}
 
@@ -125,16 +122,8 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 
 // UpdateUser handles user update requests.
 func (h *UserHandler) UpdateUser(c *gin.Context) {
-	idStr := c.Param("id")
-
-	userID, err := values.NewUserID(idStr)
-	if err != nil {
-		log.Error("Invalid user ID format", "error", err)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "invalid_user_id",
-			"message": "Invalid user ID format",
-		})
-
+	userID, ok := parseUserID(c)
+	if !ok {
 		return
 	}
 
@@ -142,24 +131,14 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		Email string `binding:"omitempty,email"         json:"email"`
 		Name  string `binding:"omitempty,min=2,max=100" json:"name"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Error("Invalid request format", "error", err)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "invalid_request_format",
-			"message": err.Error(),
-		})
-
+	if !bindRequest(c, &req) {
 		return
 	}
 
 	user, err := h.userService.UpdateUser(c.Request.Context(), userID, req.Email, req.Name)
 	if err != nil {
 		log.Error("Failed to update user", "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "user_update_failed",
-			"message": "Failed to update user",
-		})
-
+		errorResponse(c, http.StatusInternalServerError, "user_update_failed", "Failed to update user")
 		return
 	}
 
@@ -168,27 +147,15 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 
 // DeleteUser handles user deletion requests.
 func (h *UserHandler) DeleteUser(c *gin.Context) {
-	idStr := c.Param("id")
-
-	userID, err := values.NewUserID(idStr)
-	if err != nil {
-		log.Error("Invalid user ID format", "error", err)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "invalid_user_id",
-			"message": "Invalid user ID format",
-		})
-
+	userID, ok := parseUserID(c)
+	if !ok {
 		return
 	}
 
-	err = h.userService.DeleteUser(c.Request.Context(), userID)
+	err := h.userService.DeleteUser(c.Request.Context(), userID)
 	if err != nil {
 		log.Error("Failed to delete user", "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "user_deletion_failed",
-			"message": "Failed to delete user",
-		})
-
+		errorResponse(c, http.StatusInternalServerError, "user_deletion_failed", "Failed to delete user")
 		return
 	}
 

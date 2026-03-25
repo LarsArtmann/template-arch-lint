@@ -224,29 +224,18 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 		})
 
 		Context("edge cases and boundary conditions", func() {
-			It("should accept minimum valid length (2 characters)", func() {
-				userName, err := values.NewUserName("Jo")
-				Expect(err).ToNot(HaveOccurred())
-				Expect(userName.String()).To(Equal("Jo"))
-			})
-
-			It("should handle names with mixed valid characters", func() {
-				userName, err := values.NewUserName("Mary-Jane O'Connor")
-				Expect(err).ToNot(HaveOccurred())
-				Expect(userName.String()).To(Equal("Mary-Jane O'Connor"))
-			})
-
-			It("should handle names with periods", func() {
-				userName, err := values.NewUserName("Dr. John Doe")
-				Expect(err).ToNot(HaveOccurred())
-				Expect(userName.String()).To(Equal("Dr. John Doe"))
-			})
-
-			It("should handle names with commas", func() {
-				userName, err := values.NewUserName("Doe, John")
-				Expect(err).ToNot(HaveOccurred())
-				Expect(userName.String()).To(Equal("Doe, John"))
-			})
+			DescribeTable(
+				"should handle valid name edge cases",
+				func(name string) {
+					userName, err := values.NewUserName(name)
+					Expect(err).ToNot(HaveOccurred())
+					Expect(userName.String()).To(Equal(name))
+				},
+				Entry("minimum valid length (2 characters)", "Jo"),
+				Entry("names with mixed valid characters", "Mary-Jane O'Connor"),
+				Entry("names with periods", "Dr. John Doe"),
+				Entry("names with commas", "Doe, John"),
+			)
 		})
 	})
 
@@ -318,24 +307,17 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 		})
 
 		Context("edge cases and boundary conditions", func() {
-			It("should handle exactly 2 character ID (minimum boundary)", func() {
-				userID, err := values.NewUserID("ab")
-				Expect(err).ToNot(HaveOccurred())
-				Expect(userID.String()).To(Equal("ab"))
-			})
-
-			It("should handle reasonable maximum length", func() {
-				longID := strings.Repeat("a", 100)
-				userID, err := values.NewUserID(longID)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(userID.String()).To(Equal(longID))
-			})
-
-			It("should preserve case in IDs", func() {
-				userID, err := values.NewUserID("UsErId123")
-				Expect(err).ToNot(HaveOccurred())
-				Expect(userID.String()).To(Equal("UsErId123"))
-			})
+			DescribeTable(
+				"should handle valid ID edge cases",
+				func(id string) {
+					userID, err := values.NewUserID(id)
+					Expect(err).ToNot(HaveOccurred())
+					Expect(userID.String()).To(Equal(id))
+				},
+				Entry("exactly 2 character ID (minimum boundary)", "ab"),
+				Entry("reasonable maximum length", strings.Repeat("a", 100)),
+				Entry("preserve case in IDs", "UsErId123"),
+			)
 		})
 	})
 

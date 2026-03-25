@@ -118,9 +118,7 @@ func (s *userQueryServiceImpl) GetUserEmailsWithResult(ctx context.Context) mo.R
 		return mo.Err[[]string](domainerrors.WrapRepoError("list for emails", "user", err))
 	}
 
-	emails := lo.Map(users, func(user *entities.User, _ int) string {
-		return user.GetEmail().String()
-	})
+	emails := extractEmails(users)
 
 	return mo.Ok(emails)
 }

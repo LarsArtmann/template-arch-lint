@@ -12,6 +12,7 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
+	servicestesthelpers "github.com/LarsArtmann/template-arch-lint/internal/domain/services/testhelpers"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	domainErrors "github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
@@ -20,8 +21,8 @@ import (
 var (
 	errUniqueConstraint     = errors.New("UNIQUE constraint failed: users.email")
 	errForeignKeyConstraint = errors.New("FOREIGN KEY constraint failed")
-	errUserDeleted         = errors.New("user was deleted by another process")
-	errCustomDB            = errors.New("custom database error")
+	errUserDeleted          = errors.New("user was deleted by another process")
+	errCustomDB             = errors.New("custom database error")
 )
 
 // Mock repository that can simulate various failure scenarios.
@@ -172,12 +173,7 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 	)
 
 	// Test helper functions
-	createTestUserID := func(id string) values.UserID {
-		userID, err := values.NewUserID(id)
-		Expect(err).ToNot(HaveOccurred())
-
-		return userID
-	}
+	createTestUserID := servicestesthelpers.CreateTestUserID
 
 	// Helper to check if error is wrapped InternalError with specific cause
 	expectInternalErrorWithCause := func(err, expectedCause error, expectedMessagePrefix string) {
@@ -280,7 +276,7 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				user, err := userService.UpdateUser(ctx, id, "new@example.com", "New Name")
 
 				Expect(user).To(BeNil())
-				expectInternalErrorWithCause(err, sql.ErrConnDone, "failed to get for update user")
+				expectInternalErrorWithCause(err, sql.ErrConnDone, "failed to get user")
 				Expect(failingRepo.findByIDCallCount).To(Equal(1))
 				Expect(failingRepo.updateCallCount).To(Equal(0)) // Should not reach Update
 			})
@@ -608,7 +604,7 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				Expect(err).To(HaveOccurred())
 				Expect(
 					err.Error(),
-				).To(ContainSubstring("failed to get for update user"))
+				).To(ContainSubstring("failed to get user"))
 				Expect(err.Error()).To(ContainSubstring("sql: connection is already closed"))
 
 				// Service should handle this gracefully without corruption
@@ -620,7 +616,7 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 		Context("error type preservation", func() {
 			It("should preserve specific error types through service layer", func() {
 				customError := errCustomDB
-			failingRepo.saveError = customError
+				failingRepo.saveError = customError
 
 				id := createTestUserID("test-user")
 				user, err := userService.CreateUser(ctx, id, "test@example.com", "Test User")

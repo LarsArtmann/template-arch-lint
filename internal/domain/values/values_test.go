@@ -281,19 +281,16 @@ var _ = Describe("Value Objects", func() {
 			})
 
 			Describe("Equal", func() {
-				It("should return true for equal user IDs", func() {
-					other, err := values.NewUserID("test-user-123")
-					Expect(err).ToNot(HaveOccurred())
-
-					Expect(userID.Equal(other)).To(BeTrue())
-				})
-
-				It("should return false for different user IDs", func() {
-					other, err := values.NewUserID("different-user")
-					Expect(err).ToNot(HaveOccurred())
-
-					Expect(userID.Equal(other)).To(BeFalse())
-				})
+				DescribeTable(
+					"should return expected result",
+					func(otherID string, expected bool) {
+						other, err := values.NewUserID(otherID)
+						Expect(err).ToNot(HaveOccurred())
+						Expect(userID.Equal(other)).To(Equal(expected))
+					},
+					Entry("equal user IDs return true", "test-user-123", true),
+					Entry("different user IDs return false", "different-user", false),
+				)
 			})
 
 			Describe("IsZero", func() {
