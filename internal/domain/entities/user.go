@@ -10,6 +10,15 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
+// wrapValidationError wraps validation errors in the entity context.
+// This helper eliminates code duplication in validation error handling.
+func wrapValidationError(inputField, valueObjectType string, err error) error {
+	if err != nil {
+		return errors.NewValidationError(valueObjectType, err.Error())
+	}
+	return nil
+}
+
 // UserID represents a unique user identifier (alias for convenience).
 type UserID = values.UserID
 
@@ -131,8 +140,8 @@ func (u *User) GetUpdatedAt() time.Time {
 // REFACTORED: Split brain eliminated - only updates single value object field.
 func (u *User) SetEmail(email string) error {
 	emailVO, err := values.NewEmail(email)
-	if err != nil {
-		return errors.NewValidationError("email", err.Error())
+	if wrapValidationError("email", "email", err) != nil {
+		return err
 	}
 
 	// Single source of truth - no synchronization needed
@@ -146,8 +155,8 @@ func (u *User) SetEmail(email string) error {
 // REFACTORED: Split brain eliminated - only updates single value object field.
 func (u *User) SetName(name string) error {
 	nameVO, err := values.NewUserName(name)
-	if err != nil {
-		return errors.NewValidationError("name", err.Error())
+	if wrapValidationError("name", "name", err) != nil {
+		return err
 	}
 
 	// Single source of truth - no synchronization needed
@@ -217,18 +226,18 @@ func (u *User) UnmarshalJSON(data []byte) error {
 
 	// Validate and create value objects
 	userID, err := values.NewUserID(temp.ID)
-	if err != nil {
-		return errors.NewValidationError("id", err.Error())
+	if wrapValidationError("id", "user ID", err) != nil {
+		return err
 	}
 
 	email, err := values.NewEmail(temp.Email)
-	if err != nil {
-		return errors.NewValidationError("email", err.Error())
+	if wrapValidationError("email", "email", err) != nil {
+		return err
 	}
 
 	name, err := values.NewUserName(temp.Name)
-	if err != nil {
-		return errors.NewValidationError("name", err.Error())
+	if wrapValidationError("name", "name", err) != nil {
+		return err
 	}
 
 	// Set the fields
