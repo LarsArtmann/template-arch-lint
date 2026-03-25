@@ -14,9 +14,16 @@ func WrapServiceError(operation string, err error) error {
 }
 
 // WrapRepoError wraps repository errors with consistent messaging.
-func WrapRepoError(operation, entity string, err error) error {
+func WrapRepoError(operation, entity string, err error, details ...string) error {
 	if err == nil {
 		return nil
+	}
+
+	if len(details) > 0 {
+		return NewInternalError(
+			fmt.Sprintf("failed to %s %s (%s)", operation, entity, details[0]),
+			err,
+		)
 	}
 
 	return NewInternalError(fmt.Sprintf("failed to %s %s", operation, entity), err)

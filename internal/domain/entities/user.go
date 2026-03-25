@@ -3,6 +3,7 @@ package entities
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
@@ -31,16 +32,29 @@ func NewUser(id values.UserID, email, name string) (*User, error) {
 	// Validate and create value objects
 	emailVO, err := values.NewEmail(email)
 	if err != nil {
-		return nil, errors.NewValidationError("email", err.Error())
+		return nil, fmt.Errorf(
+			"create user with email %s: %w",
+			email,
+			errors.NewValidationError("email", err.Error()),
+		)
 	}
 
 	nameVO, err := values.NewUserName(name)
 	if err != nil {
-		return nil, errors.NewValidationError("name", err.Error())
+		return nil, fmt.Errorf(
+			"create user with name %s: %w",
+			name,
+			errors.NewValidationError("name", err.Error()),
+		)
 	}
 
 	if id.IsZero() {
-		return nil, errors.NewRequiredFieldError("user ID")
+		return nil, fmt.Errorf(
+			"create user (email=%s, name=%s): %w",
+			email,
+			name,
+			errors.NewRequiredFieldError("user ID"),
+		)
 	}
 
 	now := time.Now()

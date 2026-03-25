@@ -2,6 +2,7 @@ package services_test
 
 import (
 	"context"
+	std_errors "errors"
 	"fmt"
 	"strings"
 	"testing"
@@ -134,7 +135,7 @@ var _ = Describe("UserService", func() {
 
 				Expect(user).To(BeNil())
 				Expect(err).To(HaveOccurred())
-				Expect(err).To(Equal(repositories.ErrUserAlreadyExists))
+				Expect(std_errors.Is(err, repositories.ErrUserAlreadyExists)).To(BeTrue())
 			})
 		})
 	})

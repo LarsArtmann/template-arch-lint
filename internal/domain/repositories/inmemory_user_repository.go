@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -20,7 +21,7 @@ type InMemoryUserRepository struct {
 
 // NewInMemoryUserRepository creates a new in-memory user repository.
 func NewInMemoryUserRepository() UserRepository {
-	return &InMemoryUserRepository{
+	return &InMemoryUserRepository{ //nolint:exhaustruct // mu has valid zero value
 		users: make(map[values.UserID]*entities.User),
 	}
 }
@@ -34,7 +35,7 @@ func (r *InMemoryUserRepository) Save(_ context.Context, user *entities.User) er
 
 	err := user.Validate()
 	if err != nil {
-		return err
+		return fmt.Errorf("validate user %s: %w", user.ID, err)
 	}
 
 	r.mu.Lock()
@@ -48,7 +49,12 @@ func (r *InMemoryUserRepository) Save(_ context.Context, user *entities.User) er
 		// For new users, check email uniqueness atomically
 		for _, existingUser := range r.users {
 			if existingUser.GetEmail().String() == user.GetEmail().String() {
-				return ErrUserAlreadyExists
+				return fmt.Errorf(
+					"user %s with email %s already exists: %w",
+					user.ID,
+					user.GetEmail(),
+					ErrUserAlreadyExists,
+				)
 			}
 		}
 	}

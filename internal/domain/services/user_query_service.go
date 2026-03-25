@@ -71,7 +71,7 @@ func (s *userQueryServiceImpl) GetUser(
 
 	user, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
-		return nil, domainerrors.WrapRepoError("get", "user", err)
+		return nil, domainerrors.WrapRepoError("get", "user", err, id.String())
 	}
 
 	return user, nil

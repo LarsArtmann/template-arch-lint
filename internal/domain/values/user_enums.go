@@ -60,6 +60,7 @@ func (s UserStatus) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements json.Unmarshaler interface.
 func (s *UserStatus) UnmarshalJSON(data []byte) error {
 	var str string
+
 	err := json.Unmarshal(data, &str)
 	if err != nil {
 		return err
@@ -162,6 +163,7 @@ func (r UserRole) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements json.Unmarshaler interface.
 func (r *UserRole) UnmarshalJSON(data []byte) error {
 	var str string
+
 	err := json.Unmarshal(data, &str)
 	if err != nil {
 		return err

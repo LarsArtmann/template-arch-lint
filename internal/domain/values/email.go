@@ -2,6 +2,7 @@
 package values
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -83,27 +84,36 @@ func (e Email) IsEmpty() bool {
 func validateEmailFormat(email string) error {
 	err := validateEmailNotEmpty(email)
 	if err != nil {
-		return err
+		return fmt.Errorf("validate email %s: %w", email, err)
 	}
 
 	// Reject leading/trailing whitespace as per validation_test.go specification
 	if email != strings.TrimSpace(email) {
-		return errors.NewValidationError("email", "email cannot have leading or trailing spaces")
+		return fmt.Errorf(
+			"validate email %s: %w",
+			email,
+			errors.NewValidationError("email", "email cannot have leading or trailing spaces"),
+		)
 	}
 
 	normalized := strings.ToLower(email)
 
 	err = validateEmailLength(normalized)
 	if err != nil {
-		return err
+		return fmt.Errorf("validate email %s: %w", email, err)
 	}
 
 	err = validateEmailBasicFormat(normalized)
 	if err != nil {
-		return err
+		return fmt.Errorf("validate email %s: %w", email, err)
 	}
 
-	return validateEmailParts(normalized)
+	err = validateEmailParts(normalized)
+	if err != nil {
+		return fmt.Errorf("validate email %s: %w", email, err)
+	}
+
+	return nil
 }
 
 func validateEmailNotEmpty(email string) error {
@@ -152,10 +162,15 @@ func validateEmailParts(email string) error {
 
 	err := validateEmailLocalPart(localPart)
 	if err != nil {
-		return err
+		return fmt.Errorf("validate email local part %s: %w", localPart, err)
 	}
 
-	return validateEmailDomain(domain)
+	err = validateEmailDomain(domain)
+	if err != nil {
+		return fmt.Errorf("validate email domain %s: %w", domain, err)
+	}
+
+	return nil
 }
 
 func validateEmailLocalPart(localPart string) error {

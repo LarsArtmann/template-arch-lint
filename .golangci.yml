@@ -11,6 +11,38 @@ run:
 output:
   formats: {}
 linters:
+  settings:
+    depguard:
+      rules:
+        Main:
+          list-mode: lax
+          files:
+            - $all
+            - "!$test"
+          allow:
+            - $gostd
+            - github.com/LarsArtmann/template-arch-lint
+            - github.com/charmbracelet/log
+            - github.com/gin-gonic/gin
+            - github.com/go-playground/validator/v10
+            - github.com/spf13/viper
+            - github.com/samber/lo
+            - github.com/samber/mo
+            - github.com/larsartmann/go-composable-business-types
+            - github.com/onsi/ginkgo/v2
+            - github.com/onsi/gomega
+        Test:
+          list-mode: lax
+          files:
+            - $test
+          allow:
+            - $gostd
+            - github.com/LarsArtmann/template-arch-lint
+            - github.com/onsi/ginkgo/v2
+            - github.com/onsi/gomega
+            - github.com/samber/lo
+            - github.com/samber/mo
+            - github.com/stretchr/testify
   enable:
     - nilerr
     - embeddedstructfieldcheck

@@ -2,7 +2,6 @@ package services_test
 
 import (
 	"context"
-	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -12,11 +11,6 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
-
-func TestUserServiceCRUD(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "UserService CRUD Suite")
-}
 
 var _ = Describe("UserService CRUD Operations", func() {
 	var (

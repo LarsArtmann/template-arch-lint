@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"testing"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -16,11 +15,6 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
-
-func TestUserServiceConcurrency(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "🔄 UserService Concurrent Access Testing Suite")
-}
 
 var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 	var (

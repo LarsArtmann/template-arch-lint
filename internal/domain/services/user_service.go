@@ -18,6 +18,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -91,22 +92,32 @@ func (s *UserService) CreateUser(
 	// Business rule: Check if user already exists
 	existingUser, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) {
-		return nil, domainerrors.NewInternalError("failed to check existing user", err)
+		return nil, domainerrors.NewInternalError(
+			fmt.Sprintf("failed to check existing user (id=%s, email=%s)", id, email),
+			err,
+		)
 	}
 
 	if existingUser != nil {
-		return nil, repositories.ErrUserAlreadyExists
+		return nil, fmt.Errorf(
+			"user with email %s already exists: %w",
+			email,
+			repositories.ErrUserAlreadyExists,
+		)
 	}
 
 	// Create new user entity
 	user, err := entities.NewUser(id, email, name)
 	if err != nil {
-		return nil, err // Already typed error from entity
+		return nil, fmt.Errorf("create user (id=%s, email=%s): %w", id, email, err)
 	}
 
 	// Save to repository
 	if err := s.userRepo.Save(ctx, user); err != nil {
-		return nil, domainerrors.NewInternalError("failed to save user", err)
+		return nil, domainerrors.NewInternalError(
+			fmt.Sprintf("failed to save user (id=%s, email=%s)", id, email),
+			err,
+		)
 	}
 
 	return user, nil
@@ -117,7 +128,7 @@ func (s *UserService) CreateUser(
 func (s *UserService) GetUser(ctx context.Context, id values.UserID) (*entities.User, error) {
 	user, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
-		return nil, domainerrors.WrapRepoError("get", "user", err)
+		return nil, domainerrors.WrapRepoError("get", "user", err, id.String())
 	}
 
 	// Business logic: Could add user activity tracking, audit logging, etc.
@@ -132,7 +143,7 @@ func (s *UserService) GetUserByEmail(ctx context.Context, email string) (*entiti
 
 	user, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil {
-		return nil, domainerrors.WrapRepoError("get by email", "user", err)
+		return nil, domainerrors.WrapRepoError("get by email", "user", err, email)
 	}
 
 	return user, nil
@@ -165,7 +176,7 @@ func (s *UserService) getUserForUpdate(
 ) (*entities.User, error) {
 	user, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
-		return nil, domainerrors.WrapRepoError("get for update", "user", err)
+		return nil, domainerrors.WrapRepoError("get for update", "user", err, id.String())
 	}
 
 	return user, nil
@@ -204,11 +215,11 @@ func (s *UserService) validateEmailUpdate(
 func (s *UserService) checkEmailAvailability(ctx context.Context, email string) error {
 	existingUser, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) {
-		return domainerrors.WrapServiceError("check existing email", err)
+		return domainerrors.WrapServiceError(fmt.Sprintf("check existing email (%s)", email), err)
 	}
 
 	if existingUser != nil {
-		return repositories.ErrUserAlreadyExists
+		return fmt.Errorf("email %s already in use: %w", email, repositories.ErrUserAlreadyExists)
 	}
 
 	return nil
@@ -232,17 +243,20 @@ func (s *UserService) applyUserUpdates(
 ) (*entities.User, error) {
 	err := user.SetEmail(email)
 	if err != nil {
-		return nil, domainerrors.WrapServiceError("set email", err)
+		return nil, domainerrors.WrapServiceError(
+			fmt.Sprintf("set email for user %s", user.ID),
+			err,
+		)
 	}
 
 	err = user.SetName(name)
 	if err != nil {
-		return nil, domainerrors.WrapServiceError("set name", err)
+		return nil, domainerrors.WrapServiceError(fmt.Sprintf("set name for user %s", user.ID), err)
 	}
 
 	err = s.userRepo.Save(ctx, user)
 	if err != nil {
-		return nil, domainerrors.WrapRepoError("save updated", "user", err)
+		return nil, domainerrors.WrapRepoError("save updated", "user", err, user.ID.String())
 	}
 
 	return user, nil
@@ -255,12 +269,12 @@ func (s *UserService) DeleteUser(ctx context.Context, id values.UserID) error {
 	// Business rule: Check if user exists before deletion
 	_, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
-		return domainerrors.WrapRepoError("find for deletion", "user", err)
+		return domainerrors.WrapRepoError("find for deletion", "user", err, id.String())
 	}
 
 	// Business logic: Could add soft delete, cascade operations, etc.
 	if err := s.userRepo.Delete(ctx, id); err != nil {
-		return domainerrors.WrapRepoError("delete", "user", err)
+		return domainerrors.WrapRepoError("delete", "user", err, id.String())
 	}
 
 	return nil
@@ -354,12 +368,21 @@ func (s *UserService) checkUserNotExistsResult(
 	existingUser, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) {
 		return mo.Err[*entities.User](
-			domainerrors.NewInternalError("failed to check existing user", err),
+			domainerrors.NewInternalError(
+				fmt.Sprintf("failed to check existing user (email=%s)", email),
+				err,
+			),
 		)
 	}
 
 	if existingUser != nil {
-		return mo.Err[*entities.User](repositories.ErrUserAlreadyExists)
+		return mo.Err[*entities.User](
+			fmt.Errorf(
+				"user with email %s already exists: %w",
+				email,
+				repositories.ErrUserAlreadyExists,
+			),
+		)
 	}
 
 	return mo.Ok[*entities.User](nil)
@@ -374,11 +397,18 @@ func (s *UserService) createAndSaveUserResult(
 ) mo.Result[*entities.User] {
 	user, err := entities.NewUser(id, email, name)
 	if err != nil {
-		return mo.Err[*entities.User](err)
+		return mo.Err[*entities.User](
+			fmt.Errorf("create user (id=%s, email=%s): %w", id, email, err),
+		)
 	}
 
 	if err := s.userRepo.Save(ctx, user); err != nil {
-		return mo.Err[*entities.User](domainerrors.NewInternalError("failed to save user", err))
+		return mo.Err[*entities.User](
+			domainerrors.NewInternalError(
+				fmt.Sprintf("failed to save user (id=%s, email=%s)", id, email),
+				err,
+			),
+		)
 	}
 
 	return mo.Ok(user)

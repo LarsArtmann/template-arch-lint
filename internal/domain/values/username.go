@@ -113,27 +113,27 @@ func validateUserNameFormat(username string) error {
 
 	err := validateUsernameLength(normalized)
 	if err != nil {
-		return err
+		return fmt.Errorf("validate username %s: %w", username, err)
 	}
 
 	err = validateUsernameWhitespace(username, normalized)
 	if err != nil {
-		return err
+		return fmt.Errorf("validate username %s: %w", username, err)
 	}
 
 	err = validateUsernameCharacters(normalized)
 	if err != nil {
-		return err
+		return fmt.Errorf("validate username %s: %w", username, err)
 	}
 
 	err = validateUsernameEdges(normalized)
 	if err != nil {
-		return err
+		return fmt.Errorf("validate username %s: %w", username, err)
 	}
 
 	err = validateUsernameContent(normalized)
 	if err != nil {
-		return err
+		return fmt.Errorf("validate username %s: %w", username, err)
 	}
 
 	return nil

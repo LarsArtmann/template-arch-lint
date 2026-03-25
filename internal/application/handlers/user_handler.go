@@ -30,7 +30,7 @@ func NewUserHandler(userService *services.UserService) *UserHandler {
 // generateUserID generates a new random user ID.
 func generateUserID() string {
 	bytes := make([]byte, userIDByteLength)
-	rand.Read(bytes)
+	_, _ = rand.Read(bytes)
 
 	return hex.EncodeToString(bytes)
 }

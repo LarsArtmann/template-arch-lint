@@ -5,6 +5,11 @@ go 1.26.1
 replace github.com/larsartmann/go-composable-business-types => /Users/larsartmann/projects/go-composable-business-types
 
 require (
+	cloud.google.com/go/compute/metadata v0.8.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250818200422-3122310a409c // indirect
+)
+
+require (
 	github.com/charmbracelet/log v1.0.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-playground/validator/v10 v10.30.1
@@ -76,7 +81,6 @@ require (
 	github.com/ckaznocha/intrange v0.3.1 // indirect
 	github.com/cli/browser v1.3.0 // indirect
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
-	github.com/clipperhouse/stringish v0.1.1 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/curioswitch/go-reassign v0.3.0 // indirect
@@ -194,7 +198,7 @@ require (
 	github.com/nishanths/predeclared v0.2.2 // indirect
 	github.com/nunnatsa/ginkgolinter v0.21.2 // indirect
 	github.com/otiai10/copy v1.14.0 // indirect
-	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
+	github.com/pelletier/go-toml/v2 v2.3.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/polyfloyd/go-errorlint v1.8.0 // indirect
 	github.com/prometheus/client_golang v1.12.1 // indirect
@@ -264,7 +268,6 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/goleak v1.3.0 // indirect
-	go.uber.org/mock v0.6.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
@@ -301,7 +304,7 @@ tool (
 	github.com/a-h/templ/cmd/templ
 	github.com/fe3dback/go-arch-lint
 	github.com/golangci/golangci-lint/v2/cmd/golangci-lint
-	github.com/google/capslock
+	github.com/google/capslock/cmd/capslock
 	github.com/google/go-licenses
 	go.uber.org/goleak
 	golang.org/x/tools/cmd/goimports

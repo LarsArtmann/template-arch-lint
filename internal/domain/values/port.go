@@ -27,6 +27,7 @@ const (
 // NewPort creates a new Port with validation.
 func NewPort(value int) (Port, error) {
 	port := Port(value)
+
 	err := port.Validate()
 	if err != nil {
 		return 0, err
