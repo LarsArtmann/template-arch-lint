@@ -13,7 +13,7 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/application/handlers"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
-	"github.com/charmbracelet/log"
+	"charm.land/log/v2"
 	"github.com/gin-gonic/gin"
 )
 
