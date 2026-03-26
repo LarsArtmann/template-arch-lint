@@ -46,6 +46,7 @@
 ### Semantic Clones (2-3 tokens) - NOT REFACTORABLE
 
 Many remaining duplicates are minimal structural patterns:
+
 - Struct method signatures
 - Error assertions: `r.Error().To(Equal(err))`
 - Empty error checks: `if err == nil { ... }`
@@ -56,11 +57,13 @@ Many remaining duplicates are minimal structural patterns:
 
 **Token Count**: 30 remaining groups (150+ tokens)
 **Examples**:
+
 - Email validation patterns 6+ times
 - User existence check patterns 5+ times
 - DTO mapping patterns 4+ times
 
 **Refactoring Roadmap**:
+
 1. Extract email validation helper
 2. Extract user existence check helper
 3. Apply to Create/Update/Delete patterns

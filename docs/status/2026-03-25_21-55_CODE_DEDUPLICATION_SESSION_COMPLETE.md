@@ -1,4 +1,5 @@
 # COMPREHENSIVE STATUS REPORT
+
 **Date:** 2026-03-25 21:55 CET  
 **Session:** Code Deduplication Session  
 **Branch:** master
@@ -7,19 +8,20 @@
 
 ## EXECUTIVE SUMMARY
 
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| Clone Groups (30+ tokens) | 14 | 1 | **-93%** |
-| Lines Changed | - | 159 additions, 253 deletions | **-94 lines net** |
-| Files Modified | - | 10 | - |
-| Test Status | - | ALL PASSING | ✓ |
-| Build Status | - | PASSING | ✓ |
+| Metric                    | Before | After                        | Change            |
+| ------------------------- | ------ | ---------------------------- | ----------------- |
+| Clone Groups (30+ tokens) | 14     | 1                            | **-93%**          |
+| Lines Changed             | -      | 159 additions, 253 deletions | **-94 lines net** |
+| Files Modified            | -      | 10                           | -                 |
+| Test Status               | -      | ALL PASSING                  | ✓                 |
+| Build Status              | -      | PASSING                      | ✓                 |
 
 ---
 
 ## WORK STATUS
 
 ### a) FULLY DONE ✓
+
 - [x] **user_handler.go deduplication (11 clones)**
   - Extracted `errorResponse()` helper for JSON error responses
   - Extracted `bindRequest<T>()` generic helper for request binding
@@ -53,6 +55,7 @@
   - Used by: user_service_test.go, user_service_crud_test.go, user_service_error_test.go, user_service_concurrent_test.go
 
 ### b) PARTIALLY DONE ⚠
+
 - [x] **Cross-package test deduplication (1 clone remaining)**
   - Location: `user_split_brain_test.go:15-20` vs `user_test.go:238-243`
   - Issue: Both files use identical 5-line BeforeEach pattern
@@ -60,9 +63,11 @@
   - Technical debt: Requires either production code helper or separate test module
 
 ### c) NOT STARTED ❌
+
 - None in this session
 
 ### d) TOTALLY FUCKED UP! 💀
+
 - None - all tests pass, build succeeds
 
 ---
@@ -72,6 +77,7 @@
 ### 1 Clone Group (5 lines, 2 files, same package)
 
 **The Problem:**
+
 ```go
 // user_split_brain_test.go:15-20 AND user_test.go:238-243
 ginkgo.BeforeEach(func() {
@@ -82,12 +88,14 @@ ginkgo.BeforeEach(func() {
 ```
 
 **Why It Can't Be Easily Fixed:**
+
 - Both files are in `package entities`
 - Go test files in `package entities_test` can only import `package entities`
 - Go test files in `package entities` can share helpers, but only if not in `_test` package
 - Creating a non-test helper in `package entities` pollutes production code
 
 **Possible Solutions:**
+
 1. **Accept the debt** - 5 lines, 2 files, negligible impact
 2. **Create `internal/domain/entities/testhelpers/` package** - requires careful module boundary management
 3. **Extract to `internal/testhelpers/domain/entities/`** - separate test infrastructure
@@ -96,11 +104,11 @@ ginkgo.BeforeEach(func() {
 
 ## CODE QUALITY METRICS
 
-| Metric | Value |
-|--------|-------|
-| art-dupl clone groups | 1 (was 14) |
-| Test pass rate | 100% |
-| Build status | PASSING |
+| Metric                     | Value                                 |
+| -------------------------- | ------------------------------------- |
+| art-dupl clone groups      | 1 (was 14)                            |
+| Test pass rate             | 100%                                  |
+| Build status               | PASSING                               |
 | Lint issues (code quality) | 162 (existing, not from this session) |
 
 ---
@@ -158,15 +166,18 @@ internal/domain/services/testhelpers/user_id.go    | NEW FILE
 **How do we properly share test helpers across multiple `_test` packages in Go without polluting production code?**
 
 The standard Go approach of using `package X_test` (external test package) doesn't work when test files within the same package (`package entities`) need to share helpers, because:
+
 - `entities/user_test.go` is in `package entities`
 - `entities/user_split_brain_test.go` is in `package entities`
 - Neither can import a helper from the other without creating a circular dependency or a non-test package
 
 We've tried:
+
 1. Creating `entities/testhelpers/user.go` → files in `package entities` can use it, but files in `package entities_test` cannot
 2. Creating `entities/xxx_test.go` → cannot be imported by other `_test.go` files
 
 The cleanest solution I've seen is:
+
 - Create a separate `testhelpers/` directory at project root
 - Use it as a test-only module
 - Import it in all test files that need it
@@ -196,4 +207,4 @@ Found total 1 clone groups.
 
 ---
 
-*Report generated: 2026-03-25 21:55 CET*
+_Report generated: 2026-03-25 21:55 CET_

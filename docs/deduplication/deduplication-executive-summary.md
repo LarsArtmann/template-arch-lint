@@ -21,21 +21,23 @@ Artificially generate code duplication and systematically eliminate high-value d
 
 **Total tokens removed**: ~110 tokens across 13 duplicate locations
 
-| File                       | Changes                                              | Tokens Removed |
-|----------------------------|------------------------------------------------------|----------------|
-| errorhandler.go (new)      | Created `sendErrorResponse` helper                   | 24 + overhead  |
-| user_query_handler.go      | Replaced 31 error responses with helper              | ~56            |
-| user.go (enhanced)         | Created `wrapValidationError` helper                 | ~30            |
-| **Total**                  |                                                    | **~110**       |
+| File                  | Changes                                 | Tokens Removed |
+| --------------------- | --------------------------------------- | -------------- |
+| errorhandler.go (new) | Created `sendErrorResponse` helper      | 24 + overhead  |
+| user_query_handler.go | Replaced 31 error responses with helper | ~56            |
+| user.go (enhanced)    | Created `wrapValidationError` helper    | ~30            |
+| **Total**             |                                         | **~110**       |
 
 ### Remaining Duplicates
 
 **Production code**: 31 groups
+
 - All groups are 4 tokens or less (minimal structural patterns)
 - Examples: Service method calls, validation checks, signature definitions
 - Strategic decision: Do NOT refactor (would reduce code readability)
 
 **Test files**: 32 groups
+
 - Intentional repeated patterns (Gomega assertions, mock setups)
 - Strategic decision: Documented as intentional, not refactoring targets
 
@@ -81,15 +83,18 @@ None - all refactoring targeted high-value clones successfully
 ## Future Recommendations
 
 ### Immediate (if continuing)
+
 - Wrap service calls in helpers (user_query_handler.go: 4 locations, 4 tokens each)
 - Extract enum validation helper (2 locations, 8 tokens each)
 
 ### Medium-term (service layer)
+
 - Email validation extraction (user_service.go - 6 groups, 30+ tokens)
 - User existence check extraction (user_service.go - 5 groups, 25+ tokens)
 - DTO mapping extraction (user_service.go - 4 groups, 20+ tokens)
 
 ### Prevention (lint enhancements)
+
 - Add go-arch-lint rules detection repeated sync methods (3+ locations)
 - Add golangci-lint rules for strict error handling patterns
 
@@ -111,20 +116,21 @@ gofmt -w $(find . -name '*.go' -not -name '*_test.go')
 
 ## Metrics Summary
 
-| Metric                    | Value              |
-|---------------------------|--------------------|
-| Initial clone groups      | 68                 |
-| Current clone groups      | 64                 |
-| Groups eliminated         | 4                  |
-| Production tokens removed | ~110               |
-| Production groups remaining | 31                |
-| Test groups (intentional) | 32                 |
-| Rejected refactors        | 0                  |
-| Strategic holds           | 31 (structural/semantic) |
+| Metric                      | Value                    |
+| --------------------------- | ------------------------ |
+| Initial clone groups        | 68                       |
+| Current clone groups        | 64                       |
+| Groups eliminated           | 4                        |
+| Production tokens removed   | ~110                     |
+| Production groups remaining | 31                       |
+| Test groups (intentional)   | 32                       |
+| Rejected refactors          | 0                        |
+| Strategic holds             | 31 (structural/semantic) |
 
 ## Status
 
 **✅ COMPLETE** - High-value deduplication strategies executed successfully:
+
 - Eliminated highest-value duplicates (handlers: 24 tokens, entities: 30 tokens)
 - Documented all remaining findings
 - Created actionable roadmap for future work

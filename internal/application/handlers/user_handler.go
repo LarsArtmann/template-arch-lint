@@ -5,10 +5,10 @@ import (
 	"encoding/hex"
 	"net/http"
 
+	"charm.land/log/v2"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
-	"charm.land/log/v2"
 	"github.com/gin-gonic/gin"
 )
 

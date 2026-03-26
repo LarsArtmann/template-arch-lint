@@ -7,6 +7,7 @@ Test files contain intentional, repeated patterns for maintainability:
 ### 1. Gomega Assertion Patterns
 
 Repeated test assertion patterns like:
+
 ```go
 gomega.Expect(user.GetEmail().Value()).To(gomega.Equal(testEmail))
 gomega.Expect(user.GetName().Value()).To(gomega.Equal(testName))
@@ -18,6 +19,7 @@ gomega.Expect(jsonMap["id"]).To(gomega.Equal(userID))
 ### 2. Mock Repository Setup
 
 Repeated mock repository implementations:
+
 ```go
 func (m *mockRepository) FindByEmail(ctx context.Context, email string) (*entities.User, error) {
     m.calls.Add("FindByEmail", email)
@@ -33,6 +35,7 @@ func (m *mockRepository) FindByEmail(ctx context.Context, email string) (*entiti
 ### 3. Failing Repository Patterns
 
 Errors are intentionally repeated for explicit error testing:
+
 ```go
 FailingUserRepository{
     FindByEmailFunc: func(ctx context.Context, email string) (*entities.User, error) {
@@ -53,6 +56,7 @@ FailingUserRepository{
 ## When to Consider Test Deduplication
 
 Only consider if:
+
 1. Test setup code exceeds 25 lines (patterns require complex table-driven setups)
 2. Same test logic repeated >3 times across test files
 3. Extracted helper improves test readability (not obfuscates it)
