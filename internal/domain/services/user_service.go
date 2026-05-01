@@ -26,7 +26,6 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	domainerrors "github.com/LarsArtmann/template-arch-lint/pkg/errors"
-
 	"github.com/samber/lo"
 	"github.com/samber/mo"
 )

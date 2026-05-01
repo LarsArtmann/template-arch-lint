@@ -8,15 +8,14 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	servicestesthelpers "github.com/LarsArtmann/template-arch-lint/internal/domain/services/testhelpers"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 func TestUserService(t *testing.T) {

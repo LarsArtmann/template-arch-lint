@@ -3,11 +3,10 @@ package values_test
 import (
 	"encoding/json"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/ids"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Value Objects", func() {

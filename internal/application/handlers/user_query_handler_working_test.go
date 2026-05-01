@@ -8,14 +8,13 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/gin-gonic/gin"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/LarsArtmann/template-arch-lint/internal/application/handlers"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	"github.com/gin-gonic/gin"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 func TestUserQueryHandler(t *testing.T) {

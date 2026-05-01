@@ -6,15 +6,14 @@ import (
 	"errors"
 	"time"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	servicestesthelpers "github.com/LarsArtmann/template-arch-lint/internal/domain/services/testhelpers"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	domainErrors "github.com/LarsArtmann/template-arch-lint/pkg/errors"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 // Test error constants to avoid dynamic error creation (err113)
@@ -207,7 +206,9 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				Expect(
 					internalErr.Error(),
 				).To(ContainSubstring("failed to check existing user"))
-				Expect(internalErr.Error()).To(ContainSubstring("sql: connection is already closed"))
+				Expect(
+					internalErr.Error(),
+				).To(ContainSubstring("sql: connection is already closed"))
 				Expect(failingRepo.findByEmailCallCount).To(Equal(1))
 				Expect(failingRepo.saveCallCount).To(Equal(0)) // Should not reach Save
 			})
@@ -227,7 +228,9 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				Expect(
 					internalErr.Error(),
 				).To(ContainSubstring("failed to save user"))
-				Expect(internalErr.Error()).To(ContainSubstring("sql: transaction has already been committed or rolled back"))
+				Expect(
+					internalErr.Error(),
+				).To(ContainSubstring("sql: transaction has already been committed or rolled back"))
 				Expect(failingRepo.findByEmailCallCount).To(Equal(1))
 				Expect(failingRepo.saveCallCount).To(Equal(1))
 			})
@@ -537,7 +540,9 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				Expect(
 					result.Error().Error(),
 				).To(ContainSubstring("failed to list users"))
-				Expect(result.Error().Error()).To(ContainSubstring("sql: connection is already closed"))
+				Expect(
+					result.Error().Error(),
+				).To(ContainSubstring("sql: connection is already closed"))
 			})
 		})
 
@@ -567,7 +572,9 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				Expect(
 					result.Error().Error(),
 				).To(ContainSubstring("failed to save user"))
-				Expect(result.Error().Error()).To(ContainSubstring("sql: connection is already closed"))
+				Expect(
+					result.Error().Error(),
+				).To(ContainSubstring("sql: connection is already closed"))
 			})
 		})
 

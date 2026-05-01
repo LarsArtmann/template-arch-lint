@@ -3,11 +3,10 @@ package entities_test
 import (
 	"time"
 
-	ginkgo "github.com/onsi/ginkgo/v2"
-	gomega "github.com/onsi/gomega"
-
 	. "github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	ginkgo "github.com/onsi/ginkgo/v2"
+	gomega "github.com/onsi/gomega"
 )
 
 var _ = ginkgo.Describe("User Entity", func() {

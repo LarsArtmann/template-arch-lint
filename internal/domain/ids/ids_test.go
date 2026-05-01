@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/ids"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/ids"
 )
 
 func TestIDs(t *testing.T) {

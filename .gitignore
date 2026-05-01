@@ -91,3 +91,9 @@ tests/
 *-arch-lint-graph.svg
 # Dependencies
 node_modules/
+# Test coverage
+/coverage
+# Copy/paste detection report
+/report/jscpd-report.json
+# Build artifacts
+/template-arch-lint

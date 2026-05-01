@@ -5,13 +5,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gin-gonic/gin"
-	"github.com/samber/lo"
-
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	pkgerrors "github.com/LarsArtmann/template-arch-lint/pkg/errors"
+	"github.com/gin-gonic/gin"
+	"github.com/samber/lo"
 )
 
 // UserQueryHandler handles read operations for users using CQRS pattern.

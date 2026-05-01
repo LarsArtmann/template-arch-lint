@@ -1,6 +1,6 @@
 module github.com/LarsArtmann/template-arch-lint
 
-go 1.26.1
+go 1.26.2
 
 replace github.com/larsartmann/go-composable-business-types => /Users/larsartmann/projects/go-composable-business-types
 

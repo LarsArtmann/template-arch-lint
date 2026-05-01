@@ -6,11 +6,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
-
-	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 )
 
 // Configuration defaults.

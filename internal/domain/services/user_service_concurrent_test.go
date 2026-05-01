@@ -7,14 +7,13 @@ import (
 	"sync"
 	"time"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
 	servicestesthelpers "github.com/LarsArtmann/template-arch-lint/internal/domain/services/testhelpers"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
@@ -185,7 +184,13 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 		var testUser *entities.User
 
 		BeforeEach(func() {
-			testUser = createTestUserForService(userService, ctx, "read-test-user", "read@example.com", "Read Test User")
+			testUser = createTestUserForService(
+				userService,
+				ctx,
+				"read-test-user",
+				"read@example.com",
+				"Read Test User",
+			)
 		})
 
 		Context("with concurrent GetUser calls", func() {
@@ -267,7 +272,13 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 		var testUser *entities.User
 
 		BeforeEach(func() {
-			testUser = createTestUserForService(userService, ctx, "update-test-user", "update@example.com", "Update Test User")
+			testUser = createTestUserForService(
+				userService,
+				ctx,
+				"update-test-user",
+				"update@example.com",
+				"Update Test User",
+			)
 		})
 
 		Context("with concurrent updates to same user", func() {
