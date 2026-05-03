@@ -16,6 +16,7 @@ func wrapValidationError(inputField, valueObjectType string, err error) error {
 	if err != nil {
 		return errors.NewValidationError(valueObjectType, err.Error())
 	}
+
 	return nil
 }
 

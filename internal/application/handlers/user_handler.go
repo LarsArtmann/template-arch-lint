@@ -45,11 +45,14 @@ func errorResponse(c *gin.Context, status int, errCode, message string) {
 
 // bindRequest binds and validates JSON request body.
 func bindRequest[T any](c *gin.Context, req *T) bool {
-	if err := c.ShouldBindJSON(req); err != nil {
+	err := c.ShouldBindJSON(req)
+	if err != nil {
 		log.Error("Invalid request format", "error", err)
 		errorResponse(c, http.StatusBadRequest, "invalid_request_format", err.Error())
+
 		return false
 	}
+
 	return true
 }
 
@@ -83,6 +86,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 			"user_id_generation_failed",
 			"Failed to generate user ID",
 		)
+
 		return
 	}
 
@@ -95,6 +99,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 			"user_creation_failed",
 			"Failed to create user",
 		)
+
 		return
 	}
 
@@ -104,12 +109,15 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 // parseUserID extracts and validates user ID from URL parameter.
 func parseUserID(c *gin.Context) (values.UserID, bool) {
 	idStr := c.Param("id")
+
 	userID, err := values.NewUserID(idStr)
 	if err != nil {
 		log.Error("Invalid user ID format", "error", err)
 		errorResponse(c, http.StatusBadRequest, "invalid_user_id", "Invalid user ID format")
+
 		return values.UserID{}, false
 	}
+
 	return userID, true
 }
 
@@ -124,6 +132,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	if err != nil {
 		log.Error("Failed to get user", "error", err)
 		errorResponse(c, http.StatusNotFound, "user_not_found", "User not found")
+
 		return
 	}
 
@@ -154,6 +163,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 			"user_update_failed",
 			"Failed to update user",
 		)
+
 		return
 	}
 
@@ -176,6 +186,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 			"user_deletion_failed",
 			"Failed to delete user",
 		)
+
 		return
 	}
 

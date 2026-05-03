@@ -9,5 +9,6 @@ import (
 func CreateTestUserID(id string) values.UserID {
 	userID, err := values.NewUserID(id)
 	gomega.ExpectWithOffset(1, err).ToNot(gomega.HaveOccurred())
+
 	return userID
 }

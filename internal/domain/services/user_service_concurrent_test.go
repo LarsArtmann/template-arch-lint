@@ -46,6 +46,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 		id := createTestUserID(idSuffix)
 		user, err := service.CreateUser(ctx, id, email, name)
 		Expect(err).ToNot(HaveOccurred())
+
 		return user
 	}
 

@@ -1,4 +1,4 @@
-// Package ids provides branded, strongly-typed identifiers using go-composable-business-types.
+// Package ids provides branded, strongly-typed identifiers using go-branded-id.
 //
 // This package replaces the legacy UserID implementation with compile-time type-safe IDs
 // that prevent mixing different entity identifiers (e.g., passing a SessionID where a UserID is expected).
@@ -31,7 +31,7 @@ import (
 	"strings"
 
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
-	"github.com/larsartmann/go-composable-business-types/id"
+	brandedid "github.com/larsartmann/go-branded-id"
 )
 
 // ID generation and validation constraints.
@@ -54,10 +54,10 @@ type SessionBrand struct{}
 
 // UserID is a branded identifier for users. It cannot be accidentally
 // mixed with SessionID or other entity IDs at compile time.
-type UserID = id.ID[UserBrand, string]
+type UserID = brandedid.ID[UserBrand, string]
 
 // SessionID is a branded identifier for user sessions.
-type SessionID = id.ID[SessionBrand, string]
+type SessionID = brandedid.ID[SessionBrand, string]
 
 // Constructor functions with validation.
 
@@ -69,7 +69,7 @@ func NewUserID(value string) (UserID, error) {
 		return UserID{}, err
 	}
 
-	return id.NewID[UserBrand](strings.TrimSpace(value)), nil
+	return brandedid.NewID[UserBrand](strings.TrimSpace(value)), nil
 }
 
 // GenerateUserID creates a new randomly generated UserID.
@@ -80,7 +80,7 @@ func GenerateUserID() (UserID, error) {
 		return UserID{}, fmt.Errorf("failed to generate random ID: %w", err)
 	}
 
-	return id.NewID[UserBrand](fmt.Sprintf("user_%x", bytes)), nil
+	return brandedid.NewID[UserBrand](fmt.Sprintf("user_%x", bytes)), nil
 }
 
 // MustGenerateUserID creates a new UserID or panics on failure.
@@ -101,7 +101,7 @@ func NewSessionID(value string) (SessionID, error) {
 		return SessionID{}, err
 	}
 
-	return id.NewID[SessionBrand](strings.TrimSpace(value)), nil
+	return brandedid.NewID[SessionBrand](strings.TrimSpace(value)), nil
 }
 
 // GenerateSessionID creates a new randomly generated SessionID.
@@ -111,7 +111,7 @@ func GenerateSessionID() (SessionID, error) {
 		return SessionID{}, fmt.Errorf("failed to generate session ID: %w", err)
 	}
 
-	return id.NewID[SessionBrand](fmt.Sprintf("sess_%x", bytes)), nil
+	return brandedid.NewID[SessionBrand](fmt.Sprintf("sess_%x", bytes)), nil
 }
 
 // MustGenerateSessionID creates a new SessionID or panics on failure.

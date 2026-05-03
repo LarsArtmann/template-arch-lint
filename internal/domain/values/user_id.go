@@ -14,7 +14,7 @@ import (
 //   - Compile-time type safety (cannot mix UserID with SessionID)
 //   - Built-in JSON, SQL, and binary serialization
 //   - Zero-allocation operations
-//   - Generic ID capabilities via go-composable-business-types/id
+//   - Generic ID capabilities via go-branded-id
 //
 // Example migration:
 //

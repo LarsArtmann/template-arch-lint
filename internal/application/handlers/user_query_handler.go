@@ -32,6 +32,7 @@ func (h *UserQueryHandler) GetUser(c *gin.Context) {
 	userID, err := values.NewUserID(idParam)
 	if err != nil {
 		sendErrorResponse(c, http.StatusBadRequest, "Invalid user ID format")
+
 		return
 	}
 
@@ -40,10 +41,12 @@ func (h *UserQueryHandler) GetUser(c *gin.Context) {
 		_, isNotFound := pkgerrors.AsNotFoundError(err)
 		if isNotFound {
 			sendErrorResponse(c, http.StatusNotFound, "User not found")
+
 			return
 		}
 
 		sendErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve user")
+
 		return
 	}
 
@@ -55,6 +58,7 @@ func (h *UserQueryHandler) ListUsers(c *gin.Context) {
 	users, err := h.userQueryService.ListUsers(c.Request.Context())
 	if err != nil {
 		sendErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve users")
+
 		return
 	}
 
@@ -66,6 +70,7 @@ func (h *UserQueryHandler) SearchUsers(c *gin.Context) {
 	email := c.Query("email")
 	if email == "" {
 		sendErrorResponse(c, http.StatusBadRequest, "Email query parameter is required")
+
 		return
 	}
 
@@ -74,10 +79,12 @@ func (h *UserQueryHandler) SearchUsers(c *gin.Context) {
 		_, isNotFound := pkgerrors.AsNotFoundError(err)
 		if isNotFound {
 			c.JSON(http.StatusOK, gin.H{"data": []any{}})
+
 			return
 		}
 
 		sendErrorResponse(c, http.StatusInternalServerError, "Failed to search users")
+
 		return
 	}
 
@@ -89,12 +96,14 @@ func (h *UserQueryHandler) GetUsersByDomain(c *gin.Context) {
 	domain := c.Param("domain")
 	if domain == "" {
 		sendErrorResponse(c, http.StatusBadRequest, "Domain parameter is required")
+
 		return
 	}
 
 	users, err := h.userQueryService.ListUsers(c.Request.Context())
 	if err != nil {
 		sendErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve users")
+
 		return
 	}
 
@@ -119,6 +128,7 @@ func (h *UserQueryHandler) GetUserStats(c *gin.Context) {
 	stats, err := h.userQueryService.GetUserStats(c.Request.Context())
 	if err != nil {
 		sendErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve user statistics")
+
 		return
 	}
 
@@ -131,6 +141,7 @@ func (h *UserQueryHandler) GetActiveUsers(c *gin.Context) {
 	users, err := h.userQueryService.ListUsers(c.Request.Context())
 	if err != nil {
 		sendErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve active users")
+
 		return
 	}
 
@@ -159,6 +170,7 @@ func (h *UserQueryHandler) GetUsersWithPagination(c *gin.Context) {
 	users, err := h.userQueryService.ListUsers(c.Request.Context())
 	if err != nil {
 		sendErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve users")
+
 		return
 	}
 

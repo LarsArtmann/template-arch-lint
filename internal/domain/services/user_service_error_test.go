@@ -16,7 +16,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-// Test error constants to avoid dynamic error creation (err113)
+// Test error constants to avoid dynamic error creation (err113).
 var (
 	errUniqueConstraint     = errors.New("UNIQUE constraint failed: users.email")
 	errForeignKeyConstraint = errors.New("FOREIGN KEY constraint failed")

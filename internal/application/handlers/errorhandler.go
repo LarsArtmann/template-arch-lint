@@ -8,5 +8,6 @@ import (
 // This helper eliminates code duplication in handler error responses.
 func sendErrorResponse(c *gin.Context, httpStatus int, message string) {
 	c.JSON(httpStatus, gin.H{"error": message})
+
 	return
 }

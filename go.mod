@@ -2,13 +2,11 @@ module github.com/LarsArtmann/template-arch-lint
 
 go 1.26.2
 
-replace github.com/larsartmann/go-composable-business-types => /Users/larsartmann/projects/go-composable-business-types
-
 require (
 	charm.land/log/v2 v2.0.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-playground/validator/v10 v10.30.1
-	github.com/larsartmann/go-composable-business-types v0.0.0
+	github.com/larsartmann/go-branded-id v0.1.0
 	github.com/onsi/ginkgo/v2 v2.26.0
 	github.com/onsi/gomega v1.38.2
 	github.com/samber/lo v1.53.0
