@@ -31,7 +31,7 @@ var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0
 func NewEmail(email string) (Email, error) {
 	err := validateEmailFormat(email)
 	if err != nil {
-		return Email{}, err
+		return Email{}, fmt.Errorf("email=%s: %w", email, err)
 	}
 
 	// Preserve original case as per validation_test.go specification

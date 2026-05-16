@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"time"
 
@@ -29,7 +30,7 @@ type SessionToken struct {
 func NewSessionToken(duration time.Duration) (SessionToken, error) {
 	bytes := make([]byte, sessionTokenByteLength)
 	if _, err := rand.Read(bytes); err != nil {
-		return SessionToken{}, errors.NewInfrastructureError("session_token", "generate", err)
+		return SessionToken{}, fmt.Errorf("duration=%v: %w", duration, errors.NewInfrastructureError("session_token", "generate", err))
 	}
 
 	token := hex.EncodeToString(bytes)
@@ -45,7 +46,7 @@ func NewSessionToken(duration time.Duration) (SessionToken, error) {
 func NewSessionTokenFromValue(value string, expires time.Time) (SessionToken, error) {
 	err := validateSessionToken(value)
 	if err != nil {
-		return SessionToken{}, err
+		return SessionToken{}, fmt.Errorf("value=%s, expires=%v: %w", value, expires, err)
 	}
 
 	return SessionToken{
@@ -125,12 +126,12 @@ func (t *SessionToken) UnmarshalJSON(data []byte) error {
 	}
 
 	if err := json.Unmarshal(data, &session); err != nil {
-		return err
+		return fmt.Errorf("unmarshal session token: %w", err)
 	}
 
 	token, err := NewSessionTokenFromValue(session.Token, session.Expires)
 	if err != nil {
-		return err
+		return fmt.Errorf("session=%+v: %w", session, err)
 	}
 
 	*t = token
@@ -241,12 +242,12 @@ func (a *AuditTrail) UnmarshalJSON(data []byte) error {
 
 	err := json.Unmarshal(data, &audit)
 	if err != nil {
-		return err
+		return fmt.Errorf("unmarshal audit trail: %w", err)
 	}
 
 	userID, err := ids.NewUserID(audit.UserID)
 	if err != nil {
-		return errors.NewValidationError("user_id", err.Error())
+		return fmt.Errorf("audit=%+v: %w", audit, errors.NewValidationError("user_id", err.Error()))
 	}
 
 	a.userID = userID

@@ -158,11 +158,11 @@ func (s *UserService) UpdateUser(
 ) (*entities.User, error) {
 	user, err := s.GetUser(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("id=%s, email=%s: %w", id, email, err)
 	}
 
 	if err := s.validateUserUpdates(ctx, user, email, name); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("id=%s, email=%s: %w", id, email, err)
 	}
 
 	return s.applyUserUpdates(ctx, user, email, name)
@@ -192,7 +192,7 @@ func (s *UserService) validateUserUpdates(
 ) error {
 	err := s.validateEmailUpdate(ctx, user, email)
 	if err != nil {
-		return err
+		return fmt.Errorf("email=%s: %w", email, err)
 	}
 
 	return s.validateNameUpdate(user, name)
@@ -209,7 +209,7 @@ func (s *UserService) validateEmailUpdate(
 
 	err := s.validateEmail(email)
 	if err != nil {
-		return err
+		return fmt.Errorf("email=%s: %w", email, err)
 	}
 
 	return s.checkEmailAvailability(ctx, email)
@@ -504,10 +504,8 @@ func (s *UserService) GetUsersWithFilters(
 ) ([]*entities.User, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
-		return nil, domainerrors.NewInternalError("failed to list users", err)
+		return nil, fmt.Errorf("filters=%+v: %w", filters, domainerrors.NewInternalError("failed to list users", err))
 	}
-
-	// Start with all users
 	filteredUsers := users
 
 	// Filter by domain if specified

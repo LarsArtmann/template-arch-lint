@@ -1,6 +1,9 @@
 package infrastructure
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+)
 
 // Database represents an infrastructure concern.
 type Database struct {
@@ -11,7 +14,7 @@ type Database struct {
 func NewDatabase(dsn string) (*Database, error) {
 	db, err := sql.Open("sqlite3", dsn)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("dsn=%s: %w", dsn, err)
 	}
 
 	return &Database{db: db}, nil

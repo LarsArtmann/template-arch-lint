@@ -10,16 +10,6 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
-// wrapValidationError wraps validation errors in the entity context.
-// This helper eliminates code duplication in validation error handling.
-func wrapValidationError(inputField, valueObjectType string, err error) error {
-	if err != nil {
-		return errors.NewValidationError(valueObjectType, err.Error())
-	}
-
-	return nil
-}
-
 // UserID represents a unique user identifier (alias for convenience).
 type UserID = values.UserID
 
@@ -84,7 +74,7 @@ func NewUser(id values.UserID, email, name string) (*User, error) {
 func NewUserFromStrings(id, email, name string) (*User, error) {
 	userID, err := values.NewUserID(id)
 	if err != nil {
-		return nil, errors.NewValidationError("user ID", err.Error())
+		return nil, fmt.Errorf("id=%s, email=%s: %w", id, email, errors.NewValidationError("user ID", err.Error()))
 	}
 
 	return NewUser(userID, email, name)
@@ -141,11 +131,10 @@ func (u *User) GetUpdatedAt() time.Time {
 // REFACTORED: Split brain eliminated - only updates single value object field.
 func (u *User) SetEmail(email string) error {
 	emailVO, err := values.NewEmail(email)
-	if wrapValidationError("email", "email", err) != nil {
-		return err
+	if err != nil {
+		return fmt.Errorf("email=%s: %w", email, err)
 	}
 
-	// Single source of truth - no synchronization needed
 	u.email = emailVO
 	u.Modified = time.Now()
 
@@ -156,8 +145,8 @@ func (u *User) SetEmail(email string) error {
 // REFACTORED: Split brain eliminated - only updates single value object field.
 func (u *User) SetName(name string) error {
 	nameVO, err := values.NewUserName(name)
-	if wrapValidationError("name", "name", err) != nil {
-		return err
+	if err != nil {
+		return fmt.Errorf("name=%s: %w", name, err)
 	}
 
 	// Single source of truth - no synchronization needed
@@ -222,23 +211,23 @@ func (u *User) UnmarshalJSON(data []byte) error {
 
 	var temp userJSON
 	if err := json.Unmarshal(data, &temp); err != nil {
-		return err
+		return fmt.Errorf("unmarshal user: %w", err)
 	}
 
 	// Validate and create value objects
 	userID, err := values.NewUserID(temp.ID)
-	if wrapValidationError("id", "user ID", err) != nil {
-		return err
+	if err != nil {
+		return fmt.Errorf("id=%s: %w", temp.ID, err)
 	}
 
 	email, err := values.NewEmail(temp.Email)
-	if wrapValidationError("email", "email", err) != nil {
-		return err
+	if err != nil {
+		return fmt.Errorf("email=%s: %w", temp.Email, err)
 	}
 
 	name, err := values.NewUserName(temp.Name)
-	if wrapValidationError("name", "name", err) != nil {
-		return err
+	if err != nil {
+		return fmt.Errorf("name=%s: %w", temp.Name, err)
 	}
 
 	// Set the fields

@@ -60,7 +60,7 @@ const (
 func NewUserName(username string) (UserName, error) {
 	err := validateUserNameFormat(username)
 	if err != nil {
-		return UserName{}, err
+		return UserName{}, fmt.Errorf("username=%s: %w", username, err)
 	}
 
 	return UserName{
@@ -239,17 +239,17 @@ func validateUsernameEdges(normalized string) error {
 func validateUsernameContent(normalized string) error {
 	err := validateHasLetter(normalized)
 	if err != nil {
-		return err
+		return fmt.Errorf("normalized=%s: %w", normalized, err)
 	}
 
 	err = validateNotReserved(normalized)
 	if err != nil {
-		return err
+		return fmt.Errorf("normalized=%s: %w", normalized, err)
 	}
 
 	err = validateNotAllNumbers(normalized)
 	if err != nil {
-		return err
+		return fmt.Errorf("normalized=%s: %w", normalized, err)
 	}
 
 	return nil

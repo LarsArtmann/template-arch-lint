@@ -3,6 +3,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/entities"
@@ -186,7 +187,7 @@ func (s *userQueryServiceImpl) GetUsersWithFilters(
 	// TODO: Add filter result caching
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
-		return nil, domainerrors.WrapRepoError("list for filtering", "user", err)
+		return nil, fmt.Errorf("filters=%+v: %w", filters, domainerrors.WrapRepoError("list for filtering", "user", err))
 	}
 
 	filtered := lo.Filter(users, func(user *entities.User, _ int) bool {

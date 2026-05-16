@@ -62,7 +62,7 @@ func NewLogLevel(value string) (LogLevel, error) {
 
 	err := normalized.Validate()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("value=%s: %w", value, err)
 	}
 
 	return normalized, nil

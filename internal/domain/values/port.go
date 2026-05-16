@@ -30,7 +30,7 @@ func NewPort(value int) (Port, error) {
 
 	err := port.Validate()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("value=%d: %w", value, err)
 	}
 
 	return port, nil

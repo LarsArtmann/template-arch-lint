@@ -66,7 +66,7 @@ type SessionID = brandedid.ID[SessionBrand, string]
 func NewUserID(value string) (UserID, error) {
 	err := validateUserID(value)
 	if err != nil {
-		return UserID{}, err
+		return UserID{}, fmt.Errorf("value=%s: %w", value, err)
 	}
 
 	return brandedid.NewID[UserBrand](strings.TrimSpace(value)), nil
@@ -98,7 +98,7 @@ func MustGenerateUserID() UserID {
 func NewSessionID(value string) (SessionID, error) {
 	err := validateSessionID(value)
 	if err != nil {
-		return SessionID{}, err
+		return SessionID{}, fmt.Errorf("value=%s: %w", value, err)
 	}
 
 	return brandedid.NewID[SessionBrand](strings.TrimSpace(value)), nil
