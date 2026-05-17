@@ -504,8 +504,13 @@ func (s *UserService) GetUsersWithFilters(
 ) ([]*entities.User, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("filters=%+v: %w", filters, domainerrors.NewInternalError("failed to list users", err))
+		return nil, fmt.Errorf(
+			"filters=%+v: %w",
+			filters,
+			domainerrors.NewInternalError("failed to list users", err),
+		)
 	}
+
 	filteredUsers := users
 
 	// Filter by domain if specified

@@ -30,7 +30,11 @@ type SessionToken struct {
 func NewSessionToken(duration time.Duration) (SessionToken, error) {
 	bytes := make([]byte, sessionTokenByteLength)
 	if _, err := rand.Read(bytes); err != nil {
-		return SessionToken{}, fmt.Errorf("duration=%v: %w", duration, errors.NewInfrastructureError("session_token", "generate", err))
+		return SessionToken{}, fmt.Errorf(
+			"duration=%v: %w",
+			duration,
+			errors.NewInfrastructureError("session_token", "generate", err),
+		)
 	}
 
 	token := hex.EncodeToString(bytes)

@@ -74,7 +74,12 @@ func NewUser(id values.UserID, email, name string) (*User, error) {
 func NewUserFromStrings(id, email, name string) (*User, error) {
 	userID, err := values.NewUserID(id)
 	if err != nil {
-		return nil, fmt.Errorf("id=%s, email=%s: %w", id, email, errors.NewValidationError("user ID", err.Error()))
+		return nil, fmt.Errorf(
+			"id=%s, email=%s: %w",
+			id,
+			email,
+			errors.NewValidationError("user ID", err.Error()),
+		)
 	}
 
 	return NewUser(userID, email, name)
