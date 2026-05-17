@@ -1,4 +1,3 @@
-// Package services provides business logic and domain services.
 package services
 
 import (

@@ -1,4 +1,3 @@
-// Package values provides domain value objects with validation.
 package values
 
 import (

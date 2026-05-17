@@ -1,4 +1,3 @@
-// Package values provides domain value objects with validation.
 package values
 
 import (
@@ -18,37 +17,26 @@ type UserName struct {
 // usernameRegex provides basic username validation pattern.
 var usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 
-// reservedUsernames contains usernames that are not allowed.
-var reservedUsernames = map[string]bool{
-	"admin":      true,
-	"root":       true,
-	"system":     true,
-	"user":       true,
-	"guest":      true,
-	"anonymous":  true,
-	"null":       true,
-	"undefined":  true,
-	"api":        true,
-	"www":        true,
-	"mail":       true,
-	"email":      true,
-	"support":    true,
-	"help":       true,
-	"info":       true,
-	"contact":    true,
-	"noreply":    true,
-	"no-reply":   true,
-	"postmaster": true,
-	"webmaster":  true,
-	"hostmaster": true,
-	"abuse":      true,
-	"security":   true,
-	"privacy":    true,
-	"legal":      true,
-	"billing":    true,
-	"sales":      true,
-	"marketing":  true,
+// reservedUsernameList contains usernames that are not allowed.
+var reservedUsernameList = [...]string{
+	"admin", "root", "system", "user", "guest", "anonymous",
+	"null", "undefined", "api", "www", "mail", "email",
+	"support", "help", "info", "contact", "noreply", "no-reply",
+	"postmaster", "webmaster", "hostmaster", "abuse", "security",
+	"privacy", "legal", "billing", "sales", "marketing",
 }
+
+// reservedUsernameSet returns a set of reserved usernames for quick lookup.
+//
+//nolint:gochecknoglobals // This is intentionally a package-level lookup table
+var reservedUsernameSet = func() map[string]bool {
+	m := make(map[string]bool, len(reservedUsernameList))
+	for _, name := range reservedUsernameList {
+		m[name] = true
+	}
+
+	return m
+}()
 
 // Username length constraints.
 const (
@@ -95,7 +83,7 @@ func (u UserName) IsEmpty() bool {
 
 // IsReserved checks if the username is in the reserved list.
 func (u UserName) IsReserved() bool {
-	return reservedUsernames[strings.ToLower(u.value)]
+	return reservedUsernameSet[strings.ToLower(u.value)]
 }
 
 // HasValidCharacters checks if username contains only allowed characters.
@@ -269,7 +257,7 @@ func validateHasLetter(normalized string) error {
 // validateNotReserved checks against reserved usernames.
 func validateNotReserved(normalized string) error {
 	lowercased := strings.ToLower(strings.ReplaceAll(normalized, " ", ""))
-	if reservedUsernames[lowercased] {
+	if reservedUsernameSet[lowercased] {
 		return errors.NewValidationError(
 			"username",
 			fmt.Sprintf("name '%s' is reserved and cannot be used", normalized),

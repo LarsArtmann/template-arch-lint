@@ -7,7 +7,7 @@ import (
 
 // UserID is a type alias for the branded UserID from the ids package.
 //
-// DEPRECATED: Use ids.UserID directly. This alias is maintained for backward
+// Deprecated: Use ids.UserID directly. This alias is maintained for backward
 // compatibility during migration. Will be removed in a future version.
 //
 // The new UserID provides:
@@ -31,21 +31,21 @@ type UserID = ids.UserID
 
 // NewUserID creates a new UserID value object with validation.
 //
-// DEPRECATED: Use ids.NewUserID instead.
+// Deprecated: Use ids.NewUserID instead.
 func NewUserID(id string) (UserID, error) {
 	return ids.NewUserID(id)
 }
 
 // GenerateUserID creates a new random UserID.
 //
-// DEPRECATED: Use ids.GenerateUserID instead.
+// Deprecated: Use ids.GenerateUserID instead.
 func GenerateUserID() (UserID, error) {
 	return ids.GenerateUserID()
 }
 
 // MustGenerateUserID creates a new UserID or panics on failure.
 //
-// DEPRECATED: Use ids.MustGenerateUserID instead.
+// Deprecated: Use ids.MustGenerateUserID instead.
 func MustGenerateUserID() UserID {
 	return ids.MustGenerateUserID()
 }
@@ -53,7 +53,7 @@ func MustGenerateUserID() UserID {
 // IsEmpty checks if the user ID is empty.
 // This is a backward-compatibility wrapper around IsZero().
 //
-// DEPRECATED: Use id.IsZero() instead.
+// Deprecated: Use id.IsZero() instead.
 func IsEmpty(id UserID) bool {
 	return id.IsZero()
 }
@@ -61,7 +61,7 @@ func IsEmpty(id UserID) bool {
 // Equals compares two UserID value objects.
 // This is a backward-compatibility wrapper.
 //
-// DEPRECATED: Use id.Equal() instead.
+// Deprecated: Use id.Equal() instead.
 func Equals(a, b UserID) bool {
 	return a.Equal(b)
 }

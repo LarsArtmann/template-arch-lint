@@ -1,4 +1,3 @@
-// Package values provides domain value objects with validation.
 package values
 
 import (
@@ -214,12 +213,12 @@ func (a *AuditTrail) AddMetadata(key, value string) {
 // MarshalJSON implements json.Marshaler interface.
 func (a AuditTrail) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
-		UserID    string            `json:"user_id"`
+		UserID    string            `json:"userId"`
 		Action    string            `json:"action"`
 		Resource  string            `json:"resource"`
 		Timestamp time.Time         `json:"timestamp"`
 		IP        string            `json:"ip"`
-		UserAgent string            `json:"user_agent"`
+		UserAgent string            `json:"userAgent"`
 		Metadata  map[string]string `json:"metadata"`
 	}{
 		UserID:    a.userID.String(),
@@ -235,12 +234,12 @@ func (a AuditTrail) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements json.Unmarshaler interface.
 func (a *AuditTrail) UnmarshalJSON(data []byte) error {
 	var audit struct {
-		UserID    string            `json:"user_id"`
+		UserID    string            `json:"userId"`
 		Action    string            `json:"action"`
 		Resource  string            `json:"resource"`
 		Timestamp time.Time         `json:"timestamp"`
 		IP        string            `json:"ip"`
-		UserAgent string            `json:"user_agent"`
+		UserAgent string            `json:"userAgent"`
 		Metadata  map[string]string `json:"metadata"`
 	}
 
