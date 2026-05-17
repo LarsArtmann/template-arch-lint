@@ -4,15 +4,141 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/LarsArtmann/template-arch-lint/internal/domain/ids"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
+	//nolint:revive // Ginkgo convention for test files
 	. "github.com/onsi/ginkgo/v2"
+	//nolint:revive // Ginkgo convention for test files
 	. "github.com/onsi/gomega"
 )
 
 func TestValidation(t *testing.T) {
+	t.Parallel()
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "🛡️ Input Validation Testing Suite - Service Boundary Protection")
+	RunSpecs(t, "🛡️ Input Validation at Service Boundaries")
+}
+
+// usernameValidationTestCase represents a test case for username validation.
+type usernameValidationTestCase struct {
+	name        string
+	input       string
+	description string
+}
+
+// userIDValidationTestCase represents a test case for user ID validation.
+type userIDValidationTestCase struct {
+	name        string
+	input       string
+	description string
+}
+
+// invalidUsernameTestCases contains test cases for invalid username validation.
+//
+//nolint:gochecknoglobals
+var invalidUsernameTestCases = []usernameValidationTestCase{
+	{"empty name", "", "empty string"},
+	{"only spaces", "   ", "whitespace only"},
+	{"single character", "A", "too short"},
+	{"only numbers", "123", "numeric only"},
+	{"only special chars", "@#$%", "special characters only"},
+	{"leading spaces", " John Doe", "leading whitespace"},
+	{"trailing spaces", "John Doe ", "trailing whitespace"},
+	{"email format", "john@example.com", "email-like format"},
+	{"with @ symbol", "John@Doe", "@ symbol in name"},
+	{"with hash", "John#Doe", "hash symbol"},
+	{"with percent", "John%Doe", "percent symbol"},
+	{"with dollar", "John$Doe", "dollar symbol"},
+	{"with ampersand", "John&Doe", "ampersand symbol"},
+	{"with asterisk", "John*Doe", "asterisk symbol"},
+	{"with plus", "John+Doe", "plus symbol"},
+	{"with equals", "John=Doe", "equals symbol"},
+	{"with brackets", "John[Doe]", "square brackets"},
+	{"with parentheses", "John(Doe)", "parentheses"},
+	{"with braces", "John{Doe}", "curly braces"},
+	{"with pipe", "John|Doe", "pipe symbol"},
+	{"with backslash", "John\\Doe", "backslash"},
+	{"with forward slash", "John/Doe", "forward slash"},
+	{"with semicolon", "John;Doe", "semicolon"},
+	{"with colon", "John:Doe", "colon"},
+	{"with quotes", "John\"Doe\"", "quotation marks"},
+	{"with less than", "John<Doe", "less than symbol"},
+	{"with greater than", "John>Doe", "greater than symbol"},
+	{"with question mark", "John?Doe", "question mark"},
+	{"excessively long", strings.Repeat("John ", 20), "excessively long name"},
+	{"tab character", "John\tDoe", "tab character"},
+	{"newline character", "John\nDoe", "newline character"},
+	{"carriage return", "John\rDoe", "carriage return"},
+}
+
+// invalidUserIDTestCases contains test cases for invalid user ID validation.
+//
+//nolint:gochecknoglobals
+var invalidUserIDTestCases = []userIDValidationTestCase{
+	{"empty ID", "", "empty string"},
+	{"only spaces", "   ", "whitespace only"},
+	{"single character", "a", "too short"},
+	{"leading spaces", " user123", "leading whitespace"},
+	{"trailing spaces", "user123 ", "trailing whitespace"},
+	{"with spaces", "user 123", "spaces in ID"},
+	{"with special chars", "user@123", "special characters"},
+	{"with hash", "user#123", "hash symbol"},
+	{"with percent", "user%123", "percent symbol"},
+	{"with ampersand", "user&123", "ampersand symbol"},
+	{"with asterisk", "user*123", "asterisk symbol"},
+	{"with plus", "user+123", "plus symbol"},
+	{"with equals", "user=123", "equals symbol"},
+	{"with brackets", "user[123]", "square brackets"},
+	{"with parentheses", "user(123)", "parentheses"},
+	{"with braces", "user{123}", "curly braces"},
+	{"with pipe", "user|123", "pipe symbol"},
+	{"with backslash", "user\\123", "backslash"},
+	{"with forward slash", "user/123", "forward slash"},
+	{"with semicolon", "user;123", "semicolon"},
+	{"with colon", "user:123", "colon"},
+	{"with quotes", "user\"123\"", "quotation marks"},
+	{"with less than", "user<123", "less than symbol"},
+	{"with greater than", "user>123", "greater than symbol"},
+	{"with question mark", "user?123", "question mark"},
+	{"with exclamation", "user!123", "exclamation mark"},
+	{"with dot", "user.123", "period/dot"},
+	{"with comma", "user,123", "comma"},
+	{"excessively long", strings.Repeat("a", 1000), "excessively long ID"},
+	{"tab character", "user\t123", "tab character"},
+	{"newline character", "user\n123", "newline character"},
+	{"carriage return", "user\r123", "carriage return"},
+}
+
+// runInvalidUsernameTests runs all invalid username test cases as subtests.
+func runInvalidUsernameTests() {
+	for _, testCase := range invalidUsernameTestCases {
+		It("should reject "+testCase.name, func() {
+			userName, err := values.NewUserName(testCase.input)
+			Expect(userName.String()).To(BeEmpty(), testCase.description)
+			Expect(err).To(HaveOccurred(), testCase.description)
+
+			_, isValidationError := errors.AsValidationError(err)
+			Expect(
+				isValidationError,
+			).To(BeTrue(), "should be validation error: %s", testCase.description)
+		})
+	}
+}
+
+// runInvalidUserIDTests runs all invalid user ID test cases as subtests.
+func runInvalidUserIDTests() {
+	for _, testCase := range invalidUserIDTestCases {
+		It("should reject "+testCase.name, func() {
+			userID, err := ids.NewUserID(testCase.input)
+			Expect(userID.String()).To(BeEmpty(), testCase.description)
+			Expect(err).To(HaveOccurred(), testCase.description)
+
+			_, isValidationError := errors.AsValidationError(err)
+			Expect(
+				isValidationError,
+			).To(BeTrue(), "should be validation error: %s", testCase.description)
+		})
+	}
 }
 
 var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
@@ -175,52 +301,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 			)
 		})
 
-		Context("with invalid user names", func() {
-			DescribeTable("should reject invalid name formats",
-				func(nameStr, description string) {
-					userName, err := values.NewUserName(nameStr)
-					Expect(userName.String()).To(BeEmpty(), description)
-					Expect(err).To(HaveOccurred(), description)
-
-					_, isValidationError := errors.AsValidationError(err)
-					Expect(
-						isValidationError,
-					).To(BeTrue(), "should be validation error: %s", description)
-				},
-				Entry("empty name", "", "empty string"),
-				Entry("only spaces", "   ", "whitespace only"),
-				Entry("single character", "A", "too short"),
-				Entry("only numbers", "123", "numeric only"),
-				Entry("only special chars", "@#$%", "special characters only"),
-				Entry("leading spaces", " John Doe", "leading whitespace"),
-				Entry("trailing spaces", "John Doe ", "trailing whitespace"),
-				Entry("email format", "john@example.com", "email-like format"),
-				Entry("with @ symbol", "John@Doe", "@ symbol in name"),
-				Entry("with hash", "John#Doe", "hash symbol"),
-				Entry("with percent", "John%Doe", "percent symbol"),
-				Entry("with dollar", "John$Doe", "dollar symbol"),
-				Entry("with ampersand", "John&Doe", "ampersand symbol"),
-				Entry("with asterisk", "John*Doe", "asterisk symbol"),
-				Entry("with plus", "John+Doe", "plus symbol"),
-				Entry("with equals", "John=Doe", "equals symbol"),
-				Entry("with brackets", "John[Doe]", "square brackets"),
-				Entry("with parentheses", "John(Doe)", "parentheses"),
-				Entry("with braces", "John{Doe}", "curly braces"),
-				Entry("with pipe", "John|Doe", "pipe symbol"),
-				Entry("with backslash", "John\\Doe", "backslash"),
-				Entry("with forward slash", "John/Doe", "forward slash"),
-				Entry("with semicolon", "John;Doe", "semicolon"),
-				Entry("with colon", "John:Doe", "colon"),
-				Entry("with quotes", "John\"Doe\"", "quotation marks"),
-				Entry("with less than", "John<Doe", "less than symbol"),
-				Entry("with greater than", "John>Doe", "greater than symbol"),
-				Entry("with question mark", "John?Doe", "question mark"),
-				Entry("excessively long", strings.Repeat("John ", 20), "excessively long name"),
-				Entry("tab character", "John\tDoe", "tab character"),
-				Entry("newline character", "John\nDoe", "newline character"),
-				Entry("carriage return", "John\rDoe", "carriage return"),
-			)
-		})
+		Context("with invalid user names", runInvalidUsernameTests)
 
 		Context("edge cases and boundary conditions", func() {
 			DescribeTable(
@@ -242,7 +323,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 		Context("with valid user IDs", func() {
 			DescribeTable("should accept valid ID formats",
 				func(idStr, description string) {
-					userID, err := values.NewUserID(idStr)
+					userID, err := ids.NewUserID(idStr)
 					Expect(err).ToNot(HaveOccurred(), description)
 					Expect(userID.String()).To(Equal(idStr), description)
 				},
@@ -258,58 +339,13 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 			)
 		})
 
-		Context("with invalid user IDs", func() {
-			DescribeTable("should reject invalid ID formats",
-				func(idStr, description string) {
-					userID, err := values.NewUserID(idStr)
-					Expect(userID.String()).To(BeEmpty(), description)
-					Expect(err).To(HaveOccurred(), description)
-
-					_, isValidationError := errors.AsValidationError(err)
-					Expect(
-						isValidationError,
-					).To(BeTrue(), "should be validation error: %s", description)
-				},
-				Entry("empty ID", "", "empty string"),
-				Entry("only spaces", "   ", "whitespace only"),
-				Entry("single character", "a", "too short"),
-				Entry("leading spaces", " user123", "leading whitespace"),
-				Entry("trailing spaces", "user123 ", "trailing whitespace"),
-				Entry("with spaces", "user 123", "spaces in ID"),
-				Entry("with special chars", "user@123", "special characters"),
-				Entry("with hash", "user#123", "hash symbol"),
-				Entry("with percent", "user%123", "percent symbol"),
-				Entry("with ampersand", "user&123", "ampersand symbol"),
-				Entry("with asterisk", "user*123", "asterisk symbol"),
-				Entry("with plus", "user+123", "plus symbol"),
-				Entry("with equals", "user=123", "equals symbol"),
-				Entry("with brackets", "user[123]", "square brackets"),
-				Entry("with parentheses", "user(123)", "parentheses"),
-				Entry("with braces", "user{123}", "curly braces"),
-				Entry("with pipe", "user|123", "pipe symbol"),
-				Entry("with backslash", "user\\123", "backslash"),
-				Entry("with forward slash", "user/123", "forward slash"),
-				Entry("with semicolon", "user;123", "semicolon"),
-				Entry("with colon", "user:123", "colon"),
-				Entry("with quotes", "user\"123\"", "quotation marks"),
-				Entry("with less than", "user<123", "less than symbol"),
-				Entry("with greater than", "user>123", "greater than symbol"),
-				Entry("with question mark", "user?123", "question mark"),
-				Entry("with exclamation", "user!123", "exclamation mark"),
-				Entry("with dot", "user.123", "period/dot"),
-				Entry("with comma", "user,123", "comma"),
-				Entry("excessively long", strings.Repeat("a", 1000), "excessively long ID"),
-				Entry("tab character", "user\t123", "tab character"),
-				Entry("newline character", "user\n123", "newline character"),
-				Entry("carriage return", "user\r123", "carriage return"),
-			)
-		})
+		Context("with invalid user IDs", runInvalidUserIDTests)
 
 		Context("edge cases and boundary conditions", func() {
 			DescribeTable(
 				"should handle valid ID edge cases",
 				func(id string) {
-					userID, err := values.NewUserID(id)
+					userID, err := ids.NewUserID(id)
 					Expect(err).ToNot(HaveOccurred())
 					Expect(userID.String()).To(Equal(id))
 				},
@@ -324,7 +360,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 		Context("when creating complete user data", func() {
 			It("should validate all components together", func() {
 				// Valid combination
-				userID, err := values.NewUserID("valid-user-123")
+				userID, err := ids.NewUserID("valid-user-123")
 				Expect(err).ToNot(HaveOccurred())
 
 				email, err := values.NewEmail("valid@example.com")
@@ -341,7 +377,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 
 			It("should catch any invalid component in the set", func() {
 				// Test that each validation is independent
-				validID, err := values.NewUserID("valid-user-123")
+				validID, err := ids.NewUserID("valid-user-123")
 				Expect(err).ToNot(HaveOccurred())
 				Expect(validID.String()).To(Equal("valid-user-123"))
 
@@ -356,7 +392,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 				Expect(invalidName.String()).To(BeEmpty())
 
 				// Invalid ID should fail
-				invalidID, err := values.NewUserID("")
+				invalidID, err := ids.NewUserID("")
 				Expect(err).To(HaveOccurred())
 				Expect(invalidID.String()).To(BeEmpty())
 			})
@@ -378,7 +414,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 				Expect(name.String()).To(BeEmpty())
 
 				// Try in ID
-				id, err := values.NewUserID(input)
+				id, err := ids.NewUserID(input)
 				Expect(err).To(HaveOccurred(), "should reject %s in ID: %s", attackType, input)
 				Expect(id.String()).To(BeEmpty())
 			}
@@ -419,7 +455,7 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 
 				for _, pathInput := range pathTraversalInputs {
 					// Try in ID (most likely to be used in file paths)
-					id, err := values.NewUserID(pathInput)
+					id, err := ids.NewUserID(pathInput)
 					Expect(
 						err,
 					).To(HaveOccurred(), "should reject path traversal in ID: %s", pathInput)

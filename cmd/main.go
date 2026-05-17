@@ -79,15 +79,16 @@ func main() {
 	logger.Info("🛑 Shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), defaultGracefulTimeout)
-	defer cancel()
 
 	err := server.Shutdown(ctx)
 	if err != nil {
 		logger.Error("❌ Server forced to shutdown", "error", err)
+		cancel()
 		os.Exit(exitCodeFailure)
 	}
 
 	logger.Info("✅ Server shutdown complete")
+	cancel()
 	os.Exit(exitCodeSuccess)
 }
 

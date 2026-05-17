@@ -1,7 +1,6 @@
 package config
 
 import (
-	"os"
 	"testing"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
@@ -78,17 +77,7 @@ func setupTestEnvironment(t *testing.T, envVars map[string]string) {
 	t.Helper()
 
 	for key, value := range envVars {
-		err := os.Setenv(key, value)
-		if err != nil {
-			t.Fatalf("Failed to set environment variable %s: %v", key, err)
-		}
-
-		t.Cleanup(func() {
-			err := os.Unsetenv(key)
-			if err != nil {
-				t.Errorf("Failed to unset environment variable %s: %v", key, err)
-			}
-		})
+		t.Setenv(key, value)
 	}
 }
 

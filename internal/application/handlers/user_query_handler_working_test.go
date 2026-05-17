@@ -80,7 +80,8 @@ var _ = Describe("UserQueryHandler", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(response).To(HaveKey("data"))
 
-		data := response["data"].([]any)
+		data, ok := response["data"].([]any)
+		Expect(ok).To(BeTrue())
 		Expect(data).To(BeEmpty())
 	}
 
