@@ -7,6 +7,7 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/ids"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
+
 	//nolint:revive // Ginkgo convention for test files
 	. "github.com/onsi/ginkgo/v2"
 	//nolint:revive // Ginkgo convention for test files
