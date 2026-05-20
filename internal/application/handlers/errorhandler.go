@@ -1,13 +1,12 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
+	"encoding/json"
+	"net/http"
 )
 
-// sendErrorResponse sends a standardized error response to the HTTP client.
-// This helper eliminates code duplication in handler error responses.
-func sendErrorResponse(c *gin.Context, httpStatus int, message string) {
-	c.JSON(httpStatus, gin.H{"error": message})
-
-	return
+func sendErrorResponse(w http.ResponseWriter, httpStatus int, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(httpStatus)
+	json.NewEncoder(w).Encode(map[string]string{"error": message})
 }
