@@ -48,6 +48,7 @@ func bindRequest[T any](r *http.Request, req *T) bool {
 	err := json.NewDecoder(r.Body).Decode(req)
 	if err != nil {
 		log.Error("Invalid request format", "error", err)
+
 		return false
 	}
 
@@ -78,20 +79,33 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	if !bindRequest(r, &req) {
 		errorResponse(w, http.StatusBadRequest, "invalid_request_format", "Invalid request body")
+
 		return
 	}
 
 	userID, err := values.NewUserID(generateUserID())
 	if err != nil {
 		log.Error("Failed to generate user ID", "error", err)
-		errorResponse(w, http.StatusInternalServerError, "user_id_generation_failed", "Failed to generate user ID")
+		errorResponse(
+			w,
+			http.StatusInternalServerError,
+			"user_id_generation_failed",
+			"Failed to generate user ID",
+		)
+
 		return
 	}
 
 	user, err := h.userService.CreateUser(r.Context(), userID, req.Email, req.Name)
 	if err != nil {
 		log.Error("Failed to create user", "error", err)
-		errorResponse(w, http.StatusInternalServerError, "user_creation_failed", "Failed to create user")
+		errorResponse(
+			w,
+			http.StatusInternalServerError,
+			"user_creation_failed",
+			"Failed to create user",
+		)
+
 		return
 	}
 
@@ -104,6 +118,7 @@ func parseUserID(r *http.Request) (values.UserID, bool) {
 	userID, err := values.NewUserID(idStr)
 	if err != nil {
 		log.Error("Invalid user ID format", "error", err)
+
 		return values.UserID{}, false
 	}
 
@@ -114,6 +129,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	userID, ok := parseUserID(r)
 	if !ok {
 		errorResponse(w, http.StatusBadRequest, "invalid_user_id", "Invalid user ID format")
+
 		return
 	}
 
@@ -121,6 +137,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Error("Failed to get user", "error", err)
 		errorResponse(w, http.StatusNotFound, "user_not_found", "User not found")
+
 		return
 	}
 
@@ -131,6 +148,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	userID, ok := parseUserID(r)
 	if !ok {
 		errorResponse(w, http.StatusBadRequest, "invalid_user_id", "Invalid user ID format")
+
 		return
 	}
 
@@ -140,13 +158,20 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	if !bindRequest(r, &req) {
 		errorResponse(w, http.StatusBadRequest, "invalid_request_format", "Invalid request body")
+
 		return
 	}
 
 	user, err := h.userService.UpdateUser(r.Context(), userID, req.Email, req.Name)
 	if err != nil {
 		log.Error("Failed to update user", "error", err)
-		errorResponse(w, http.StatusInternalServerError, "user_update_failed", "Failed to update user")
+		errorResponse(
+			w,
+			http.StatusInternalServerError,
+			"user_update_failed",
+			"Failed to update user",
+		)
+
 		return
 	}
 
@@ -157,13 +182,20 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	userID, ok := parseUserID(r)
 	if !ok {
 		errorResponse(w, http.StatusBadRequest, "invalid_user_id", "Invalid user ID format")
+
 		return
 	}
 
 	err := h.userService.DeleteUser(r.Context(), userID)
 	if err != nil {
 		log.Error("Failed to delete user", "error", err)
-		errorResponse(w, http.StatusInternalServerError, "user_deletion_failed", "Failed to delete user")
+		errorResponse(
+			w,
+			http.StatusInternalServerError,
+			"user_deletion_failed",
+			"Failed to delete user",
+		)
+
 		return
 	}
 

@@ -38,6 +38,7 @@ func (h *UserQueryHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	userID, err := values.NewUserID(idParam)
 	if err != nil {
 		sendErrorResponse(w, http.StatusBadRequest, "Invalid user ID format")
+
 		return
 	}
 
@@ -46,10 +47,12 @@ func (h *UserQueryHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 		_, isNotFound := pkgerrors.AsNotFoundError(err)
 		if isNotFound {
 			sendErrorResponse(w, http.StatusNotFound, "User not found")
+
 			return
 		}
 
 		sendErrorResponse(w, http.StatusInternalServerError, "Failed to retrieve user")
+
 		return
 	}
 
@@ -60,6 +63,7 @@ func (h *UserQueryHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.userQueryService.ListUsers(r.Context())
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, "Failed to retrieve users")
+
 		return
 	}
 
@@ -70,6 +74,7 @@ func (h *UserQueryHandler) SearchUsers(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	if email == "" {
 		sendErrorResponse(w, http.StatusBadRequest, "Email query parameter is required")
+
 		return
 	}
 
@@ -78,10 +83,12 @@ func (h *UserQueryHandler) SearchUsers(w http.ResponseWriter, r *http.Request) {
 		_, isNotFound := pkgerrors.AsNotFoundError(err)
 		if isNotFound {
 			writeJSON(w, http.StatusOK, map[string]any{"data": []any{}})
+
 			return
 		}
 
 		sendErrorResponse(w, http.StatusInternalServerError, "Failed to search users")
+
 		return
 	}
 
@@ -92,12 +99,14 @@ func (h *UserQueryHandler) GetUsersByDomain(w http.ResponseWriter, r *http.Reque
 	domain := r.PathValue("domain")
 	if domain == "" {
 		sendErrorResponse(w, http.StatusBadRequest, "Domain parameter is required")
+
 		return
 	}
 
 	users, err := h.userQueryService.ListUsers(r.Context())
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, "Failed to retrieve users")
+
 		return
 	}
 
@@ -105,6 +114,7 @@ func (h *UserQueryHandler) GetUsersByDomain(w http.ResponseWriter, r *http.Reque
 		userEmail := user.GetEmail().String()
 		if strings.Contains(userEmail, "@") {
 			parts := strings.Split(userEmail, "@")
+
 			return len(parts) == 2 && parts[1] == domain
 		}
 
@@ -118,6 +128,7 @@ func (h *UserQueryHandler) GetUserStats(w http.ResponseWriter, r *http.Request) 
 	stats, err := h.userQueryService.GetUserStats(r.Context())
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, "Failed to retrieve user statistics")
+
 		return
 	}
 
@@ -128,6 +139,7 @@ func (h *UserQueryHandler) GetActiveUsers(w http.ResponseWriter, r *http.Request
 	users, err := h.userQueryService.ListUsers(r.Context())
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, "Failed to retrieve active users")
+
 		return
 	}
 
@@ -152,6 +164,7 @@ func (h *UserQueryHandler) GetUsersWithPagination(w http.ResponseWriter, r *http
 	users, err := h.userQueryService.ListUsers(r.Context())
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, "Failed to retrieve users")
+
 		return
 	}
 
@@ -168,6 +181,7 @@ func (h *UserQueryHandler) GetUsersWithPagination(w http.ResponseWriter, r *http
 				"total": total,
 			},
 		})
+
 		return
 	}
 

@@ -122,7 +122,11 @@ var _ = Describe("UserQueryHandler", func() {
 
 		Context("when user does not exist", func() {
 			It("should return 404 status", func() {
-				req := httptest.NewRequest(http.MethodGet, "/api/v1/users/query/non-existent-id", nil)
+				req := httptest.NewRequest(
+					http.MethodGet,
+					"/api/v1/users/query/non-existent-id",
+					nil,
+				)
 				w := httptest.NewRecorder()
 				mux.ServeHTTP(w, req)
 
@@ -178,7 +182,11 @@ var _ = Describe("UserQueryHandler", func() {
 			It("should return user with 200 status", func() {
 				createTestUser("search@example.com", "Search User")
 
-				req := httptest.NewRequest(http.MethodGet, "/api/v1/users/search?email=search@example.com", nil)
+				req := httptest.NewRequest(
+					http.MethodGet,
+					"/api/v1/users/search?email=search@example.com",
+					nil,
+				)
 				w := httptest.NewRecorder()
 				mux.ServeHTTP(w, req)
 
@@ -215,7 +223,11 @@ var _ = Describe("UserQueryHandler", func() {
 					createTestUser("user"+strconv.Itoa(i)+"@example.com", "User "+strconv.Itoa(i))
 				}
 
-				req := httptest.NewRequest(http.MethodGet, "/api/v1/users/paginated?page=1&limit=3", nil)
+				req := httptest.NewRequest(
+					http.MethodGet,
+					"/api/v1/users/paginated?page=1&limit=3",
+					nil,
+				)
 				w := httptest.NewRecorder()
 				mux.ServeHTTP(w, req)
 
