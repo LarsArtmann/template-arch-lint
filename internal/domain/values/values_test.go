@@ -39,7 +39,8 @@ var _ = Describe("Value Objects", func() {
 			})
 
 			Context("with invalid email addresses", func() {
-				DescribeTable("should return validation error",
+				DescribeTable(
+					"should return validation error",
 					func(email string) {
 						_, err := values.NewEmail(email)
 						Expect(err).To(HaveOccurred())
@@ -104,7 +105,8 @@ var _ = Describe("Value Objects", func() {
 	Describe("UserName", func() {
 		Describe("NewUserName", func() {
 			Context("with valid usernames", func() {
-				DescribeTable("should create username successfully",
+				DescribeTable(
+					"should create username successfully",
 					func(name, expected string) {
 						username, err := values.NewUserName(name)
 						Expect(err).ToNot(HaveOccurred())
@@ -119,7 +121,8 @@ var _ = Describe("Value Objects", func() {
 			})
 
 			Context("with invalid usernames", func() {
-				DescribeTable("should return validation error",
+				DescribeTable(
+					"should return validation error",
 					func(name string) {
 						_, err := values.NewUserName(name)
 						Expect(err).To(HaveOccurred())
@@ -174,7 +177,8 @@ var _ = Describe("Value Objects", func() {
 	Describe("UserID", func() {
 		Describe("NewUserID", func() {
 			Context("with valid user IDs", func() {
-				DescribeTable("should create user ID successfully",
+				DescribeTable(
+					"should create user ID successfully",
 					func(idStr, expected string) {
 						userID, err := values.NewUserID(idStr)
 						Expect(err).ToNot(HaveOccurred())
@@ -189,7 +193,8 @@ var _ = Describe("Value Objects", func() {
 			})
 
 			Context("with invalid user IDs", func() {
-				DescribeTable("should return validation error",
+				DescribeTable(
+					"should return validation error",
 					func(idStr string) {
 						_, err := values.NewUserID(idStr)
 						Expect(err).To(HaveOccurred())

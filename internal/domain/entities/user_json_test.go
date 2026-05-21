@@ -118,7 +118,8 @@ var _ = ginkgo.Describe("User JSON Marshaling", func() {
 			gomega.Expect(unmarshaledUser.Modified).To(gomega.Equal(expectedModified))
 		})
 
-		ginkgo.DescribeTable("should return validation error for invalid field in JSON",
+		ginkgo.DescribeTable(
+			"should return validation error for invalid field in JSON",
 			func(jsonInput, expectedField string) {
 				// When
 				var unmarshaledUser User

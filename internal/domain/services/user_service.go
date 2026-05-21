@@ -484,7 +484,8 @@ func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) 
 	totalDays := lo.Reduce(users, func(acc int, user *entities.User, _ int) int {
 		days := max(
 			// Ensure non-negative days
-			int(now.Sub(user.Created).Hours())/hoursPerDay, 0)
+			int(now.Sub(user.Created).Hours())/hoursPerDay, 0,
+		)
 
 		return acc + days
 	}, 0)

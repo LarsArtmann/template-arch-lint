@@ -280,7 +280,8 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 
 	Describe("👤 UserName Validation", func() {
 		Context("with valid user names", func() {
-			DescribeTable("should accept valid name formats",
+			DescribeTable(
+				"should accept valid name formats",
 				func(nameStr, description string) {
 					userName, err := values.NewUserName(nameStr)
 					Expect(err).ToNot(HaveOccurred(), description)
@@ -321,7 +322,8 @@ var _ = Describe("🛡️ Input Validation at Service Boundaries", func() {
 
 	Describe("🆔 UserID Validation", func() {
 		Context("with valid user IDs", func() {
-			DescribeTable("should accept valid ID formats",
+			DescribeTable(
+				"should accept valid ID formats",
 				func(idStr, description string) {
 					userID, err := ids.NewUserID(idStr)
 					Expect(err).ToNot(HaveOccurred(), description)
