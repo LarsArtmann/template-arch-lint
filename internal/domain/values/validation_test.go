@@ -7,9 +7,7 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/ids"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
-	//nolint:revive // Ginkgo convention for test files
 	. "github.com/onsi/ginkgo/v2"
-	//nolint:revive // Ginkgo convention for test files
 	. "github.com/onsi/gomega"
 )
 
@@ -35,7 +33,7 @@ type userIDValidationTestCase struct {
 
 // invalidUsernameTestCases contains test cases for invalid username validation.
 //
-//nolint:gochecknoglobals
+
 var invalidUsernameTestCases = []usernameValidationTestCase{
 	{"empty name", "", "empty string"},
 	{"only spaces", "   ", "whitespace only"},
@@ -73,7 +71,7 @@ var invalidUsernameTestCases = []usernameValidationTestCase{
 
 // invalidUserIDTestCases contains test cases for invalid user ID validation.
 //
-//nolint:gochecknoglobals
+
 var invalidUserIDTestCases = []userIDValidationTestCase{
 	{"empty ID", "", "empty string"},
 	{"only spaces", "   ", "whitespace only"},
