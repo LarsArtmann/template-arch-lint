@@ -165,10 +165,7 @@ linters:
         - os/exec.Cmd
     gocritic:
       disabled-checks:
-        - dupImport
         - ifElseChain
-        - octalLiteral
-        - whyNoLint
     gomoddirectives:
       replace-local: true
     ireturn:
