@@ -21,7 +21,7 @@ type CodeBlock struct {
 }
 
 // runCodeDuplicationDetection implements code duplication detection analyzer.
-func runCodeDuplicationDetection(pass *analysis.Pass) (interface{}, error) {
+func runCodeDuplicationDetection(pass *analysis.Pass) (any, error) {
 	const minTokens = 15 // Configurable threshold
 
 	var codeBlocks []CodeBlock
@@ -232,12 +232,4 @@ func abs(x int) int {
 	}
 
 	return x
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-
-	return b
 }
