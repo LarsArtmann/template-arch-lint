@@ -10,8 +10,8 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-// runFilenameValidation implements filename validation analyzer
-func runFilenameValidation(pass *analysis.Pass) (interface{}, error) {
+// runFilenameValidation implements filename validation analyzer.
+func runFilenameValidation(pass *analysis.Pass) (any, error) {
 	// Standard Go filename patterns
 	validFilenameRegex := regexp.MustCompile(`^[a-z][a-z0-9_]*(_test)?\.go$`)
 
@@ -33,7 +33,8 @@ func runFilenameValidation(pass *analysis.Pass) (interface{}, error) {
 		}
 
 		// Check for common anti-patterns
-		if err := checkFilenameAntiPatterns(pass, filename, file); err != nil {
+		err := checkFilenameAntiPatterns(pass, filename, file)
+		if err != nil {
 			pass.Reportf(file.Pos(), "%v", err)
 		}
 	}
@@ -41,7 +42,7 @@ func runFilenameValidation(pass *analysis.Pass) (interface{}, error) {
 	return nil, nil
 }
 
-// isGeneratedFile checks if a file is generated and should be skipped
+// isGeneratedFile checks if a file is generated and should be skipped.
 func isGeneratedFile(filename string) bool {
 	generatedPatterns := []string{
 		"_gen.go",
@@ -56,10 +57,11 @@ func isGeneratedFile(filename string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
-// checkFilenameAntiPatterns validates against common filename anti-patterns
+// checkFilenameAntiPatterns validates against common filename anti-patterns.
 func checkFilenameAntiPatterns(pass *analysis.Pass, filename string, file *ast.File) error {
 	// Check for camelCase filenames
 	if strings.ContainsAny(filename[:len(filename)-3], "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
@@ -70,6 +72,7 @@ func checkFilenameAntiPatterns(pass *analysis.Pass, filename string, file *ast.F
 	// Check for dashes (should use underscores)
 	if strings.Contains(filename, "-") {
 		suggested := strings.ReplaceAll(filename, "-", "_")
+
 		return fmt.Errorf("filename %q uses dashes. Use underscores: %s",
 			filename, suggested)
 	}
@@ -89,7 +92,7 @@ func checkFilenameAntiPatterns(pass *analysis.Pass, filename string, file *ast.F
 	return nil
 }
 
-// isDescriptiveFilename checks if a filename is descriptively appropriate for the package
+// isDescriptiveFilename checks if a filename is descriptively appropriate for the package.
 func isDescriptiveFilename(filename, packageName string) bool {
 	// Allow common descriptive patterns
 	descriptivePatterns := []string{

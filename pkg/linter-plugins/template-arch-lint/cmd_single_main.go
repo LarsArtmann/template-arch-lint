@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"go/ast"
 	"path/filepath"
@@ -9,8 +10,8 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-// runCmdSingleMainValidation implements CMD single main enforcement
-func runCmdSingleMainValidation(pass *analysis.Pass) (interface{}, error) {
+// runCmdSingleMainValidation implements CMD single main enforcement.
+func runCmdSingleMainValidation(pass *analysis.Pass) (any, error) {
 	var mainFiles []string
 
 	for _, file := range pass.Files {
@@ -47,7 +48,8 @@ func runCmdSingleMainValidation(pass *analysis.Pass) (interface{}, error) {
 	for _, mainFile := range mainFiles {
 		file := getFileNodeByPath(pass, mainFile)
 		if file != nil {
-			if err := validateMainFile(pass, file); err != nil {
+			err := validateMainFile(pass, file)
+			if err != nil {
 				pass.Reportf(file.Pos(), "CMD_SINGLE_MAIN: %v", err)
 			}
 		}
@@ -56,17 +58,18 @@ func runCmdSingleMainValidation(pass *analysis.Pass) (interface{}, error) {
 	return nil, nil
 }
 
-// getFileNodeByPath finds the AST file node for a given file path
+// getFileNodeByPath finds the AST file node for a given file path.
 func getFileNodeByPath(pass *analysis.Pass, filePath string) *ast.File {
 	for _, file := range pass.Files {
 		if pass.Fset.Position(file.Pos()).Filename == filePath {
 			return file
 		}
 	}
+
 	return nil
 }
 
-// validateMainFile ensures main.go has proper structure
+// validateMainFile ensures main.go has proper structure.
 func validateMainFile(pass *analysis.Pass, file *ast.File) error {
 	// Check package name
 	if file.Name.Name != "main" {
@@ -75,6 +78,7 @@ func validateMainFile(pass *analysis.Pass, file *ast.File) error {
 
 	// Check for main function
 	hasMainFunc := false
+
 	ast.Inspect(file, func(n ast.Node) bool {
 		if fn, ok := n.(*ast.FuncDecl); ok {
 			if fn.Name.Name == "main" && fn.Recv == nil {
@@ -85,17 +89,19 @@ func validateMainFile(pass *analysis.Pass, file *ast.File) error {
 					pass.Reportf(fn.Pos(),
 						"CMD_SINGLE_MAIN: main() function should not have parameters")
 				}
+
 				if fn.Type.Results != nil && len(fn.Type.Results.List) > 0 {
 					pass.Reportf(fn.Pos(),
 						"CMD_SINGLE_MAIN: main() function should not return values")
 				}
 			}
 		}
+
 		return true
 	})
 
 	if !hasMainFunc {
-		return fmt.Errorf("main.go must contain a main() function")
+		return errors.New("main.go must contain a main() function")
 	}
 
 	return nil

@@ -7,8 +7,8 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-// runImportCycleDetection implements import cycle detection analyzer
-func runImportCycleDetection(pass *analysis.Pass) (interface{}, error) {
+// runImportCycleDetection implements import cycle detection analyzer.
+func runImportCycleDetection(pass *analysis.Pass) (any, error) {
 	// Build import graph for this package
 	pkg := pass.Pkg
 	imports := getPackageImports(pkg)
@@ -31,9 +31,10 @@ func runImportCycleDetection(pass *analysis.Pass) (interface{}, error) {
 	return nil, nil
 }
 
-// getPackageImports extracts all import paths from a package
+// getPackageImports extracts all import paths from a package.
 func getPackageImports(pkg *types.Package) []string {
 	var imports []string
+
 	seen := make(map[string]bool)
 
 	for _, imp := range pkg.Imports() {
@@ -46,7 +47,7 @@ func getPackageImports(pkg *types.Package) []string {
 	return imports
 }
 
-// findCycle uses DFS to detect import cycles
+// findCycle uses DFS to detect import cycles.
 func findCycle(
 	currentPkg, targetPkg string,
 	visited, recStack map[string]bool,
@@ -81,7 +82,7 @@ func findCycle(
 	return nil
 }
 
-// isLikelyCycle detects common import cycle patterns
+// isLikelyCycle detects common import cycle patterns.
 func isLikelyCycle(pkg1, pkg2 string) bool {
 	// Check for bidirectional dependencies between related packages
 	pkg1Parts := strings.Split(pkg1, "/")

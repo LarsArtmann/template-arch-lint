@@ -10,7 +10,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-// CodeBlock represents a block of code for duplication analysis
+// CodeBlock represents a block of code for duplication analysis.
 type CodeBlock struct {
 	Node     ast.Node
 	Hash     string
@@ -20,7 +20,7 @@ type CodeBlock struct {
 	EndPos   token.Pos
 }
 
-// runCodeDuplicationDetection implements code duplication detection analyzer
+// runCodeDuplicationDetection implements code duplication detection analyzer.
 func runCodeDuplicationDetection(pass *analysis.Pass) (interface{}, error) {
 	const minTokens = 15 // Configurable threshold
 
@@ -60,7 +60,7 @@ func runCodeDuplicationDetection(pass *analysis.Pass) (interface{}, error) {
 	return nil, nil
 }
 
-// extractCodeBlocks extracts analyzable code blocks from a file
+// extractCodeBlocks extracts analyzable code blocks from a file.
 func extractCodeBlocks(
 	pass *analysis.Pass,
 	file *ast.File,
@@ -92,13 +92,14 @@ func extractCodeBlocks(
 				blocks = append(blocks, *block)
 			}
 		}
+
 		return true
 	})
 
 	return blocks
 }
 
-// createCodeBlock creates a code block for duplication analysis
+// createCodeBlock creates a code block for duplication analysis.
 func createCodeBlock(
 	pass *analysis.Pass,
 	node ast.Node,
@@ -128,19 +129,22 @@ func createCodeBlock(
 	}
 }
 
-// estimateTokenCount provides a rough estimate of tokens in an AST node
+// estimateTokenCount provides a rough estimate of tokens in an AST node.
 func estimateTokenCount(node ast.Node) int {
 	count := 0
+
 	ast.Inspect(node, func(n ast.Node) bool {
 		if n != nil {
 			count++
 		}
+
 		return true
 	})
+
 	return count
 }
 
-// generateStructuralHash creates a hash based on AST structure (simplified)
+// generateStructuralHash creates a hash based on AST structure (simplified).
 func generateStructuralHash(node ast.Node) string {
 	var builder strings.Builder
 
@@ -161,13 +165,13 @@ func generateStructuralHash(node ast.Node) string {
 			builder.WriteString("IDENT;")
 		case *ast.BasicLit:
 			// Include literal type but not value
-			builder.WriteString(fmt.Sprintf("LIT_%s;", typed.Kind.String()))
+			fmt.Fprintf(&builder, "LIT_%s;", typed.Kind.String())
 		case *ast.BinaryExpr:
 			// Include operator
-			builder.WriteString(fmt.Sprintf("BINOP_%s;", typed.Op.String()))
+			fmt.Fprintf(&builder, "BINOP_%s;", typed.Op.String())
 		case *ast.UnaryExpr:
 			// Include operator
-			builder.WriteString(fmt.Sprintf("UNOP_%s;", typed.Op.String()))
+			fmt.Fprintf(&builder, "UNOP_%s;", typed.Op.String())
 		}
 
 		return true
@@ -176,7 +180,7 @@ func generateStructuralHash(node ast.Node) string {
 	return builder.String()
 }
 
-// findDuplicateBlocks groups code blocks by their structural similarity
+// findDuplicateBlocks groups code blocks by their structural similarity.
 func findDuplicateBlocks(blocks []CodeBlock) [][]CodeBlock {
 	hashGroups := make(map[string][]CodeBlock)
 
@@ -187,6 +191,7 @@ func findDuplicateBlocks(blocks []CodeBlock) [][]CodeBlock {
 
 	// Return only groups with duplicates
 	var duplicates [][]CodeBlock
+
 	for _, group := range hashGroups {
 		if len(group) > 1 {
 			// Additional similarity check to reduce false positives
@@ -199,7 +204,7 @@ func findDuplicateBlocks(blocks []CodeBlock) [][]CodeBlock {
 	return duplicates
 }
 
-// areSimilarBlocks performs additional similarity checks beyond hash matching
+// areSimilarBlocks performs additional similarity checks beyond hash matching.
 func areSimilarBlocks(blocks []CodeBlock) bool {
 	if len(blocks) < 2 {
 		return false
@@ -220,11 +225,12 @@ func areSimilarBlocks(blocks []CodeBlock) bool {
 	return true
 }
 
-// Helper functions
+// Helper functions.
 func abs(x int) int {
 	if x < 0 {
 		return -x
 	}
+
 	return x
 }
 
@@ -232,5 +238,6 @@ func max(a, b int) int {
 	if a > b {
 		return a
 	}
+
 	return b
 }
