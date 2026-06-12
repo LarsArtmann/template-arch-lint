@@ -2,4 +2,4 @@ module github.com/LarsArtmann/template-arch-lint/pkg/linter-plugins/template-arc
 
 go 1.26.3
 
-require golang.org/x/tools v0.45.0
+require golang.org/x/tools v0.46.0
