@@ -6,6 +6,7 @@ require (
 	charm.land/log/v2 v2.0.0
 	github.com/go-playground/validator/v10 v10.30.3
 	github.com/larsartmann/go-branded-id v0.3.0
+	github.com/larsartmann/httputil v0.2.0
 	github.com/onsi/ginkgo/v2 v2.26.0
 	github.com/onsi/gomega v1.41.0
 	github.com/samber/lo v1.53.0
@@ -152,6 +153,7 @@ require (
 	github.com/kkHAIKE/contextcheck v1.1.6 // indirect
 	github.com/kulti/thelper v0.7.1 // indirect
 	github.com/kunwardeep/paralleltest v1.0.15 // indirect
+	github.com/larsartmann/go-error-family v0.3.0 // indirect
 	github.com/lasiar/canonicalheader v1.1.2 // indirect
 	github.com/ldez/exptostd v0.4.5 // indirect
 	github.com/ldez/gomoddirectives v0.7.1 // indirect

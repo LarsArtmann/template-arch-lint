@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -15,6 +13,7 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/internal/application/handlers"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/repositories"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/services"
+	"github.com/larsartmann/httputil"
 )
 
 const (
@@ -46,49 +45,46 @@ func main() {
 	userHandler := handlers.NewUserHandler(userService)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
-			"status": "healthy",
-			"time":   time.Now().UTC(),
-		})
-	})
+	mux.HandleFunc("GET /health", httputil.HealthHandler())
 	userHandler.RegisterRoutes(mux)
 
-	server := &http.Server{
+	serverCfg := httputil.ServerConfig{
 		Addr:         fmt.Sprintf(":%d", defaultServerPort),
-		Handler:      mux,
 		ReadTimeout:  defaultServerReadTimeout,
 		WriteTimeout: defaultServerWriteTimeout,
 		IdleTimeout:  defaultServerIdleTimeout,
 	}
 
-	go func() {
-		logger.Info("🚀 Starting HTTP server", "port", defaultServerPort)
+	server, err := httputil.NewServer(serverCfg, mux)
+	if err != nil {
+		logger.Error("❌ Failed to create HTTP server", "error", err)
+		os.Exit(exitCodeFailure)
+	}
 
-		err := server.ListenAndServe()
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Error("❌ Server failed to start", "error", err)
-			os.Exit(exitCodeFailure)
-		}
-	}()
+	logger.Info("🚀 Starting HTTP server", "port", defaultServerPort)
+
+	errChan := server.Start()
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
 
-	logger.Info("🛑 Shutting down server...")
+	select {
+	case <-quit:
+		logger.Info("🛑 Shutting down server...")
+	case err := <-errChan:
+		logger.Error("❌ Server failed", "error", err)
+		os.Exit(exitCodeFailure)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), defaultGracefulTimeout)
+	defer cancel()
 
-	err := server.Shutdown(ctx)
+	err = server.Shutdown(ctx)
 	if err != nil {
 		logger.Error("❌ Server forced to shutdown", "error", err)
-		cancel()
 		os.Exit(exitCodeFailure)
 	}
 
 	logger.Info("✅ Server shutdown complete")
-	cancel()
 	os.Exit(exitCodeSuccess)
 }

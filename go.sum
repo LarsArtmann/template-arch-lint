@@ -554,6 +554,10 @@ github.com/kunwardeep/paralleltest v1.0.15 h1:ZMk4Qt306tHIgKISHWFJAO1IDQJLc6uDyJ
 github.com/kunwardeep/paralleltest v1.0.15/go.mod h1:di4moFqtfz3ToSKxhNjhOZL+696QtJGCFe132CbBLGk=
 github.com/larsartmann/go-branded-id v0.3.0 h1:3uE01+ymNTfsvtLMRSiux+6TjPZX5+frqR5Ub3Cj+w0=
 github.com/larsartmann/go-branded-id v0.3.0/go.mod h1:O9fhyzY3DxtLsswpR7XaI+VbCM9182ZbZQLjfFFanLk=
+github.com/larsartmann/go-error-family v0.3.0 h1:ozA/xt9C+o+4o6bbt/vrMZDCL+ZvBjJVV79fjNkz3+8=
+github.com/larsartmann/go-error-family v0.3.0/go.mod h1:Fz+CKBOHHFZAeiZ/GFbY0JiiXBei+SqY8nznz2XpeaM=
+github.com/larsartmann/httputil v0.2.0 h1:0DHSMJVuEoApO1L89zNzSE661Nao6CPwV2IsFVtKKJU=
+github.com/larsartmann/httputil v0.2.0/go.mod h1:OfsRBnA+R+2sSJJapE0J/qwMF58e7BdmaExdr+RH1yk=
 github.com/lasiar/canonicalheader v1.1.2 h1:vZ5uqwvDbyJCnMhmFYimgMZnJMjwljN5VGY0VKbMXb4=
 github.com/lasiar/canonicalheader v1.1.2/go.mod h1:qJCeLFS0G/QlLQ506T+Fk/fWMa2VmBUiEI2cuMK4djI=
 github.com/ldez/exptostd v0.4.5 h1:kv2ZGUVI6VwRfp/+bcQ6Nbx0ghFWcGIKInkG/oFn1aQ=
