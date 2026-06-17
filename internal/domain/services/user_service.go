@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -491,7 +492,7 @@ func (s *UserService) GetUserStats(ctx context.Context) (map[string]int, error) 
 	}, 0)
 
 	// Safe division using lo.Max to prevent divide by zero
-	userCount := lo.Max([]int{len(users), 1}) // Ensure at least 1 to prevent division by zero
+	userCount := slices.Max([]int{len(users), 1}) // Ensure at least 1 to prevent division by zero
 	avgDays := lo.Ternary(len(users) > 0, totalDays/userCount, 0)
 	stats["avg_days_since_registration"] = avgDays
 

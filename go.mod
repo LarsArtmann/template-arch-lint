@@ -5,7 +5,7 @@ go 1.26.3
 require (
 	charm.land/log/v2 v2.0.0
 	github.com/go-playground/validator/v10 v10.30.3
-	github.com/larsartmann/go-branded-id v0.3.0
+	github.com/larsartmann/go-branded-id v0.3.1
 	github.com/larsartmann/httputil v0.2.0
 	github.com/onsi/ginkgo/v2 v2.26.0
 	github.com/onsi/gomega v1.42.0
@@ -153,7 +153,7 @@ require (
 	github.com/kkHAIKE/contextcheck v1.1.6 // indirect
 	github.com/kulti/thelper v0.7.1 // indirect
 	github.com/kunwardeep/paralleltest v1.0.15 // indirect
-	github.com/larsartmann/go-error-family v0.3.0 // indirect
+	github.com/larsartmann/go-error-family v0.4.0 // indirect
 	github.com/lasiar/canonicalheader v1.1.2 // indirect
 	github.com/ldez/exptostd v0.4.5 // indirect
 	github.com/ldez/gomoddirectives v0.7.1 // indirect
@@ -186,7 +186,7 @@ require (
 	github.com/nishanths/predeclared v0.2.2 // indirect
 	github.com/nunnatsa/ginkgolinter v0.21.2 // indirect
 	github.com/otiai10/copy v1.14.0 // indirect
-	github.com/pelletier/go-toml/v2 v2.3.1 // indirect
+	github.com/pelletier/go-toml/v2 v2.4.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/polyfloyd/go-errorlint v1.8.0 // indirect
 	github.com/prometheus/client_golang v1.12.1 // indirect
