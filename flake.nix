@@ -48,6 +48,17 @@
 
           checks.format = config.treefmt.build.check self;
 
+          packages.default = pkgs.buildGoModule {
+            pname = "template-arch-lint";
+            version = builtins.substring 0 7 (self.shortRev or "dirty");
+            src = ./.;
+            subPackages = [ "cmd" ];
+            vendorHash = "sha256-MHAHkxjYaoPz4KCxnpSg98s11oXele7kLkGvvzDXaBA=";
+            postInstall = ''
+              mv $out/bin/cmd $out/bin/template-arch-lint
+            '';
+          };
+
           devShells = {
             default = pkgs.mkShell {
               name = "template-arch-lint-dev";

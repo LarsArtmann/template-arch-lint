@@ -515,11 +515,6 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 
 				results := make(chan error, numOperations)
 
-				createCount := 0
-				readCount := 0
-				updateCount := 0
-				deleteCount := 0
-
 				// Launch mixed operations
 				for i := range numOperations {
 					wg.Add(1)
@@ -535,15 +530,12 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 							email := fmt.Sprintf("mixedcreate%d@example.com", index)
 							name := fmt.Sprintf("Mixed Create User %d", index)
 							_, err = userService.CreateUser(ctx, id, email, name)
-							createCount++
 
 						case 1: // Read
 							if len(existingUserIDs) > 0 {
 								userID := existingUserIDs[index%len(existingUserIDs)]
 								_, err = userService.GetUser(ctx, userID)
 							}
-
-							readCount++
 
 						case 2: // Update
 							if len(existingUserIDs) > 0 {
@@ -553,15 +545,11 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 								_, err = userService.UpdateUser(ctx, userID, newEmail, newName)
 							}
 
-							updateCount++
-
 						case 3: // Delete
 							if len(existingUserIDs) > 0 && index < len(existingUserIDs) {
 								userID := existingUserIDs[index]
 								err = userService.DeleteUser(ctx, userID)
 							}
-
-							deleteCount++
 						}
 
 						results <- err

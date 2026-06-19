@@ -6,7 +6,7 @@ require (
 	charm.land/log/v2 v2.0.0
 	github.com/go-playground/validator/v10 v10.30.3
 	github.com/larsartmann/go-branded-id v0.3.1
-	github.com/larsartmann/httputil v0.2.0
+	github.com/larsartmann/httputil v0.3.0
 	github.com/onsi/ginkgo/v2 v2.26.0
 	github.com/onsi/gomega v1.42.0
 	github.com/samber/lo v1.53.0
