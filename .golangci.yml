@@ -1,7 +1,7 @@
 version: "2"
 run:
   timeout: 5m
-  go: 1.26.3
+  go: 1.26.4
   build-tags:
     - goexperiment.arenas
     - goexperiment.goroutineleakprofile
@@ -163,6 +163,9 @@ linters:
     exhaustruct:
       exclude:
         - os/exec.Cmd
+    ginkgolinter:
+      forbid-focus-container: true
+      forbid-spec-pollution: true
     gocritic:
       disabled-checks:
         - ifElseChain
@@ -175,12 +178,18 @@ linters:
         - anon
         - stdlib
         - generic
+    makezero:
+      always: true
     revive:
       rules:
         - disabled: true
           name: exported
         - disabled: true
           name: package-comments
+    testifylint:
+      disable:
+        - go-require
+      enable-all: true
     varnamelen:
       ignore-map-index-ok: true
       ignore-names:
@@ -230,4 +239,6 @@ formatters:
     paths:
       - _templ\.go$
       - internal/infrastructure/db/
-issues: {}
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 10
