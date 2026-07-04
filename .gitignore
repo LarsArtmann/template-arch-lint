@@ -99,3 +99,25 @@ node_modules/
 /template-arch-lint
 # Nix build output
 /result
+
+# >>> buildflow-managed (.gitignore) >>>
+# Auto-managed by buildflow. Edit outside these markers; this block is regenerated on `buildflow --fix`.
+
+## Secrets and environment
+*.pem
+*.key
+
+## Databases
+*.db-shm
+*.db-wal
+
+## Buildflow artifacts
+audit-log.*
+workflow-audit-log.*
+.buildflow-workflow-baseline.json
+
+## Nix
+result-*
+.envrc
+.direnv/
+# <<< buildflow-managed (.gitignore) <<<

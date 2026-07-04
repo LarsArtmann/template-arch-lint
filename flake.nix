@@ -53,7 +53,7 @@
             version = builtins.substring 0 7 (self.shortRev or "dirty");
             src = ./.;
             subPackages = [ "cmd" ];
-            vendorHash = "sha256-MHAHkxjYaoPz4KCxnpSg98s11oXele7kLkGvvzDXaBA=";
+            vendorHash = "sha256-7gBOsOhI4SLIevCq+rxIdr2QtlTsPAbk5NpEk9NbEaI=";
             postInstall = ''
               mv $out/bin/cmd $out/bin/template-arch-lint
             '';
