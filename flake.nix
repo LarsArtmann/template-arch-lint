@@ -3,91 +3,52 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
+
     systems.url = "github:nix-systems/default";
+
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    go-nix-helpers = {
+      url = "github:LarsArtmann/go-nix-helpers";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
   outputs =
-    inputs@{
-      self,
-      flake-parts,
-      systems,
-      treefmt-nix,
-      ...
-    }:
+    inputs@{ self, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = import systems;
+      imports = [ inputs.go-nix-helpers.flakeModules.go-standard ];
 
-      imports = [
-        treefmt-nix.flakeModule
-      ];
+      go-standard = {
+        pname = "template-arch-lint";
+        vendorHash = "sha256-cn20VAdEtKO1c80/b+AP5Jjzq9uv4MgFmaYhiT4NdjI=";
+        description = "Architecture linter template for Go";
+        enableTempl = true;
+        subPackages = [ "cmd" ];
 
-      perSystem =
-        {
-          config,
-          pkgs,
-          ...
-        }:
-        {
-          treefmt = {
-            projectRootFile = "go.mod";
-            programs = {
-              gofumpt.enable = true;
-              goimports.enable = true;
-              nixfmt.enable = true;
-              templ.enable = true;
-            };
-          };
-
-          checks.format = config.treefmt.build.check self;
-
-          packages.default = pkgs.buildGoModule {
-            pname = "template-arch-lint";
-            version = builtins.substring 0 7 (self.shortRev or "dirty");
-            src = ./.;
-            subPackages = [ "cmd" ];
-            vendorHash = "sha256-7gBOsOhI4SLIevCq+rxIdr2QtlTsPAbk5NpEk9NbEaI=";
-            postInstall = ''
-              mv $out/bin/cmd $out/bin/template-arch-lint
-            '';
-          };
-
-          devShells = {
-            default = pkgs.mkShell {
-              name = "template-arch-lint-dev";
-
-              packages = [
-                pkgs.go_1_26
-                pkgs.golangci-lint
-                pkgs.gopls
-                pkgs.delve
-                pkgs.gotools
-                pkgs.gofumpt
-                pkgs.templ
-              ];
-
-              GOWORK = "off";
-              GOPRIVATE = "github.com/LarsArtmann/*,github.com/larsartmann/*";
-            };
-
-            ci = pkgs.mkShellNoCC {
-              packages = [
-                pkgs.go_1_26
-                pkgs.golangci-lint
-                pkgs.templ
-              ];
-
-              GOWORK = "off";
-              GOPRIVATE = "github.com/LarsArtmann/*,github.com/larsartmann/*";
-            };
-          };
+        extraBuildAttrs = {
+          postInstall = ''
+            mv $out/bin/cmd $out/bin/template-arch-lint
+          '';
         };
+
+        shellExtraEnv = {
+          GOPRIVATE = "github.com/LarsArtmann/*,github.com/larsartmann/*";
+        };
+
+        devShellExtraPackages = pkgs: [
+          pkgs.delve
+          pkgs.gotools
+          pkgs.gofumpt
+        ];
+      };
     };
 }
