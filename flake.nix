@@ -29,7 +29,7 @@
 
       go-standard = {
         pname = "template-arch-lint";
-        vendorHash = "sha256-cn20VAdEtKO1c80/b+AP5Jjzq9uv4MgFmaYhiT4NdjI=";
+        vendorHash = "sha256-BUsbYVq9NSp7D5FN6nvEOvFE5U0+ctphkd5oYvFADO0=";
         description = "Architecture linter template for Go";
         enableTempl = true;
         subPackages = [ "cmd" ];

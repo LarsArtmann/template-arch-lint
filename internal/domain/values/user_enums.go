@@ -2,7 +2,7 @@ package values
 
 import (
 	"database/sql/driver"
-	"encoding/json"
+	"encoding/json/v2"
 	"slices"
 	"strings"
 

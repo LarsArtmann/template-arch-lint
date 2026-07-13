@@ -3,7 +3,7 @@ package values
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
+	"encoding/json/v2"
 	"fmt"
 	"regexp"
 	"time"

@@ -3,7 +3,7 @@ package handlers
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
+	"encoding/json/v2"
 	"net/http"
 
 	"charm.land/log/v2"
@@ -34,7 +34,7 @@ func generateUserID() string {
 func writeJSON(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(data)
+	json.MarshalWrite(w, data)
 }
 
 func errorResponse(w http.ResponseWriter, status int, errCode, message string) {
@@ -45,7 +45,7 @@ func errorResponse(w http.ResponseWriter, status int, errCode, message string) {
 }
 
 func bindRequest[T any](r *http.Request, req *T) bool {
-	err := json.NewDecoder(r.Body).Decode(req)
+	err := json.UnmarshalRead(r.Body, req)
 	if err != nil {
 		log.Error("Invalid request format", "error", err)
 
