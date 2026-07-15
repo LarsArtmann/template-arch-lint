@@ -16,6 +16,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  GOEXPERIMENT: jsonv2
+
 jobs:
   # ==============================================
   # Complete CI Pipeline - calls other workflows
