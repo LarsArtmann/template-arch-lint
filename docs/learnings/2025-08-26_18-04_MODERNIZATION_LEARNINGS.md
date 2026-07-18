@@ -35,23 +35,23 @@ Error: unknown linters: 'maligned,golint,gomnd,nilaway,deadcode,varcheck,structc
 # Before (Deprecated)
 linters:
   enable:
-    - maligned      # struct field alignment
-    - golint        # style checking
-    - gomnd         # magic number detection
-    - deadcode      # unused code
-    - varcheck      # unused variables
-    - structcheck   # unused struct fields
+    - maligned # struct field alignment
+    - golint # style checking
+    - gomnd # magic number detection
+    - deadcode # unused code
+    - varcheck # unused variables
+    - structcheck # unused struct fields
 
 # After (Modern Equivalents)
 linters:
   enable:
-    - unused        # Replaces deadcode, varcheck, structcheck via staticcheck
-    - mnd           # Modern magic number detection
-    - revive        # Enhanced replacement for golint
+    - unused # Replaces deadcode, varcheck, structcheck via staticcheck
+    - mnd # Modern magic number detection
+    - revive # Enhanced replacement for golint
 
 linters-settings:
   govet:
-    enable-all: true  # Includes fieldalignment (maligned replacement) + 30+ analyzers
+    enable-all: true # Includes fieldalignment (maligned replacement) + 30+ analyzers
 ```
 
 **Key Insight**: Modern Go linting favors **fewer, more comprehensive tools** over many specialized ones.
@@ -231,11 +231,12 @@ import "linting.just"
 - ❌ **nancy + osv-scanner**: Database overlap with govulncheck, poor stdlib coverage
 
 **Comparison Matrix Insight**:
-| Tool | Go Stdlib | Official | Database Quality | Maintenance |
-|------|-----------|----------|------------------|-------------|
-| govulncheck | ✅ Excellent | ✅ Go team | ✅ Curated | ✅ Active |
-| nancy | ❌ Limited | ❌ Third-party | ⚠️ Community | ⚠️ Maintenance |
-| osv-scanner | ❌ Poor | ❌ Third-party | ⚠️ Crowdsourced | ✅ Active |
+
+| Tool        | Go Stdlib    | Official       | Database Quality | Maintenance    |
+| ----------- | ------------ | -------------- | ---------------- | -------------- |
+| govulncheck | ✅ Excellent | ✅ Go team     | ✅ Curated       | ✅ Active      |
+| nancy       | ❌ Limited   | ❌ Third-party | ⚠️ Community     | ⚠️ Maintenance |
+| osv-scanner | ❌ Poor      | ❌ Third-party | ⚠️ Crowdsourced  | ✅ Active      |
 
 **Learning**: For Go projects, official tools + established patterns provide better coverage than tool proliferation.
 
