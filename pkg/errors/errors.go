@@ -362,90 +362,79 @@ func (e *ConfigurationError) IsRetryable() bool {
 
 // IsDomainError checks if an error is a domain error.
 func IsDomainError(err error) bool {
-	var domainErr DomainError
-
-	return errors.As(err, &domainErr)
+	_, ok := errors.AsType[DomainError](err)
+	return ok
 }
 
 // AsValidationError attempts to cast error to ValidationError.
 func AsValidationError(err error) (*ValidationError, bool) {
-	var ve *ValidationError
 
-	ok := errors.As(err, &ve)
+	ve, ok := errors.AsType[*ValidationError](err)
 
 	return ve, ok
 }
 
 // AsNotFoundError attempts to cast error to NotFoundError.
 func AsNotFoundError(err error) (*NotFoundError, bool) {
-	var nfe *NotFoundError
 
-	ok := errors.As(err, &nfe)
+	nfe, ok := errors.AsType[*NotFoundError](err)
 
 	return nfe, ok
 }
 
 // AsConflictError attempts to cast error to ConflictError.
 func AsConflictError(err error) (*ConflictError, bool) {
-	var ce *ConflictError
 
-	ok := errors.As(err, &ce)
+	ce, ok := errors.AsType[*ConflictError](err)
 
 	return ce, ok
 }
 
 // AsInternalError attempts to cast error to InternalError.
 func AsInternalError(err error) (*InternalError, bool) {
-	var ie *InternalError
 
-	ok := errors.As(err, &ie)
+	ie, ok := errors.AsType[*InternalError](err)
 
 	return ie, ok
 }
 
 // AsDatabaseError attempts to cast error to DatabaseError.
 func AsDatabaseError(err error) (*DatabaseError, bool) {
-	var de *DatabaseError
 
-	ok := errors.As(err, &de)
+	de, ok := errors.AsType[*DatabaseError](err)
 
 	return de, ok
 }
 
 // AsNetworkError attempts to cast error to NetworkError.
 func AsNetworkError(err error) (*NetworkError, bool) {
-	var ne *NetworkError
 
-	ok := errors.As(err, &ne)
+	ne, ok := errors.AsType[*NetworkError](err)
 
 	return ne, ok
 }
 
 // AsConfigurationError attempts to cast error to ConfigurationError.
 func AsConfigurationError(err error) (*ConfigurationError, bool) {
-	var ce *ConfigurationError
 
-	ok := errors.As(err, &ce)
+	ce, ok := errors.AsType[*ConfigurationError](err)
 
 	return ce, ok
 }
 
 // IsInfrastructureError checks if error is an infrastructure error.
 func IsInfrastructureError(err error) bool {
-	var infraErr InfrastructureError
-
-	return errors.As(err, &infraErr)
+	_, ok := errors.AsType[InfrastructureError](err)
+	return ok
 }
 
 // IsRetryableError checks if error can be retried.
 func IsRetryableError(err error) bool {
-	var de *DatabaseError
-	if errors.As(err, &de) {
+	if de, ok := errors.AsType[*DatabaseError](err); ok {
 		return de.IsRetryable()
 	}
 
-	var ne *NetworkError
-	if errors.As(err, &ne) {
+	if ne, ok := errors.AsType[*NetworkError](err); ok {
 		return ne.IsRetryable()
 	}
 

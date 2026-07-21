@@ -105,7 +105,7 @@ func TestInternalError(t *testing.T) {
 		t.Errorf("Expected status %d, got %d", http.StatusInternalServerError, err.HTTPStatus())
 	}
 
-	if !errors.Is(err.Cause(), cause) {
+	if !errors.Is(err.Cause(), cause) { //nolint:legacyerrors // value match
 		t.Errorf("Expected cause to be set correctly")
 	}
 

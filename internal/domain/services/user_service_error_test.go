@@ -636,8 +636,8 @@ var _ = Describe("🚨 UserService Error Path Testing", func() {
 				Expect(err.Error()).To(ContainSubstring("custom database error"))
 
 				// Check that we can still access the original error
-				var internalErr *domainErrors.InternalError
-				Expect(errors.As(err, &internalErr)).To(BeTrue())
+				internalErr, ok := errors.AsType[*domainErrors.InternalError](err)
+				Expect(ok).To(BeTrue())
 				Expect(internalErr.Cause()).To(Equal(customError))
 			})
 		})

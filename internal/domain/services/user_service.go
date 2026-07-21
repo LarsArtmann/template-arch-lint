@@ -91,7 +91,7 @@ func (s *UserService) CreateUser(
 
 	// Business rule: Check if user already exists
 	existingUser, err := s.userRepo.FindByEmail(ctx, email)
-	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) {
+	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) { //nolint:legacyerrors // value sentinel
 		return nil, domainerrors.NewInternalError(
 			fmt.Sprintf("failed to check existing user (id=%s, email=%s)", id, email),
 			err,
@@ -218,7 +218,7 @@ func (s *UserService) validateEmailUpdate(
 
 func (s *UserService) checkEmailAvailability(ctx context.Context, email string) error {
 	existingUser, err := s.userRepo.FindByEmail(ctx, email)
-	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) {
+	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) { //nolint:legacyerrors // value sentinel
 		return domainerrors.WrapServiceError(fmt.Sprintf("check existing email (%s)", email), err)
 	}
 
@@ -368,7 +368,7 @@ func (s *UserService) checkUserNotExistsResult(
 	email string,
 ) mo.Result[*entities.User] {
 	existingUser, err := s.userRepo.FindByEmail(ctx, email)
-	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) {
+	if err != nil && !errors.Is(err, repositories.ErrUserNotFound) { //nolint:legacyerrors // value sentinel
 		return mo.Err[*entities.User](
 			domainerrors.NewInternalError(
 				fmt.Sprintf("failed to check existing user (email=%s)", email),

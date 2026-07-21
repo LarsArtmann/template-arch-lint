@@ -160,7 +160,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				for err := range results {
 					if err == nil {
 						successCount++
-					} else if errors.Is(err, repositories.ErrUserAlreadyExists) {
+					} else if errors.Is(err, repositories.ErrUserAlreadyExists) { //nolint:legacyerrors // value sentinel
 						conflictCount++
 					} else {
 						otherErrorCount++
@@ -423,7 +423,7 @@ var _ = Describe("🔄 UserService Concurrent Access Testing", func() {
 				for err := range results {
 					if err == nil {
 						successCount++
-					} else if errors.Is(err, repositories.ErrUserNotFound) {
+					} else if errors.Is(err, repositories.ErrUserNotFound) { //nolint:legacyerrors // value sentinel
 						notFoundCount++
 					} else {
 						otherErrorCount++

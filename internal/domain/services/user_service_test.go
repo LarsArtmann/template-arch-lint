@@ -134,7 +134,7 @@ var _ = Describe("UserService", func() {
 
 				Expect(user).To(BeNil())
 				Expect(err).To(HaveOccurred())
-				Expect(std_errors.Is(err, repositories.ErrUserAlreadyExists)).To(BeTrue())
+				Expect(std_errors.Is(err, repositories.ErrUserAlreadyExists)).To(BeTrue()) //nolint:legacyerrors // value sentinel
 			})
 		})
 	})
