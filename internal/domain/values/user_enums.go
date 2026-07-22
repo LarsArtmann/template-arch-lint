@@ -9,6 +9,17 @@ import (
 	"github.com/LarsArtmann/template-arch-lint/pkg/errors"
 )
 
+func unmarshalString(data []byte, setString func(string) error) error {
+	var str string
+
+	err := json.Unmarshal(data, &str)
+	if err != nil {
+		return err
+	}
+
+	return setString(str)
+}
+
 // UserStatus represents a user's account status.
 type UserStatus string
 
@@ -58,13 +69,10 @@ func (s UserStatus) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements json.Unmarshaler interface.
 func (s *UserStatus) UnmarshalJSON(data []byte) error {
-	var str string
+	return unmarshalString(data, s.setString)
+}
 
-	err := json.Unmarshal(data, &str)
-	if err != nil {
-		return err
-	}
-
+func (s *UserStatus) setString(str string) error {
 	status := UserStatus(strings.ToLower(str))
 	if !status.IsValid() {
 		return errors.NewDomainValidationError("user_status", "invalid status: "+str)
@@ -94,14 +102,7 @@ func (s *UserStatus) Scan(value any) error {
 		return errors.NewDomainValidationError("user_status", "cannot scan non-string value")
 	}
 
-	status := UserStatus(strings.ToLower(str))
-	if !status.IsValid() {
-		return errors.NewDomainValidationError("user_status", "invalid status: "+str)
-	}
-
-	*s = status
-
-	return nil
+	return s.setString(str)
 }
 
 // Value implements the driver Valuer interface for database compatibility.
@@ -161,13 +162,10 @@ func (r UserRole) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements json.Unmarshaler interface.
 func (r *UserRole) UnmarshalJSON(data []byte) error {
-	var str string
+	return unmarshalString(data, r.setString)
+}
 
-	err := json.Unmarshal(data, &str)
-	if err != nil {
-		return err
-	}
-
+func (r *UserRole) setString(str string) error {
 	role := UserRole(strings.ToLower(str))
 	if !role.IsValid() {
 		return errors.NewDomainValidationError("user_role", "invalid role: "+str)
@@ -197,14 +195,7 @@ func (r *UserRole) Scan(value any) error {
 		return errors.NewDomainValidationError("user_role", "cannot scan non-string value")
 	}
 
-	role := UserRole(strings.ToLower(str))
-	if !role.IsValid() {
-		return errors.NewDomainValidationError("user_role", "invalid role: "+str)
-	}
-
-	*r = role
-
-	return nil
+	return r.setString(str)
 }
 
 // Value implements the driver Valuer interface for database compatibility.
