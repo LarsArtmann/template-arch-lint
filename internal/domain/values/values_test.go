@@ -1,7 +1,7 @@
 package values_test
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/ids"
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/values"

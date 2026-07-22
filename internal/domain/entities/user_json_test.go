@@ -1,7 +1,7 @@
 package entities
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"time"
 
 	ginkgo "github.com/onsi/ginkgo/v2"

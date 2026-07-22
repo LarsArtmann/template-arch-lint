@@ -363,12 +363,12 @@ func (e *ConfigurationError) IsRetryable() bool {
 // IsDomainError checks if an error is a domain error.
 func IsDomainError(err error) bool {
 	_, ok := errors.AsType[DomainError](err)
+
 	return ok
 }
 
 // AsValidationError attempts to cast error to ValidationError.
 func AsValidationError(err error) (*ValidationError, bool) {
-
 	ve, ok := errors.AsType[*ValidationError](err)
 
 	return ve, ok
@@ -376,7 +376,6 @@ func AsValidationError(err error) (*ValidationError, bool) {
 
 // AsNotFoundError attempts to cast error to NotFoundError.
 func AsNotFoundError(err error) (*NotFoundError, bool) {
-
 	nfe, ok := errors.AsType[*NotFoundError](err)
 
 	return nfe, ok
@@ -384,7 +383,6 @@ func AsNotFoundError(err error) (*NotFoundError, bool) {
 
 // AsConflictError attempts to cast error to ConflictError.
 func AsConflictError(err error) (*ConflictError, bool) {
-
 	ce, ok := errors.AsType[*ConflictError](err)
 
 	return ce, ok
@@ -392,7 +390,6 @@ func AsConflictError(err error) (*ConflictError, bool) {
 
 // AsInternalError attempts to cast error to InternalError.
 func AsInternalError(err error) (*InternalError, bool) {
-
 	ie, ok := errors.AsType[*InternalError](err)
 
 	return ie, ok
@@ -400,7 +397,6 @@ func AsInternalError(err error) (*InternalError, bool) {
 
 // AsDatabaseError attempts to cast error to DatabaseError.
 func AsDatabaseError(err error) (*DatabaseError, bool) {
-
 	de, ok := errors.AsType[*DatabaseError](err)
 
 	return de, ok
@@ -408,7 +404,6 @@ func AsDatabaseError(err error) (*DatabaseError, bool) {
 
 // AsNetworkError attempts to cast error to NetworkError.
 func AsNetworkError(err error) (*NetworkError, bool) {
-
 	ne, ok := errors.AsType[*NetworkError](err)
 
 	return ne, ok
@@ -416,7 +411,6 @@ func AsNetworkError(err error) (*NetworkError, bool) {
 
 // AsConfigurationError attempts to cast error to ConfigurationError.
 func AsConfigurationError(err error) (*ConfigurationError, bool) {
-
 	ce, ok := errors.AsType[*ConfigurationError](err)
 
 	return ce, ok
@@ -425,6 +419,7 @@ func AsConfigurationError(err error) (*ConfigurationError, bool) {
 // IsInfrastructureError checks if error is an infrastructure error.
 func IsInfrastructureError(err error) bool {
 	_, ok := errors.AsType[InfrastructureError](err)
+
 	return ok
 }
 

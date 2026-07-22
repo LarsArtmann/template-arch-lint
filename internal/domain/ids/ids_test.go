@@ -1,7 +1,7 @@
 package ids_test
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"testing"
 
 	"github.com/LarsArtmann/template-arch-lint/internal/domain/ids"

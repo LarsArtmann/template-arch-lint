@@ -34,7 +34,7 @@ func generateUserID() string {
 func writeJSON(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.MarshalWrite(w, data)
+	_ = json.MarshalWrite(w, data)
 }
 
 func errorResponse(w http.ResponseWriter, status int, errCode, message string) {

@@ -8,5 +8,5 @@ import (
 func sendErrorResponse(w http.ResponseWriter, httpStatus int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(httpStatus)
-	json.MarshalWrite(w, map[string]string{"error": message})
+	_ = json.MarshalWrite(w, map[string]string{"error": message})
 }
