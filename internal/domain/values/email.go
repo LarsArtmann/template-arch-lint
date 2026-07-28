@@ -51,22 +51,29 @@ func (e Email) Value() string {
 
 // Domain returns the domain part of the email.
 func (e Email) Domain() string {
-	parts := strings.Split(e.value, "@")
-	if len(parts) != emailExpectedParts {
-		return ""
-	}
+	_, domain := e.splitParts()
 
-	return parts[1]
+	return domain
 }
 
 // LocalPart returns the local part of the email (before @).
 func (e Email) LocalPart() string {
+	local, _ := e.splitParts()
+
+	return local
+}
+
+// splitParts returns the (local, domain) parts of e.value, or two empty strings
+// when the value does not have exactly one "@". Callers are expected to hold
+// a validated Email (where validateEmailParts guarantees a single "@"); the
+// guard exists so that future constructors that bypass validation stay safe.
+func (e Email) splitParts() (local, domain string) {
 	parts := strings.Split(e.value, "@")
 	if len(parts) != emailExpectedParts {
-		return ""
+		return "", ""
 	}
 
-	return parts[0]
+	return parts[0], parts[1]
 }
 
 // Equals compares two Email value objects (case-insensitive).

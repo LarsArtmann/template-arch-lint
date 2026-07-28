@@ -127,14 +127,11 @@ func MustGenerateSessionID() SessionID {
 // Validation functions.
 
 func validateUserID(id string) error {
-	if id == "" {
-		return newValidationError("user ID is required")
+	if err := validateIDRequired(id, "user ID"); err != nil {
+		return err
 	}
 
 	normalized := strings.TrimSpace(id)
-	if normalized != id {
-		return newValidationError("user ID cannot have leading or trailing whitespace")
-	}
 
 	if strings.ContainsAny(normalized, " \t\n\r") {
 		return newValidationError("user ID cannot contain whitespace")
@@ -160,14 +157,11 @@ func validateUserID(id string) error {
 }
 
 func validateSessionID(id string) error {
-	if id == "" {
-		return newValidationError("session ID is required")
+	if err := validateIDRequired(id, "session ID"); err != nil {
+		return err
 	}
 
 	normalized := strings.TrimSpace(id)
-	if normalized != id {
-		return newValidationError("session ID cannot have leading or trailing whitespace")
-	}
 
 	if len(normalized) < idMinLength {
 		return newValidationError("session ID too short (minimum 2 characters)")
@@ -175,6 +169,21 @@ func validateSessionID(id string) error {
 
 	if len(normalized) > idMaxLength {
 		return newValidationError("session ID too long (maximum 100 characters)")
+	}
+
+	return nil
+}
+
+// validateIDRequired enforces the "non-empty and no surrounding whitespace" rules
+// shared by every branded ID in this package. name is the human-readable noun
+// used in error messages (e.g. "user ID", "session ID").
+func validateIDRequired(id, name string) error {
+	if id == "" {
+		return newValidationError(name + " is required")
+	}
+
+	if strings.TrimSpace(id) != id {
+		return newValidationError(name + " cannot have leading or trailing whitespace")
 	}
 
 	return nil
