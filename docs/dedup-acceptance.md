@@ -7,6 +7,7 @@ sessions do not re-evaluate them.
 ## cmd/main.go vs internal/config/config.go (server timeout defaults)
 
 **Locations:**
+
 - `cmd/main.go:26-29` — `defaultServerReadTimeout=15s`, `defaultServerWriteTimeout=15s`,
   `defaultServerIdleTimeout=60s`, `defaultGracefulTimeout=30s`
 - `internal/config/config.go:17-20` — `defaultServerReadTimeout=5s`,

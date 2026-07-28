@@ -4,12 +4,12 @@
 
 ### a) FULLY DONE
 
-| # | Clone Group | File:Line | Action | Result |
-|---|---|---|---|---|
-| 1 | Email dot-prefix/suffix check | `internal/domain/values/email.go:185-191` & `210-216` | Extracted `validateNoEdgeDots(s, partName)` helper | Eliminated |
-| 2 | ID required/whitespace check | `internal/domain/ids/ids.go:129-137` & `162-170` | Extracted `validateIDRequired(id, name)` helper | Eliminated |
-| 3 | Email `Split` + `len(parts)!=2` check | `internal/domain/values/email.go:54-59` & `64-69` | Extracted `splitParts()` accessor shared by `Domain()` and `LocalPart()` | Eliminated |
-| 4 | Server timeout constants | `cmd/main.go:26-29` vs `internal/config/config.go:17-20` | Reviewed for unification | Accepted (different values, different layers) |
+| #   | Clone Group                           | File:Line                                                | Action                                                                   | Result                                        |
+| --- | ------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------- |
+| 1   | Email dot-prefix/suffix check         | `internal/domain/values/email.go:185-191` & `210-216`    | Extracted `validateNoEdgeDots(s, partName)` helper                       | Eliminated                                    |
+| 2   | ID required/whitespace check          | `internal/domain/ids/ids.go:129-137` & `162-170`         | Extracted `validateIDRequired(id, name)` helper                          | Eliminated                                    |
+| 3   | Email `Split` + `len(parts)!=2` check | `internal/domain/values/email.go:54-59` & `64-69`        | Extracted `splitParts()` accessor shared by `Domain()` and `LocalPart()` | Eliminated                                    |
+| 4   | Server timeout constants              | `cmd/main.go:26-29` vs `internal/config/config.go:17-20` | Reviewed for unification                                                 | Accepted (different values, different layers) |
 
 - Created `docs/dedup-acceptance.md` recording the rationale for Group #4.
 - All 3 actively-refactored groups verified by `go test ./...` (7 packages, all `ok`).
@@ -28,11 +28,13 @@
 ### d) TOTALLY FUCKED UP
 
 Nothing. All 3 refactors preserved semantics:
+
 - `validateNoEdgeDots` keeps identical error messages ("email local part cannot start with dot", "email domain cannot end with dot") by composing `partName + " cannot start with dot"` etc. — verified against tests that pass.
 - `validateIDRequired` produces the same messages by concatenating `name + " is required"` / `name + " cannot have leading or trailing whitespace"`.
 - `splitParts` preserves the "return empty string when split count != 2" behaviour for both `Domain()` and `LocalPart()`.
 
 Pre-existing issues NOT touched (per "don't fix unrelated bugs" rule):
+
 - `encoding/json/v2` import requires `GOEXPERIMENT=jsonv2` to compile (Go 1.26 vs 1.27 stdlib mismatch) — present before this session, still present.
 - 22 pre-existing lint findings in `user_enums.go`, `user_id.go`, `user_session.go`, `cmd/main.go`, `config.go` (wrapcheck, recvcheck, godoclint, makezero, varnamelen, nonamedreturns, paralleltest, gochecknoglobals) — all in files I did not modify.
 

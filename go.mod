@@ -5,7 +5,7 @@ go 1.26.5
 require (
 	charm.land/log/v2 v2.0.0
 	github.com/go-playground/validator/v10 v10.30.3
-	github.com/larsartmann/go-branded-id v0.4.0
+	github.com/larsartmann/go-branded-id v0.5.0
 	github.com/larsartmann/httputil v0.6.1
 	github.com/onsi/ginkgo/v2 v2.26.0
 	github.com/onsi/gomega v1.42.1
@@ -255,7 +255,7 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.54.0 // indirect
-	golang.org/x/exp v0.0.0-20260718201538-764159d718ef // indirect
+	golang.org/x/exp v0.0.0-20260727155853-b88d891fe743 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20251002181428-27f1f14c8bb9 // indirect
 	golang.org/x/image v0.20.0 // indirect
 	golang.org/x/mod v0.38.0 // indirect
