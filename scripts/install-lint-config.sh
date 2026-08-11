@@ -14,14 +14,14 @@ echo -e "${BOLD}${BLUE}🚀 Installing Template Architecture Lint${NC}"
 
 # Check if we're in a git repo
 if [ ! -d ".git" ]; then
-    echo "❌ Not in a git repository. Please run from the root of a git project."
-    exit 1
+	echo "❌ Not in a git repository. Please run from the root of a git project."
+	exit 1
 fi
 
-# Check if go.mod exists  
+# Check if go.mod exists
 if [ ! -f "go.mod" ]; then
-    echo "❌ No go.mod found. Please run from the root of a Go project."
-    exit 1
+	echo "❌ No go.mod found. Please run from the root of a Go project."
+	exit 1
 fi
 
 echo "✅ Go project detected"
@@ -42,7 +42,7 @@ echo -e "${GREEN}✅ Installation complete!${NC}"
 echo ""
 echo "📝 Files added:"
 echo "  • .go-arch-lint.yml  (Architecture boundaries)"
-echo "  • .golangci.yml      (Code quality rules)"  
+echo "  • .golangci.yml      (Code quality rules)"
 echo "  • linting.just       (Development commands)"
 echo ""
 echo "🚀 Next steps:"

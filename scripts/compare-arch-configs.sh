@@ -17,25 +17,25 @@ echo
 
 # Function to run check and capture output
 run_check() {
-    local config_file="$1"
-    local description="$2"
-    
-    echo -e "${YELLOW}Testing: $description${NC}"
-    echo "Config: $config_file"
-    echo "----------------------------------------"
-    
-    if go-arch-lint check --arch-file "$config_file" 2>&1; then
-        echo -e "${GREEN}✅ PASSED - No violations found${NC}"
-    else
-        local exit_code=$?
-        echo -e "${RED}❌ FAILED - Violations detected (exit code: $exit_code)${NC}"
-    fi
-    echo
+	local config_file="$1"
+	local description="$2"
+
+	echo -e "${YELLOW}Testing: $description${NC}"
+	echo "Config: $config_file"
+	echo "----------------------------------------"
+
+	if go-arch-lint check --arch-file "$config_file" 2>&1; then
+		echo -e "${GREEN}✅ PASSED - No violations found${NC}"
+	else
+		local exit_code=$?
+		echo -e "${RED}❌ FAILED - Violations detected (exit code: $exit_code)${NC}"
+	fi
+	echo
 }
 
 # Function to create test file with banned library
 create_banned_test() {
-    cat > /tmp/test-banned.go << 'EOF'
+	cat >/tmp/test-banned.go <<'EOF'
 package main
 
 import (
@@ -53,7 +53,7 @@ EOF
 
 # Function to create test file with approved libraries only
 create_approved_test() {
-    cat > /tmp/test-approved.go << 'EOF'
+	cat >/tmp/test-approved.go <<'EOF'
 package main
 
 import (
@@ -73,7 +73,7 @@ EOF
 
 # Function to cleanup test files
 cleanup() {
-    rm -f /tmp/test-banned.go /tmp/test-approved.go
+	rm -f /tmp/test-banned.go /tmp/test-approved.go
 }
 
 # Cleanup on exit
@@ -93,7 +93,7 @@ echo "=========================================================="
 echo
 run_check ".go-arch-lint.yml" "Permissive Configuration (anyVendorDeps: true)"
 
-# Test with strict config  
+# Test with strict config
 echo
 run_check ".go-arch-lint-strict.yml" "Strict Configuration (anyVendorDeps: false)"
 
@@ -108,7 +108,7 @@ echo
 run_check ".go-arch-lint.yml" "Permissive Configuration (anyVendorDeps: true)"
 
 # Test with strict config
-echo  
+echo
 run_check ".go-arch-lint-strict.yml" "Strict Configuration (anyVendorDeps: false)"
 
 echo -e "${BLUE}📊 Summary of Differences${NC}"
@@ -132,7 +132,7 @@ echo
 echo -e "${BLUE}🎯 Recommendation:${NC}"
 echo "Use strict configuration for production projects requiring:"
 echo "  - Security compliance"
-echo "  - Vendor dependency control" 
+echo "  - Vendor dependency control"
 echo "  - Library policy enforcement"
 echo "  - Architectural purity"
 echo "  - Team consistency"
