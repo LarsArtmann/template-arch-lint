@@ -1669,7 +1669,7 @@ run_diagnostics_with_repair() {
 		# Provide helpful cleanup suggestions
 		log_info "Auto-cleanup suggestions:"
 		log_info "  • Clean Go cache: go clean -cache -modcache"
-		log_info "  • Clean npm cache: npm cache clean --force"
+		log_info "  • Clean pnpm store: pnpm store prune"
 		log_info "  • Clean Docker: docker system prune"
 		log_info "  • Clean Homebrew: brew cleanup"
 
