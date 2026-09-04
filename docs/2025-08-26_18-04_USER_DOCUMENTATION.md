@@ -250,7 +250,7 @@ linters:
     - nilaway # Nil panic prevention
     - godox # TODO detection
     - forbidigo # Banned patterns
-    # ... 37 more linters
+# ... 37 more linters
 
 linters-settings:
   funlen:

@@ -662,7 +662,7 @@ if err != nil {
 
 ```yaml
 whitespace: # Fast
-  # No additional settings available
+# No additional settings available
 ```
 
 **Decision:** ❌ Don't add wsl/wsl_v5 (covered by whitespace)

@@ -42,7 +42,7 @@
 | Tool          | Time | CPU  | Memory | Status                 |
 | ------------- | ---- | ---- | ------ | ---------------------- |
 | go-arch-lint  | 1.7s | 84%  | Low    | ✅ Excellent           |
-| golangci-lint | 8.9s | 455% | High   | ⚠️ Heavy but thorough  |
+| golangci-lint | 8.9s | 455% | High   | ⚠️ Heavy but thorough   |
 | NilAway       | ~6s  | High | Medium | ✅ Finding real issues |
 | govulncheck   | <1s  | Low  | Low    | ✅ Very fast           |
 

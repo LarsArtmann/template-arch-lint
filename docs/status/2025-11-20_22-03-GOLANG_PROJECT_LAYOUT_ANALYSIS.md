@@ -1,9 +1,9 @@
 # GOLANG PROJECT LAYOUT ANALYSIS REPORT
 
-**Date:** 2025-11-20 22:03  
-**Updated:** 2025-11-20 (Go 1.25 Integration)  
-**Analysis Type:** Go Project Layout Standard Compliance + Modern Go Capabilities  
-**Repository:** template-arch-lint (Architecture Linting Template)  
+**Date:** 2025-11-20 22:03\
+**Updated:** 2025-11-20 (Go 1.25 Integration)\
+**Analysis Type:** Go Project Layout Standard Compliance + Modern Go Capabilities\
+**Repository:** template-arch-lint (Architecture Linting Template)\
 **Go Version Coverage:** 1.23, 1.24, 1.25 (Latest Features)
 
 ## 🎯 Executive Summary
@@ -159,7 +159,7 @@ tool (
 
 ### 1. **`/api`** - API Definitions (CRITICAL)
 
-**Current State:** Missing entirely  
+**Current State:** Missing entirely\
 **What Should Be Here:**
 
 - OpenAPI/Swagger specifications for linting rule APIs
@@ -172,7 +172,7 @@ tool (
 
 ### 2. **`/configs`** - Configuration Templates (CRITICAL)
 
-**Current State:** Configs scattered in root (`config.yaml`, `.go-arch-lint.yml`, `.golangci.yml`)  
+**Current State:** Configs scattered in root (`config.yaml`, `.go-arch-lint.yml`, `.golangci.yml`)\
 **What Should Be Here:**
 
 - `/configs/default.yaml` - Default linter configuration
@@ -185,7 +185,7 @@ tool (
 
 ### 3. **`/examples`** - Usage Examples (HIGH)
 
-**Current State:** `template-configs/` exists but not as proper examples  
+**Current State:** `template-configs/` exists but not as proper examples\
 **What Should Be Here:**
 
 - `/examples/simple-project/` - Minimal Go project with linting setup
@@ -198,7 +198,7 @@ tool (
 
 ### 4. **`/test`** - External Test Data (HIGH)
 
-**Current State:** Tests within `/internal` only  
+**Current State:** Tests within `/internal` only\
 **What Should Be Here:**
 
 - `/test/testdata/` - Sample projects with various architectures
@@ -213,14 +213,14 @@ tool (
 
 ### 5. **`/plugins`** → **COMPLETED MOVED TO `/pkg/linter-plugins/`**
 
-**Previous State:** `/plugins/template-arch-lint/` with its own Go module  
-**Current State:** ✅ MOVED to `/pkg/linter-plugins/template-arch-lint/` for Go Project Layout compliance  
-**Completed:** 2025-11-20 - Module path updated to `github.com/LarsArtmann/template-arch-lint/pkg/linter-plugins/template-arch-lint`  
+**Previous State:** `/plugins/template-arch-lint/` with its own Go module\
+**Current State:** ✅ MOVED to `/pkg/linter-plugins/template-arch-lint/` for Go Project Layout compliance\
+**Completed:** 2025-11-20 - Module path updated to `github.com/LarsArtmann/template-arch-lint/pkg/linter-plugins/template-arch-lint`\
 **Updates:** Config files updated, documentation references migrated, public API properly exposed
 
 ### 6. **Missing `/build` Directory**
 
-**Current State:** CI/CD configurations scattered in `.github/workflows/`  
+**Current State:** CI/CD configurations scattered in `.github/workflows/`\
 **What Should Be Here:**
 
 - `/build/ci/` - CI configuration templates
@@ -232,7 +232,7 @@ tool (
 
 ### 7. **Missing `/tools` Directory**
 
-**Current State:** Supporting tools mixed with build scripts in `/scripts/`  
+**Current State:** Supporting tools mixed with build scripts in `/scripts/`\
 **What Should Be Here:**
 
 - Tools that can import from `/pkg` and `/internal`
@@ -246,13 +246,13 @@ tool (
 
 ### 8. **SQL Organization**
 
-**Current State:** `/sql/sqlite/` (unnecessary double directory)  
-**Should Be:** `/sql/` with subdirectories if needed  
+**Current State:** `/sql/sqlite/` (unnecessary double directory)\
+**Should Be:** `/sql/` with subdirectories if needed\
 **Effort:** 15 minutes (minimal)
 
 ### 9. **Missing `/deployments` Directory**
 
-**Current State:** No deployment examples  
+**Current State:** No deployment examples\
 **Could Add:**
 
 - `/deployments/docker/` - Docker Compose examples

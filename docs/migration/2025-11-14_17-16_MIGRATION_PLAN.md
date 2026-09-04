@@ -119,7 +119,7 @@
 ### Phase 2: Migration (Steps 4-6)
 
 **Goal**: All code using pkg/errors
-**Time**: ~33 minutes  
+**Time**: ~33 minutes\
 **Risk**: Medium (many import changes)
 
 ### Phase 3: Refinement (Steps 7-9)

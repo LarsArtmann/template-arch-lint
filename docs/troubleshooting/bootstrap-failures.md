@@ -1,6 +1,6 @@
 # Bootstrap Troubleshooting Guide
 
-**Last Updated:** 2025-08-28  
+**Last Updated:** 2025-08-28\
 **Version:** 1.0
 
 This guide covers common bootstrap.sh failure scenarios and their solutions.

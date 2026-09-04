@@ -52,7 +52,7 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0 # Fetch full history for baseline comparison
 
@@ -88,10 +88,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -103,7 +103,7 @@ jobs:
           go mod verify
 
       - name: 🔧 Install Just and Tools
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -130,7 +130,7 @@ jobs:
             awk '{print $1 ": " $3 " ns/op"}' | tee -a benchmark-results/cpu-summary.txt
 
       - name: 📤 Upload CPU Benchmark Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: cpu-benchmarks-${{ github.run_number }}
           path: benchmark-results/
@@ -147,10 +147,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -162,7 +162,7 @@ jobs:
           go mod verify
 
       - name: 🔧 Install Just and Tools
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -190,7 +190,7 @@ jobs:
             tee -a benchmark-results/memory-summary.txt
 
       - name: 📤 Upload Memory Benchmark Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: memory-benchmarks-${{ github.run_number }}
           path: benchmark-results/
@@ -207,10 +207,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -222,7 +222,7 @@ jobs:
           go mod verify
 
       - name: 🔧 Install Just and Tools
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -251,7 +251,7 @@ jobs:
             awk '{print $1 ": " $3 " ns/op"}' | tee -a benchmark-results/concurrent-summary.txt
 
       - name: 📤 Upload Concurrent Benchmark Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: concurrent-benchmarks-${{ github.run_number }}
           path: benchmark-results/
@@ -268,10 +268,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -283,7 +283,7 @@ jobs:
           go mod verify
 
       - name: 🔧 Install Just and Tools
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -311,7 +311,7 @@ jobs:
             tee -a benchmark-results/stress-summary.txt
 
       - name: 📤 Upload Stress Benchmark Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: stress-benchmarks-${{ github.run_number }}
           path: benchmark-results/
@@ -329,12 +329,12 @@ jobs:
 
     steps:
       - name: 📥 Checkout Current Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 🏗️ Setup Go ${{ env.GO_VERSION }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -346,7 +346,7 @@ jobs:
           go mod verify
 
       - name: 🔧 Install Just and Tools
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -366,7 +366,7 @@ jobs:
           just bench-quick | tee benchmark-results/current/benchmarks.txt
 
       - name: 📥 Checkout Baseline Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ needs.setup-baseline.outputs.baseline-ref }}
           path: baseline
@@ -508,14 +508,14 @@ jobs:
           go run compare_benchmarks.go | tee benchmark-results/comparison/report.md
 
       - name: 📤 Upload Comparison Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: benchmark-comparison-${{ github.run_number }}
           path: benchmark-results/
           retention-days: 30
 
       - name: 💬 Comment PR with Results
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const fs = require('fs');
@@ -544,7 +544,7 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 📊 Archive Performance Metrics
         run: |

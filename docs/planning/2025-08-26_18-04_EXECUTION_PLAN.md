@@ -2,8 +2,8 @@
 
 ## 📊 Executive Summary
 
-**Date:** August 16, 2025  
-**Current State:** 16 Open GitHub Issues, 2 Failing Tests, 5 Ghost Systems  
+**Date:** August 16, 2025\
+**Current State:** 16 Open GitHub Issues, 2 Failing Tests, 5 Ghost Systems\
 **Goal:** Fix all critical issues, integrate/remove ghost systems, implement production features
 
 ## 🎯 The 80/20 Analysis
@@ -29,38 +29,38 @@
 
 ## 📋 COMPREHENSIVE PLAN (30 Tasks, 30-100min each)
 
-| #   | Task                                        | Time  | Impact   | GitHub Issue | Priority |
-| --- | ------------------------------------------- | ----- | -------- | ------------ | -------- |
-| 1   | Clean temp lint files                       | 5min  | Low      | -            | P0       |
-| 2   | Fix integration test failures               | 60min | Critical | -            | P0       |
-| 3   | Fix handler JSON unmarshal errors           | 30min | Critical | -            | P0       |
-| 4   | Remove ghost database utilities             | 45min | High     | -            | P1       |
-| 5   | Remove ghost error utilities                | 45min | High     | -            | P1       |
-| 6   | Integrate validation utilities              | 60min | Medium   | -            | P1       |
-| 7   | Remove duplicate repository implementations | 90min | High     | -            | P1       |
-| 8   | Fix remaining architecture violations       | 45min | High     | -            | P1       |
-| 9   | Implement graceful shutdown                 | 60min | Critical | #26          | P1       |
-| 10  | Add shutdown signal handling                | 30min | Critical | #26          | P1       |
-| 11  | Add connection draining                     | 30min | Critical | #26          | P1       |
-| 12  | Create JWT middleware structure             | 45min | Critical | #17          | P1       |
-| 13  | Implement token validation                  | 45min | Critical | #17          | P1       |
-| 14  | Add JWT to routes                           | 30min | Critical | #17          | P1       |
-| 15  | Create rate limiter middleware              | 45min | Critical | #23          | P1       |
-| 16  | Add Redis/memory store for rate limiting    | 45min | Critical | #23          | P1       |
-| 17  | Configure rate limits                       | 30min | Critical | #23          | P1       |
-| 18  | Add CORS headers                            | 30min | Critical | #28          | P1       |
-| 19  | Add CSP headers                             | 30min | Critical | #28          | P1       |
-| 20  | Add HSTS headers                            | 30min | Critical | #28          | P1       |
-| 21  | Add Prometheus metrics                      | 60min | Medium   | #19          | P2       |
-| 22  | Add Grafana integration                     | 30min | Medium   | #20          | P2       |
-| 23  | Database migration system                   | 90min | Medium   | #18          | P2       |
-| 24  | OpenAPI documentation generation            | 60min | Medium   | #24          | P2       |
-| 25  | API versioning implementation               | 30min | Low      | #29          | P2       |
-| 26  | Request validation middleware               | 45min | Medium   | #21          | P2       |
-| 27  | Railway-oriented Result types               | 90min | Low      | #25          | P3       |
-| 28  | Add mutation testing                        | 90min | Low      | #16          | P3       |
-| 29  | Update session handover docs                | 30min | Low      | #27,#30      | P3       |
-| 30  | Final verification and testing              | 60min | Critical | -            | P0       |
+| #  | Task                                        | Time  | Impact   | GitHub Issue | Priority |
+| -- | ------------------------------------------- | ----- | -------- | ------------ | -------- |
+| 1  | Clean temp lint files                       | 5min  | Low      | -            | P0       |
+| 2  | Fix integration test failures               | 60min | Critical | -            | P0       |
+| 3  | Fix handler JSON unmarshal errors           | 30min | Critical | -            | P0       |
+| 4  | Remove ghost database utilities             | 45min | High     | -            | P1       |
+| 5  | Remove ghost error utilities                | 45min | High     | -            | P1       |
+| 6  | Integrate validation utilities              | 60min | Medium   | -            | P1       |
+| 7  | Remove duplicate repository implementations | 90min | High     | -            | P1       |
+| 8  | Fix remaining architecture violations       | 45min | High     | -            | P1       |
+| 9  | Implement graceful shutdown                 | 60min | Critical | #26          | P1       |
+| 10 | Add shutdown signal handling                | 30min | Critical | #26          | P1       |
+| 11 | Add connection draining                     | 30min | Critical | #26          | P1       |
+| 12 | Create JWT middleware structure             | 45min | Critical | #17          | P1       |
+| 13 | Implement token validation                  | 45min | Critical | #17          | P1       |
+| 14 | Add JWT to routes                           | 30min | Critical | #17          | P1       |
+| 15 | Create rate limiter middleware              | 45min | Critical | #23          | P1       |
+| 16 | Add Redis/memory store for rate limiting    | 45min | Critical | #23          | P1       |
+| 17 | Configure rate limits                       | 30min | Critical | #23          | P1       |
+| 18 | Add CORS headers                            | 30min | Critical | #28          | P1       |
+| 19 | Add CSP headers                             | 30min | Critical | #28          | P1       |
+| 20 | Add HSTS headers                            | 30min | Critical | #28          | P1       |
+| 21 | Add Prometheus metrics                      | 60min | Medium   | #19          | P2       |
+| 22 | Add Grafana integration                     | 30min | Medium   | #20          | P2       |
+| 23 | Database migration system                   | 90min | Medium   | #18          | P2       |
+| 24 | OpenAPI documentation generation            | 60min | Medium   | #24          | P2       |
+| 25 | API versioning implementation               | 30min | Low      | #29          | P2       |
+| 26 | Request validation middleware               | 45min | Medium   | #21          | P2       |
+| 27 | Railway-oriented Result types               | 90min | Low      | #25          | P3       |
+| 28 | Add mutation testing                        | 90min | Low      | #16          | P3       |
+| 29 | Update session handover docs                | 30min | Low      | #27,#30      | P3       |
+| 30 | Final verification and testing              | 60min | Critical | -            | P0       |
 
 ## 🔧 DETAILED BREAKDOWN (150 Micro-Tasks, 15min each)
 

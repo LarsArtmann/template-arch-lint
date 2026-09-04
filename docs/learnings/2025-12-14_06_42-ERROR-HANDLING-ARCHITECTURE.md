@@ -1,7 +1,7 @@
 # Error Handling Architecture Learnings
 
-**Date**: 2025-12-14  
-**Session**: Error Handling Architectural Analysis  
+**Date**: 2025-12-14\
+**Session**: Error Handling Architectural Analysis\
 **Focus**: Centralized vs Layered Error Patterns in Go Clean Architecture
 
 ---

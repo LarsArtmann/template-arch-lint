@@ -6,7 +6,7 @@ This directory contains the CI/CD workflows for automated building, testing, and
 
 ### `ci-working.yml` - Main CI/CD Pipeline
 
-**Triggers**: Push to main/master/develop, Pull Requests, Manual dispatch  
+**Triggers**: Push to main/master/develop, Pull Requests, Manual dispatch\
 **Purpose**: Complete CI/CD pipeline with container registry integration
 
 **Jobs**:
@@ -34,7 +34,7 @@ This directory contains the CI/CD workflows for automated building, testing, and
 
 ### `registry-cleanup.yml` - Container Registry Maintenance
 
-**Triggers**: Daily schedule (2:00 AM UTC), Manual dispatch  
+**Triggers**: Daily schedule (2:00 AM UTC), Manual dispatch\
 **Purpose**: Automated cleanup of container images
 
 **Features**:

@@ -1,8 +1,8 @@
 # Cross-Platform Compatibility Report
 
-**Feature**: CMD Single Main Enforcement  
-**Script**: `scripts/check-cmd-single.sh`  
-**Verification Date**: 2025-09-06  
+**Feature**: CMD Single Main Enforcement\
+**Script**: `scripts/check-cmd-single.sh`\
+**Verification Date**: 2025-09-06\
 **Verified On**: macOS (Darwin aarch64)
 
 ## ✅ COMPATIBILITY MATRIX
@@ -140,20 +140,20 @@ RUN apk add --no-cache bash
 
 ### Color Output
 
-**Issue**: Some terminals may not support ANSI colors  
-**Detection**: `tty -s` and `$TERM` checks  
+**Issue**: Some terminals may not support ANSI colors\
+**Detection**: `tty -s` and `$TERM` checks\
 **Workaround**: Colors gracefully degrade to plain text
 
 ### File Permissions
 
-**Issue**: Some systems have restrictive file permissions  
-**Detection**: `[ -r "cmd" ]` check implemented  
+**Issue**: Some systems have restrictive file permissions\
+**Detection**: `[ -r "cmd" ]` check implemented\
 **Workaround**: Clear error message with chmod suggestion
 
 ### Shell Variations
 
-**Issue**: Some minimal shells lack advanced features  
-**Solution**: Script uses only basic shell constructs  
+**Issue**: Some minimal shells lack advanced features\
+**Solution**: Script uses only basic shell constructs\
 **Fallback**: Works with `/bin/sh` (POSIX shell)
 
 ## 🔮 FUTURE ENHANCEMENTS

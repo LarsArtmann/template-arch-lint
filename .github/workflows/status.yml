@@ -7,7 +7,11 @@ name: 📊 Status Dashboard
 on:
   workflow_run:
     workflows:
-      ["🔍 Code Quality & Architecture Validation", "🧪 Testing Suite", "🚀 Continuous Integration"]
+      [
+        "🔍 Code Quality & Architecture Validation",
+        "🧪 Testing Suite",
+        "🚀 Continuous Integration",
+      ]
     types: [completed]
   schedule:
     # Run daily at 06:00 UTC to check project health

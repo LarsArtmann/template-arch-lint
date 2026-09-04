@@ -1,7 +1,7 @@
 # 🔥 DEPGUARD MAJOR PROGRESS STATUS REPORT
 
-**Date:** 2025-12-08_09-18  
-**Project:** template-arch-lint  
+**Date:** 2025-12-08_09-18\
+**Project:** template-arch-lint\
 **Status:** 🚨 SIGNIFICANT PROGRESS - DEPGUARD MOSTLY FIXED
 
 ---
@@ -55,7 +55,7 @@ depguard:
       allow:
         - $gostd
         - github.com/LarsArtmann/template-arch-lint/ # SINGLE PREFIX!
-        # + external dependencies
+    # + external dependencies
     tests:
       list-mode: allow
       files:

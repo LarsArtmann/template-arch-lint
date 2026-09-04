@@ -8,11 +8,11 @@ Transform your Go project with copy-paste configuration files that enforce archi
 
 ## 📋 What You Get
 
-✅ **40+ Linters** - Comprehensive code quality enforcement  
-✅ **Architecture Rules** - Clean architecture boundary validation  
-✅ **Type Safety** - Zero tolerance for `interface{}` and weak typing  
-✅ **Security Scanning** - Automated vulnerability detection  
-✅ **Performance Optimization** - Struct alignment, preallocation hints  
+✅ **40+ Linters** - Comprehensive code quality enforcement\
+✅ **Architecture Rules** - Clean architecture boundary validation\
+✅ **Type Safety** - Zero tolerance for `interface{}` and weak typing\
+✅ **Security Scanning** - Automated vulnerability detection\
+✅ **Performance Optimization** - Struct alignment, preallocation hints\
 ✅ **CMD Single Main** - Enforce single entry point architecture
 
 ---

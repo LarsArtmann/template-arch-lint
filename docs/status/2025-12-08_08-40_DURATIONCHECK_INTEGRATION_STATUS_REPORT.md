@@ -55,11 +55,11 @@ Successfully integrated `durationcheck` linter into the `.golangci.yml` configur
 | ------------------ | ---------- | --------------------------- |
 | **Build Status**   | ✅ PASSING | All builds successful       |
 | **Architecture**   | ✅ VALID   | Clean Architecture enforced |
-| **Tests**          | ⚠️ RUNNING | With style warnings         |
+| **Tests**          | ⚠️ RUNNING  | With style warnings         |
 | **Linting**        | ❌ FAILING | 264 violations              |
 | **Security**       | ✅ SCANNED | Security scans pass         |
 | **Durationcheck**  | ✅ ACTIVE  | Newly integrated            |
-| **Overall Health** | ⚠️ 65/100  | Needs immediate attention   |
+| **Overall Health** | ⚠️ 65/100   | Needs immediate attention   |
 
 ---
 

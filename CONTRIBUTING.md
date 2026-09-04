@@ -506,15 +506,15 @@ func NewUser(id UserID, email string, name string) (*User, error) {
 #### **Test Pyramid**
 
 ```
-           ╭─────────────╮
-          ╱  E2E Tests    ╲     ← Few, expensive, realistic
-         ╱    (10%)       ╲
-        ╱─────────────────╲
-       ╱ Integration Tests ╲    ← Some, medium cost, focused
-      ╱      (20%)         ╲
-     ╱───────────────────────╲
-    ╱    Unit Tests (70%)     ╲  ← Many, fast, isolated
-   ╱─────────────────────────╲
+        ╭─────────────╮
+       ╱  E2E Tests    ╲     ← Few, expensive, realistic
+      ╱    (10%)       ╲
+     ╱─────────────────╲
+    ╱ Integration Tests ╲    ← Some, medium cost, focused
+   ╱      (20%)         ╲
+  ╱───────────────────────╲
+ ╱    Unit Tests (70%)     ╲  ← Many, fast, isolated
+╱─────────────────────────╲
 ```
 
 #### **Testing Standards**

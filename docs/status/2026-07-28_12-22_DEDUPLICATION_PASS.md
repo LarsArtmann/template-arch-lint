@@ -4,12 +4,12 @@
 
 ### a) FULLY DONE
 
-| #   | Clone Group                           | File:Line                                                | Action                                                                   | Result                                        |
-| --- | ------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------- |
-| 1   | Email dot-prefix/suffix check         | `internal/domain/values/email.go:185-191` & `210-216`    | Extracted `validateNoEdgeDots(s, partName)` helper                       | Eliminated                                    |
-| 2   | ID required/whitespace check          | `internal/domain/ids/ids.go:129-137` & `162-170`         | Extracted `validateIDRequired(id, name)` helper                          | Eliminated                                    |
-| 3   | Email `Split` + `len(parts)!=2` check | `internal/domain/values/email.go:54-59` & `64-69`        | Extracted `splitParts()` accessor shared by `Domain()` and `LocalPart()` | Eliminated                                    |
-| 4   | Server timeout constants              | `cmd/main.go:26-29` vs `internal/config/config.go:17-20` | Reviewed for unification                                                 | Accepted (different values, different layers) |
+| # | Clone Group                           | File:Line                                                | Action                                                                   | Result                                        |
+| - | ------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------- |
+| 1 | Email dot-prefix/suffix check         | `internal/domain/values/email.go:185-191` & `210-216`    | Extracted `validateNoEdgeDots(s, partName)` helper                       | Eliminated                                    |
+| 2 | ID required/whitespace check          | `internal/domain/ids/ids.go:129-137` & `162-170`         | Extracted `validateIDRequired(id, name)` helper                          | Eliminated                                    |
+| 3 | Email `Split` + `len(parts)!=2` check | `internal/domain/values/email.go:54-59` & `64-69`        | Extracted `splitParts()` accessor shared by `Domain()` and `LocalPart()` | Eliminated                                    |
+| 4 | Server timeout constants              | `cmd/main.go:26-29` vs `internal/config/config.go:17-20` | Reviewed for unification                                                 | Accepted (different values, different layers) |
 
 - Created `docs/dedup-acceptance.md` recording the rationale for Group #4.
 - All 3 actively-refactored groups verified by `go test ./...` (7 packages, all `ok`).

@@ -1,7 +1,7 @@
 # golangci-lint Custom Plugin Design: CMD Single Main Enforcement
 
-**Plugin Name**: `cmd-single-main`  
-**Purpose**: Native golangci-lint integration for enforcing single main.go file in cmd/ directory  
+**Plugin Name**: `cmd-single-main`\
+**Purpose**: Native golangci-lint integration for enforcing single main.go file in cmd/ directory\
 **Priority**: High-value replacement for shell script approach
 
 ## 🎯 PLUGIN ARCHITECTURE OVERVIEW

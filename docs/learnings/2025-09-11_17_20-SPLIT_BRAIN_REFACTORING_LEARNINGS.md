@@ -142,7 +142,7 @@ rg "QueryService" --type go | grep -v "type\|func\|interface"
 **Before**: "Value objects must be completely encapsulated with private fields"
 **After**: "Value objects need thoughtful JSON marshaling to be API-friendly while maintaining encapsulation"
 
-**Before**: "More abstraction layers = better architecture"  
+**Before**: "More abstraction layers = better architecture"\
 **After**: "Right-sized abstractions for the problem context = better architecture"
 
 ## Practical Applications

@@ -38,10 +38,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🏗️ Setup Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: ${{ matrix.go-version }}
           cache: true
@@ -53,7 +53,7 @@ jobs:
           go mod verify
 
       - name: 🔧 Install Just Command Runner
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -79,7 +79,7 @@ jobs:
 
       - name: 📤 Upload Coverage (Go 1.24 only)
         if: matrix.go-version == '1.24'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: coverage-unit-${{ github.run_number }}
           path: coverage.out
@@ -95,10 +95,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🏗️ Setup Go 1.24
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: "1.24"
           cache: true
@@ -110,7 +110,7 @@ jobs:
           go mod verify
 
       - name: 🔧 Install Just and Tools
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -146,10 +146,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🏗️ Setup Go 1.24
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: "1.24"
           cache: true
@@ -161,7 +161,7 @@ jobs:
           go mod verify
 
       - name: 🔧 Install Just and Tools
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -215,10 +215,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🏗️ Setup Go 1.24
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: "1.24"
           cache: true
@@ -230,7 +230,7 @@ jobs:
           go mod verify
 
       - name: 🔧 Install Just and Tools
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -249,7 +249,7 @@ jobs:
           just bench | tee benchmark-results.txt
 
       - name: 📤 Upload Benchmark Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: benchmark-results-${{ github.run_number }}
           path: benchmark-results.txt
@@ -266,10 +266,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🏗️ Setup Go 1.24
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: "1.24"
           cache: true
@@ -281,7 +281,7 @@ jobs:
           go mod verify
 
       - name: 🔧 Install Just and Tools
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -315,7 +315,7 @@ jobs:
           fi
 
       - name: 📤 Upload Coverage Reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: coverage-reports-${{ github.run_number }}
           path: |
@@ -330,7 +330,7 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         if: env.CODECOV_TOKEN != ''
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
         with:
           file: ./coverage.out
           flags: unittests
@@ -348,10 +348,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🏗️ Setup Go 1.24
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: "1.24"
           cache: true
@@ -363,7 +363,7 @@ jobs:
           go mod verify
 
       - name: 🔧 Install Just and Tools
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -392,7 +392,14 @@ jobs:
     name: ✅ Testing Complete
     runs-on: ["self-hosted", "linux", "x64"]
     needs:
-      [unit-tests, race-tests, integration-tests, benchmark-tests, coverage-analysis, config-tests]
+      [
+        unit-tests,
+        race-tests,
+        integration-tests,
+        benchmark-tests,
+        coverage-analysis,
+        config-tests,
+      ]
     timeout-minutes: 2
 
     steps:

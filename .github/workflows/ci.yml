@@ -30,17 +30,17 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🏗️ Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: "1.24"
           cache: true
           cache-dependency-path: go.sum
 
       - name: 🔧 Install Just
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -74,10 +74,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🏗️ Setup Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: ${{ matrix.go-version }}
           cache: true
@@ -90,7 +90,7 @@ jobs:
 
       - name: 🔧 Install Just (Unix)
         if: runner.os != 'Windows'
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -150,10 +150,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🏗️ Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: "1.24"
           cache: true
@@ -178,7 +178,7 @@ jobs:
           go list -m all > dependencies.txt
 
       - name: 📤 Upload Dependency Reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: dependency-analysis-${{ github.run_number }}
           path: |
@@ -196,13 +196,13 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: 🔧 Install Just
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -243,17 +243,17 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 🏗️ Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: "1.24"
           cache: true
           cache-dependency-path: go.sum
 
       - name: 🔧 Install Just and Tools
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: "1.36.0"
 
@@ -271,7 +271,7 @@ jobs:
           go test -bench=. -benchmem -count=3 ./... | tee performance-baseline.txt
 
       - name: 📤 Upload Performance Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: performance-baseline-${{ github.run_number }}
           path: performance-baseline.txt
@@ -283,7 +283,13 @@ jobs:
   ci-success:
     name: ✅ CI Pipeline Complete
     runs-on: ["self-hosted", "linux", "x64"]
-    needs: [lint-and-test, build-verification, dependencies, docker-build, performance]
+    needs: [
+      lint-and-test,
+      build-verification,
+      dependencies,
+      docker-build,
+      performance,
+    ]
     timeout-minutes: 2
 
     steps:

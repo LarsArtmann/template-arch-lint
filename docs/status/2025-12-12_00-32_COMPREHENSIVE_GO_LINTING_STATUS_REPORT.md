@@ -359,8 +359,8 @@ Low Priority: <30
 
 ---
 
-**Report Generated:** 2025-12-12 00:32  
-**Configuration Files:** .go-arch-lint.yml, .golangci.yml  
-**Total Violations:** 344 (Target: <100)  
-**Critical Status:** CONFIGURATION OVER-ENGINEERING DETECTED  
+**Report Generated:** 2025-12-12 00:32\
+**Configuration Files:** .go-arch-lint.yml, .golangci.yml\
+**Total Violations:** 344 (Target: <100)\
+**Critical Status:** CONFIGURATION OVER-ENGINEERING DETECTED\
 **Recommended Action:** BALANCE STRICTNESS WITH PRODUCTIVITY

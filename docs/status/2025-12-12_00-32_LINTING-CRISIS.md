@@ -1,7 +1,7 @@
 # 🚨 LINTING STATUS REPORT
 
-**Generated:** 2025-12-12 at 00:32 CET  
-**Project:** template-arch-lint  
+**Generated:** 2025-12-12 at 00:32 CET\
+**Project:** template-arch-lint\
 **Status:** CRITICAL - 344 violations, ZERO fixes implemented
 
 ---
@@ -166,6 +166,6 @@ depguard: 68 issues - ALL project imports blocked by misconfigured "Main" rule
 
 ---
 
-**Status:** 🚨 CRITICAL ACTION REQUIRED  
-**Next Review:** 2025-12-12 01:30 CET  
+**Status:** 🚨 CRITICAL ACTION REQUIRED\
+**Next Review:** 2025-12-12 01:30 CET\
 **Deadline:** 2025-12-12 10:00 CET (Production deployment target)
