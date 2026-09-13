@@ -30,56 +30,56 @@ const (
 
 // Config represents the application configuration.
 type Config struct {
-	Server   ServerConfig   `mapstructure:"server"   validate:"required"`
-	Database DatabaseConfig `mapstructure:"database" validate:"required"`
-	Logging  LoggingConfig  `mapstructure:"logging"  validate:"required"`
-	App      AppConfig      `mapstructure:"app"      validate:"required"`
-	JWT      JWTConfig      `mapstructure:"jwt"      validate:"required"`
-	Security SecurityConfig `mapstructure:"security"`
+	Server   ServerConfig   `validate:"required" mapstructure:"server"`
+	Database DatabaseConfig `validate:"required" mapstructure:"database"`
+	Logging  LoggingConfig  `validate:"required" mapstructure:"logging"`
+	App      AppConfig      `validate:"required" mapstructure:"app"`
+	JWT      JWTConfig      `validate:"required" mapstructure:"jwt"`
+	Security SecurityConfig `                    mapstructure:"security"`
 }
 
 // ServerConfig contains HTTP server configuration.
 type ServerConfig struct {
-	Host                    string        `mapstructure:"host"                      validate:"required"`
-	Port                    values.Port   `mapstructure:"port"                      validate:"required"`
-	ReadTimeout             time.Duration `mapstructure:"read_timeout"`
-	WriteTimeout            time.Duration `mapstructure:"write_timeout"`
-	IdleTimeout             time.Duration `mapstructure:"idle_timeout"`
-	GracefulShutdownTimeout time.Duration `mapstructure:"graceful_shutdown_timeout"`
+	Host                    string        `validate:"required" mapstructure:"host"`
+	Port                    values.Port   `validate:"required" mapstructure:"port"`
+	ReadTimeout             time.Duration `                    mapstructure:"read_timeout"`
+	WriteTimeout            time.Duration `                    mapstructure:"write_timeout"`
+	IdleTimeout             time.Duration `                    mapstructure:"idle_timeout"`
+	GracefulShutdownTimeout time.Duration `                    mapstructure:"graceful_shutdown_timeout"`
 }
 
 // DatabaseConfig contains database configuration.
 type DatabaseConfig struct {
-	Driver          string        `mapstructure:"driver"             validate:"required,oneof=sqlite3 postgres mysql"`
-	DSN             string        `mapstructure:"dsn"                validate:"required"`
-	MaxOpenConns    int           `mapstructure:"max_open_conns"`
-	MaxIdleConns    int           `mapstructure:"max_idle_conns"`
-	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime"`
-	ConnMaxIdleTime time.Duration `mapstructure:"conn_max_idle_time"`
+	Driver          string        `validate:"required,oneof=sqlite3 postgres mysql" mapstructure:"driver"`
+	DSN             string        `validate:"required"                              mapstructure:"dsn"`
+	MaxOpenConns    int           `                                                 mapstructure:"max_open_conns"`
+	MaxIdleConns    int           `                                                 mapstructure:"max_idle_conns"`
+	ConnMaxLifetime time.Duration `                                                 mapstructure:"conn_max_lifetime"`
+	ConnMaxIdleTime time.Duration `                                                 mapstructure:"conn_max_idle_time"`
 }
 
 // LoggingConfig contains logging configuration.
 type LoggingConfig struct {
-	Level  values.LogLevel `mapstructure:"level"  validate:"required"`
-	Format string          `mapstructure:"format" validate:"required,oneof=json text"`
-	Output string          `mapstructure:"output" validate:"required"`
+	Level  values.LogLevel `validate:"required"                 mapstructure:"level"`
+	Format string          `validate:"required,oneof=json text" mapstructure:"format"`
+	Output string          `validate:"required"                 mapstructure:"output"`
 }
 
 // AppConfig contains application-specific configuration.
 type AppConfig struct {
-	Name        string `mapstructure:"name"        validate:"required"`
-	Version     string `mapstructure:"version"     validate:"required"`
-	Environment string `mapstructure:"environment" validate:"required,valid_environment"`
-	Debug       bool   `mapstructure:"debug"`
+	Name        string `validate:"required"                   mapstructure:"name"`
+	Version     string `validate:"required"                   mapstructure:"version"`
+	Environment string `validate:"required,valid_environment" mapstructure:"environment"`
+	Debug       bool   `                                      mapstructure:"debug"`
 }
 
 // JWTConfig contains JWT authentication configuration.
 type JWTConfig struct {
-	SecretKey          string        `mapstructure:"secret_key"           validate:"required,min=32"`
-	AccessTokenExpiry  time.Duration `mapstructure:"access_token_expiry"`
-	RefreshTokenExpiry time.Duration `mapstructure:"refresh_token_expiry"`
-	Issuer             string        `mapstructure:"issuer"               validate:"required"`
-	Algorithm          string        `mapstructure:"algorithm"            validate:"required,oneof=HS256 HS384 HS512"`
+	SecretKey          string        `validate:"required,min=32"                  mapstructure:"secret_key"`
+	AccessTokenExpiry  time.Duration `                                            mapstructure:"access_token_expiry"`
+	RefreshTokenExpiry time.Duration `                                            mapstructure:"refresh_token_expiry"`
+	Issuer             string        `validate:"required"                         mapstructure:"issuer"`
+	Algorithm          string        `validate:"required,oneof=HS256 HS384 HS512" mapstructure:"algorithm"`
 }
 
 // SecurityConfig contains security configuration.

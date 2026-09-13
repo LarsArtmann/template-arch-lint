@@ -571,7 +571,12 @@ jobs:
   benchmark-success:
     name: ✅ Benchmarks Complete
     runs-on: ["self-hosted", "linux", "x64"]
-    needs: [cpu-benchmarks, memory-benchmarks, concurrent-benchmarks, stress-benchmarks]
+    needs: [
+      cpu-benchmarks,
+      memory-benchmarks,
+      concurrent-benchmarks,
+      stress-benchmarks,
+    ]
     timeout-minutes: 2
     if: always()
 
