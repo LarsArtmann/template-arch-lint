@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI coding assistants working in this repository.
 
 ## 🎯 What This Project IS and IS NOT
 
@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Go Linting Template**: Demonstrates enterprise-grade architecture and code quality enforcement
 - **Reference Implementation**: Shows Clean Architecture + DDD patterns in Go
-- **Configuration Library**: Provides `.go-arch-lint.yml`, `.golangci.yml`, and `justfile` for copy/paste use
-- **Simple HTMX Demo**: Basic web app with templ templates and SQLite database
+- **Configuration Library**: Provides `.go-arch-lint.yml` and a custom golangci-lint plugin for copy/paste use; `.golangci.yml` is generated and maintained by [golangci-lint-auto-configure](https://github.com/LarsArtmann/golangci-lint-auto-configure)
+- **Simple HTTP Demo**: Basic net/http server with in-memory user CRUD and sqlc/SQLite scaffolding
 - **Educational Resource**: Learn proper Go architecture boundaries and functional programming patterns
 
 ### ❌ **What This Project IS NOT:**
@@ -21,40 +21,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 🎯 **Core Purpose:**
 
-Copy the linting configurations (`.go-arch-lint.yml`, `.golangci.yml`, `justfile`) to your real projects to enforce architectural boundaries and code quality. The Go code demonstrates how to structure projects following these rules.
+Copy the architecture configuration (`.go-arch-lint.yml`) to your real projects and generate `.golangci.yml` with golangci-lint-auto-configure to enforce architectural boundaries and code quality. The Go code demonstrates how to structure projects following these rules.
 
 ## 🏗️ High-Level Architecture Understanding
 
 ### Layer Structure (Dependency Flow: Infrastructure → Application → Domain)
 
 ```
-web/templates/          # Templ templates for server-side rendering
-├── components/         # Reusable UI components
-├── layouts/           # Page layouts
-└── pages/             # Full page templates
+cmd/                    # Single entry point (main.go, enforced by the custom plugin)
 
-internal/application/   # HTTP handlers & use case orchestration
-├── handlers/          # HTTP request handlers (user_handler.go)
-├── dto/               # Data transfer objects for HTTP
-├── http/              # HTTP response helpers
-└── middleware/        # Cross-cutting concerns
+internal/application/   # HTTP layer
+└── handlers/           # HTTP request handlers (user_handler.go, errorhandler.go)
 
 internal/domain/        # Pure business logic (NO external dependencies)
-├── entities/          # Business entities (user.go with value objects)
-├── services/          # Domain services (user_service.go)
-├── repositories/      # Repository interfaces (user_repository.go)
-├── values/            # Value objects (email.go, username.go, user_id.go)
-├── errors/            # Domain-specific errors
-└── shared/            # Result pattern implementation
+├── entities/           # Business entities (user.go)
+├── services/           # Domain services (user_service.go, user_query_service.go)
+├── repositories/       # Repository interfaces
+├── values/             # Value objects (email.go, username.go, port.go, log_level.go)
+└── ids/                # Branded IDs (UserID via go-branded-id)
 
 internal/infrastructure/ # External concerns
-├── persistence/       # Repository implementations
-└── repositories/      # Database-specific code
+├── database.go         # SQLite connection scaffolding
+└── db/                 # SQLC-generated type-safe SQL code
 
-internal/db/            # SQLC-generated type-safe SQL code
-sql/
-├── schema/            # Database schema files
-└── queries/           # SQL query files for SQLC
+internal/config/         # Viper-based configuration
+internal/testhelpers/    # Test builders and helpers
+sql/sqlite/
+├── schema/             # Database schema files
+└── queries/            # SQL query files for SQLC
 ```
 
 ### Key Architectural Patterns Demonstrated
@@ -62,62 +56,56 @@ sql/
 - **Clean Architecture**: Strict dependency rules enforced by go-arch-lint
 - **Domain-Driven Design**: Rich domain entities with value objects
 - **Functional Programming**: Heavy use of samber/lo for Map/Filter/Reduce operations
-- **Result Pattern**: `internal/domain/shared/result.go` for error handling
+- **Result Pattern**: `mo.Result[T]` (samber/mo) for railway-oriented error handling in domain services
 - **Value Objects**: Email, UserName, UserID with validation in domain/values
 - **Repository Pattern**: Domain interfaces implemented by infrastructure
-- **HTMX + Templ**: Server-side rendering with progressive enhancement
+- **Standard library HTTP**: net/http routing via larsartmann/httputil (no framework)
 
 ## Essential Commands
 
 ### Core Development Commands
 
 ```bash
-# Installation & Setup
-just install              # Install ALL linting tools (golangci-lint, go-arch-lint, etc.)
-just install-hooks        # Install git pre-commit hooks (fast checks only)
-just install-hooks-full   # Install comprehensive pre-commit hooks (includes architecture)
+# Setup (Nix recommended)
+nix develop              # Go 1.27 toolchain + lint tools
+nix build                # Build demo binary → ./result/bin/template-arch-lint
+# Without Nix: go.mod requires Go 1.27.1, so set GOTOOLCHAIN=auto
 
-# Primary Workflow Commands
-just lint                 # Run ALL linters (architecture, code, security, dependencies)
-just fix                  # Auto-fix formatting issues and simple violations
-just test                 # Run all tests with coverage report
-just build                # Build the application
-just run                  # Start HTTP server on port 8080
-just dev                  # Development mode with auto-reload
-just ci                   # Complete CI/CD pipeline simulation
+# Primary workflow
+go-arch-lint check       # Architecture boundary validation
+golangci-lint run        # Code quality (config maintained by golangci-lint-auto-configure)
+go test ./... -race      # BDD tests (Ginkgo/Gomega) with race detection
+GOTOOLCHAIN=auto go build ./...   # Build
 
-# Security & Vulnerability Scanning
-just security-audit       # Complete security audit (all tools)
-just lint-vulns          # Run govulncheck for CVE scanning
-just lint-nilaway        # Uber's nil panic prevention (80% reduction)
-just lint-licenses       # License compliance scanning (manual audit)
-just lint-deps-advanced  # Advanced dependency vulnerability analysis
+# Custom plugin (cmd-single, import cycles, duplication, filenames)
+golangci-lint custom     # Build custom binary from .custom-gcl.yml
+./custom-golangci-lint run
+
+# Security
+govulncheck ./...                 # CVE scanning
+semgrep --config .semgrep.yml    # 10 custom security rules
+
+# Pre-commit hooks
+pre-commit install       # Installs hooks from .pre-commit-config.yaml
 ```
 
 ### Specialized Linting Commands
 
 ```bash
 # Architecture & Design
-just lint-arch           # Architecture boundary validation only
-just lint-cmd-single     # CMD single main.go enforcement only
-just graph               # Generate flow architecture graph (SVG)
-just graph-di           # Generate dependency injection graph
-just graph-vendor       # Generate graph with vendor dependencies
-just graph-all          # Generate ALL architecture graphs
-just graph-component <name> # Generate focused component graph
-just graph-list-components   # List available components
+go-arch-lint check                  # Architecture boundary validation
+go-arch-lint graph                  # Generate architecture graph (see --help)
+scripts/check-cmd-single.sh         # CMD single main.go enforcement
+scripts/compare-arch-configs.sh     # Compare strict vs default arch config
 
 # Code Quality
-just lint-code           # Code quality linting (99+ linters)
-just lint-strict         # Maximum strictness mode
-just lint-files          # Filename compliance validation
-just lint-cycles         # Import cycle detection
-just lint-goroutines     # Goroutine leak detection (Uber's goleak)
+golangci-lint run                                   # Code quality (100+ linters)
+golangci-lint custom && ./custom-golangci-lint run  # With custom plugin
 
 # Formatting & Generation
-just format              # gofumpt + goimports formatting
-just templ               # Generate templ templates
-templ generate           # Force regenerate templates
+golangci-lint fmt        # Run configured formatters
+gofumpt -w .             # Or format directly
+goimports -w -local github.com/LarsArtmann/template-arch-lint .
 sqlc generate            # Generate type-safe SQL code
 ```
 
@@ -155,13 +143,13 @@ go test ./internal/domain/services/ -bench=.
 - **Single Entry Point**: Enforces exactly one `main.go` file in `cmd/` directory
 - **Clean Architecture**: Prevents command proliferation and maintains single responsibility
 - **Actionable Errors**: Provides specific consolidation suggestions when violations are found
-- **Automated Validation**: Integrated into `just lint` pipeline for continuous enforcement
+- **Automated Validation**: Enforced via the custom golangci-lint plugin and `scripts/check-cmd-single.sh`
 
 **Examples:**
 
 ```bash
-just lint-cmd-single      # Check cmd/ single main constraint only
-just lint                 # Includes cmd/ validation in full linting pipeline
+scripts/check-cmd-single.sh                          # Standalone check
+golangci-lint custom && ./custom-golangci-lint run   # Plugin-based check
 ```
 
 **Violation Examples:**
@@ -176,7 +164,7 @@ just lint                 # Includes cmd/ validation in full linting pipeline
 - Create single main with multiple modes: `server start`, `server migrate`
 - Move additional tools to separate packages/repositories
 
-**Future Enhancement**: This constraint will be available as a native golangci-lint plugin, providing deeper IDE integration and more sophisticated analysis. See `docs/planning/` for the plugin roadmap.
+**Shipped**: This constraint IS a custom golangci-lint plugin: [`pkg/linter-plugins/template-arch-lint`](pkg/linter-plugins/template-arch-lint), wired via `.custom-gcl.yml` alongside `import-cycle-detector`, `code-duplication-detector`, and `filename-validator`.
 
 ### Code Quality Enforcement (`.golangci.yml`)
 
@@ -210,12 +198,13 @@ just lint                 # Includes cmd/ validation in full linting pipeline
 
 ### Core Dependencies
 
-- **gin**: HTTP web framework
-- **templ**: Type-safe HTML templates
-- **HTMX**: Progressive enhancement for web UI
-- **sqlc**: Type-safe SQL code generation
+- **net/http + larsartmann/httputil**: Standard library HTTP server helpers (no framework)
+- **charm.land/log/v2**: Structured logging
+- **go-branded-id**: Branded ID types (UserID)
+- **go-playground/validator/v10**: Input validation
+- **sqlc**: Type-safe SQL code generation (build-time tool)
 - **samber/lo**: Functional programming utilities (Map, Filter, Reduce)
-- **samber/do**: Dependency injection
+- **samber/mo**: Monads incl. `mo.Result[T]` for railway-oriented error handling
 - **viper**: Configuration management
 - **Ginkgo/Gomega**: BDD testing framework
 
@@ -229,13 +218,14 @@ just lint                 # Includes cmd/ validation in full linting pipeline
 #### Repository Pattern
 
 - **Interfaces** in `internal/domain/repositories/`
-- **Implementations** in `internal/infrastructure/persistence/`
-- **In-memory versions** for testing
+- **In-memory implementations** used by handlers and tests
+- SQLC-generated persistence in `internal/infrastructure/db/`
 
-#### Result Pattern (`internal/domain/shared/result.go`)
+#### Result Pattern (`mo.Result[T]`, samber/mo)
 
 - Functional error handling without exceptions
 - Chain operations with success/failure paths
+- See `GetUserEmailsWithResult` in `internal/domain/services/user_service.go`
 
 ### Architecture Graph Organization
 
@@ -243,38 +233,18 @@ just lint                 # Includes cmd/ validation in full linting pipeline
 
 ```
 docs/graphs/
-├── README.md                     # This documentation
-├── index.md                      # Auto-generated index of all graphs
+├── README.md                     # Graph documentation
+├── index.md                      # Index of all graphs
 ├── flow/                         # Flow graphs (execution flow)
-│   └── architecture-flow.svg        # Main flow graph
-├── dependency-injection/           # DI graphs (component dependencies)
-│   └── architecture-di.svg         # Dependencies graph
-├── vendor/                       # Vendor-inclusive graphs
-│   └── architecture-with-vendors.svg # Including external dependencies
-└── focused/                      # Component-focused graphs
-    ├── domain-focused.svg           # Domain layer only
-    ├── application-focused.svg      # Application layer only
-    ├── infrastructure-focused.svg   # Infrastructure layer only
-    └── cmd-focused.svg            # Command layer only
+│   └── architecture-flow.svg     # Main flow graph
+└── dependency-injection/         # DI graphs (component dependencies)
+    └── architecture-di.svg       # Dependencies graph
 ```
-
-**Graph Types Explained:**
-
-- **Flow graphs** (`just graph`): Show execution flow (reverse dependency injection)
-- **DI graphs** (`just graph-di`): Show direct component dependencies
-- **Vendor graphs** (`just graph-vendor`): Include external library dependencies
-- **Focused graphs** (`just graph-component <name>`): Single component and its deps
 
 **Usage Examples:**
 
 ```bash
-# Generate all graphs (recommended for documentation)
-just graph-all
-
-# Generate specific graph types
-just graph-di          # Dependency injection view
-just graph-vendor      # Including external deps
-just graph-component domain  # Focus on domain layer
+go-arch-lint graph        # Regenerate (see --help for output options)
 
 # View organized graphs
 open docs/graphs/index.md  # See all available graphs
@@ -290,24 +260,24 @@ open docs/graphs/index.md  # See all available graphs
 ### Before Committing Code
 
 ```bash
-just lint        # Run all quality checks
-just fix         # Auto-fix formatting
-just test        # Ensure tests pass
+go-arch-lint check   # Architecture boundaries
+golangci-lint run    # Code quality
+go test ./... -race  # Tests
 ```
 
 ### Adding New Features
 
 ```bash
-just lint-arch   # Verify architecture compliance
-just lint-code   # Check code quality
-just test        # Test your changes
+go-arch-lint check   # Verify architecture compliance
+golangci-lint run    # Check code quality
+go test ./...        # Test your changes
 ```
 
 ### Security Review
 
 ```bash
-just security-audit  # Complete security scan
-cat gosec-report.json    # Review security findings
+govulncheck ./...                 # CVE scan
+semgrep --config .semgrep.yml    # Custom security rules
 ```
 
 ## Architecture Violations You'll Encounter
@@ -322,34 +292,34 @@ Common violations and their meanings:
 
 ## Important Configuration Files
 
-- **`.go-arch-lint.yml`**: Architecture boundary rules
-- **`.golangci.yml`**: 99+ linters configuration
-- **Built-in security**: gosec + govulncheck + NilAway (no external config needed)
-- **`justfile`**: Task automation (30+ commands)
+- **`.go-arch-lint.yml`**: Architecture boundary rules (+ `.go-arch-lint-strict.yml` strict variant)
+- **`.golangci.yml`**: Code quality linters (generated/maintained by golangci-lint-auto-configure)
+- **`.custom-gcl.yml`**: Custom plugin wiring (cmd-single, cycles, duplication, filenames)
+- **`.semgrep.yml`**: 10 custom security rules
 - **`sqlc.yaml`**: Type-safe SQL generation
 - **`.pre-commit-config.yaml`**: Git hook configuration
+- **`flake.nix`**: Development environment and build
 
 ## Database Setup
 
-- **SQLite** for development (`./app.db`)
-- **In-memory** for testing
+- **SQLite** scaffolding in `internal/infrastructure/database.go` (no SQLite driver in go.mod — add `mattn/go-sqlite3` or `modernc.org/sqlite` before opening a real DB)
+- **In-memory repositories** power the demo and tests
 - **SQLC** for type-safe queries
-- Schema in `sql/schema/`
-- Queries in `sql/queries/`
+- Schema in `sql/sqlite/schema/`
+- Queries in `sql/sqlite/queries/`
 
 ## Project-Specific Notes
 
 ### SQLC Integration
 
 - Always run `sqlc generate` after modifying SQL files
-- Generated code goes to `internal/db/`
-- Custom type mappings configured in `sqlc.yaml`
+- Generated code goes to `internal/infrastructure/db/`
+- Custom type mappings configured in `sqlc.yaml` (e.g., `users.id` → `internal/domain/ids.UserID`)
 
-### Templ Templates
+### HTTP Handlers
 
-- Run `just templ` or `templ generate` after template changes
-- Templates in `web/templates/`
-- Type-safe HTML generation
+- Handlers in `internal/application/handlers/` (user, query, error)
+- Server wiring in `cmd/main.go` via larsartmann/httputil
 
 ### Testing Strategy
 
@@ -360,9 +330,8 @@ Common violations and their meanings:
 
 ### Error Handling
 
-- Domain errors in `internal/domain/errors/`
-- Result pattern for functional error handling
-- Standardized HTTP responses in `internal/application/http/`
+- `mo.Result[T]` (samber/mo) for railway-oriented domain error handling
+- Centralized HTTP error responses in `internal/application/handlers/errorhandler.go`
 
 ## Important Implementation Guidelines
 
@@ -372,26 +341,26 @@ Common violations and their meanings:
 2. Use value objects for domain primitives
 3. Prefer functional programming patterns with samber/lo
 4. Write BDD-style tests with Ginkgo
-5. Run `just lint` before committing
+5. Run `go-arch-lint check` and `golangci-lint run` before committing
 
 ### When Modifying Architecture
 
 1. Update `.go-arch-lint.yml` for new components
-2. Regenerate architecture graph with `just graph`
+2. Regenerate architecture graph with `go-arch-lint graph`
 3. Ensure no circular dependencies
 4. Maintain dependency inversion principle
 
 ### When Working with Database
 
-1. Write SQL in `sql/queries/`
+1. Write SQL in `sql/sqlite/queries/`
 2. Run `sqlc generate` to create type-safe code
 3. Implement repository interfaces from domain layer
 4. Use in-memory repositories for testing
 
 ## Quick Troubleshooting
 
-- **"Tool not found"**: Run `just install`
+- **"Tool not found"**: `nix develop` (or install go-arch-lint/golangci-lint manually)
+- **Build fails with "requires go >= 1.27.1"**: run with `GOTOOLCHAIN=auto`
 - **Architecture violations**: Check dependency direction (Infrastructure → Application → Domain)
-- **Too many linting errors**: Start with `just fix`, then address remaining issues
-- **Test failures**: Check for goroutine leaks with `just lint-goroutines`
-- **Performance issues**: Run linters individually instead of `just lint`
+- **Too many linting errors**: `golangci-lint-auto-configure configure` regenerates a clean config, then address remaining issues
+- **Performance issues**: Run linters individually instead of the full config
