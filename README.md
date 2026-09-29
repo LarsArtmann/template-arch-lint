@@ -51,8 +51,8 @@ internal/domain/              pure business logic, zero external imports
   repositories/               interfaces only
 internal/application/         HTTP handlers
 internal/infrastructure/      repository implementations, external concerns
-internal/db/                  sqlc-generated type-safe queries (SQLite)
-sql/                          schema and query sources
+  db/                         sqlc-generated type-safe SQLite queries
+sql/sqlite/                   schema and query sources
 ```
 
 Patterns worth stealing:
@@ -84,11 +84,13 @@ go test ./... -race    # BDD-style suites (Ginkgo/Gomega)
 go-arch-lint check     # architecture boundaries
 ```
 
+Without Nix: the repo targets Go 1.27, so set `GOTOOLCHAIN=auto` (or install Go 1.27+) before building.
+
 Generated architecture graphs live in [`docs/graphs/`](docs/graphs).
 
 ## Scope
 
-The demo app (user CRUD over SQLite) is intentionally boring. The point is the enforcement, not the features: copy the configs, don't copy the app.
+The demo app (in-memory user CRUD) is intentionally boring. The point is the enforcement, not the features: copy the configs, don't copy the app.
 
 ## Contributing
 

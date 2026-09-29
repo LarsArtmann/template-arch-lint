@@ -155,7 +155,6 @@ require (
 	github.com/kulti/thelper v0.7.1 // indirect
 	github.com/kunwardeep/paralleltest v1.0.15 // indirect
 	github.com/larsartmann/go-error-family v0.11.0 // indirect
-	github.com/larsartmann/go-etag v0.6.0 // indirect
 	github.com/larsartmann/go-etag/entitytag v0.6.0 // indirect
 	github.com/larsartmann/go-etag/server v0.6.0 // indirect
 	github.com/lasiar/canonicalheader v1.1.2 // indirect
