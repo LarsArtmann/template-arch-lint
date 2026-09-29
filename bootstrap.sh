@@ -23,7 +23,7 @@ readonly NC='\033[0m' # No Color
 
 # Configuration
 readonly REPO_URL="https://raw.githubusercontent.com/LarsArtmann/template-arch-lint/master"
-readonly REQUIRED_FILES=(".go-arch-lint.yml" ".golangci.yml" "justfile")
+readonly REQUIRED_FILES=(".go-arch-lint.yml" ".golangci.yml")
 readonly MIN_GO_VERSION="1.19"
 
 # Global state
@@ -241,11 +241,6 @@ EXAMPLES:
     bootstrap.sh --fix              # Auto-repair and install
     bootstrap.sh --retry --verbose  # Retry with debug output
 
-INTEGRATION:
-    just bootstrap                  # Run via justfile
-    just bootstrap-fix              # Auto-repair via justfile  
-    just bootstrap-diagnose         # Diagnose via justfile
-
 For more help: https://github.com/LarsArtmann/template-arch-lint
 EOF
 }
@@ -345,198 +340,6 @@ check_requirements() {
 	log_success "Platform: $os/$arch"
 
 	return 0
-}
-
-# Install just command runner with progressive fallbacks
-install_just() {
-	if command_exists just; then
-		log_success "just command runner already installed ($(just --version))"
-		return 0
-	fi
-
-	log_step "Installing just command runner..."
-
-	local os arch
-	os=$(get_os)
-	arch=$(get_arch)
-
-	# Progressive fallback chains by platform
-	case "$os" in
-	macos)
-		# Fallback chain for macOS: Homebrew → Direct install → Manual binary download
-		if install_just_macos_homebrew || install_just_direct || install_just_manual_binary "$os" "$arch"; then
-			log_success "just installed successfully via fallback chain"
-		else
-			return 1
-		fi
-		;;
-	linux)
-		# Fallback chain for Linux: Package manager → Direct install → Manual binary download
-		if install_just_linux_packages || install_just_direct || install_just_manual_binary "$os" "$arch"; then
-			log_success "just installed successfully via fallback chain"
-		else
-			return 1
-		fi
-		;;
-	*)
-		log_warning "Unsupported platform for automatic just installation"
-		if install_just_manual_binary "$os" "$arch"; then
-			log_success "just installed via manual binary download"
-		else
-			handle_error_with_escalation "$ERROR_TOOLS" "HIGH" \
-				"Platform $os not supported for automatic just installation" \
-				"No automated installation method available" \
-				"Install manually: https://just.systems/man/en/chapter_4.html"
-			return 1
-		fi
-		;;
-	esac
-
-	# Final verification
-	if command_exists just; then
-		log_success "just installed successfully ($(just --version))"
-		return 0
-	else
-		handle_error_with_escalation "$ERROR_TOOLS" "CRITICAL" \
-			"Failed to install just command runner after all fallback attempts" \
-			"Homebrew, package managers, direct install, and binary download all failed" \
-			"Manual installation required: https://github.com/casey/just/releases"
-		return 1
-	fi
-}
-
-# macOS Homebrew installation
-install_just_macos_homebrew() {
-	if ! command_exists brew; then
-		log_verbose "Homebrew not available, skipping homebrew installation"
-		return 1
-	fi
-
-	log_step "Attempting just installation via Homebrew..."
-	if retry_with_backoff 3 2 2 brew install just; then
-		INSTALLED_TOOLS+=("just (via homebrew)")
-		return 0
-	else
-		log_warning "Homebrew installation failed, trying next method..."
-		return 1
-	fi
-}
-
-# Linux package manager installation
-install_just_linux_packages() {
-	log_step "Attempting just installation via package manager..."
-
-	# Try apt-get (Debian/Ubuntu)
-	if command_exists apt-get; then
-		log_verbose "Trying apt-get installation..."
-		if retry_with_backoff 2 1 2 sudo apt-get update && retry_with_backoff 2 1 2 sudo apt-get install -y just; then
-			INSTALLED_TOOLS+=("just (via apt)")
-			return 0
-		fi
-	fi
-
-	# Try yum (RHEL/CentOS)
-	if command_exists yum; then
-		log_verbose "Trying yum installation..."
-		if retry_with_backoff 2 1 2 sudo yum install -y just; then
-			INSTALLED_TOOLS+=("just (via yum)")
-			return 0
-		fi
-	fi
-
-	# Try dnf (Fedora)
-	if command_exists dnf; then
-		log_verbose "Trying dnf installation..."
-		if retry_with_backoff 2 1 2 sudo dnf install -y just; then
-			INSTALLED_TOOLS+=("just (via dnf)")
-			return 0
-		fi
-	fi
-
-	# Try pacman (Arch)
-	if command_exists pacman; then
-		log_verbose "Trying pacman installation..."
-		if retry_with_backoff 2 1 2 sudo pacman -S --noconfirm just; then
-			INSTALLED_TOOLS+=("just (via pacman)")
-			return 0
-		fi
-	fi
-
-	log_warning "Package manager installation failed, trying next method..."
-	return 1
-}
-
-# Direct installation via official script
-install_just_direct() {
-	log_step "Attempting just installation via official installer script..."
-
-	# Ensure ~/.local/bin exists
-	mkdir -p "$HOME/.local/bin"
-
-	if retry_with_backoff 3 2 2 curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ~/.local/bin; then
-		export PATH="$HOME/.local/bin:$PATH"
-		INSTALLED_TOOLS+=("just (direct install to ~/.local/bin)")
-		return 0
-	else
-		log_warning "Direct installation failed, trying next method..."
-		return 1
-	fi
-}
-
-# Manual binary download as last resort
-install_just_manual_binary() {
-	local os="$1"
-	local arch="$2"
-
-	log_step "Attempting manual binary download for $os/$arch..."
-
-	# Map architecture names
-	local binary_arch
-	case "$arch" in
-	amd64) binary_arch="x86_64" ;;
-	arm64) binary_arch="aarch64" ;;
-	*)
-		log_warning "Unsupported architecture for binary download: $arch"
-		return 1
-		;;
-	esac
-
-	# Map OS names for binary download
-	local binary_os
-	case "$os" in
-	macos) binary_os="apple-darwin" ;;
-	linux) binary_os="unknown-linux-musl" ;;
-	*)
-		log_warning "Unsupported OS for binary download: $os"
-		return 1
-		;;
-	esac
-
-	local binary_name="just-${binary_arch}-${binary_os}"
-	local download_url="https://github.com/casey/just/releases/latest/download/${binary_name}.tar.gz"
-
-	log_verbose "Downloading from: $download_url"
-
-	# Create temporary directory
-	local temp_dir
-	temp_dir=$(mktemp -d)
-
-	if retry_with_backoff 3 2 2 curl -fsSL "$download_url" -o "$temp_dir/just.tar.gz"; then
-		if cd "$temp_dir" && tar -xzf just.tar.gz; then
-			mkdir -p "$HOME/.local/bin"
-			if mv just "$HOME/.local/bin/"; then
-				chmod +x "$HOME/.local/bin/just"
-				export PATH="$HOME/.local/bin:$PATH"
-				INSTALLED_TOOLS+=("just (manual binary download)")
-				rm -rf "$temp_dir"
-				return 0
-			fi
-		fi
-	fi
-
-	rm -rf "$temp_dir"
-	log_warning "Manual binary download failed"
-	return 1
 }
 
 # Download single configuration file with retries
@@ -749,21 +552,7 @@ install_linting_tools() {
 		auto_repair_environment
 	fi
 
-	# Try justfile installation first
-	log_step "Attempting tool installation via justfile..."
-	if [[ -f "justfile" ]] && command_exists just; then
-		if retry_with_backoff 2 2 2 just install; then
-			log_success "All linting tools installed successfully via justfile"
-			INSTALLED_TOOLS+=("golangci-lint (via justfile)" "go-arch-lint (via justfile)")
-			return 0
-		else
-			log_warning "Justfile installation failed, trying direct installation..."
-		fi
-	else
-		log_warning "Justfile not available, using direct installation method..."
-	fi
-
-	# Fallback to direct Go installations
+	# Direct Go installations
 	log_step "Installing linting tools directly via go install..."
 
 	local tools_to_install=(
@@ -968,7 +757,7 @@ setup_go_path() {
 	local tools_verified=()
 	local tools_missing=()
 
-	for tool in just golangci-lint go-arch-lint; do
+	for tool in golangci-lint go-arch-lint; do
 		if command_exists "$tool"; then
 			tools_verified+=("$tool:$(command -v "$tool")")
 		else
@@ -1091,9 +880,6 @@ smart_tool_path_repair() {
 		if ! command_exists "$tool"; then
 			log_warning "$tool not found in common locations"
 			case "$tool" in
-			just)
-				log_info "Install with: curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ~/.local/bin"
-				;;
 			golangci-lint)
 				log_info "Install with: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest"
 				;;
@@ -1269,7 +1055,7 @@ standardize_error_recovery() {
 		;;
 	"$ERROR_CONFIG")
 		log_info "⚙️ Configuration troubleshooting:"
-		log_info "  1. Check file downloads: ls -la .go-arch-lint.yml .golangci.yml justfile"
+		log_info "  1. Check file downloads: ls -la .go-arch-lint.yml .golangci.yml"
 		log_info "  2. Validate file contents: head -5 .golangci.yml"
 		log_info "  3. Re-download manually: curl -fsSL -o file $REPO_URL/file"
 		log_info "  4. Check file permissions: chmod 644 config-files"
@@ -1288,12 +1074,12 @@ standardize_error_recovery() {
 verify_installation() {
 	log_header "🧪 VERIFYING INSTALLATION"
 
-	# Test basic justfile functionality
-	log_step "Testing justfile commands..."
-	if just --version >/dev/null 2>&1; then
-		log_success "Justfile is working"
+	# Test linting tool functionality
+	log_step "Testing linting tool commands..."
+	if go-arch-lint --help >/dev/null 2>&1; then
+		log_success "go-arch-lint is working"
 	else
-		log_error "Justfile verification failed"
+		log_error "go-arch-lint verification failed"
 		return 1
 	fi
 
@@ -1343,7 +1129,7 @@ verify_installation() {
 	# Test 2: Try running a quick architecture check (if we have Go files)
 	if ls *.go >/dev/null 2>&1 || find . -name "*.go" -not -path "./vendor/*" | head -1 | grep -q "."; then
 		log_step "Running architecture validation on project..."
-		if timeout 30s just lint-arch >/dev/null 2>&1; then
+		if timeout 30s go-arch-lint check >/dev/null 2>&1; then
 			log_success "Architecture validation passed ✨"
 		else
 			log_warning "Architecture validation had issues (this may be normal for new projects)"
@@ -1351,7 +1137,7 @@ verify_installation() {
 
 		# Test 3: Try a quick format check (non-destructive)
 		log_step "Testing code formatting capabilities..."
-		if timeout 15s just format --dry-run >/dev/null 2>&1 || timeout 15s just format >/dev/null 2>&1; then
+		if timeout 15s gofmt -l . >/dev/null 2>&1; then
 			log_success "Code formatting tools working"
 		else
 			log_info "Code formatting test skipped (may require Go files)"
@@ -1362,7 +1148,7 @@ verify_installation() {
 
 		# For projects without Go files, test basic tool availability
 		log_step "Testing basic tool configuration..."
-		if [ -f ".golangci.yml" ] && [ -f ".go-arch-lint.yml" ] && [ -f "justfile" ]; then
+		if [ -f ".golangci.yml" ] && [ -f ".go-arch-lint.yml" ]; then
 			log_success "All configuration files present and ready"
 		else
 			log_warning "Some configuration files may be missing"
@@ -1377,7 +1163,7 @@ verify_installation() {
 		return 0
 	else
 		log_warning "Some verification tests had issues, but installation may still be functional"
-		log_info "Try running 'just lint' manually to test full functionality"
+		log_info "Try running 'go-arch-lint check && golangci-lint run' manually to test full functionality"
 		return 0 # Don't fail the entire bootstrap for minor issues
 	fi
 }
@@ -1804,7 +1590,6 @@ main() {
 
 	# Run all installation steps
 	check_requirements
-	install_just
 	download_config_files
 	install_linting_tools
 	setup_go_path
@@ -1827,11 +1612,10 @@ main() {
 	fi
 
 	echo -e "\n${BOLD}🚀 Ready to use:${NC}"
-	echo -e "  ${CYAN}just lint${NC}           # Run ALL quality checks"
-	echo -e "  ${CYAN}just lint-arch${NC}      # Architecture boundaries only"
-	echo -e "  ${CYAN}just security-audit${NC} # Complete security scan"
-	echo -e "  ${CYAN}just format${NC}         # Format code automatically"
-	echo -e "  ${CYAN}just help${NC}           # Show all available commands"
+	echo -e "  ${CYAN}go-arch-lint check${NC}  # Architecture boundaries"
+	echo -e "  ${CYAN}golangci-lint run${NC}   # All quality checks"
+	echo -e "  ${CYAN}govulncheck ./...${NC}   # Security scan"
+	echo -e "  ${CYAN}golangci-lint fmt${NC}   # Format code automatically"
 
 	echo -e "\n${BOLD}📚 What you got:${NC}"
 	echo -e "  ${GREEN}•${NC} Clean Architecture enforcement (domain boundaries)"
@@ -1840,7 +1624,7 @@ main() {
 	echo -e "  ${GREEN}•${NC} Magic number/string detection"
 	echo -e "  ${GREEN}•${NC} Zero tolerance for \`interface{}\`, \`any\`, \`panic()\`"
 
-	echo -e "\n${YELLOW}💡 Pro tip:${NC} Run ${CYAN}just install-hooks${NC} to enable pre-commit linting!"
+	echo -e "\n${YELLOW}💡 Pro tip:${NC} Run ${CYAN}pre-commit install${NC} to enable pre-commit linting!"
 
 	return 0
 }
