@@ -1,12 +1,13 @@
 #!/bin/bash
 # Template Architecture Lint - Quick Install
-# Extracts only the essential linting files using git subtree
+# Extracts the essential architecture config using git subtree
 
 set -e
 
 # Colors
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
+YELLOW='\033[0;33m'
 BOLD='\033[1m'
 NC='\033[0m'
 
@@ -32,22 +33,27 @@ git subtree add --prefix=.lint-config https://github.com/LarsArtmann/template-ar
 
 echo "📋 Extracting essential files..."
 cp .lint-config/.go-arch-lint.yml .
-cp .lint-config/.golangci.yml .
-cp .lint-config/justfile linting.just
+cp .lint-config/.go-arch-lint-strict.yml . 2>/dev/null || true
 
 echo "🧹 Cleaning up temporary directory..."
 rm -rf .lint-config
 
-echo -e "${GREEN}✅ Installation complete!${NC}"
+echo -e "${GREEN}✅ Architecture config installed!${NC}"
 echo ""
 echo "📝 Files added:"
-echo "  • .go-arch-lint.yml  (Architecture boundaries)"
-echo "  • .golangci.yml      (Code quality rules)"
-echo "  • linting.just       (Development commands)"
+echo "  • .go-arch-lint.yml         (Architecture boundaries)"
+echo "  • .go-arch-lint-strict.yml  (Strict variant, optional)"
 echo ""
+
 echo "🚀 Next steps:"
-echo "  1. just install      (Install linting tools)"
-echo "  2. just lint         (Run complete linting)"
-echo "  3. just lint-arch    (Architecture only)"
+echo "  1. go-arch-lint check       (Validate architecture)"
+echo "  2. Adapt component paths in .go-arch-lint.yml to your layout"
+if command -v golangci-lint-auto-configure >/dev/null 2>&1; then
+	echo "  3. golangci-lint-auto-configure configure   (Generate code-quality config)"
+else
+	echo -e "  ${YELLOW}3. Install golangci-lint-auto-configure to generate .golangci.yml${NC}"
+	echo "     go install github.com/larsartmann/golangci-lint-auto-configure/cmd/golangci-lint-auto-configure@latest"
+	echo "     golangci-lint-auto-configure configure"
+fi
 echo ""
 echo -e "${BOLD}Happy linting! 🎉${NC}"
