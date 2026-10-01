@@ -98,12 +98,10 @@ type ValidationError struct {
 // NewValidationError creates a new validation error.
 func NewValidationError(field, message string) *ValidationError {
 	return &ValidationError{
-		baseError: baseError{
-			code:    ValidationErrorCode,
-			message: message,
-			details: ErrorDetails{
-				Field: field,
-			},
+		code:    ValidationErrorCode,
+		message: message,
+		details: ErrorDetails{
+			Field: field,
 		},
 		field: field,
 	}
@@ -112,12 +110,10 @@ func NewValidationError(field, message string) *ValidationError {
 // NewRequiredFieldError creates a validation error for required fields.
 func NewRequiredFieldError(field string) *ValidationError {
 	return &ValidationError{
-		baseError: baseError{
-			code:    RequiredFieldCode,
-			message: field + " cannot be empty",
-			details: ErrorDetails{
-				Field: field,
-			},
+		code:    RequiredFieldCode,
+		message: field + " cannot be empty",
+		details: ErrorDetails{
+			Field: field,
 		},
 		field: field,
 	}
@@ -144,13 +140,11 @@ type NotFoundError struct {
 // NewNotFoundError creates a new not found error.
 func NewNotFoundError(resource, id string) *NotFoundError {
 	return &NotFoundError{
-		baseError: baseError{
-			code:    NotFoundErrorCode,
-			message: fmt.Sprintf("%s with id '%s' not found", resource, id),
-			details: ErrorDetails{
-				Resource: resource,
-				ID:       id,
-			},
+		code:    NotFoundErrorCode,
+		message: fmt.Sprintf("%s with id '%s' not found", resource, id),
+		details: ErrorDetails{
+			Resource: resource,
+			ID:       id,
 		},
 		resource: resource,
 		id:       id,
@@ -180,11 +174,9 @@ type ConflictError struct {
 // NewConflictError creates a new conflict error.
 func NewConflictError(message string, details ErrorDetails) *ConflictError {
 	return &ConflictError{
-		baseError: baseError{
-			code:    ConflictErrorCode,
-			message: message,
-			details: details,
-		},
+		code:    ConflictErrorCode,
+		message: message,
+		details: details,
 	}
 }
 
@@ -203,12 +195,10 @@ type InternalError struct {
 // NewInternalError creates a new internal error.
 func NewInternalError(message string, cause error) *InternalError {
 	return &InternalError{
-		baseError: baseError{
-			code:    InternalErrorCode,
-			message: message,
-			details: ErrorDetails{},
-		},
-		cause: cause,
+		code:    InternalErrorCode,
+		message: message,
+		details: ErrorDetails{},
+		cause:   cause,
 	}
 }
 
@@ -251,14 +241,12 @@ type DatabaseError struct {
 // NewDatabaseError creates a new database error.
 func NewDatabaseError(operation string, cause error, retryable bool) *DatabaseError {
 	return &DatabaseError{
-		baseError: baseError{
-			code:    DatabaseErrorCode,
-			message: fmt.Sprintf("database %s failed: %v", operation, cause),
-			details: ErrorDetails{
-				Extra: map[string]string{
-					"operation": operation,
-					"retryable": strconv.FormatBool(retryable),
-				},
+		code:    DatabaseErrorCode,
+		message: fmt.Sprintf("database %s failed: %v", operation, cause),
+		details: ErrorDetails{
+			Extra: map[string]string{
+				"operation": operation,
+				"retryable": strconv.FormatBool(retryable),
 			},
 		},
 		operation: operation,
@@ -292,14 +280,12 @@ type NetworkError struct {
 // NewNetworkError creates a new network error.
 func NewNetworkError(service string, cause error, retryable bool) *NetworkError {
 	return &NetworkError{
-		baseError: baseError{
-			code:    NetworkErrorCode,
-			message: fmt.Sprintf("network service %s failed: %v", service, cause),
-			details: ErrorDetails{
-				Extra: map[string]string{
-					"service":   service,
-					"retryable": strconv.FormatBool(retryable),
-				},
+		code:    NetworkErrorCode,
+		message: fmt.Sprintf("network service %s failed: %v", service, cause),
+		details: ErrorDetails{
+			Extra: map[string]string{
+				"service":   service,
+				"retryable": strconv.FormatBool(retryable),
 			},
 		},
 		service:   service,
@@ -332,13 +318,11 @@ type ConfigurationError struct {
 // NewConfigurationError creates a new configuration error.
 func NewConfigurationError(key, message string) *ConfigurationError {
 	return &ConfigurationError{
-		baseError: baseError{
-			code:    ConfigurationErrorCode,
-			message: fmt.Sprintf("configuration error for %s: %s", key, message),
-			details: ErrorDetails{
-				Extra: map[string]string{
-					"config_key": key,
-				},
+		code:    ConfigurationErrorCode,
+		message: fmt.Sprintf("configuration error for %s: %s", key, message),
+		details: ErrorDetails{
+			Extra: map[string]string{
+				"config_key": key,
 			},
 		},
 		configKey: key,

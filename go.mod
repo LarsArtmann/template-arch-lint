@@ -5,7 +5,7 @@ go 1.27.1
 require (
 	charm.land/log/v2 v2.0.1
 	github.com/go-playground/validator/v10 v10.30.5
-	github.com/larsartmann/go-branded-id v0.6.0
+	github.com/larsartmann/go-branded-id v0.7.0
 	github.com/larsartmann/httputil v1.4.0
 	github.com/onsi/ginkgo/v2 v2.26.0
 	github.com/onsi/gomega v1.44.0
@@ -65,7 +65,7 @@ require (
 	github.com/charithe/durationcheck v0.0.11 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
 	github.com/charmbracelet/lipgloss v1.1.0 // indirect
-	github.com/charmbracelet/ultraviolet v0.0.0-20260928045949-bbf040aedf25 // indirect
+	github.com/charmbracelet/ultraviolet v0.0.0-20260930135840-270558f35f71 // indirect
 	github.com/charmbracelet/x/ansi v0.11.8 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.15 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
