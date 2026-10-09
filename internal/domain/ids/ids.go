@@ -45,8 +45,7 @@ const (
 // These are phantom types - they have no runtime representation.
 
 // UserBrand distinguishes UserID from other ID types.
-// brandid-lint:ignore(BD001) String() is the repo's raw-ID carrier: it flows into JSON wire formats, HTTP responses, and audit events
-// (aliased as values.UserID; use .Value() for the raw value elsewhere)
+// brandid-lint:ignore(BD001) String() is the repo's raw-ID carrier (aliased as values.UserID): it flows into JSON wire formats, HTTP responses, and audit events
 type UserBrand struct{}
 
 // SessionBrand distinguishes SessionID from other ID types.
