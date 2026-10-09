@@ -47,8 +47,12 @@ const (
 // UserBrand distinguishes UserID from other ID types.
 type UserBrand struct{}
 
+func (UserBrand) Name() string { return "User" }
+
 // SessionBrand distinguishes SessionID from other ID types.
 type SessionBrand struct{}
+
+func (SessionBrand) Name() string { return "Session" }
 
 // ID type aliases for convenient use throughout the codebase.
 
