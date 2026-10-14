@@ -10,10 +10,10 @@ import (
 )
 
 // ErrUserNotFound is returned when a user is not found.
-var ErrUserNotFound = errors.NewNotFoundError("user", "")
+var ErrUserNotFound error = errors.NewNotFoundError("user", "")
 
 // ErrUserAlreadyExists is returned when a user already exists.
-var ErrUserAlreadyExists = errors.NewConflictError("user already exists", errors.ErrorDetails{
+var ErrUserAlreadyExists error = errors.NewConflictError("user already exists", errors.ErrorDetails{
 	Resource: "user",
 })
 
