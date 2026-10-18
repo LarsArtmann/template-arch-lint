@@ -1,7 +1,7 @@
 version: "2"
 run:
   timeout: 5m
-  go: 1.27.1
+  go: "1.27"
   build-tags:
     - goexperiment.arenas
     - goexperiment.goroutineleakprofile
@@ -244,7 +244,7 @@ linters:
     rules:
       - path: _test\.go
         linters:
-          - exhaustruct
+          - exhaustruct_v5
           - testpackage
           - gochecknoglobals
           - funlen
@@ -258,7 +258,6 @@ linters:
           - recvcheck
           - contextcheck
           - exhaustive
-          - exhaustruct_v5
       - path: _test\.go
         text: unused
         linters:
@@ -291,5 +290,5 @@ formatters:
       - _templ\.go$
       - internal/infrastructure/db/
 issues:
-  max-issues-per-linter: 50
-  max-same-issues: 10
+  max-issues-per-linter: 0
+  max-same-issues: 0
